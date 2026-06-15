@@ -30,6 +30,9 @@ type CarouselContextProps = {
   canScrollNext: boolean
 } & CarouselProps
 
+type CarouselButtonProps = React.ComponentProps<"button"> &
+  Pick<React.ComponentProps<typeof Button>, "variant" | "size">
+
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
 
 function useCarousel() {
@@ -176,7 +179,7 @@ function CarouselPrevious({
   variant = "outline",
   size = "icon-sm",
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: CarouselButtonProps) {
   const { orientation, scrollPrev, canScrollPrev } = useCarousel()
 
   return (
@@ -206,7 +209,7 @@ function CarouselNext({
   variant = "outline",
   size = "icon-sm",
   ...props
-}: React.ComponentProps<typeof Button>) {
+}: CarouselButtonProps) {
   const { orientation, scrollNext, canScrollNext } = useCarousel()
 
   return (

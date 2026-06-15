@@ -82,14 +82,17 @@ const inputGroupButtonVariants = cva(
   }
 )
 
+type InputGroupButtonProps = Omit<React.ComponentProps<"button">, "size"> &
+  Pick<React.ComponentProps<typeof Button>, "asChild" | "variant"> &
+  VariantProps<typeof inputGroupButtonVariants>
+
 function InputGroupButton({
   className,
   type = "button",
   variant = "ghost",
   size = "xs",
   ...props
-}: Omit<React.ComponentProps<typeof Button>, "size"> &
-  VariantProps<typeof inputGroupButtonVariants>) {
+}: InputGroupButtonProps) {
   return (
     <Button
       type={type}

@@ -44,12 +44,13 @@ type ButtonBaseProps = VariantProps<typeof buttonVariants> & {
   asChild?: boolean;
 };
 
-type ButtonProps =
-  | (React.ComponentProps<"button"> &
-      ButtonBaseProps & {
-        href?: never;
-      })
-  | (React.ComponentProps<typeof Link> & ButtonBaseProps);
+type ButtonElementProps = React.ComponentProps<"button">;
+type ButtonLinkProps = React.ComponentProps<typeof Link>;
+type ButtonProps = ButtonElementProps &
+  ButtonBaseProps &
+  Omit<ButtonLinkProps, keyof ButtonElementProps | "href"> & {
+    href?: ButtonLinkProps["href"];
+  };
 
 function Button({
   className,

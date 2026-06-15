@@ -2,6 +2,7 @@
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type * as React from "react";
+import { ThemeShortcut } from "@/components/theme-shortcut";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 type ProvidersProps = {
@@ -16,6 +17,7 @@ export function Providers({ children }: ProvidersProps) {
       enableSystem
       disableTransitionOnChange
     >
+      <ThemeShortcut />
       <TooltipProvider>{children}</TooltipProvider>
     </NextThemesProvider>
   );
