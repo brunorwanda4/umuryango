@@ -18,17 +18,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const themeToggleCopy = {
-  label: "Theme",
-  light: "Light",
-  dark: "Dark",
-  system: "System",
-};
+import { defaultLocale, getMessages } from "@/i18n/config";
+import { createTranslator } from "@/i18n/translate";
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme, setTheme, theme } = useTheme();
+  const t = createTranslator(getMessages(defaultLocale), "Shared.theme");
 
   useEffect(() => {
     setMounted(true);
@@ -45,10 +41,10 @@ export function ThemeToggle() {
         size="icon"
         className="rounded-full"
         disabled
-        aria-label={themeToggleCopy.label}
+        aria-label={t("label")}
       >
         <SunIcon aria-hidden="true" />
-        <span className="sr-only">{themeToggleCopy.label}</span>
+        <span className="sr-only">{t("label")}</span>
       </Button>
     );
   }
@@ -63,30 +59,30 @@ export function ThemeToggle() {
               variant="outline"
               size="icon"
               className="rounded-full bg-background/90 backdrop-blur"
-              aria-label={themeToggleCopy.label}
+              aria-label={t("label")}
             >
               <ThemeIcon aria-hidden="true" />
-              <span className="sr-only">{themeToggleCopy.label}</span>
+              <span className="sr-only">{t("label")}</span>
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
-        <TooltipContent side="left">{themeToggleCopy.label}</TooltipContent>
+        <TooltipContent side="left">{t("label")}</TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" className="w-36">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>{themeToggleCopy.label}</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
           <DropdownMenuRadioGroup value={activeTheme} onValueChange={setTheme}>
             <DropdownMenuRadioItem value="light">
               <SunIcon aria-hidden="true" />
-              {themeToggleCopy.light}
+              {t("light")}
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="dark">
               <MoonIcon aria-hidden="true" />
-              {themeToggleCopy.dark}
+              {t("dark")}
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="system">
               <MonitorIcon aria-hidden="true" />
-              {themeToggleCopy.system}
+              {t("system")}
             </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>

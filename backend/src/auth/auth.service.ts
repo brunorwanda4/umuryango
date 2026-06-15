@@ -1,11 +1,12 @@
 import { randomBytes } from 'node:crypto';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
 import { AuthAuditAction, AuthAuditResult, UserStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 type RequestContext = {
   ipAddress?: string;
@@ -36,6 +37,52 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
+
+  async register(
+    registerDto: RegisterDto,
+    context: RequestContext,
+  ): Promise<LoginResult> {
+    const email = registerDto.email.toLowerCase();
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          ...(registerDto.phoneNumber ? [{ phoneNumber: registerDto.phoneNumber }] : []),
+        ],
+      },
+    });
+
+    if (existingUser) {
+      if (existingUser.email === email) {
+        throw new ConflictException('Email is already registered.');
+      }
+      throw new ConflictException('Phone number is already registered.');
+    }
+
+    const passwordHash = await hash(registerDto.password, 12);
+    const fullName = `${registerDto.firstName} ${registerDto.lastName}`.trim();
+
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        phoneNumber: registerDto.phoneNumber || null,
+        fullName,
+        gender: registerDto.gender || null,
+        passwordHash,
+        status: UserStatus.ACTIVE,
+      },
+    });
+
+    await this.writeLoginAudit({
+      emailOrMobile: email,
+      result: AuthAuditResult.SUCCESS,
+      context,
+      userId: user.id,
+      action: AuthAuditAction.REGISTER,
+    });
+
+    return this.createSessionAndTokens(user, context);
+  }
 
   async login(
     loginDto: LoginDto,
@@ -70,6 +117,20 @@ export class AuthService {
       throw new UnauthorizedException('Invalid login credentials.');
     }
 
+    await this.writeLoginAudit({
+      emailOrMobile: loginDto.emailOrMobile,
+      result: AuthAuditResult.SUCCESS,
+      context,
+      userId: user.id,
+    });
+
+    return this.createSessionAndTokens(user, context);
+  }
+
+  private async createSessionAndTokens(
+    user: { id: string; email: string; phoneNumber: string | null; fullName: string },
+    context: RequestContext,
+  ): Promise<LoginResult> {
     const refreshToken = randomBytes(64).toString('base64url');
     const refreshTokenHash = await hash(refreshToken, 12);
     const refreshTokenExpiresAt = this.getRefreshTokenExpiresAt();
@@ -89,13 +150,6 @@ export class AuthService {
       email: user.email,
       sessionId: session.id,
       type: 'access',
-    });
-
-    await this.writeLoginAudit({
-      emailOrMobile: loginDto.emailOrMobile,
-      result: AuthAuditResult.SUCCESS,
-      context,
-      userId: user.id,
     });
 
     return {
@@ -126,15 +180,17 @@ export class AuthService {
     result,
     context,
     userId,
+    action = AuthAuditAction.LOGIN,
   }: {
     emailOrMobile: string;
     result: AuthAuditResult;
     context: RequestContext;
     userId?: string;
+    action?: AuthAuditAction;
   }) {
     await this.prisma.authAuditEvent.create({
       data: {
-        action: AuthAuditAction.LOGIN,
+        action,
         result,
         emailOrMobile,
         ipAddress: context.ipAddress,

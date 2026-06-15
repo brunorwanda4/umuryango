@@ -9,6 +9,7 @@ import {
 import type { Request, Response } from 'express';
 import { AuthService, type LoginResult } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 const ACCESS_COOKIE_NAME = 'rf_access_token';
 const REFRESH_COOKIE_NAME = 'rf_refresh_token';
@@ -16,6 +17,29 @@ const REFRESH_COOKIE_NAME = 'rf_refresh_token';
 @Controller('api/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Post('register')
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const loginResult = await this.authService.register(registerDto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+
+    this.setAuthCookies(response, loginResult);
+
+    return {
+      data: {
+        user: loginResult.user,
+        accessTokenExpiresInSeconds: loginResult.accessTokenExpiresInSeconds,
+        refreshTokenExpiresAt: loginResult.refreshTokenExpiresAt,
+      },
+      message: 'Registered successfully.',
+    };
+  }
 
   @Post('login')
   async login(

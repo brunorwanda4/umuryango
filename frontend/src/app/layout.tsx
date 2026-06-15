@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
+import enMessages from "@/messages/en.json";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -22,12 +23,11 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   ),
   title: {
-    default: "Rwanda Family",
-    template: "%s | Rwanda Family",
+    default: enMessages.Metadata.title.default,
+    template: enMessages.Metadata.title.template,
   },
-  description:
-    "Rwanda Family helps families securely manage money, contributions, expenses, savings, debts, projects, documents, announcements, events, and reports in one trusted place.",
-  applicationName: "Rwanda Family",
+  description: enMessages.Metadata.description,
+  applicationName: enMessages.Metadata.applicationName,
   keywords: [
     "Rwanda Family",
     "family management",
@@ -38,22 +38,20 @@ export const metadata: Metadata = {
     "family projects",
     "family reports",
   ],
-  authors: [{ name: "Rwanda Family" }],
-  creator: "Rwanda Family",
-  publisher: "Rwanda Family",
+  authors: [{ name: enMessages.Metadata.applicationName }],
+  creator: enMessages.Metadata.applicationName,
+  publisher: enMessages.Metadata.applicationName,
   openGraph: {
     type: "website",
     locale: "en",
-    siteName: "Rwanda Family",
-    title: "Rwanda Family",
-    description:
-      "A secure family management platform for finances, contributions, projects, documents, announcements, events, and reports.",
+    siteName: enMessages.Metadata.applicationName,
+    title: enMessages.Metadata.applicationName,
+    description: enMessages.Metadata.openGraphDescription,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rwanda Family",
-    description:
-      "Securely manage family money, contributions, projects, documents, announcements, events, and reports.",
+    title: enMessages.Metadata.applicationName,
+    description: enMessages.Metadata.twitterDescription,
   },
   robots: {
     index: true,

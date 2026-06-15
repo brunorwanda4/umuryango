@@ -9,27 +9,37 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { type AppLocale, getLocalizedHref, type Messages } from "@/i18n/config";
+import { createTranslator } from "@/i18n/translate";
 
 const navigationLinks = [
-  { href: "/items", label: "Items", icon: PackageIcon },
-  { href: "/privacy", label: "Privacy", icon: LockKeyholeIcon },
-  { href: "/terms", label: "Terms", icon: FileTextIcon },
-  { href: "/safety", label: "Safety", icon: ShieldCheckIcon },
+  { href: "/items", labelKey: "nav.items", icon: PackageIcon },
+  { href: "/privacy", labelKey: "nav.privacy", icon: LockKeyholeIcon },
+  { href: "/terms", labelKey: "nav.terms", icon: FileTextIcon },
+  { href: "/safety", labelKey: "nav.safety", icon: ShieldCheckIcon },
 ];
 
 type PublicSiteShellProps = {
   children: ReactNode;
+  locale: AppLocale;
+  messages: Messages;
 };
 
-export function PublicSiteShell({ children }: PublicSiteShellProps) {
+export function PublicSiteShell({
+  children,
+  locale,
+  messages,
+}: PublicSiteShellProps) {
+  const t = createTranslator(messages, "Shared");
+
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <header className="border-border border-b">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-4 pr-20 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:pr-24 lg:px-8">
           <Link
-            href="/"
+            href={getLocalizedHref("/", locale)}
             className="flex w-fit items-center gap-3"
-            aria-label="Rwanda Family home"
+            aria-label={t("homeAriaLabel")}
           >
             <Image
               src="/logo.svg"
@@ -39,27 +49,31 @@ export function PublicSiteShell({ children }: PublicSiteShellProps) {
               className="rounded-xl"
               priority
             />
-            <span className="text-base font-semibold">Rwanda Family</span>
+            <span className="text-base font-semibold">{t("brand")}</span>
           </Link>
 
           <nav
-            aria-label="Public pages"
+            aria-label={t("navigationAriaLabel")}
             className="flex flex-wrap items-center gap-2"
           >
             {navigationLinks.map((link) => (
               <Button
                 key={link.href}
-                href={link.href}
+                href={getLocalizedHref(link.href, locale)}
                 variant="ghost"
                 size="sm"
                 className="rounded-full"
               >
                 <link.icon data-icon="inline-start" aria-hidden="true" />
-                {link.label}
+                {t(link.labelKey)}
               </Button>
             ))}
-            <Button href="/auth/login" size="sm" className="rounded-full">
-              Log in
+            <Button
+              href={getLocalizedHref("/auth/login", locale)}
+              size="sm"
+              className="rounded-full"
+            >
+              {t("nav.login")}
             </Button>
           </nav>
         </div>
@@ -72,25 +86,23 @@ export function PublicSiteShell({ children }: PublicSiteShellProps) {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3 text-sm font-medium">
               <Image src="/logo.svg" alt="" width={28} height={28} />
-              <span>Rwanda Family</span>
+              <span>{t("brand")}</span>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               {navigationLinks.map((link) => (
                 <Link
                   key={link.href}
-                  href={link.href}
+                  href={getLocalizedHref(link.href, locale)}
                   className="rounded-full px-2 py-1 hover:text-foreground"
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               ))}
             </div>
           </div>
           <Separator />
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            Rwanda Family is currently free to use. Private family data is used
-            to provide the application, protect accounts, and support family
-            workflows. It is not sold or used for unrelated purposes.
+            {t("footer.privacy")}
           </p>
         </div>
       </footer>

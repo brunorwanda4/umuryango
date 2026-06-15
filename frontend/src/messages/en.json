@@ -1,0 +1,342 @@
+{
+  "Metadata": {
+    "title": {
+      "default": "Rwanda Family",
+      "template": "%s | Rwanda Family"
+    },
+    "description": "Rwanda Family helps families securely manage money, contributions, expenses, savings, debts, projects, documents, announcements, events, and reports in one trusted place.",
+    "applicationName": "Rwanda Family",
+    "openGraphDescription": "A secure family management platform for finances, contributions, projects, documents, announcements, events, and reports.",
+    "twitterDescription": "Securely manage family money, contributions, projects, documents, announcements, events, and reports."
+  },
+  "Shared": {
+    "brand": "Rwanda Family",
+    "homeAriaLabel": "Rwanda Family home",
+    "navigationAriaLabel": "Public pages",
+    "authFooterAriaLabel": "Authentication footer pages",
+    "nav": {
+      "items": "Items",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "safety": "Safety",
+      "login": "Log in"
+    },
+    "footer": {
+      "free": "Rwanda Family is currently free to use.",
+      "privacy": "Rwanda Family is currently free to use. Private family data is used to provide the application, protect accounts, and support family workflows. It is not sold or used for unrelated purposes."
+    },
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "Home": {
+    "badge": "Free to use now",
+    "title": "Rwanda Family",
+    "description": "Securely manage family money, contributions, projects, documents, announcements, events, and reports from one private workspace.",
+    "login": "Log in",
+    "viewItems": "View items",
+    "privacyNote": "Rwanda Family does not sell private family data or use it for unrelated advertising, profiling, or external datasets.",
+    "privacyLink": "Read the privacy policy.",
+    "trustTitle": "Built for trust",
+    "trustDescription": "Family records should stay accurate, permission-aware, and easy to explain.",
+    "trustItems": [
+      "Free access",
+      "Private family workspace",
+      "Auditable records"
+    ],
+    "highlights": [
+      {
+        "id": "money",
+        "title": "Money records",
+        "description": "Income, expenses, savings, debts, and approvals."
+      },
+      {
+        "id": "contributions",
+        "title": "Contributions",
+        "description": "Monthly, emergency, event, and project contributions."
+      },
+      {
+        "id": "documents",
+        "title": "Documents",
+        "description": "Receipts, agreements, reports, and private files."
+      },
+      {
+        "id": "reports",
+        "title": "Reports",
+        "description": "Readable summaries generated from saved records."
+      },
+      {
+        "id": "members",
+        "title": "Members",
+        "description": "Owner, leader, and member roles with clear permissions."
+      },
+      {
+        "id": "privacy",
+        "title": "Privacy",
+        "description": "Family data is not sold or used for unrelated purposes."
+      }
+    ]
+  },
+  "AuthLayout": {
+    "free": "Rwanda Family is currently free to use."
+  },
+  "LoginPage": {
+    "metadataTitle": "Log in",
+    "metadataDescription": "Log in to Rwanda Family to manage family money, contributions, projects, documents, announcements, and reports.",
+    "title": "Log into Rwanda Family",
+    "heading": "Organize the family moments you protect.",
+    "highlightedHeading": "together.",
+    "createAccount": "Create new account",
+    "familySavings": "Family savings",
+    "monthlyContribution": "Monthly contribution",
+    "expenses": "Expenses",
+    "images": {
+      "first": "Family enjoying time together",
+      "second": "Family capturing a shared moment",
+      "third": "Family planning together at home",
+      "fourth": "Family using Rwanda Family together"
+    }
+  },
+  "LoginForm": {
+    "emailLabel": "Email or mobile number",
+    "emailPlaceholder": "Email or mobile number",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Password",
+    "submitLabel": "Log in",
+    "pendingLabel": "Logging in",
+    "forgotPassword": "Forgot password?",
+    "success": "You are logged in.",
+    "genericError": "Unable to log in. Check your details and try again."
+  },
+  "RegisterPage": {
+    "metadataTitle": "Create account",
+    "metadataDescription": "Create a Rwanda Family account to manage family money, contributions, projects, documents, announcements, and reports.",
+    "heading": "Get started on Rwanda Family",
+    "subheading": "Create an account to organize your family money, projects, documents, and announcements together.",
+    "backAriaLabel": "Go back"
+  },
+  "RegisterForm": {
+    "firstNameLabel": "First name",
+    "lastNameLabel": "Last name",
+    "genderLabel": "Gender",
+    "genderPlaceholder": "Select your gender",
+    "emailLabel": "Email",
+    "phoneLabel": "Mobile number",
+    "contactHint": "You may receive notifications from us.",
+    "passwordLabel": "Password",
+    "legal": "By tapping Submit, you agree to create an account and to our Terms, Privacy Policy and Cookies Policy.",
+    "submitLabel": "Submit",
+    "pendingLabel": "Creating account",
+    "haveAccount": "I already have an account",
+    "success": "Your account has been created.",
+    "genericError": "Unable to create account. Check your details and try again.",
+    "genderOptions": [
+      {
+        "value": "female",
+        "label": "Female"
+      },
+      {
+        "value": "male",
+        "label": "Male"
+      },
+      {
+        "value": "custom",
+        "label": "Custom"
+      },
+      {
+        "value": "prefer-not-to-say",
+        "label": "Prefer not to say"
+      }
+    ]
+  },
+  "ItemsPage": {
+    "metadataTitle": "Items",
+    "metadataDescription": "Explore the family management items Rwanda Family helps organize, including money, contributions, projects, documents, reports, events, and members.",
+    "badge": "What you can organize",
+    "title": "Items for everyday family administration.",
+    "description": "Rwanda Family keeps the important parts of family management structured, private, and easy to review. Each item is designed for family roles, approvals, audit history, and mobile use.",
+    "freeNote": "The application is currently free to use. Rwanda Family does not sell private family data or use it for unrelated advertising, profiling, or external datasets.",
+    "items": [
+      {
+        "id": "money",
+        "title": "Family money",
+        "description": "Track income, expenses, categories, dates, statuses, creators, and approvals in one auditable place."
+      },
+      {
+        "id": "contributions",
+        "title": "Contributions",
+        "description": "Organize monthly, emergency, event, and project contributions with expected amounts, paid amounts, due dates, and member status."
+      },
+      {
+        "id": "savings",
+        "title": "Savings goals",
+        "description": "Follow shared goals, target amounts, current progress, contribution history, and target dates."
+      },
+      {
+        "id": "expenses",
+        "title": "Expense records",
+        "description": "Submit, review, approve, reject, and pay expenses without losing the audit history behind each decision."
+      },
+      {
+        "id": "projects",
+        "title": "Projects",
+        "description": "Manage family initiatives with budgets, timelines, updates, members, linked documents, and linked money records."
+      },
+      {
+        "id": "documents",
+        "title": "Documents",
+        "description": "Keep receipts, agreements, certificates, reports, and family files with role-aware access rules."
+      },
+      {
+        "id": "reports",
+        "title": "Reports",
+        "description": "Generate summaries from saved records for money movement, savings, debt, contribution, budget, and project activity."
+      },
+      {
+        "id": "announcements",
+        "title": "Announcements",
+        "description": "Publish notices, emergency updates, and pinned family messages so members can stay informed."
+      },
+      {
+        "id": "events",
+        "title": "Events",
+        "description": "Plan family events with dates, locations, RSVP status, reminders, and optional linked contributions."
+      },
+      {
+        "id": "members",
+        "title": "Members",
+        "description": "Invite members, approve access, assign roles, and keep sensitive actions visible only to permitted people."
+      }
+    ]
+  },
+  "PrivacyPage": {
+    "metadataTitle": "Privacy Policy",
+    "metadataDescription": "Read how Rwanda Family protects family data, limits data use, and avoids selling or reusing private records for unrelated purposes.",
+    "badge": "Last updated June 15, 2026",
+    "title": "Privacy Policy",
+    "description": "Rwanda Family is built for private family administration. Family data should be protected, used only for the application, and kept inside the permissions of each family workspace.",
+    "sections": [
+      {
+        "title": "What we collect",
+        "body": "Rwanda Family may collect account details, family membership details, family workspace records, financial records entered by permitted users, documents uploaded by users, device information, security logs, and support messages."
+      },
+      {
+        "title": "How we use data",
+        "body": "We use data to run the application, authenticate users, enforce family permissions, keep records available, generate reports, send requested notifications, prevent abuse, improve reliability, and respond to support requests."
+      },
+      {
+        "title": "What we do not do",
+        "body": "We do not sell personal data. We do not use private family financial records, documents, or member data for unrelated advertising, unrelated profiling, or external datasets."
+      },
+      {
+        "title": "Limited operational access",
+        "body": "Private family data should only be accessed by authorized operational staff when needed for support requested by a user, security investigation, abuse prevention, legal compliance, or system maintenance. Access should be limited, accountable, and never for personal use."
+      },
+      {
+        "title": "Family permissions",
+        "body": "Family owners and permitted leaders control who can join a family workspace and what members can see or do. The backend must enforce access rules for protected records."
+      },
+      {
+        "title": "Retention and deletion",
+        "body": "Financial and permission-sensitive records may be retained for audit history. Where deletion is allowed, Rwanda Family should use safe deletion, soft deletion, or reversal records when auditability matters."
+      }
+    ]
+  },
+  "SafetyPage": {
+    "metadataTitle": "Safety and Data Policy",
+    "metadataDescription": "Learn how Rwanda Family keeps the application free, protects private family data, and limits access to sensitive records.",
+    "badge": "Free and private by design",
+    "title": "Safety and Data Policy",
+    "description": "Rwanda Family should be safe for every family. The application is currently free to use, and private family data must not be sold, reused for unrelated purposes, or accessed casually.",
+    "protections": [
+      {
+        "id": "unrelated-use",
+        "title": "No unrelated use",
+        "description": "Private family records are for running Rwanda Family workflows, not for unrelated advertising, profiling, or resale."
+      },
+      {
+        "id": "permissions",
+        "title": "Permission-aware access",
+        "description": "Protected actions and records should be checked against family membership, role, and permissions on the server."
+      },
+      {
+        "id": "audit",
+        "title": "Audit-friendly records",
+        "description": "Financial approvals, permission changes, exports, and sensitive activity should leave accountable history."
+      },
+      {
+        "id": "tenant",
+        "title": "Tenant boundary",
+        "description": "Family workspaces are designed as private tenant boundaries so one family cannot access another family's records."
+      },
+      {
+        "id": "sensitive-data",
+        "title": "Sensitive data care",
+        "description": "Passwords, tokens, reset codes, MFA details, and private payment details must not be logged or exposed."
+      },
+      {
+        "id": "free",
+        "title": "Free access",
+        "description": "The application is currently free to use, so families can organize records without a subscription barrier."
+      }
+    ]
+  },
+  "TermsPage": {
+    "metadataTitle": "Terms of Use",
+    "metadataDescription": "Read the Rwanda Family terms covering free use, user responsibilities, family owner responsibilities, and acceptable use.",
+    "badge": "Last updated June 15, 2026",
+    "title": "Terms of Use",
+    "description": "These terms explain how Rwanda Family should be used while it is offered as a free family management application.",
+    "sections": [
+      {
+        "title": "Free use",
+        "body": "Rwanda Family is currently free to use. If paid features are introduced later, users should receive clear notice before being asked to pay."
+      },
+      {
+        "title": "User responsibility",
+        "body": "Users are responsible for entering accurate records, protecting login details, inviting only trusted members, and reviewing records before approval or reporting."
+      },
+      {
+        "title": "Family owner responsibility",
+        "body": "Family owners manage the workspace, approve members, assign roles, and decide which information members can access according to family needs."
+      },
+      {
+        "title": "Financial records",
+        "body": "Rwanda Family helps organize family records but does not create, invent, or approve financial activity on behalf of a family. Reports must be based on persisted records."
+      },
+      {
+        "title": "Acceptable use",
+        "body": "Users may not use Rwanda Family to upload harmful files, violate privacy, impersonate others, attack the service, bypass permissions, or store unlawful content."
+      },
+      {
+        "title": "Service changes",
+        "body": "Features may change as the product improves. Privacy, security, and auditability remain core requirements for changes that affect family data."
+      }
+    ]
+  },
+  "ErrorPage": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. You can try again, and if the problem continues, return home and try later.",
+    "reference": "Error reference: {digest}",
+    "tryAgain": "Try again",
+    "backHome": "Back to home"
+  },
+  "GlobalErrorPage": {
+    "title": "Something went wrong | Rwanda Family",
+    "heading": "Something went wrong",
+    "description": "A critical error stopped the application from loading. Please try again in a moment.",
+    "reference": "Error reference: {digest}",
+    "tryAgain": "Try again"
+  },
+  "NotFoundPage": {
+    "metadataTitle": "Page not found",
+    "metadataDescription": "The page you are looking for does not exist or has moved.",
+    "heading": "This page does not exist",
+    "description": "The page you are looking for may have been moved, renamed, or is no longer available.",
+    "backHome": "Back to home",
+    "login": "Log in"
+  }
+}

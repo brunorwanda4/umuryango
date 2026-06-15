@@ -13,16 +13,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 
-const loginFormCopy = {
-  emailLabel: "Email or mobile number",
-  emailPlaceholder: "Email or mobile number",
-  passwordLabel: "Password",
-  passwordPlaceholder: "Password",
-  submitLabel: "Log in",
-  pendingLabel: "Logging in",
-  forgotPassword: "Forgot password?",
-  success: "You are logged in.",
-  genericError: "Unable to log in. Check your details and try again.",
+export type LoginFormCopy = {
+  emailLabel: string;
+  emailPlaceholder: string;
+  passwordLabel: string;
+  passwordPlaceholder: string;
+  submitLabel: string;
+  pendingLabel: string;
+  forgotPassword: string;
+  success: string;
+  genericError: string;
 };
 
 type ApiErrorResponse = {
@@ -46,19 +46,24 @@ const getLoginUrl = () => {
   return `${baseUrl}/api/v1/auth/login`;
 };
 
-const getErrorMessage = (payload: ApiErrorResponse) => {
+const getErrorMessage = (payload: ApiErrorResponse, genericError: string) => {
   if (payload.error?.message) {
     return payload.error.message;
   }
 
   if (Array.isArray(payload.message)) {
-    return payload.message[0] ?? loginFormCopy.genericError;
+    return payload.message[0] ?? genericError;
   }
 
-  return payload.message ?? loginFormCopy.genericError;
+  return payload.message ?? genericError;
 };
 
-export const LoginForm = () => {
+type LoginFormProps = {
+  copy: LoginFormCopy;
+  forgotPasswordHref: string;
+};
+
+export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -87,13 +92,13 @@ export const LoginForm = () => {
         | undefined;
 
       if (!response.ok) {
-        setError(getErrorMessage(payload ?? {}));
+        setError(getErrorMessage(payload ?? {}, copy.genericError));
         return;
       }
 
-      setSuccessMessage(loginFormCopy.success);
+      setSuccessMessage(copy.success);
     } catch {
-      setError(loginFormCopy.genericError);
+      setError(copy.genericError);
     } finally {
       setIsPending(false);
     }
@@ -104,7 +109,7 @@ export const LoginForm = () => {
       <FieldGroup className="gap-4">
         <Field data-invalid={Boolean(error)}>
           <FieldLabel htmlFor="emailOrMobile" className="sr-only">
-            {loginFormCopy.emailLabel}
+            {copy.emailLabel}
           </FieldLabel>
           <Input
             id="emailOrMobile"
@@ -114,7 +119,7 @@ export const LoginForm = () => {
             required
             minLength={3}
             maxLength={254}
-            placeholder={loginFormCopy.emailPlaceholder}
+            placeholder={copy.emailPlaceholder}
             aria-invalid={Boolean(error)}
             className="h-14 rounded-[1.125rem] border-input/80 bg-background/70 px-5 text-[0.95rem] shadow-none placeholder:text-muted-foreground"
           />
@@ -122,7 +127,7 @@ export const LoginForm = () => {
 
         <Field data-invalid={Boolean(error)}>
           <FieldLabel htmlFor="password" className="sr-only">
-            {loginFormCopy.passwordLabel}
+            {copy.passwordLabel}
           </FieldLabel>
           <Input
             id="password"
@@ -132,7 +137,7 @@ export const LoginForm = () => {
             required
             minLength={8}
             maxLength={128}
-            placeholder={loginFormCopy.passwordPlaceholder}
+            placeholder={copy.passwordPlaceholder}
             aria-invalid={Boolean(error)}
             className="h-14 rounded-[1.125rem] border-input/80 bg-background/70 px-5 text-[0.95rem] shadow-none placeholder:text-muted-foreground"
           />
@@ -150,15 +155,15 @@ export const LoginForm = () => {
           {isPending ? (
             <>
               <Spinner data-icon="inline-start" />
-              {loginFormCopy.pendingLabel}
+              {copy.pendingLabel}
             </>
           ) : (
-            loginFormCopy.submitLabel
+            copy.submitLabel
           )}
         </Button>
 
-        <Button href="/auth/forgot-password" variant="link" className="text-sm">
-          {loginFormCopy.forgotPassword}
+        <Button href={forgotPasswordHref} variant="link" className="text-sm">
+          {copy.forgotPassword}
         </Button>
       </div>
 

@@ -1,31 +1,37 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { defaultLocale, getLocalizedHref, getMessages } from "@/i18n/config";
+import { createTranslator } from "@/i18n/translate";
 
 const authFooterLinks = [
-  { href: "/items", label: "Items" },
-  { href: "/privacy", label: "Privacy" },
-  { href: "/terms", label: "Terms" },
-  { href: "/safety", label: "Safety" },
+  { href: "/items", labelKey: "nav.items" },
+  { href: "/privacy", labelKey: "nav.privacy" },
+  { href: "/terms", labelKey: "nav.terms" },
+  { href: "/safety", labelKey: "nav.safety" },
 ];
 
 const LayoutAuth = ({ children }: { children: ReactNode }) => {
+  const messages = getMessages(defaultLocale);
+  const shared = createTranslator(messages, "Shared");
+  const auth = createTranslator(messages, "AuthLayout");
+
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <div className="flex-1">{children}</div>
       <footer className="border-border border-t px-5 py-5 sm:px-6">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>Rwanda Family is currently free to use.</p>
+          <p>{auth("free")}</p>
           <nav
-            aria-label="Authentication footer pages"
+            aria-label={shared("authFooterAriaLabel")}
             className="flex flex-wrap items-center gap-3"
           >
             {authFooterLinks.map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                href={getLocalizedHref(link.href, defaultLocale)}
                 className="font-medium hover:text-foreground"
               >
-                {link.label}
+                {shared(link.labelKey)}
               </Link>
             ))}
           </nav>
