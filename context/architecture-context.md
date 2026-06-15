@@ -40,12 +40,15 @@ Rwanda Family follows a modular web application architecture:
 
 Suggested stack:
 
+- Bun (runtime and package manager).
 - Next.js 15.
 - TypeScript.
 - Tailwind CSS.
 - shadcn/ui.
 - TanStack Query.
 - Zustand.
+
+The frontend uses Bun as its runtime and package manager. Use `bun install`, `bun run <script>`, and `bunx <pkg>` in `frontend/`. Do not use npm, pnpm, or yarn there.
 
 Recommended structure:
 
@@ -80,12 +83,15 @@ Guidelines:
 
 Suggested stack:
 
+- pnpm (package manager).
 - NestJS.
 - TypeScript.
 - PostgreSQL.
 - Prisma ORM.
 - Redis.
 - BullMQ.
+
+The backend uses pnpm as its package manager. Use `pnpm install`, `pnpm <script>`, and `pnpm dlx <pkg>` in `backend/`. Do not use npm, yarn, or bun there.
 
 Recommended modules:
 

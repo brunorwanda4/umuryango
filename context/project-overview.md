@@ -116,8 +116,8 @@ At the product level, Rwanda Family is organized around families as tenant bound
 
 The expected stack is:
 
-- Frontend: Next.js 15, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, Zustand.
-- Backend: NestJS, TypeScript, PostgreSQL, Prisma ORM, Redis, BullMQ.
+- Frontend: Bun (runtime and package manager), Next.js 15, TypeScript, Tailwind CSS, shadcn/ui, TanStack Query, Zustand.
+- Backend: pnpm (package manager), NestJS, TypeScript, PostgreSQL, Prisma ORM, Redis, BullMQ.
 - Storage: Bunny Storage.
 - Authentication: JWT and refresh tokens.
 - Deployment: Docker, VPS, CI/CD.

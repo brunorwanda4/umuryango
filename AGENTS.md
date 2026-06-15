@@ -74,6 +74,7 @@ Agents should treat the architecture as production-oriented even during early de
 
 ### Frontend
 
+- Use Bun as the frontend runtime and package manager. Run scripts with `bun run <script>`, install with `bun install`, and execute one-off binaries with `bunx <pkg>`. Do not use npm, pnpm, or yarn in `frontend/`.
 - Use Next.js 15 with the App Router.
 - Use TypeScript for all application code.
 - Use Tailwind CSS for styling.
@@ -85,6 +86,7 @@ Agents should treat the architecture as production-oriented even during early de
 
 ### Backend
 
+- Use pnpm as the backend package manager. Run scripts with `pnpm <script>`, install with `pnpm install`, and execute one-off binaries with `pnpm dlx <pkg>`. Do not use npm, yarn, or bun in `backend/`.
 - Use NestJS as the API framework.
 - Use modular domains: auth, families, members, permissions, finance, contributions, projects, documents, notifications, reports, and audit.
 - Use Prisma ORM with PostgreSQL.
@@ -165,11 +167,11 @@ shadcn/ui is the required component layer for all frontend UI. Components are ad
 
 ### Setup and CLI
 
-- The CLI is run with the project package runner. This project uses pnpm, so run `pnpm dlx shadcn@latest <command>`.
-- Initialize once if `frontend/components.json` does not yet exist: `pnpm dlx shadcn@latest init`. Use a black-and-white base theme consistent with the product identity.
-- Add components before importing them: `pnpm dlx shadcn@latest add button card dialog table badge`. Never import a component that has not been added.
-- Search registries before writing custom UI: `pnpm dlx shadcn@latest search`.
-- Before creating, fixing, or debugging a component, fetch its docs first: `pnpm dlx shadcn@latest docs <component>`, then read the returned URLs. Do not guess the API.
+- shadcn is a frontend tool, so run it with Bun: `bunx shadcn@latest <command>`. Do not use `pnpm dlx` or `npx` for shadcn.
+- Initialize once if `frontend/components.json` does not yet exist: `bunx shadcn@latest init`. Use a black-and-white base theme consistent with the product identity.
+- Add components before importing them: `bunx shadcn@latest add button card dialog table badge`. Never import a component that has not been added.
+- Search registries before writing custom UI: `bunx shadcn@latest search`.
+- Before creating, fixing, or debugging a component, fetch its docs first: `bunx shadcn@latest docs <component>`, then read the returned URLs. Do not guess the API.
 - Use the explicit registry the user names. Do not default to a registry on the user's behalf.
 - After adding any component, read the generated files and verify composition, imports, and icon library before using them.
 

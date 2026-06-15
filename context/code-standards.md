@@ -39,6 +39,12 @@ This applies to frontend, backend, database, tests, documentation, infrastructur
 - Avoid inconsistent quote, semicolon, and naming styles.
 - Do not manually format generated files unless the tool requires it.
 
+## Package Managers and Runtime
+
+- Frontend (`frontend/`) uses Bun as the runtime and package manager. Install with `bun install`, run scripts with `bun run <script>`, and run one-off binaries with `bunx <pkg>` (for example `bunx shadcn@latest add button`). Do not use npm, pnpm, or yarn in the frontend.
+- Backend (`backend/`) uses pnpm as the package manager. Install with `pnpm install`, run scripts with `pnpm <script>`, and run one-off binaries with `pnpm dlx <pkg>`. Do not use npm, yarn, or bun in the backend.
+- Use the lockfile that matches the workspace: `bun.lock` for the frontend, `pnpm-lock.yaml` for the backend. Do not commit lockfiles from the wrong package manager.
+
 ## Naming Conventions
 
 Use domain-specific names:
@@ -109,8 +115,8 @@ Vague names are acceptable only in very small local scopes where meaning is obvi
 
 ### shadcn/ui
 
-- Add components through the CLI before importing them: `pnpm dlx shadcn@latest add <component>`. Never import a component that has not been added.
-- Run `pnpm dlx shadcn@latest docs <component>` and read the returned URLs before creating, fixing, or debugging a component instead of guessing the API.
+- Add components through the CLI before importing them: `bunx shadcn@latest add <component>`. Never import a component that has not been added.
+- Run `bunx shadcn@latest docs <component>` and read the returned URLs before creating, fixing, or debugging a component instead of guessing the API.
 - Compose existing primitives rather than writing custom markup. Use `Alert`, `Empty`, `Badge`, `Skeleton`, `Separator`, and `sonner` toasts instead of bespoke styled elements.
 - Use built-in `variant` and `size` props before adding custom classes. Keep `className` for layout, not for overriding component colors or typography.
 - Use semantic tokens (`bg-background`, `text-muted-foreground`, `bg-primary`, `border`, `destructive`), never raw color values. Do not add manual `dark:` color overrides.

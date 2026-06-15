@@ -47,12 +47,12 @@ shadcn/ui is the standard component layer for Rwanda Family. Components are not 
 
 ### CLI workflow
 
-This project uses pnpm, so run the CLI as `pnpm dlx shadcn@latest <command>`.
+shadcn is a frontend tool, so run the CLI with Bun: `bunx shadcn@latest <command>`. Do not use `pnpm dlx` or `npx`.
 
-- Initialize once if `frontend/components.json` is missing: `pnpm dlx shadcn@latest init`. Choose a black-and-white base theme so the default identity stays neutral and theming-ready.
-- Add components before importing them: `pnpm dlx shadcn@latest add button card dialog table badge`. Never import a component that has not been added.
-- Search before building custom UI: `pnpm dlx shadcn@latest search`.
-- Fetch docs and examples before creating, fixing, or debugging a component: `pnpm dlx shadcn@latest docs <component>`, then read the returned URLs instead of guessing the API.
+- Initialize once if `frontend/components.json` is missing: `bunx shadcn@latest init`. Choose a black-and-white base theme so the default identity stays neutral and theming-ready.
+- Add components before importing them: `bunx shadcn@latest add button card dialog table badge`. Never import a component that has not been added.
+- Search before building custom UI: `bunx shadcn@latest search`.
+- Fetch docs and examples before creating, fixing, or debugging a component: `bunx shadcn@latest docs <component>`, then read the returned URLs instead of guessing the API.
 - After adding components, read the generated files and verify composition, imports, and icon library before using them.
 
 ### Composition rules
