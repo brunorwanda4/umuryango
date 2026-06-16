@@ -153,7 +153,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
         </div>
       </section>
 
-      <section className="flex items-start border-t border-border px-6 py-10 sm:px-10 lg:min-h-dvh lg:items-center lg:border-t-0 lg:px-14">
+      <section className="flex mt-12 items-start border-t border-border px-6 py-10 sm:px-10 lg:min-h-dvh lg:items-center lg:border-t-0 lg:px-14">
         <div className="mx-auto flex w-full max-w-[32.75rem] flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h2 className="text-xl font-semibold tracking-normal">

@@ -10,7 +10,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { FloatingField } from "@/components/ui/floating-field";
 import {
   Select,
   SelectContent,
@@ -137,45 +137,35 @@ export const RegisterForm = ({ copy, loginHref }: RegisterFormProps) => {
 
   return (
     <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-      <FieldGroup className="gap-5">
+      <FieldGroup className="gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field data-invalid={Boolean(error)}>
-            <FieldLabel htmlFor="firstName" className="sr-only">
-              {copy.firstNameLabel}
-            </FieldLabel>
-            <Input
-              id="firstName"
-              name="firstName"
-              type="text"
-              autoComplete="given-name"
-              required
-              maxLength={80}
-              placeholder={copy.firstNameLabel}
-              aria-invalid={Boolean(error)}
-              className={inputClassName}
-            />
-          </Field>
+          <FloatingField
+            id="firstName"
+            name="firstName"
+            type="text"
+            label={copy.firstNameLabel}
+            autoComplete="given-name"
+            required
+            maxLength={80}
+            aria-invalid={Boolean(error)}
+          />
 
-          <Field data-invalid={Boolean(error)}>
-            <FieldLabel htmlFor="lastName" className="sr-only">
-              {copy.lastNameLabel}
-            </FieldLabel>
-            <Input
-              id="lastName"
-              name="lastName"
-              type="text"
-              autoComplete="family-name"
-              required
-              maxLength={80}
-              placeholder={copy.lastNameLabel}
-              aria-invalid={Boolean(error)}
-              className={inputClassName}
-            />
-          </Field>
+          <FloatingField
+            id="lastName"
+            name="lastName"
+            type="text"
+            label={copy.lastNameLabel}
+            autoComplete="family-name"
+            required
+            maxLength={80}
+            aria-invalid={Boolean(error)}
+          />
         </div>
 
         <Field data-invalid={Boolean(error)}>
-          <FieldLabel htmlFor="gender">{copy.genderLabel}</FieldLabel>
+          <FieldLabel htmlFor="gender" className="sr-only">
+            {copy.genderLabel}
+          </FieldLabel>
           <Select
             value={gender}
             onValueChange={setGender}
@@ -201,54 +191,46 @@ export const RegisterForm = ({ copy, loginHref }: RegisterFormProps) => {
           </Select>
         </Field>
 
-        <Field data-invalid={Boolean(error)}>
-          <FieldLabel htmlFor="email">{copy.emailLabel}</FieldLabel>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            maxLength={254}
-            placeholder={copy.emailLabel}
-            aria-invalid={Boolean(error)}
-            className={inputClassName}
-          />
-        </Field>
+        <FloatingField
+          id="email"
+          name="email"
+          type="email"
+          label={copy.emailLabel}
+          autoComplete="email"
+          required
+          maxLength={254}
+          aria-invalid={Boolean(error)}
+        />
 
-        <Field data-invalid={Boolean(error)}>
-          <FieldLabel htmlFor="phoneNumber">{copy.phoneLabel}</FieldLabel>
-          <Input
+        <div className="flex flex-col gap-1.5">
+          <FloatingField
             id="phoneNumber"
             name="phoneNumber"
             type="tel"
+            label={copy.phoneLabel}
             autoComplete="tel"
             required
             minLength={7}
             maxLength={20}
-            placeholder={copy.phoneLabel}
             aria-invalid={Boolean(error)}
-            className={inputClassName}
           />
           <FieldDescription>{copy.contactHint}</FieldDescription>
-        </Field>
+        </div>
 
-        <Field data-invalid={Boolean(error)}>
-          <FieldLabel htmlFor="password">{copy.passwordLabel}</FieldLabel>
-          <Input
+        <div className="flex flex-col gap-1.5">
+          <FloatingField
             id="password"
             name="password"
             type="password"
+            label={copy.passwordLabel}
             autoComplete="new-password"
             required
             minLength={8}
             maxLength={128}
-            placeholder={copy.passwordLabel}
             aria-invalid={Boolean(error)}
-            className={inputClassName}
           />
           <FieldError>{error}</FieldError>
-        </Field>
+        </div>
       </FieldGroup>
 
       <p className="text-xs leading-relaxed text-muted-foreground">

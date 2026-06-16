@@ -4,13 +4,11 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Field,
   FieldDescription,
   FieldError,
   FieldGroup,
-  FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { FloatingField } from "@/components/ui/floating-field";
 import { Spinner } from "@/components/ui/spinner";
 
 export type LoginFormCopy = {
@@ -107,42 +105,32 @@ export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
   return (
     <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
       <FieldGroup className="gap-4">
-        <Field data-invalid={Boolean(error)}>
-          <FieldLabel htmlFor="emailOrMobile" className="sr-only">
-            {copy.emailLabel}
-          </FieldLabel>
-          <Input
-            id="emailOrMobile"
-            name="emailOrMobile"
-            type="text"
-            autoComplete="username"
-            required
-            minLength={3}
-            maxLength={254}
-            placeholder={copy.emailPlaceholder}
-            aria-invalid={Boolean(error)}
-            className="h-14 rounded-[1.125rem] border-input/80 bg-background/70 px-5 text-[0.95rem] shadow-none placeholder:text-muted-foreground"
-          />
-        </Field>
+        <FloatingField
+          id="emailOrMobile"
+          name="emailOrMobile"
+          type="text"
+          label={copy.emailPlaceholder}
+          autoComplete="username"
+          required
+          minLength={3}
+          maxLength={254}
+          aria-invalid={Boolean(error)}
+        />
 
-        <Field data-invalid={Boolean(error)}>
-          <FieldLabel htmlFor="password" className="sr-only">
-            {copy.passwordLabel}
-          </FieldLabel>
-          <Input
+        <div className="flex flex-col gap-1.5">
+          <FloatingField
             id="password"
             name="password"
             type="password"
+            label={copy.passwordPlaceholder}
             autoComplete="current-password"
             required
             minLength={8}
             maxLength={128}
-            placeholder={copy.passwordPlaceholder}
             aria-invalid={Boolean(error)}
-            className="h-14 rounded-[1.125rem] border-input/80 bg-background/70 px-5 text-[0.95rem] shadow-none placeholder:text-muted-foreground"
           />
           <FieldError>{error}</FieldError>
-        </Field>
+        </div>
       </FieldGroup>
 
       <div className="flex flex-col items-center gap-5">
