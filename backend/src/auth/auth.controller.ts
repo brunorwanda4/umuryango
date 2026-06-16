@@ -8,25 +8,50 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import { AuthService, type LoginResult } from './auth.service';
+import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from './auth.constants';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 
-const ACCESS_COOKIE_NAME = 'rf_access_token';
-const REFRESH_COOKIE_NAME = 'rf_refresh_token';
-
+@ApiTags('auth')
 @Controller('api/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(
-    @Body() registerDto: RegisterDto,
-    @Req() request: Request,
-  ) {
+  @ApiOperation({
+    summary: 'Create a user account and send an email verification code',
+  })
+  @ApiCreatedResponse({
+    description: 'Account created and verification code sent.',
+    schema: {
+      example: {
+        data: {
+          email: 'claudine@example.com',
+          fullName: 'Claudine Uwase',
+          requiresEmailVerification: true,
+          verificationCodeExpiresInMinutes: 10,
+        },
+        message: 'Account created. Check your email for the verification code.',
+      },
+    },
+  })
+  @ApiConflictResponse({
+    description: 'Email or phone number is already registered.',
+  })
+  async register(@Body() registerDto: RegisterDto, @Req() request: Request) {
     const result = await this.authService.register(registerDto, {
       ipAddress: request.ip,
       userAgent: request.get('user-agent'),
@@ -39,6 +64,33 @@ export class AuthController {
   }
 
   @Post('verify-email')
+  @ApiOperation({
+    summary: 'Verify an email address and start an authenticated session',
+  })
+  @ApiOkResponse({
+    description: 'Email verified and auth cookies set.',
+    schema: {
+      example: {
+        data: {
+          user: {
+            id: 'clx0000000000000000000000',
+            email: 'claudine@example.com',
+            phoneNumber: '+250788123456',
+            fullName: 'Claudine Uwase',
+          },
+          accessTokenExpiresInSeconds: 900,
+          refreshTokenExpiresAt: '2026-07-16T07:00:00.000Z',
+        },
+        message: 'Email verified successfully.',
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Verification code is invalid, expired, or already exhausted.',
+  })
+  @ApiConflictResponse({
+    description: 'Email is already verified.',
+  })
   async verifyEmail(
     @Body() verifyEmailDto: VerifyEmailDto,
     @Req() request: Request,
@@ -63,6 +115,18 @@ export class AuthController {
 
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Send a new email verification code when needed' })
+  @ApiOkResponse({
+    description: 'Verification resend request accepted.',
+    schema: {
+      example: {
+        data: {
+          requiresEmailVerification: true,
+        },
+        message: 'If the account needs verification, a new code has been sent.',
+      },
+    },
+  })
   async resendVerification(@Body() resendDto: ResendVerificationDto) {
     const result = await this.authService.resendVerification(resendDto);
 
@@ -73,6 +137,28 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Log in and set secure auth cookies' })
+  @ApiOkResponse({
+    description: 'Login succeeded and auth cookies set.',
+    schema: {
+      example: {
+        data: {
+          user: {
+            id: 'clx0000000000000000000000',
+            email: 'claudine@example.com',
+            phoneNumber: '+250788123456',
+            fullName: 'Claudine Uwase',
+          },
+          accessTokenExpiresInSeconds: 900,
+          refreshTokenExpiresAt: '2026-07-16T07:00:00.000Z',
+        },
+        message: 'Logged in successfully.',
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Credentials are invalid or the email must be verified first.',
+  })
   async login(
     @Body() loginDto: LoginDto,
     @Req() request: Request,
