@@ -62,6 +62,7 @@ const RegisterPage = async ({ searchParams }: RegisterPageProps) => {
         <RegisterForm
           copy={messages.RegisterForm}
           loginHref={getLocalizedHref("/auth/login", locale)}
+          verifiedHref={getLocalizedHref("/", locale)}
         />
       </div>
     </main>

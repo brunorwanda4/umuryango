@@ -1,6 +1,8 @@
 import {
   Body,
   Controller,
+  HttpCode,
+  HttpStatus,
   Post,
   Req,
   Res,
@@ -10,6 +12,8 @@ import type { Request, Response } from 'express';
 import { AuthService, type LoginResult } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 const ACCESS_COOKIE_NAME = 'rf_access_token';
 const REFRESH_COOKIE_NAME = 'rf_refresh_token';
@@ -22,9 +26,25 @@ export class AuthController {
   async register(
     @Body() registerDto: RegisterDto,
     @Req() request: Request,
+  ) {
+    const result = await this.authService.register(registerDto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+
+    return {
+      data: result,
+      message: 'Account created. Check your email for the verification code.',
+    };
+  }
+
+  @Post('verify-email')
+  async verifyEmail(
+    @Body() verifyEmailDto: VerifyEmailDto,
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const loginResult = await this.authService.register(registerDto, {
+    const loginResult = await this.authService.verifyEmail(verifyEmailDto, {
       ipAddress: request.ip,
       userAgent: request.get('user-agent'),
     });
@@ -37,7 +57,18 @@ export class AuthController {
         accessTokenExpiresInSeconds: loginResult.accessTokenExpiresInSeconds,
         refreshTokenExpiresAt: loginResult.refreshTokenExpiresAt,
       },
-      message: 'Registered successfully.',
+      message: 'Email verified successfully.',
+    };
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  async resendVerification(@Body() resendDto: ResendVerificationDto) {
+    const result = await this.authService.resendVerification(resendDto);
+
+    return {
+      data: result,
+      message: 'If the account needs verification, a new code has been sent.',
     };
   }
 

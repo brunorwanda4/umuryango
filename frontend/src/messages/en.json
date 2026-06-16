@@ -133,6 +133,16 @@
     "haveAccount": "I already have an account",
     "success": "Your account has been created.",
     "genericError": "Unable to create account. Check your details and try again.",
+    "verifyHeading": "Verify your email",
+    "verifyDescription": "We sent a 6-digit code to {email}. Enter it below to finish creating your account.",
+    "codeLabel": "Verification code",
+    "verifySubmitLabel": "Verify email",
+    "verifyPendingLabel": "Verifying",
+    "verifySuccess": "Email verified. Redirecting you now.",
+    "verifyGenericError": "Unable to verify the code. Try again.",
+    "resendLabel": "Resend code",
+    "resendPendingLabel": "Sending",
+    "resendSuccess": "A new code is on its way.",
     "genderOptions": [
       {
         "value": "female",
