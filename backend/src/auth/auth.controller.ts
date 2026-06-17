@@ -20,9 +20,11 @@ import {
 import type { Request, Response } from 'express';
 import { AuthService, type LoginResult } from './auth.service';
 import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from './auth.constants';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @ApiTags('auth')
@@ -178,6 +180,68 @@ export class AuthController {
         refreshTokenExpiresAt: loginResult.refreshTokenExpiresAt,
       },
       message: 'Logged in successfully.',
+    };
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Request a password reset code. Always succeeds to prevent user enumeration.',
+  })
+  @ApiOkResponse({
+    description: 'Reset code sent if the account exists.',
+    schema: {
+      example: {
+        data: {},
+        message:
+          'If that email is registered, a reset code has been sent. Check your inbox.',
+      },
+    },
+  })
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+    @Req() request: Request,
+  ) {
+    await this.authService.forgotPassword(forgotPasswordDto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+
+    return {
+      data: {},
+      message:
+        'If that email is registered, a reset code has been sent. Check your inbox.',
+    };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify the reset code and set a new password' })
+  @ApiOkResponse({
+    description: 'Password updated and all active sessions revoked.',
+    schema: {
+      example: {
+        data: {},
+        message: 'Password updated successfully. Please log in again.',
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Reset code is invalid, expired, or too many attempts.',
+  })
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+    @Req() request: Request,
+  ) {
+    await this.authService.resetPassword(resetPasswordDto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+
+    return {
+      data: {},
+      message: 'Password updated successfully. Please log in again.',
     };
   }
 

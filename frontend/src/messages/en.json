@@ -162,8 +162,35 @@
       }
     ]
   },
+  "ForgotPasswordPage": {
+    "metadataTitle": "Forgot password",
+    "metadataDescription": "Reset your Rwanda Family account password.",
+    "heading": "Forgot your password?",
+    "subheading": "Enter your email and we'll send you a 6-digit reset code.",
+    "backAriaLabel": "Go back to login"
+  },
+  "ForgotPasswordForm": {
+    "emailLabel": "Email address",
+    "submitLabel": "Send reset code",
+    "pendingLabel": "Sending",
+    "requestSuccess": "Check your email for a 6-digit reset code.",
+    "codeLabel": "Reset code",
+    "verifySubmitLabel": "Verify code",
+    "verifyPendingLabel": "Verifying",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm new password",
+    "resetSubmitLabel": "Set new password",
+    "resetPendingLabel": "Saving",
+    "resetSuccess": "Password updated. You can now log in.",
+    "resendLabel": "Resend code",
+    "resendPendingLabel": "Sending",
+    "resendSuccess": "A new code has been sent to your email.",
+    "passwordMismatch": "Passwords do not match.",
+    "genericError": "Something went wrong. Please try again."
+  },
   "ItemsPage": {
     "metadataTitle": "Items",
+
     "metadataDescription": "Explore the family management items Rwanda Family helps organize, including money, contributions, projects, documents, reports, events, and members.",
     "badge": "What you can organize",
     "title": "Items for everyday family administration.",

@@ -22,6 +22,7 @@ enum AuthAuditAction {
   REFRESH_TOKEN
   REGISTER
   EMAIL_VERIFICATION
+  PASSWORD_RESET
 }
 
 enum AuthAuditResult {
@@ -40,9 +41,10 @@ model User {
   emailVerifiedAt DateTime?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  authSessions    AuthSession[]
-  authAuditEvents AuthAuditEvent[]
+  authSessions       AuthSession[]
+  authAuditEvents    AuthAuditEvent[]
   emailVerifications EmailVerification[]
+  passwordResets     PasswordReset[]
 
   @@index([status])
 }
@@ -61,6 +63,22 @@ model EmailVerification {
   @@index([userId])
   @@index([expiresAt])
 }
+
+model PasswordReset {
+  id         String    @id @default(cuid())
+  userId     String
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
 
 model AuthSession {
   id               String    @id @default(cuid())

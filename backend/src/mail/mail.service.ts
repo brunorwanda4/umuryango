@@ -9,6 +9,13 @@ type VerificationEmailInput = {
   expiresInMinutes: number;
 };
 
+type PasswordResetEmailInput = {
+  to: string;
+  fullName: string;
+  code: string;
+  expiresInMinutes: number;
+};
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
@@ -68,6 +75,47 @@ export class MailService {
     } catch (error) {
       this.logger.error(
         `Failed to send verification email to ${to}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw error;
+    }
+  }
+
+  async sendPasswordResetCode({
+    to,
+    fullName,
+    code,
+    expiresInMinutes,
+  }: PasswordResetEmailInput): Promise<void> {
+    const subject = 'Reset your Rwanda Family password';
+    const text = [
+      `Hi ${fullName},`,
+      '',
+      `Your Rwanda Family password reset code is: ${code}`,
+      '',
+      `This code expires in ${expiresInMinutes} minutes.`,
+      'If you did not request a password reset, you can safely ignore this email.',
+    ].join('\n');
+
+    const html = `
+      <div style="font-family: Arial, Helvetica, sans-serif; color: #111; max-width: 480px; margin: 0 auto;">
+        <h2 style="margin-bottom: 8px;">Reset your password</h2>
+        <p style="margin: 0 0 16px;">Hi ${fullName}, use the code below to reset your Rwanda Family account password.</p>
+        <div style="font-size: 32px; font-weight: 700; letter-spacing: 8px; padding: 16px 0; text-align: center; background: #f4f4f5; border-radius: 12px;">${code}</div>
+        <p style="margin: 16px 0 0; color: #555;">This code expires in ${expiresInMinutes} minutes. If you did not request a password reset, you can safely ignore this email — your password will not change.</p>
+      </div>`;
+
+    try {
+      await this.transporter.sendMail({
+        from: this.from,
+        to,
+        subject,
+        text,
+        html,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to send password reset email to ${to}`,
         error instanceof Error ? error.stack : undefined,
       );
       throw error;

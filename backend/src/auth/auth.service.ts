@@ -11,9 +11,11 @@ import { AuthAuditAction, AuthAuditResult, UserStatus } from "@prisma/client";
 import { compare, hash } from "bcryptjs";
 import { MailService } from "../mail/mail.service";
 import { PrismaService } from "../prisma/prisma.service";
+import type { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import type { LoginDto } from "./dto/login.dto";
 import type { RegisterDto } from "./dto/register.dto";
 import type { ResendVerificationDto } from "./dto/resend-verification.dto";
+import type { ResetPasswordDto } from "./dto/reset-password.dto";
 import type { VerifyEmailDto } from "./dto/verify-email.dto";
 
 type RequestContext = {
@@ -47,7 +49,9 @@ export type RegisterResult = {
 export class AuthService {
 	private readonly accessTokenExpiresInSeconds = 15 * 60;
 	private readonly verificationCodeExpiresInMinutes = 10;
+	private readonly passwordResetCodeExpiresInMinutes = 10;
 	private readonly maxVerificationAttempts = 5;
+	private readonly maxResetAttempts = 5;
 
 	constructor(
 		private readonly prisma: PrismaService,
@@ -259,6 +263,109 @@ export class AuthService {
 		return this.createSessionAndTokens(user, context);
 	}
 
+	// ─── Forgot Password ────────────────────────────────────────────────────────
+
+	async forgotPassword(
+		forgotPasswordDto: ForgotPasswordDto,
+		context: RequestContext,
+	): Promise<void> {
+		const email = forgotPasswordDto.email.toLowerCase();
+		const user = await this.prisma.user.findUnique({ where: { email } });
+
+		// Always succeed to avoid user enumeration.
+		if (user && user.status === UserStatus.ACTIVE) {
+			await this.issuePasswordResetCode(user);
+			await this.writeLoginAudit({
+				emailOrMobile: email,
+				result: AuthAuditResult.SUCCESS,
+				context,
+				userId: user.id,
+				action: AuthAuditAction.PASSWORD_RESET,
+			});
+		}
+	}
+
+	async resetPassword(
+		resetPasswordDto: ResetPasswordDto,
+		context: RequestContext,
+	): Promise<void> {
+		const email = resetPasswordDto.email.toLowerCase();
+		const user = await this.prisma.user.findUnique({ where: { email } });
+
+		if (!user || user.status !== UserStatus.ACTIVE) {
+			throw new BadRequestException("Invalid password reset request.");
+		}
+
+		const resetRecord = await this.prisma.passwordReset.findFirst({
+			where: { userId: user.id, consumedAt: null },
+			orderBy: { createdAt: "desc" },
+		});
+
+		if (!resetRecord || resetRecord.expiresAt.getTime() < Date.now()) {
+			throw new BadRequestException(
+				"Reset code is invalid or has expired.",
+			);
+		}
+
+		if (resetRecord.attempts >= this.maxResetAttempts) {
+			await this.prisma.passwordReset.update({
+				where: { id: resetRecord.id },
+				data: { consumedAt: new Date() },
+			});
+			throw new BadRequestException(
+				"Too many attempts. Please request a new reset code.",
+			);
+		}
+
+		const codeMatches = await compare(
+			resetPasswordDto.code,
+			resetRecord.codeHash,
+		);
+
+		if (!codeMatches) {
+			await this.prisma.passwordReset.update({
+				where: { id: resetRecord.id },
+				data: { attempts: { increment: 1 } },
+			});
+			await this.writeLoginAudit({
+				emailOrMobile: email,
+				result: AuthAuditResult.FAILURE,
+				context,
+				userId: user.id,
+				action: AuthAuditAction.PASSWORD_RESET,
+			});
+			throw new BadRequestException("Reset code is incorrect.");
+		}
+
+		const newPasswordHash = await hash(resetPasswordDto.newPassword, 12);
+
+		await this.prisma.$transaction([
+			this.prisma.passwordReset.update({
+				where: { id: resetRecord.id },
+				data: { consumedAt: new Date() },
+			}),
+			this.prisma.user.update({
+				where: { id: user.id },
+				data: { passwordHash: newPasswordHash },
+			}),
+			// Revoke all active sessions so old tokens can no longer be used.
+			this.prisma.authSession.updateMany({
+				where: { userId: user.id, revokedAt: null },
+				data: { revokedAt: new Date() },
+			}),
+		]);
+
+		await this.writeLoginAudit({
+			emailOrMobile: email,
+			result: AuthAuditResult.SUCCESS,
+			context,
+			userId: user.id,
+			action: AuthAuditAction.PASSWORD_RESET,
+		});
+	}
+
+	// ─── Private helpers ────────────────────────────────────────────────────────
+
 	private async issueVerificationCode(user: {
 		id: string;
 		email: string;
@@ -289,6 +396,40 @@ export class AuthService {
 			fullName: user.fullName,
 			code,
 			expiresInMinutes: this.verificationCodeExpiresInMinutes,
+		});
+	}
+
+	private async issuePasswordResetCode(user: {
+		id: string;
+		email: string;
+		fullName: string;
+	}): Promise<void> {
+		const code = randomInt(0, 1_000_000).toString().padStart(6, "0");
+		const codeHash = await hash(code, 10);
+		const expiresAt = new Date(
+			Date.now() + this.passwordResetCodeExpiresInMinutes * 60 * 1000,
+		);
+
+		await this.prisma.$transaction([
+			// Invalidate any existing pending reset codes.
+			this.prisma.passwordReset.updateMany({
+				where: { userId: user.id, consumedAt: null },
+				data: { consumedAt: new Date() },
+			}),
+			this.prisma.passwordReset.create({
+				data: {
+					userId: user.id,
+					codeHash,
+					expiresAt,
+				},
+			}),
+		]);
+
+		await this.mailService.sendPasswordResetCode({
+			to: user.email,
+			fullName: user.fullName,
+			code,
+			expiresInMinutes: this.passwordResetCodeExpiresInMinutes,
 		});
 	}
 
