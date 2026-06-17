@@ -34,7 +34,7 @@ const getLoginUrl = () => {
   const configuredUrl =
     process.env.NEXT_PUBLIC_API_URL ??
     process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:3000";
+    "http://localhost:4915";
   const baseUrl = configuredUrl.replace(/\/$/, "");
 
   if (baseUrl.endsWith("/api/v1")) {
