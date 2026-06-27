@@ -17,6 +17,7 @@ import type { RegisterDto } from "./dto/register.dto";
 import type { ResendVerificationDto } from "./dto/resend-verification.dto";
 import type { ResetPasswordDto } from "./dto/reset-password.dto";
 import type { VerifyEmailDto } from "./dto/verify-email.dto";
+import type { GoogleUser } from "./strategies/google.strategy";
 
 type RequestContext = {
 	ipAddress?: string;
@@ -258,6 +259,57 @@ export class AuthService {
 			result: AuthAuditResult.SUCCESS,
 			context,
 			userId: user.id,
+		});
+
+		return this.createSessionAndTokens(user, context);
+	}
+
+	async loginWithGoogle(
+		googleUser: GoogleUser,
+		context: RequestContext,
+	): Promise<LoginResult> {
+		const email = googleUser.email.toLowerCase();
+
+		let user = await this.prisma.user.findUnique({
+			where: { googleId: googleUser.googleId },
+		});
+
+		if (!user) {
+			const existing = await this.prisma.user.findUnique({ where: { email } });
+
+			if (existing) {
+				user = await this.prisma.user.update({
+					where: { id: existing.id },
+					data: {
+						googleId: googleUser.googleId,
+						avatarUrl: googleUser.avatarUrl,
+						emailVerifiedAt: existing.emailVerifiedAt ?? new Date(),
+					},
+				});
+			} else {
+				user = await this.prisma.user.create({
+					data: {
+						email,
+						fullName: googleUser.fullName,
+						googleId: googleUser.googleId,
+						avatarUrl: googleUser.avatarUrl,
+						emailVerifiedAt: new Date(),
+						status: UserStatus.ACTIVE,
+					},
+				});
+			}
+		}
+
+		if (user.status !== UserStatus.ACTIVE) {
+			throw new UnauthorizedException("This account is disabled.");
+		}
+
+		await this.writeLoginAudit({
+			emailOrMobile: email,
+			result: AuthAuditResult.SUCCESS,
+			context,
+			userId: user.id,
+			action: AuthAuditAction.LOGIN,
 		});
 
 		return this.createSessionAndTokens(user, context);
