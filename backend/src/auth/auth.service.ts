@@ -218,7 +218,7 @@ export class AuthService {
 			},
 		});
 
-		if (!user || user.status !== UserStatus.ACTIVE) {
+		if (!user || user.status !== UserStatus.ACTIVE || !user.passwordHash) {
 			await this.writeLoginAudit({
 				emailOrMobile: loginDto.emailOrMobile,
 				result: AuthAuditResult.FAILURE,

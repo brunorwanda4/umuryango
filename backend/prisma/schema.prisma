@@ -36,7 +36,9 @@ model User {
   phoneNumber     String?          @unique
   fullName        String
   gender          String?
-  passwordHash    String
+  passwordHash    String?
+  googleId        String?          @unique
+  avatarUrl       String?
   status          UserStatus       @default(ACTIVE)
   emailVerifiedAt DateTime?
   createdAt       DateTime         @default(now())
