@@ -108,6 +108,7 @@
     "submitLabel": "Log in",
     "pendingLabel": "Logging in",
     "forgotPassword": "Forgot password?",
+    "continueWithGoogle": "Continue with Google",
     "success": "You are logged in.",
     "genericError": "Unable to log in. Check your details and try again."
   },
@@ -131,6 +132,7 @@
     "submitLabel": "Submit",
     "pendingLabel": "Creating account",
     "haveAccount": "I already have an account",
+    "continueWithGoogle": "Continue with Google",
     "success": "Your account has been created.",
     "genericError": "Something went wrong. Please try again.",
     "networkError": "Cannot reach the server. Make sure you are connected and try again.",
