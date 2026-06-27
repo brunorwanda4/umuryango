@@ -1,8 +1,8 @@
 export default async function FamilyPage({
-	params,
+  params,
 }: {
-	params: { familyName: string };
+  params: { familyName: string };
 }) {
-	const { familyName } = params;
-	return <div>Family page for {familyName}</div>;
+  const { familyName } = params;
+  return <div>Family page for {familyName}</div>;
 }

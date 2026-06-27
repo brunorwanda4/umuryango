@@ -9,12 +9,7 @@ type FloatingFieldProps = Omit<React.ComponentProps<"input">, "placeholder"> & {
   label: string;
 };
 
-function FloatingField({
-  id,
-  label,
-  className,
-  ...props
-}: FloatingFieldProps) {
+function FloatingField({ id, label, className, ...props }: FloatingFieldProps) {
   return (
     <div className="relative">
       <input

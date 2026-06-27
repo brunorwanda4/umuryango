@@ -107,7 +107,9 @@ export const ForgotPasswordForm = ({
       });
 
       if (!response.ok) {
-        const payload = (await response.json().catch(() => ({}))) as ApiErrorResponse;
+        const payload = (await response
+          .json()
+          .catch(() => ({}))) as ApiErrorResponse;
         setError(getErrorMessage(payload, copy.genericError));
         return;
       }
@@ -195,7 +197,9 @@ export const ForgotPasswordForm = ({
         body: JSON.stringify({ email, code: otpValue, newPassword }),
       });
 
-      const payload = (await response.json().catch(() => ({}))) as ApiErrorResponse;
+      const payload = (await response
+        .json()
+        .catch(() => ({}))) as ApiErrorResponse;
 
       if (!response.ok) {
         setError(getErrorMessage(payload, copy.genericError));

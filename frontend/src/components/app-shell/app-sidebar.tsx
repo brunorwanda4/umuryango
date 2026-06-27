@@ -179,7 +179,10 @@ export function AppSidebarShell({
 
   return (
     <SidebarProvider>
-      <Sidebar collapsible="icon">
+      <Sidebar
+        collapsible="icon"
+        className="[&_[data-slot=sidebar-inner]]:bg-background"
+      >
         <SidebarHeader>
           <WorkspaceSwitcher
             currentFamilyName={familyName}

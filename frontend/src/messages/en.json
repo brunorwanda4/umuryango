@@ -192,6 +192,121 @@
     "passwordMismatch": "Passwords do not match.",
     "genericError": "Something went wrong. Please try again."
   },
+  "CreateFamilyPage": {
+    "metadataTitle": "Create family",
+    "metadataDescription": "Create a Rwanda Family workspace for money, contributions, projects, documents, announcements, events, and reports.",
+    "badge": "Family setup",
+    "heading": "Create a family workspace",
+    "description": "Set the basic family profile before inviting members, tracking contributions, and organizing shared records.",
+    "formTitle": "Family details",
+    "formDescription": "These settings become the starting point for family records and reports."
+  },
+  "CreateFamilyForm": {
+    "nameLabel": "Family name",
+    "namePlaceholder": "Example: Mutesi Family",
+    "nameDescription": "This will be used to create the family workspace address.",
+    "countryLabel": "Primary country",
+    "countryPlaceholder": "Select a country",
+    "currencyLabel": "Default currency",
+    "currencyPlaceholder": "Select a currency",
+    "cadenceLabel": "Contribution rhythm",
+    "cadencePlaceholder": "Select a rhythm",
+    "descriptionLabel": "Family note",
+    "descriptionPlaceholder": "Add a short note about this family workspace.",
+    "descriptionHint": "Optional. Keep this general and avoid sensitive financial details.",
+    "inviteEmailLabel": "First member email",
+    "inviteEmailPlaceholder": "name@example.com",
+    "inviteEmailHint": "Optional. You can invite more members after the workspace is created.",
+    "submitLabel": "Create family",
+    "pendingLabel": "Creating family",
+    "cancelLabel": "Back to families",
+    "successTitle": "Family created",
+    "successDescription": "Your family workspace has been created. Redirecting you now.",
+    "genericError": "Unable to create family.",
+    "networkError": "Cannot reach the family service. The family API may not be connected yet.",
+    "validation": {
+      "nameRequired": "Enter a family name.",
+      "nameLength": "Family name must be at least 2 characters.",
+      "countryRequired": "Select the family's primary country.",
+      "currencyRequired": "Select a default currency.",
+      "cadenceRequired": "Select a contribution rhythm.",
+      "inviteEmailInvalid": "Enter a valid email address or leave this blank."
+    },
+    "countries": [
+      {
+        "value": "RW",
+        "label": "Rwanda"
+      },
+      {
+        "value": "BI",
+        "label": "Burundi"
+      },
+      {
+        "value": "CD",
+        "label": "Democratic Republic of the Congo"
+      },
+      {
+        "value": "KE",
+        "label": "Kenya"
+      },
+      {
+        "value": "TZ",
+        "label": "Tanzania"
+      },
+      {
+        "value": "UG",
+        "label": "Uganda"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
+    ],
+    "currencies": [
+      {
+        "value": "RWF",
+        "label": "Rwandan franc (RWF)"
+      },
+      {
+        "value": "USD",
+        "label": "US dollar (USD)"
+      },
+      {
+        "value": "EUR",
+        "label": "Euro (EUR)"
+      },
+      {
+        "value": "KES",
+        "label": "Kenyan shilling (KES)"
+      },
+      {
+        "value": "TZS",
+        "label": "Tanzanian shilling (TZS)"
+      },
+      {
+        "value": "UGX",
+        "label": "Ugandan shilling (UGX)"
+      }
+    ],
+    "cadences": [
+      {
+        "value": "monthly",
+        "label": "Monthly contributions"
+      },
+      {
+        "value": "as-needed",
+        "label": "As-needed contributions"
+      },
+      {
+        "value": "project-based",
+        "label": "Project-based contributions"
+      },
+      {
+        "value": "event-based",
+        "label": "Event-based contributions"
+      }
+    ]
+  },
   "ItemsPage": {
     "metadataTitle": "Items",
 
