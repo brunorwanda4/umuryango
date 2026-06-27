@@ -19,10 +19,24 @@ type PasswordResetEmailInput = {
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
-  private readonly transporter: Transporter;
+  private readonly transporter: Transporter | null;
   private readonly from: string;
+  private readonly devMode: boolean;
 
   constructor(private readonly configService: ConfigService) {
+    this.devMode =
+      this.configService.get<string>('MAIL_DEV_MODE', 'false') === 'true';
+
+    if (this.devMode) {
+      // Dev mode: skip SMTP, log codes to the console instead of sending email.
+      this.transporter = null;
+      this.from = this.configService.get<string>('SMTP_FROM', 'dev@local');
+      this.logger.warn(
+        'MAIL_DEV_MODE enabled — emails are logged to the console, not sent.',
+      );
+      return;
+    }
+
     const host = this.configService.getOrThrow<string>('SMTP_HOST');
     const port = Number(this.configService.get<string>('SMTP_PORT', '465'));
     const secure =
@@ -46,6 +60,13 @@ export class MailService {
     code,
     expiresInMinutes,
   }: VerificationEmailInput): Promise<void> {
+    if (this.devMode) {
+      this.logger.log(
+        `[DEV] Verification code for ${to}: ${code} (expires in ${expiresInMinutes}m)`,
+      );
+      return;
+    }
+
     const subject = 'Your Rwanda Family verification code';
     const text = [
       `Hi ${fullName},`,
@@ -65,7 +86,7 @@ export class MailService {
       </div>`;
 
     try {
-      await this.transporter.sendMail({
+      await this.transporter?.sendMail({
         from: this.from,
         to,
         subject,
@@ -87,6 +108,13 @@ export class MailService {
     code,
     expiresInMinutes,
   }: PasswordResetEmailInput): Promise<void> {
+    if (this.devMode) {
+      this.logger.log(
+        `[DEV] Password reset code for ${to}: ${code} (expires in ${expiresInMinutes}m)`,
+      );
+      return;
+    }
+
     const subject = 'Reset your Rwanda Family password';
     const text = [
       `Hi ${fullName},`,
@@ -106,7 +134,7 @@ export class MailService {
       </div>`;
 
     try {
-      await this.transporter.sendMail({
+      await this.transporter?.sendMail({
         from: this.from,
         to,
         subject,

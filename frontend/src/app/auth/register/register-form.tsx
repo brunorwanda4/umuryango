@@ -13,6 +13,12 @@ import {
 } from "@/components/ui/field";
 import { FloatingField } from "@/components/ui/floating-field";
 import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -37,8 +43,10 @@ export type RegisterFormCopy = {
   haveAccount: string;
   success: string;
   genericError: string;
+  networkError: string;
   verifyHeading: string;
   verifyDescription: string;
+  spamHint: string;
   codeLabel: string;
   verifySubmitLabel: string;
   verifyPendingLabel: string;
@@ -55,9 +63,8 @@ export type RegisterFormCopy = {
 
 type ApiErrorResponse = {
   message?: string | string[];
-  error?: {
-    message?: string;
-  };
+  error?: string;
+  statusCode?: number;
 };
 
 const getAuthUrl = (path: string) => {
@@ -75,14 +82,9 @@ const getAuthUrl = (path: string) => {
 };
 
 const getErrorMessage = (payload: ApiErrorResponse, genericError: string) => {
-  if (payload.error?.message) {
-    return payload.error.message;
-  }
-
   if (Array.isArray(payload.message)) {
     return payload.message[0] ?? genericError;
   }
-
   return payload.message ?? genericError;
 };
 
@@ -104,6 +106,7 @@ export const RegisterForm = ({
   const [step, setStep] = useState<"register" | "verify">("register");
   const [registeredEmail, setRegisteredEmail] = useState("");
   const [gender, setGender] = useState("");
+  const [otpValue, setOtpValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -148,22 +151,24 @@ export const RegisterForm = ({
       }
 
       setRegisteredEmail(email);
+      setOtpValue("");
       setStep("verify");
-    } catch {
-      setError(copy.genericError);
+    } catch (err) {
+      const isNetworkError =
+        err instanceof TypeError && err.message.toLowerCase().includes("fetch");
+      setError(isNetworkError ? copy.networkError : copy.genericError);
     } finally {
       setIsPending(false);
     }
   };
 
-  const handleVerify = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleVerify = async (event?: FormEvent<HTMLFormElement>) => {
+    if (event) event.preventDefault();
+    const code = otpValue.trim();
+    if (code.length !== 6) return;
     setError(null);
     setSuccessMessage(null);
     setIsPending(true);
-
-    const formData = new FormData(event.currentTarget);
-    const code = String(formData.get("code") ?? "").trim();
 
     try {
       const response = await fetch(getAuthUrl("verify-email"), {
@@ -185,8 +190,10 @@ export const RegisterForm = ({
 
       setSuccessMessage(copy.verifySuccess);
       router.push(verifiedHref);
-    } catch {
-      setError(copy.verifyGenericError);
+    } catch (err) {
+      const isNetworkError =
+        err instanceof TypeError && err.message.toLowerCase().includes("fetch");
+      setError(isNetworkError ? copy.networkError : copy.verifyGenericError);
     } finally {
       setIsPending(false);
     }
@@ -216,8 +223,10 @@ export const RegisterForm = ({
       }
 
       setSuccessMessage(copy.resendSuccess);
-    } catch {
-      setError(copy.verifyGenericError);
+    } catch (err) {
+      const isNetworkError =
+        err instanceof TypeError && err.message.toLowerCase().includes("fetch");
+      setError(isNetworkError ? copy.networkError : copy.verifyGenericError);
     } finally {
       setIsResending(false);
     }
@@ -234,20 +243,40 @@ export const RegisterForm = ({
         </div>
 
         <FieldGroup className="gap-4">
-          <div className="flex flex-col gap-1.5">
-            <FloatingField
-              id="code"
-              name="code"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              label={copy.codeLabel}
-              required
-              minLength={6}
-              maxLength={6}
-              aria-invalid={Boolean(error)}
-            />
-            <FieldError>{error}</FieldError>
+          <div className="flex flex-col items-center gap-3">
+            <Field className="flex flex-col items-center gap-2">
+              <FieldLabel className="sr-only">{copy.codeLabel}</FieldLabel>
+              <InputOTP
+                maxLength={6}
+                value={otpValue}
+                onChange={(val) => {
+                  setOtpValue(val);
+                  if (val.length === 6) {
+                    void handleVerify();
+                  }
+                }}
+                autoFocus
+                disabled={isPending}
+                aria-invalid={Boolean(error)}
+                aria-label={copy.codeLabel}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                </InputOTPGroup>
+                <InputOTPSeparator />
+                <InputOTPGroup>
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+              <FieldError>{error}</FieldError>
+              <p className="text-xs text-muted-foreground text-center">
+                {copy.spamHint}
+              </p>
+            </Field>
           </div>
         </FieldGroup>
 
@@ -255,7 +284,7 @@ export const RegisterForm = ({
           <Button
             type="submit"
             size="lg"
-            disabled={isPending}
+            disabled={isPending || otpValue.length !== 6}
             className="h-12 w-full rounded-full text-sm font-semibold"
           >
             {isPending ? (
