@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { GoogleIcon } from "@/components/icons/google-icon";
 import { Button } from "@/components/ui/button";
 import {
   FieldDescription,
@@ -19,6 +20,7 @@ export type LoginFormCopy = {
   submitLabel: string;
   pendingLabel: string;
   forgotPassword: string;
+  continueWithGoogle: string;
   success: string;
   genericError: string;
 };
@@ -42,6 +44,20 @@ const getLoginUrl = () => {
   }
 
   return `${baseUrl}/api/v1/auth/login`;
+};
+
+const getGoogleUrl = () => {
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_API_URL ??
+    process.env.NEXT_PUBLIC_API_BASE_URL ??
+    "http://localhost:4915";
+  const baseUrl = configuredUrl.replace(/\/$/, "");
+
+  if (baseUrl.endsWith("/api/v1")) {
+    return `${baseUrl}/auth/google`;
+  }
+
+  return `${baseUrl}/api/v1/auth/google`;
 };
 
 const getErrorMessage = (payload: ApiErrorResponse, genericError: string) => {
@@ -148,6 +164,18 @@ export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
           ) : (
             copy.submitLabel
           )}
+        </Button>
+
+        <Button
+          asChild
+          variant="outline"
+          size="lg"
+          className="h-11 w-full rounded-full text-sm font-semibold"
+        >
+          <a href={getGoogleUrl()}>
+            <GoogleIcon data-icon="inline-start" />
+            {copy.continueWithGoogle}
+          </a>
         </Button>
 
         <Button href={forgotPasswordHref} variant="link" className="text-sm">

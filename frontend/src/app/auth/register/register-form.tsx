@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { GoogleIcon } from "@/components/icons/google-icon";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -41,6 +42,7 @@ export type RegisterFormCopy = {
   submitLabel: string;
   pendingLabel: string;
   haveAccount: string;
+  continueWithGoogle: string;
   success: string;
   genericError: string;
   networkError: string;
@@ -439,6 +441,17 @@ export const RegisterForm = ({
           ) : (
             copy.submitLabel
           )}
+        </Button>
+
+        <Button
+          asChild
+          variant="outline"
+          className="h-12 w-full rounded-full text-sm font-semibold"
+        >
+          <a href={getAuthUrl("google")}>
+            <GoogleIcon data-icon="inline-start" />
+            {copy.continueWithGoogle}
+          </a>
         </Button>
 
         <Button
