@@ -1,17 +1,21 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
   Req,
   Res,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiExcludeEndpoint,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -26,6 +30,7 @@ import { RegisterDto } from './dto/register.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import type { GoogleUser } from './strategies/google.strategy';
 
 @ApiTags('auth')
 @Controller('api/v1/auth')
@@ -181,6 +186,33 @@ export class AuthController {
       },
       message: 'Logged in successfully.',
     };
+  }
+
+  @Get('google')
+  @ApiExcludeEndpoint()
+  @UseGuards(AuthGuard('google'))
+  googleAuth(): void {
+    // The AuthGuard redirects the browser to Google's consent screen.
+  }
+
+  @Get('google/callback')
+  @ApiExcludeEndpoint()
+  @UseGuards(AuthGuard('google'))
+  async googleAuthCallback(
+    @Req() request: Request,
+    @Res() response: Response,
+  ): Promise<void> {
+    const googleUser = request.user as GoogleUser;
+
+    const loginResult = await this.authService.loginWithGoogle(googleUser, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+
+    this.setAuthCookies(response, loginResult);
+
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:4914';
+    response.redirect(`${frontendUrl}/me`);
   }
 
   @Post('forgot-password')
