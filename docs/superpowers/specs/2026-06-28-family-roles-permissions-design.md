@@ -146,7 +146,7 @@ All routes under `/api/v1`, family-scoped, audited where they mutate access.
 | Method | Route | Required | Purpose |
 |---|---|---|---|
 | GET | `/families/:slug/members` | family member | list members: authority, kinship, capabilities |
-| POST | `/families/:slug/members/invite` | `MANAGE_MEMBERS` | invite with authority + kinship + capabilities |
+| POST | `/families/:slug/members` | `MANAGE_MEMBERS` | invite with authority + kinship + capabilities |
 | PATCH | `/families/:slug/members/:memberId` | see rules | change authority / kinship / capabilities |
 | DELETE | `/families/:slug/members/:memberId` | see rules | soft-remove member |
 | POST | `/families/:slug/members/:memberId/transfer-head` | HEAD only | grant HEAD to another member |
