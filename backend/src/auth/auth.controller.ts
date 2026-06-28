@@ -222,6 +222,34 @@ export class AuthController {
     };
   }
 
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Revoke the current session and clear auth cookies' })
+  @ApiOkResponse({
+    description: 'Logged out and auth cookies cleared.',
+    schema: {
+      example: {
+        data: {},
+        message: 'Logged out successfully.',
+      },
+    },
+  })
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const accessToken = request.cookies?.[ACCESS_COOKIE_NAME] as
+      | string
+      | undefined;
+    await this.authService.logout(accessToken);
+    this.clearAuthCookies(response);
+
+    return {
+      data: {},
+      message: 'Logged out successfully.',
+    };
+  }
+
   @Get('google')
   @ApiExcludeEndpoint()
   @UseGuards(AuthGuard('google'))
@@ -332,5 +360,18 @@ export class AuthController {
       ...cookieOptions,
       expires: loginResult.refreshTokenExpiresAt,
     });
+  }
+
+  private clearAuthCookies(response: Response) {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? ('none' as const) : ('lax' as const),
+      path: '/',
+    };
+
+    response.clearCookie(ACCESS_COOKIE_NAME, cookieOptions);
+    response.clearCookie(REFRESH_COOKIE_NAME, cookieOptions);
   }
 }

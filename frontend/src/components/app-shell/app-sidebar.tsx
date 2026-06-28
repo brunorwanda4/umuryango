@@ -17,6 +17,7 @@ import {
 	LandmarkIcon,
 	LayoutDashboardIcon,
 	ListChecksIcon,
+	LogOutIcon,
 	ReceiptTextIcon,
 	SettingsIcon,
 	ShieldCheckIcon,
@@ -25,7 +26,7 @@ import {
 	WalletCardsIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useLayoutEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -65,6 +66,7 @@ import {
 } from "@/components/ui/sidebar";
 import { type CurrentUser, useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
+import apiRequest from "@/service/api";
 
 type NavigationItem = {
 	title: string;
@@ -424,11 +426,18 @@ function WorkspaceSwitcher({
 	mode: AppSidebarMode;
 	user: CurrentUser | null;
 }) {
+	const router = useRouter();
 	const workspaceTitle =
 		mode === "family" ? currentFamilyName : "Personal workspace";
 	const title = user?.fullName ?? workspaceTitle;
 	const description =
 		user?.email ?? (mode === "family" ? "Family workspace" : "Your money");
+
+	async function handleLogout() {
+		await apiRequest("post", "/auth/logout");
+		router.push("/auth/login");
+		router.refresh();
+	}
 
 	return (
 		<DropdownMenu>
@@ -484,6 +493,11 @@ function WorkspaceSwitcher({
 						</Link>
 					</DropdownMenuItem>
 				</DropdownMenuGroup>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem variant="destructive" onSelect={handleLogout}>
+					<LogOutIcon aria-hidden="true" />
+					Log out
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

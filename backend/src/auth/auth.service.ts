@@ -286,6 +286,7 @@ export class AuthService {
 					where: { id: existing.id },
 					data: {
 						googleId: googleUser.googleId,
+						fullName: googleUser.fullName,
 						avatarUrl: googleUser.avatarUrl,
 						emailVerifiedAt: existing.emailVerifiedAt ?? new Date(),
 					},
@@ -531,6 +532,28 @@ export class AuthService {
 			accessTokenExpiresInSeconds: this.accessTokenExpiresInSeconds,
 			refreshTokenExpiresAt,
 		};
+	}
+
+	async logout(accessToken: string | undefined): Promise<void> {
+		if (!accessToken) {
+			return;
+		}
+
+		let payload: { sessionId?: string };
+		try {
+			payload = await this.jwtService.verifyAsync(accessToken);
+		} catch {
+			return;
+		}
+
+		if (!payload.sessionId) {
+			return;
+		}
+
+		await this.prisma.authSession.updateMany({
+			where: { id: payload.sessionId, revokedAt: null },
+			data: { revokedAt: new Date() },
+		});
 	}
 
 	async getCurrentUser(accessToken: string | undefined): Promise<CurrentUser> {

@@ -1,6 +1,6 @@
 # UI Context
 
-## Purpose
+Use this file for screens, flows, components, responsive behavior, accessibility, and visual decisions.
 
 ## Direction
 
