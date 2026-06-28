@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import apiRequest, { getApiAuthUrl } from "@/service/api";
 
 export type RegisterFormCopy = {
   firstNameLabel: string;
@@ -61,33 +62,6 @@ export type RegisterFormCopy = {
     value: string;
     label: string;
   }>;
-};
-
-type ApiErrorResponse = {
-  message?: string | string[];
-  error?: string;
-  statusCode?: number;
-};
-
-const getAuthUrl = (path: string) => {
-  const configuredUrl =
-    process.env.NEXT_PUBLIC_API_URL ??
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:4915";
-  const baseUrl = configuredUrl.replace(/\/$/, "");
-
-  if (baseUrl.endsWith("/api/v1")) {
-    return `${baseUrl}/auth/${path}`;
-  }
-
-  return `${baseUrl}/api/v1/auth/${path}`;
-};
-
-const getErrorMessage = (payload: ApiErrorResponse, genericError: string) => {
-  if (Array.isArray(payload.message)) {
-    return payload.message[0] ?? genericError;
-  }
-  return payload.message ?? genericError;
 };
 
 const inputClassName =
@@ -127,41 +101,29 @@ export const RegisterForm = ({
     const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
     const password = String(formData.get("password") ?? "");
 
-    try {
-      const response = await fetch(getAuthUrl("register"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          gender,
-          email,
-          phoneNumber,
-          password,
-        }),
-      });
-      const payload = (await response.json().catch(() => ({}))) as
-        | ApiErrorResponse
-        | undefined;
+    const response = await apiRequest("post", "/auth/register", {
+      firstName,
+      lastName,
+      gender,
+      email,
+      phoneNumber,
+      password,
+    });
 
-      if (!response.ok) {
-        setError(getErrorMessage(payload ?? {}, copy.genericError));
-        return;
-      }
-
-      setRegisteredEmail(email);
-      setOtpValue("");
-      setStep("verify");
-    } catch (err) {
-      const isNetworkError =
-        err instanceof TypeError && err.message.toLowerCase().includes("fetch");
-      setError(isNetworkError ? copy.networkError : copy.genericError);
-    } finally {
+    if (!response.ok) {
+      setError(
+        response.statusCode === 0
+          ? copy.networkError
+          : (response.message ?? copy.genericError),
+      );
       setIsPending(false);
+      return;
     }
+
+    setRegisteredEmail(email);
+    setOtpValue("");
+    setStep("verify");
+    setIsPending(false);
   };
 
   const handleVerify = async (event?: FormEvent<HTMLFormElement>) => {
@@ -172,33 +134,24 @@ export const RegisterForm = ({
     setSuccessMessage(null);
     setIsPending(true);
 
-    try {
-      const response = await fetch(getAuthUrl("verify-email"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email: registeredEmail, code }),
-      });
-      const payload = (await response.json().catch(() => ({}))) as
-        | ApiErrorResponse
-        | undefined;
+    const response = await apiRequest("post", "/auth/verify-email", {
+      email: registeredEmail,
+      code,
+    });
 
-      if (!response.ok) {
-        setError(getErrorMessage(payload ?? {}, copy.verifyGenericError));
-        return;
-      }
-
-      setSuccessMessage(copy.verifySuccess);
-      router.push(verifiedHref);
-    } catch (err) {
-      const isNetworkError =
-        err instanceof TypeError && err.message.toLowerCase().includes("fetch");
-      setError(isNetworkError ? copy.networkError : copy.verifyGenericError);
-    } finally {
+    if (!response.ok) {
+      setError(
+        response.statusCode === 0
+          ? copy.networkError
+          : (response.message ?? copy.verifyGenericError),
+      );
       setIsPending(false);
+      return;
     }
+
+    setSuccessMessage(copy.verifySuccess);
+    router.push(verifiedHref);
+    setIsPending(false);
   };
 
   const handleResend = async () => {
@@ -206,32 +159,22 @@ export const RegisterForm = ({
     setSuccessMessage(null);
     setIsResending(true);
 
-    try {
-      const response = await fetch(getAuthUrl("resend-verification"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email: registeredEmail }),
-      });
+    const response = await apiRequest("post", "/auth/resend-verification", {
+      email: registeredEmail,
+    });
 
-      if (!response.ok) {
-        const payload = (await response.json().catch(() => ({}))) as
-          | ApiErrorResponse
-          | undefined;
-        setError(getErrorMessage(payload ?? {}, copy.verifyGenericError));
-        return;
-      }
-
-      setSuccessMessage(copy.resendSuccess);
-    } catch (err) {
-      const isNetworkError =
-        err instanceof TypeError && err.message.toLowerCase().includes("fetch");
-      setError(isNetworkError ? copy.networkError : copy.verifyGenericError);
-    } finally {
+    if (!response.ok) {
+      setError(
+        response.statusCode === 0
+          ? copy.networkError
+          : (response.message ?? copy.verifyGenericError),
+      );
       setIsResending(false);
+      return;
     }
+
+    setSuccessMessage(copy.resendSuccess);
+    setIsResending(false);
   };
 
   if (step === "verify") {
@@ -448,7 +391,7 @@ export const RegisterForm = ({
           variant="outline"
           className="h-12 w-full rounded-full text-sm font-semibold"
         >
-          <a href={getAuthUrl("google")}>
+          <a href={getApiAuthUrl("google")}>
             <GoogleIcon data-icon="inline-start" />
             {copy.continueWithGoogle}
           </a>

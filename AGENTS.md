@@ -79,6 +79,9 @@ Agents should treat the architecture as production-oriented even during early de
 - Use TypeScript for all application code.
 - Use Tailwind CSS for styling.
 - Use shadcn/ui for accessible, consistent UI primitives.
+- Use `frontend/src/service/api.ts` for frontend API calls to the Nest backend. It builds `/api/v1` URLs from `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_API_BASE_URL`, sends cookies with `credentials: "include"`, and reads the backend `{ data, message }` response envelope. Do not duplicate `fetch` URL builders inside forms.
+- Use `frontend/src/hooks/use-zod-form-submit.ts` for Zod-backed mutation forms when React Hook Form is appropriate.
+- Use `frontend/src/components/common/form/common-form-field.tsx` for React Hook Form fields so forms compose the local shadcn `Field` component instead of the older shadcn `Form` wrapper.
 - Use TanStack Query for server state, caching, retries, pagination, and mutations.
 - Use Zustand only for local client state that is not authoritative server data.
 - Keep feature code grouped by domain when possible.
@@ -183,7 +186,7 @@ shadcn/ui is the required component layer for all frontend UI. Components are ad
 - `className` is for layout, not for overriding component colors or typography.
 - Use `flex` with `gap-*` for spacing, not `space-x-*` / `space-y-*`. Use `size-*` when width and height are equal. Use `cn()` for conditional classes.
 - Do not add manual `dark:` color overrides or manual `z-index` on overlay components; tokens and components handle these.
-- Forms use `FieldGroup` + `Field`, not raw `div` + `Label`. Validation uses `data-invalid` on `Field` and `aria-invalid` on the control.
+- Forms use `FieldGroup` + `Field`, not raw `div` + `Label` and not the older shadcn `Form` wrapper. Validation uses `data-invalid` on `Field` and `aria-invalid` on the control. React Hook Form screens should prefer `CommonFormField` from `frontend/src/components/common/form/common-form-field.tsx`.
 - Keep items inside their group (`SelectItem` in `SelectGroup`, `DropdownMenuItem` in `DropdownMenuGroup`). `Dialog`, `Sheet`, and `Drawer` always need a title for accessibility.
 - Prefer real components over custom markup: `Alert` for callouts, `Empty` for empty states, `Badge` for status, `Skeleton` for loading, `Separator` instead of `<hr>`, and `sonner` `toast()` for toasts.
 - Icons in a `Button` use `data-icon="inline-start"` / `inline-end` with no sizing classes; pass icons as objects, not string keys. Use the project's configured icon library.

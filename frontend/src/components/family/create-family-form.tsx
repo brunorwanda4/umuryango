@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import apiRequest from "@/service/api";
 
 type SelectOption = {
   value: string;
@@ -67,17 +68,8 @@ export type CreateFamilyFormCopy = {
   cadences: SelectOption[];
 };
 
-type ApiErrorResponse = {
-  message?: string | string[];
-  error?: string;
-  statusCode?: number;
-};
-
 type CreateFamilyResponse = {
   slug?: string;
-  data?: {
-    slug?: string;
-  };
 };
 
 type CreateFamilyFormProps = {
@@ -88,28 +80,6 @@ type CreateFamilyFormProps = {
 type FieldErrors = Partial<
   Record<"name" | "country" | "currency" | "cadence" | "inviteEmail", string>
 >;
-
-const getApiUrl = (path: string) => {
-  const configuredUrl =
-    process.env.NEXT_PUBLIC_API_URL ??
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:4915";
-  const baseUrl = configuredUrl.replace(/\/$/, "");
-
-  if (baseUrl.endsWith("/api/v1")) {
-    return `${baseUrl}/${path}`;
-  }
-
-  return `${baseUrl}/api/v1/${path}`;
-};
-
-const getErrorMessage = (payload: ApiErrorResponse, genericError: string) => {
-  if (Array.isArray(payload.message)) {
-    return payload.message[0] ?? genericError;
-  }
-
-  return payload.message ?? payload.error ?? genericError;
-};
 
 const createSlug = (value: string) =>
   value
@@ -124,9 +94,9 @@ export function CreateFamilyForm({
 }: CreateFamilyFormProps) {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [country, setCountry] = useState("");
-  const [currency, setCurrency] = useState("");
-  const [cadence, setCadence] = useState("");
+  const [country, setCountry] = useState("RW");
+  const [currency, setCurrency] = useState("RWF");
+  const [cadence, setCadence] = useState("monthly");
   const [description, setDescription] = useState("");
   const [inviteEmails, setInviteEmails] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -182,45 +152,39 @@ export function CreateFamilyForm({
 
     setIsPending(true);
 
-    try {
-      const response = await fetch(getApiUrl("families"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Idempotency-Key": crypto.randomUUID(),
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          name: name.trim(),
-          slug: slugPreview,
-          country,
-          defaultCurrency: currency,
-          contributionCadence: cadence,
-          description: description.trim() || undefined,
-          inviteEmails: inviteEmails.length
-            ? inviteEmails.map((tag) => tag.text.trim())
-            : undefined,
-        }),
-      });
-      const payload = (await response.json().catch(() => ({}))) as
-        | (ApiErrorResponse & CreateFamilyResponse)
-        | undefined;
+    const response = await apiRequest<unknown, CreateFamilyResponse>(
+      "post",
+      "/families",
+      {
+        name: name.trim(),
+        slug: slugPreview,
+        country,
+        defaultCurrency: currency,
+        contributionCadence: cadence,
+        description: description.trim() || undefined,
+        inviteEmails: inviteEmails.length
+          ? inviteEmails.map((tag) => tag.text.trim())
+          : undefined,
+      },
+      {
+        idempotencyKey: crypto.randomUUID(),
+      },
+    );
 
-      if (!response.ok) {
-        setFormError(getErrorMessage(payload ?? {}, copy.genericError));
-        return;
-      }
-
-      setSuccessMessage(copy.successDescription);
-      const createdSlug = payload?.data?.slug ?? payload?.slug ?? slugPreview;
-      router.push(`/family/${encodeURIComponent(createdSlug)}`);
-    } catch (err) {
-      const isNetworkError =
-        err instanceof TypeError && err.message.toLowerCase().includes("fetch");
-      setFormError(isNetworkError ? copy.networkError : copy.genericError);
-    } finally {
+    if (!response.ok) {
+      setFormError(
+        response.statusCode === 0
+          ? copy.networkError
+          : (response.message ?? copy.genericError),
+      );
       setIsPending(false);
+      return;
     }
+
+    setSuccessMessage(copy.successDescription);
+    const createdSlug = response.data?.slug ?? slugPreview;
+    router.push(`/family/${encodeURIComponent(createdSlug)}`);
+    setIsPending(false);
   };
 
   return (

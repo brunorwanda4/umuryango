@@ -62,7 +62,7 @@ shadcn is a frontend tool, so run the CLI with Bun: `bunx shadcn@latest <command
 - Use semantic color tokens (`bg-background`, `bg-primary`, `text-muted-foreground`, `border`, `destructive`), never raw colors. This keeps light mode, dark mode, and future family branding working without rewrites.
 - `className` is for layout only, not for overriding component colors or typography.
 - Spacing uses `flex` with `gap-*`, not `space-x-*` / `space-y-*`. Use `size-*` for equal width and height. Use `cn()` for conditional classes.
-- Forms use `FieldGroup` + `Field` (not raw `div` + `Label`). Validation uses `data-invalid` on `Field` and `aria-invalid` on the control, so errors stay visible without relying on color alone.
+- Forms use `FieldGroup` + `Field` (not raw `div` + `Label` and not the older shadcn `Form` wrapper). Validation uses `data-invalid` on `Field` and `aria-invalid` on the control, so errors stay visible without relying on color alone. React Hook Form fields should use `frontend/src/components/common/form/common-form-field.tsx`, which composes the local `Field` primitives.
 - Keep items inside their group (`SelectItem` in `SelectGroup`, `DropdownMenuItem` in `DropdownMenuGroup`). `Dialog`, `Sheet`, and `Drawer` always need a title for accessibility, visually hidden with `sr-only` when needed.
 - Prefer real components over custom markup: `Alert` for callouts and emergency notices, `Empty` for empty states, `Badge` for status, `Skeleton` for loading, `Separator` instead of `<hr>`, and `sonner` `toast()` for toasts.
 - Icons inside a `Button` use `data-icon="inline-start"` / `inline-end` with no sizing classes. Use the project's configured icon library.
@@ -346,6 +346,8 @@ Form best practices:
 - Save drafts where useful.
 - Prevent duplicate submissions.
 - Show upload progress for receipts and documents.
+- For Zod-backed mutation forms, prefer `frontend/src/hooks/use-zod-form-submit.ts` so validation, pending state, success/error state, and API submission stay consistent.
+- For backend calls from forms, use `frontend/src/service/api.ts` instead of duplicating `fetch` URL and error parsing logic.
 
 ## Accessibility
 

@@ -79,7 +79,7 @@ Vague names are acceptable only in very small local scopes where meaning is obvi
 - Keep route components focused on composition.
 - Put reusable domain UI in feature folders.
 - Keep shared components generic.
-- Keep API calls in typed clients or hooks.
+- Keep API calls in typed clients or hooks. Frontend calls to the Nest API should go through `frontend/src/service/api.ts`; it handles `/api/v1` URL normalization, cookie credentials, idempotency keys, JSON envelopes, and backend error messages.
 - Use TanStack Query for server data.
 - Use Zustand only for local UI state.
 - Build user-facing UI text so it can be moved into localization files later.
@@ -100,6 +100,8 @@ Vague names are acceptable only in very small local scopes where meaning is obvi
 - Prevent duplicate submissions.
 - Use currency-safe amount input handling.
 - Keep form schemas close to domain DTOs when practical.
+- For React Hook Form screens, use `frontend/src/hooks/use-zod-form-submit.ts` for Zod-backed mutation submission when appropriate.
+- For React Hook Form fields, use `frontend/src/components/common/form/common-form-field.tsx`, which composes the local shadcn `Field` primitives. Do not use the older shadcn `Form` wrapper for new forms.
 
 ### Styling
 
@@ -121,7 +123,7 @@ Vague names are acceptable only in very small local scopes where meaning is obvi
 - Use built-in `variant` and `size` props before adding custom classes. Keep `className` for layout, not for overriding component colors or typography.
 - Use semantic tokens (`bg-background`, `text-muted-foreground`, `bg-primary`, `border`, `destructive`), never raw color values. Do not add manual `dark:` color overrides.
 - Use `flex` with `gap-*` instead of `space-x-*` / `space-y-*`, `size-*` for equal dimensions, and `cn()` for conditional classes.
-- Build forms with `FieldGroup` + `Field`; mark validation with `data-invalid` on `Field` and `aria-invalid` on the control.
+- Build forms with `FieldGroup` + `Field`; mark validation with `data-invalid` on `Field` and `aria-invalid` on the control. New React Hook Form fields should use the shared `CommonFormField` wrapper instead of shadcn `FormField` / `FormItem`.
 - Keep items inside their group component, and give every `Dialog`, `Sheet`, and `Drawer` a title for accessibility.
 - After adding any component, read the generated files and fix composition, imports, or icon-library mismatches before use.
 
@@ -182,6 +184,7 @@ Services should not:
 - Support filtering and sorting where useful.
 - Use idempotency for duplicate-sensitive operations.
 - Return authorization errors consistently.
+- Frontend clients should expect the current Nest backend to return `{ data, message }` on success and standard Nest validation/error payloads on failure. Do not hard-code old project ports or unrelated headers in frontend helpers.
 
 Example error response:
 

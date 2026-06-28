@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/field";
 import { FloatingField } from "@/components/ui/floating-field";
 import { Spinner } from "@/components/ui/spinner";
+import apiRequest, { getApiAuthUrl } from "@/service/api";
 
 export type LoginFormCopy = {
   emailLabel: string;
@@ -23,53 +24,6 @@ export type LoginFormCopy = {
   continueWithGoogle: string;
   success: string;
   genericError: string;
-};
-
-type ApiErrorResponse = {
-  message?: string | string[];
-  error?: {
-    message?: string;
-  };
-};
-
-const getLoginUrl = () => {
-  const configuredUrl =
-    process.env.NEXT_PUBLIC_API_URL ??
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:4915";
-  const baseUrl = configuredUrl.replace(/\/$/, "");
-
-  if (baseUrl.endsWith("/api/v1")) {
-    return `${baseUrl}/auth/login`;
-  }
-
-  return `${baseUrl}/api/v1/auth/login`;
-};
-
-const getGoogleUrl = () => {
-  const configuredUrl =
-    process.env.NEXT_PUBLIC_API_URL ??
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:4915";
-  const baseUrl = configuredUrl.replace(/\/$/, "");
-
-  if (baseUrl.endsWith("/api/v1")) {
-    return `${baseUrl}/auth/google`;
-  }
-
-  return `${baseUrl}/api/v1/auth/google`;
-};
-
-const getErrorMessage = (payload: ApiErrorResponse, genericError: string) => {
-  if (payload.error?.message) {
-    return payload.error.message;
-  }
-
-  if (Array.isArray(payload.message)) {
-    return payload.message[0] ?? genericError;
-  }
-
-  return payload.message ?? genericError;
 };
 
 type LoginFormProps = {
@@ -92,30 +46,23 @@ export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
     const emailOrMobile = String(formData.get("emailOrMobile") ?? "");
     const password = String(formData.get("password") ?? "");
 
-    try {
-      const response = await fetch(getLoginUrl(), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ emailOrMobile, password }),
-      });
-      const payload = (await response.json().catch(() => ({}))) as
-        | ApiErrorResponse
-        | undefined;
+    const response = await apiRequest("post", "/auth/login", {
+      emailOrMobile,
+      password,
+    });
 
-      if (!response.ok) {
-        setError(getErrorMessage(payload ?? {}, copy.genericError));
-        return;
-      }
-
-      setSuccessMessage(copy.success);
-    } catch {
-      setError(copy.genericError);
-    } finally {
+    if (!response.ok) {
+      setError(
+        response.statusCode === 0
+          ? copy.genericError
+          : (response.message ?? copy.genericError),
+      );
       setIsPending(false);
+      return;
     }
+
+    setSuccessMessage(copy.success);
+    setIsPending(false);
   };
 
   return (
@@ -172,7 +119,7 @@ export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
           size="lg"
           className="h-11 w-full rounded-full text-sm font-semibold"
         >
-          <a href={getGoogleUrl()}>
+          <a href={getApiAuthUrl("google")}>
             <GoogleIcon data-icon="inline-start" />
             {copy.continueWithGoogle}
           </a>

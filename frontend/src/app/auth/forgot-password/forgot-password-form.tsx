@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckCircle2Icon, MailIcon } from "lucide-react";
-import Link from "next/link";
 import type { FormEvent } from "react";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Spinner } from "@/components/ui/spinner";
+import apiRequest from "@/service/api";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -41,32 +41,9 @@ export type ForgotPasswordFormCopy = {
   genericError: string;
 };
 
-type ApiErrorResponse = {
-  message?: string | string[];
-  error?: { message?: string };
-};
-
 type Step = "request" | "verify" | "reset" | "done";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const getAuthUrl = (path: string) => {
-  const configuredUrl =
-    process.env.NEXT_PUBLIC_API_URL ??
-    process.env.NEXT_PUBLIC_API_BASE_URL ??
-    "http://localhost:4915";
-  const baseUrl = configuredUrl.replace(/\/$/, "");
-  if (baseUrl.endsWith("/api/v1")) {
-    return `${baseUrl}/auth/${path}`;
-  }
-  return `${baseUrl}/api/v1/auth/${path}`;
-};
-
-const getErrorMessage = (payload: ApiErrorResponse, fallback: string) => {
-  if (payload.error?.message) return payload.error.message;
-  if (Array.isArray(payload.message)) return payload.message[0] ?? fallback;
-  return payload.message ?? fallback;
-};
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -99,29 +76,20 @@ export const ForgotPasswordForm = ({
     const formData = new FormData(e.currentTarget);
     const submittedEmail = String(formData.get("email") ?? "").toLowerCase();
 
-    try {
-      const response = await fetch(getAuthUrl("forgot-password"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: submittedEmail }),
-      });
+    const response = await apiRequest("post", "/auth/forgot-password", {
+      email: submittedEmail,
+    });
 
-      if (!response.ok) {
-        const payload = (await response
-          .json()
-          .catch(() => ({}))) as ApiErrorResponse;
-        setError(getErrorMessage(payload, copy.genericError));
-        return;
-      }
-
-      setEmail(submittedEmail);
-      setOtpValue("");
-      setStep("verify");
-    } catch {
-      setError(copy.genericError);
-    } finally {
+    if (!response.ok) {
+      setError(response.message ?? copy.genericError);
       setIsPending(false);
+      return;
     }
+
+    setEmail(submittedEmail);
+    setOtpValue("");
+    setStep("verify");
+    setIsPending(false);
   };
 
   // ── Step 2: Verify code ────────────────────────────────────────────────────
@@ -158,18 +126,18 @@ export const ForgotPasswordForm = ({
     setError(null);
     setInfo(null);
 
-    try {
-      await fetch(getAuthUrl("forgot-password"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      setInfo(copy.resendSuccess);
-    } catch {
-      setError(copy.genericError);
-    } finally {
+    const response = await apiRequest("post", "/auth/forgot-password", {
+      email,
+    });
+
+    if (!response.ok) {
+      setError(response.message ?? copy.genericError);
       setIsResendPending(false);
+      return;
     }
+
+    setInfo(copy.resendSuccess);
+    setIsResendPending(false);
   };
 
   // ── Step 3: Reset password ─────────────────────────────────────────────────
@@ -190,28 +158,20 @@ export const ForgotPasswordForm = ({
       return;
     }
 
-    try {
-      const response = await fetch(getAuthUrl("reset-password"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code: otpValue, newPassword }),
-      });
+    const response = await apiRequest("post", "/auth/reset-password", {
+      email,
+      code: otpValue,
+      newPassword,
+    });
 
-      const payload = (await response
-        .json()
-        .catch(() => ({}))) as ApiErrorResponse;
-
-      if (!response.ok) {
-        setError(getErrorMessage(payload, copy.genericError));
-        return;
-      }
-
-      setStep("done");
-    } catch {
-      setError(copy.genericError);
-    } finally {
+    if (!response.ok) {
+      setError(response.message ?? copy.genericError);
       setIsPending(false);
+      return;
     }
+
+    setStep("done");
+    setIsPending(false);
   };
 
   // ─── Render ──────────────────────────────────────────────────────────────
