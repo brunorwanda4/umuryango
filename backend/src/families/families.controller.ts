@@ -1,9 +1,11 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -54,6 +56,47 @@ export class FamiliesController {
     return {
       data: family,
       message: 'Family created successfully.',
+    };
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'List the families the current user belongs to' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Maximum number of families to return, newest first.',
+  })
+  @ApiOkResponse({
+    description: 'Families the user belongs to, newest membership first.',
+    schema: {
+      example: {
+        data: [
+          {
+            id: 'clx0000000000000000000000',
+            name: 'Mutesi Family',
+            slug: 'mutesi-family',
+            role: 'OWNER',
+          },
+        ],
+        message: 'Families retrieved successfully.',
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({ description: 'No valid session was found.' })
+  async list(
+    @CurrentUserId() userId: string,
+    @Query('limit') limit?: string,
+  ) {
+    const parsedLimit = limit ? Number.parseInt(limit, 10) : undefined;
+    const families = await this.familiesService.listForUser(
+      userId,
+      parsedLimit && parsedLimit > 0 ? parsedLimit : undefined,
+    );
+
+    return {
+      data: families,
+      message: 'Families retrieved successfully.',
     };
   }
 }

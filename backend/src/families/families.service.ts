@@ -24,6 +24,13 @@ export type CreatedFamily = {
   createdAt: Date;
 };
 
+export type UserFamily = {
+  id: string;
+  name: string;
+  slug: string;
+  role: FamilyMemberRole;
+};
+
 @Injectable()
 export class FamiliesService {
   private readonly logger = new Logger(FamiliesService.name);
@@ -119,6 +126,22 @@ export class FamiliesService {
       invitedEmails: uniqueInviteEmails,
       createdAt: family.createdAt,
     };
+  }
+
+  async listForUser(userId: string, limit?: number): Promise<UserFamily[]> {
+    const memberships = await this.prisma.familyMember.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      include: { family: true },
+    });
+
+    return memberships.map((membership) => ({
+      id: membership.family.id,
+      name: membership.family.name,
+      slug: membership.family.slug,
+      role: membership.role,
+    }));
   }
 
   private async sendInviteEmail({

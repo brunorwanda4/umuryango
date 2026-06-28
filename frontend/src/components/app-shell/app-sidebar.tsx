@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { type ReactNode, useLayoutEffect } from "react";
+import { type ReactNode, useEffect, useLayoutEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	Collapsible,
@@ -427,6 +427,7 @@ function WorkspaceSwitcher({
 	user: CurrentUser | null;
 }) {
 	const router = useRouter();
+	const recentFamilies = useRecentFamilies();
 	const workspaceTitle =
 		mode === "family" ? currentFamilyName : "Personal workspace";
 	const title = user?.fullName ?? workspaceTitle;
@@ -478,6 +479,22 @@ function WorkspaceSwitcher({
 						</DropdownMenuItem>
 					))}
 				</DropdownMenuGroup>
+				{recentFamilies.length ? (
+					<>
+						<DropdownMenuSeparator />
+						<DropdownMenuLabel>Recent families</DropdownMenuLabel>
+						<DropdownMenuGroup>
+							{recentFamilies.map((family) => (
+								<DropdownMenuItem key={family.id} asChild>
+									<Link href={`/family/${encodeURIComponent(family.slug)}`}>
+										<UsersIcon aria-hidden="true" />
+										{family.name}
+									</Link>
+								</DropdownMenuItem>
+							))}
+						</DropdownMenuGroup>
+					</>
+				) : null}
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
 					<DropdownMenuItem asChild>
@@ -501,6 +518,38 @@ function WorkspaceSwitcher({
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
+}
+
+type RecentFamily = {
+	id: string;
+	name: string;
+	slug: string;
+	role: string;
+};
+
+function useRecentFamilies() {
+	const [families, setFamilies] = useState<RecentFamily[]>([]);
+
+	useEffect(() => {
+		let active = true;
+
+		(async () => {
+			const response = await apiRequest<undefined, RecentFamily[]>(
+				"get",
+				"/families?limit=3",
+			);
+
+			if (active && response.ok) {
+				setFamilies(response.data ?? []);
+			}
+		})();
+
+		return () => {
+			active = false;
+		};
+	}, []);
+
+	return families;
 }
 
 function getActiveNavigationItem(
