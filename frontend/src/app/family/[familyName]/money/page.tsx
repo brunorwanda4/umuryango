@@ -1,8 +1,11 @@
+import { FamilyMoneyWorkspace } from "@/components/family/money/family-money-workspace";
+
 export default async function FamilyMoneyPage({
   params,
 }: {
-  params: { familyName: string };
+  params: Promise<{ familyName: string }>;
 }) {
-  const { familyName } = params;
-  return <div>Family money page for {familyName}</div>;
+  const { familyName } = await params;
+
+  return <FamilyMoneyWorkspace familyName={familyName} />;
 }
