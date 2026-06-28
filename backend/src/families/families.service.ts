@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   Logger,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -29,6 +30,29 @@ export type UserFamily = {
   name: string;
   slug: string;
   role: FamilyMemberRole;
+};
+
+export type FamilyMemberSummary = {
+  id: string;
+  userId: string;
+  fullName: string;
+  avatarUrl: string | null;
+  role: FamilyMemberRole;
+  joinedAt: Date;
+};
+
+export type FamilyDetail = {
+  id: string;
+  name: string;
+  slug: string;
+  country: string;
+  defaultCurrency: string;
+  contributionCadence: string;
+  description: string | null;
+  createdAt: Date;
+  role: FamilyMemberRole;
+  memberCount: number;
+  members: FamilyMemberSummary[];
 };
 
 @Injectable()
@@ -142,6 +166,53 @@ export class FamiliesService {
       slug: membership.family.slug,
       role: membership.role,
     }));
+  }
+
+  async getBySlugForUser(userId: string, slug: string): Promise<FamilyDetail> {
+    const family = await this.prisma.family.findUnique({
+      where: { slug },
+      include: {
+        members: {
+          orderBy: { createdAt: 'asc' },
+          include: { user: true },
+        },
+      },
+    });
+
+    // Return the same 404 for a missing family and for a non-member so we
+    // never leak whether a given family slug exists (IDOR guard).
+    if (!family) {
+      throw new NotFoundException('Family not found.');
+    }
+
+    const membership = family.members.find(
+      (member) => member.userId === userId,
+    );
+
+    if (!membership) {
+      throw new NotFoundException('Family not found.');
+    }
+
+    return {
+      id: family.id,
+      name: family.name,
+      slug: family.slug,
+      country: family.country,
+      defaultCurrency: family.defaultCurrency,
+      contributionCadence: family.contributionCadence,
+      description: family.description,
+      createdAt: family.createdAt,
+      role: membership.role,
+      memberCount: family.members.length,
+      members: family.members.map((member) => ({
+        id: member.id,
+        userId: member.userId,
+        fullName: member.user.fullName,
+        avatarUrl: member.user.avatarUrl,
+        role: member.role,
+        joinedAt: member.createdAt,
+      })),
+    };
   }
 
   private async sendInviteEmail({

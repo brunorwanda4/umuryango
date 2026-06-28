@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -97,6 +106,57 @@ export class FamiliesController {
     return {
       data: families,
       message: 'Families retrieved successfully.',
+    };
+  }
+
+  @Get(':slug')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get a single family the current user belongs to, with members',
+  })
+  @ApiOkResponse({
+    description: 'Family detail with members and the current user role.',
+    schema: {
+      example: {
+        data: {
+          id: 'clx0000000000000000000000',
+          name: 'Mutesi Family',
+          slug: 'mutesi-family',
+          country: 'RW',
+          defaultCurrency: 'RWF',
+          contributionCadence: 'monthly',
+          description: null,
+          createdAt: '2026-06-28T07:00:00.000Z',
+          role: 'OWNER',
+          memberCount: 1,
+          members: [
+            {
+              id: 'clx0000000000000000000001',
+              userId: 'clx0000000000000000000002',
+              fullName: 'Claudine Mutesi',
+              avatarUrl: null,
+              role: 'OWNER',
+              joinedAt: '2026-06-28T07:00:00.000Z',
+            },
+          ],
+        },
+        message: 'Family retrieved successfully.',
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Family does not exist or the user is not a member.',
+  })
+  @ApiUnauthorizedResponse({ description: 'No valid session was found.' })
+  async getBySlug(
+    @CurrentUserId() userId: string,
+    @Param('slug') slug: string,
+  ) {
+    const family = await this.familiesService.getBySlugForUser(userId, slug);
+
+    return {
+      data: family,
+      message: 'Family retrieved successfully.',
     };
   }
 }
