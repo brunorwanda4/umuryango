@@ -45,16 +45,27 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import {
+  AUTHORITY_LABELS,
+  type FamilyAuthority,
+  type FamilyCapability,
+  type FamilyKinship,
+  hasCapability,
+  KINSHIP_LABELS,
+} from "@/lib/family-access";
 import apiRequest from "@/service/api";
 
-type FamilyMemberRole = "OWNER" | "ADMIN" | "MEMBER";
+type AssignableAuthority = Exclude<FamilyAuthority, "HEAD">;
 
 type FamilyMemberSummary = {
   id: string;
   userId: string;
   fullName: string;
   avatarUrl: string | null;
-  role: FamilyMemberRole;
+  authority: FamilyAuthority;
+  kinshipLabel: FamilyKinship | null;
+  kinshipCustom: string | null;
+  capabilities: FamilyCapability[];
   joinedAt: string;
 };
 
@@ -67,7 +78,8 @@ type FamilyDetail = {
   contributionCadence: string;
   description: string | null;
   createdAt: string;
-  role: FamilyMemberRole;
+  authority: FamilyAuthority;
+  capabilities: FamilyCapability[];
   memberCount: number;
   members: FamilyMemberSummary[];
 };
@@ -77,17 +89,12 @@ type FetchState =
   | { status: "error"; message: string }
   | { status: "success"; family: FamilyDetail };
 
-const ROLE_LABELS: Record<FamilyMemberRole, string> = {
-  OWNER: "Owner",
-  ADMIN: "Leader",
-  MEMBER: "Member",
-};
-
-// Owner is granted at creation and transferred separately; managers only move
-// members between leader and member.
-const ASSIGNABLE_ROLES: { value: FamilyMemberRole; label: string }[] = [
-  { value: "ADMIN", label: ROLE_LABELS.ADMIN },
-  { value: "MEMBER", label: ROLE_LABELS.MEMBER },
+const ASSIGNABLE_AUTHORITIES: {
+  value: AssignableAuthority;
+  label: string;
+}[] = [
+  { value: "ADMIN", label: AUTHORITY_LABELS.ADMIN },
+  { value: "MEMBER", label: AUTHORITY_LABELS.MEMBER },
 ];
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -172,7 +179,7 @@ function MembersManager({
   familySlug: string;
   onChanged: () => void;
 }) {
-  const canManage = family.role === "OWNER" || family.role === "ADMIN";
+  const canManage = hasCapability(family, "MANAGE_MEMBERS");
 
   return (
     <div className="flex flex-col gap-6">
@@ -232,12 +239,10 @@ function MemberRow({
 }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string>();
+  const editable = canManage && member.authority !== "HEAD";
 
-  // The owner role is never demoted from this screen, so it stays read-only.
-  const editable = canManage && member.role !== "OWNER";
-
-  const changeRole = async (role: FamilyMemberRole) => {
-    if (role === member.role) return;
+  const changeAuthority = async (authority: AssignableAuthority) => {
+    if (authority === member.authority) return;
 
     setPending(true);
     setError(undefined);
@@ -247,7 +252,7 @@ function MemberRow({
       `/families/${encodeURIComponent(familySlug)}/members/${encodeURIComponent(
         member.id,
       )}`,
-      { role },
+      { authority },
     );
 
     setPending(false);
@@ -255,7 +260,7 @@ function MemberRow({
     if (response.ok) {
       onChanged();
     } else {
-      setError(response.message ?? "Unable to update this role.");
+      setError(response.message ?? "Unable to update this member.");
     }
   };
 
@@ -275,29 +280,38 @@ function MemberRow({
           <span className="text-muted-foreground text-xs">
             Joined {joinedFormatter.format(new Date(member.joinedAt))}
           </span>
+          {member.kinshipLabel ? (
+            <span className="text-muted-foreground text-xs">
+              {member.kinshipLabel === "OTHER" && member.kinshipCustom
+                ? member.kinshipCustom
+                : KINSHIP_LABELS[member.kinshipLabel]}
+            </span>
+          ) : null}
         </div>
         {editable ? (
           <div className="flex items-center gap-2">
             {pending ? <Spinner className="size-4" /> : null}
             <Select
-              value={member.role}
-              onValueChange={(value) => changeRole(value as FamilyMemberRole)}
+              value={member.authority}
+              onValueChange={(value) =>
+                changeAuthority(value as AssignableAuthority)
+              }
               disabled={pending}
             >
-              <SelectTrigger className="w-32" aria-label="Member role">
+              <SelectTrigger className="w-32" aria-label="Member authority">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {ASSIGNABLE_ROLES.map((role) => (
-                  <SelectItem key={role.value} value={role.value}>
-                    {role.label}
+                {ASSIGNABLE_AUTHORITIES.map((authority) => (
+                  <SelectItem key={authority.value} value={authority.value}>
+                    {authority.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         ) : (
-          <Badge variant="outline">{ROLE_LABELS[member.role]}</Badge>
+          <Badge variant="outline">{AUTHORITY_LABELS[member.authority]}</Badge>
         )}
       </div>
       {error ? <p className="text-destructive text-xs">{error}</p> : null}
@@ -307,7 +321,7 @@ function MemberRow({
 
 type AddMemberFormValues = {
   email: string;
-  role: FamilyMemberRole;
+  authority: AssignableAuthority;
 };
 
 const addMemberSchema = z.object({
@@ -318,7 +332,7 @@ const addMemberSchema = z.object({
     .refine((value) => emailPattern.test(value), {
       message: "Enter a valid email address.",
     }),
-  role: z.enum(["ADMIN", "MEMBER"]),
+  authority: z.enum(["ADMIN", "MEMBER"]),
 });
 
 function AddMemberDialog({
@@ -368,7 +382,7 @@ function AddMemberForm({
     useZodFormSubmit<AddMemberFormValues>({
       schema: addMemberSchema,
       formOptions: {
-        defaultValues: { email: "", role: "MEMBER" },
+        defaultValues: { email: "", authority: "MEMBER" },
       },
       request: {
         method: "post",
@@ -377,7 +391,7 @@ function AddMemberForm({
       },
       transform: (values) => ({
         email: values.email.trim().toLowerCase(),
-        role: values.role,
+        authority: values.authority,
       }),
       onSuccessMessage: "Invite sent.",
       onSuccess: () => {
@@ -419,10 +433,10 @@ function AddMemberForm({
         />
         <CommonFormField
           control={form.control}
-          name="role"
-          label="Role"
+          name="authority"
+          label="Authority"
           fieldType="select"
-          selectOptions={ASSIGNABLE_ROLES}
+          selectOptions={ASSIGNABLE_AUTHORITIES}
           required
         />
       </FieldGroup>

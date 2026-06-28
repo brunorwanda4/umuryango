@@ -211,6 +211,8 @@
     "currencyPlaceholder": "Select a currency",
     "cadenceLabel": "Contribution rhythm",
     "cadencePlaceholder": "Select a rhythm",
+    "familyTypeLabel": "Family type",
+    "familyTypePlaceholder": "Select a family type",
     "descriptionLabel": "Family note",
     "descriptionPlaceholder": "Add a short note about this family workspace.",
     "descriptionHint": "Optional. Keep this general and avoid sensitive financial details.",
@@ -230,6 +232,7 @@
       "countryRequired": "Select the family's primary country.",
       "currencyRequired": "Select a default currency.",
       "cadenceRequired": "Select a contribution rhythm.",
+      "familyTypeRequired": "Select a family type.",
       "inviteEmailInvalid": "Enter a valid email address or leave this blank."
     },
     "countries": [
@@ -304,6 +307,28 @@
       {
         "value": "event-based",
         "label": "Event-based contributions"
+      }
+    ],
+    "familyTypes": [
+      {
+        "value": "NUCLEAR",
+        "label": "Nuclear family"
+      },
+      {
+        "value": "JOINT_EXTENDED",
+        "label": "Joint / extended family"
+      },
+      {
+        "value": "SINGLE_PARENT",
+        "label": "Single-parent family"
+      },
+      {
+        "value": "BLENDED",
+        "label": "Blended family"
+      },
+      {
+        "value": "ADOPTIVE",
+        "label": "Adoptive family"
       }
     ]
   },

@@ -32,16 +32,23 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AUTHORITY_LABELS,
+  type FamilyAuthority,
+  type FamilyCapability,
+  type FamilyKinship,
+} from "@/lib/family-access";
 import apiRequest from "@/service/api";
-
-type FamilyMemberRole = "OWNER" | "ADMIN" | "MEMBER";
 
 type FamilyMemberSummary = {
   id: string;
   userId: string;
   fullName: string;
   avatarUrl: string | null;
-  role: FamilyMemberRole;
+  authority: FamilyAuthority;
+  kinshipLabel: FamilyKinship | null;
+  kinshipCustom: string | null;
+  capabilities: FamilyCapability[];
   joinedAt: string;
 };
 
@@ -54,7 +61,8 @@ type FamilyDetail = {
   contributionCadence: string;
   description: string | null;
   createdAt: string;
-  role: FamilyMemberRole;
+  authority: FamilyAuthority;
+  capabilities: FamilyCapability[];
   memberCount: number;
   members: FamilyMemberSummary[];
 };
@@ -63,12 +71,6 @@ type FetchState =
   | { status: "loading" }
   | { status: "error"; message: string }
   | { status: "success"; family: FamilyDetail };
-
-const ROLE_LABELS: Record<FamilyMemberRole, string> = {
-  OWNER: "Owner",
-  ADMIN: "Leader",
-  MEMBER: "Member",
-};
 
 type ModuleCard = {
   title: string;
@@ -214,7 +216,7 @@ function FamilyHeader({ family }: { family: FamilyDetail }) {
     <header className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <h1 className="font-bold text-2xl tracking-tight">{family.name}</h1>
-        <Badge variant="secondary">{ROLE_LABELS[family.role]}</Badge>
+        <Badge variant="secondary">{AUTHORITY_LABELS[family.authority]}</Badge>
       </div>
       {family.description ? (
         <p className="text-muted-foreground text-sm">{family.description}</p>
@@ -253,7 +255,9 @@ function MembersCard({ family }: { family: FamilyDetail }) {
             <span className="min-w-0 flex-1 truncate font-medium text-sm">
               {member.fullName}
             </span>
-            <Badge variant="outline">{ROLE_LABELS[member.role]}</Badge>
+            <Badge variant="outline">
+              {AUTHORITY_LABELS[member.authority]}
+            </Badge>
           </div>
         ))}
       </CardContent>

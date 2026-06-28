@@ -30,10 +30,63 @@ enum AuthAuditResult {
   FAILURE
 }
 
-enum FamilyMemberRole {
-  OWNER
+enum FamilyType {
+  NUCLEAR
+  JOINT_EXTENDED
+  SINGLE_PARENT
+  BLENDED
+  ADOPTIVE
+}
+
+enum FamilyAuthority {
+  HEAD
   ADMIN
   MEMBER
+}
+
+enum FamilyCapability {
+  MANAGE_FAMILY_SETTINGS
+  MANAGE_MEMBERS
+  MANAGE_SAVINGS
+  MANAGE_CONTRIBUTIONS
+  RECORD_INCOME
+  RECORD_EXPENSE
+  APPROVE_EXPENSE
+  MANAGE_DEBTS
+  MANAGE_PROJECTS
+  MANAGE_EVENTS
+  MANAGE_ANNOUNCEMENTS
+  MANAGE_DOCUMENTS
+  VIEW_REPORTS
+  EXPORT_REPORTS
+}
+
+enum FamilyKinship {
+  SON
+  DAUGHTER
+  FATHER
+  MOTHER
+  BROTHER
+  SISTER
+  UNCLE
+  AUNT
+  GRANDFATHER
+  GRANDMOTHER
+  COUSIN
+  IN_LAW
+  FAMILY_FRIEND
+  NEIGHBOR
+  CLEANER
+  OTHER
+}
+
+enum FamilyAuditAction {
+  MEMBER_INVITED
+  MEMBER_REMOVED
+  AUTHORITY_CHANGED
+  CAPABILITIES_CHANGED
+  HEAD_GRANTED
+  SETTINGS_CHANGED
 }
 
 enum FamilyInviteStatus {
@@ -44,18 +97,18 @@ enum FamilyInviteStatus {
 }
 
 model User {
-  id              String           @id @default(cuid())
-  email           String           @unique
-  phoneNumber     String?          @unique
-  fullName        String
-  gender          String?
-  passwordHash    String?
-  googleId        String?          @unique
-  avatarUrl       String?
-  status          UserStatus       @default(ACTIVE)
-  emailVerifiedAt DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  id                 String              @id @default(cuid())
+  email              String              @unique
+  phoneNumber        String?             @unique
+  fullName           String
+  gender             String?
+  passwordHash       String?
+  googleId           String?             @unique
+  avatarUrl          String?
+  status             UserStatus          @default(ACTIVE)
+  emailVerifiedAt    DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   authSessions       AuthSession[]
   authAuditEvents    AuthAuditEvent[]
   emailVerifications EmailVerification[]
@@ -96,7 +149,6 @@ model PasswordReset {
   @@index([expiresAt])
 }
 
-
 model AuthSession {
   id               String    @id @default(cuid())
   userId           String
@@ -114,51 +166,74 @@ model AuthSession {
 }
 
 model Family {
-  id                  String         @id @default(cuid())
+  id                  String             @id @default(cuid())
   name                String
-  slug                String         @unique
+  slug                String             @unique
   country             String
   defaultCurrency     String
   contributionCadence String
+  type                FamilyType         @default(NUCLEAR)
   description         String?
   createdById         String
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  createdBy           User           @relation("FamiliesCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  createdBy           User               @relation("FamiliesCreated", fields: [createdById], references: [id], onDelete: Cascade)
   members             FamilyMember[]
   invites             FamilyInvite[]
+  auditEvents         FamilyAuditEvent[]
 
   @@index([createdById])
 }
 
 model FamilyMember {
-  id        String           @id @default(cuid())
-  familyId  String
-  userId    String
-  role      FamilyMemberRole @default(MEMBER)
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  family    Family           @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String             @id @default(cuid())
+  familyId      String
+  userId        String
+  authority     FamilyAuthority    @default(MEMBER)
+  kinshipLabel  FamilyKinship?
+  kinshipCustom String?
+  capabilities  FamilyCapability[]
+  removedAt     DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  family        Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([familyId, userId])
   @@index([userId])
 }
 
 model FamilyInvite {
-  id        String             @id @default(cuid())
-  familyId  String
-  email     String
-  role      FamilyMemberRole   @default(MEMBER)
-  status    FamilyInviteStatus @default(PENDING)
-  tokenHash String
-  expiresAt DateTime
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  family    Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  id            String             @id @default(cuid())
+  familyId      String
+  email         String
+  authority     FamilyAuthority    @default(MEMBER)
+  kinshipLabel  FamilyKinship?
+  kinshipCustom String?
+  capabilities  FamilyCapability[]
+  status        FamilyInviteStatus @default(PENDING)
+  tokenHash     String
+  expiresAt     DateTime
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  family        Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
   @@unique([familyId, email])
   @@index([email])
+}
+
+model FamilyAuditEvent {
+  id             String            @id @default(cuid())
+  familyId       String
+  actorId        String
+  action         FamilyAuditAction
+  targetMemberId String?
+  before         Json?
+  after          Json?
+  createdAt      DateTime          @default(now())
+  family         Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, createdAt])
 }
 
 model AuthAuditEvent {

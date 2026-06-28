@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { FamilyType } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -39,15 +40,21 @@ export const FAMILY_CADENCES = [
   'event-based',
 ] as const;
 
+export const FAMILY_TYPES = [
+  FamilyType.NUCLEAR,
+  FamilyType.JOINT_EXTENDED,
+  FamilyType.SINGLE_PARENT,
+  FamilyType.BLENDED,
+  FamilyType.ADOPTIVE,
+] as const;
+
 export class CreateFamilyDto {
   @ApiProperty({ example: 'Mutesi Family', maxLength: 120 })
   @IsString()
   @IsNotEmpty()
   @MinLength(2)
   @MaxLength(120)
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim() : value,
-  )
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   name: string;
 
   @ApiPropertyOptional({
@@ -79,13 +86,16 @@ export class CreateFamilyDto {
   @IsIn(FAMILY_CADENCES as unknown as string[])
   contributionCadence: string;
 
+  @ApiPropertyOptional({ enum: FAMILY_TYPES, example: FamilyType.NUCLEAR })
+  @IsIn(FAMILY_TYPES as unknown as string[])
+  @IsOptional()
+  type?: FamilyType;
+
   @ApiPropertyOptional({ maxLength: 500 })
   @IsString()
   @IsOptional()
   @MaxLength(500)
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim() : value,
-  )
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   description?: string;
 
   @ApiPropertyOptional({

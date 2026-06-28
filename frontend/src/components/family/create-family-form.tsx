@@ -27,6 +27,8 @@ export type CreateFamilyFormCopy = {
   currencyPlaceholder: string;
   cadenceLabel: string;
   cadencePlaceholder: string;
+  familyTypeLabel: string;
+  familyTypePlaceholder: string;
   descriptionLabel: string;
   descriptionPlaceholder: string;
   descriptionHint: string;
@@ -46,11 +48,13 @@ export type CreateFamilyFormCopy = {
     countryRequired: string;
     currencyRequired: string;
     cadenceRequired: string;
+    familyTypeRequired: string;
     inviteEmailInvalid: string;
   };
   countries: SelectOption[];
   currencies: SelectOption[];
   cadences: SelectOption[];
+  familyTypes: SelectOption[];
 };
 
 type CreateFamilyResponse = {
@@ -67,6 +71,7 @@ type CreateFamilyFormValues = {
   country: string;
   defaultCurrency: string;
   contributionCadence: string;
+  type: string;
   description: string;
   inviteEmails: Tag[];
 };
@@ -91,6 +96,7 @@ const getCreateFamilySchema = (copy: CreateFamilyFormCopy) =>
     country: z.string().min(1, copy.validation.countryRequired),
     defaultCurrency: z.string().min(1, copy.validation.currencyRequired),
     contributionCadence: z.string().min(1, copy.validation.cadenceRequired),
+    type: z.string().min(1, copy.validation.familyTypeRequired),
     description: z.string().max(500),
     inviteEmails: z
       .array(
@@ -129,6 +135,7 @@ export function CreateFamilyForm({
         country: "RW",
         defaultCurrency: "RWF",
         contributionCadence: "monthly",
+        type: "NUCLEAR",
         description: "",
         inviteEmails: [],
       },
@@ -146,6 +153,7 @@ export function CreateFamilyForm({
       country: values.country,
       defaultCurrency: values.defaultCurrency,
       contributionCadence: values.contributionCadence,
+      type: values.type,
       description: values.description.trim() || undefined,
       inviteEmails: values.inviteEmails.length
         ? values.inviteEmails.map((tag) => tag.text.trim().toLowerCase())
@@ -225,6 +233,16 @@ export function CreateFamilyForm({
           placeholder={copy.cadencePlaceholder}
           fieldType="select"
           selectOptions={copy.cadences}
+          required
+        />
+
+        <CommonFormField
+          control={form.control}
+          name="type"
+          label={copy.familyTypeLabel}
+          placeholder={copy.familyTypePlaceholder}
+          fieldType="select"
+          selectOptions={copy.familyTypes}
           required
         />
 
