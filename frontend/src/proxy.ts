@@ -4,6 +4,30 @@ import { isSupportedLocale, defaultLocale } from "@/i18n/config";
 
 const LANGUAGE_COOKIE = "rf_language";
 const LANGUAGE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+const ACCESS_COOKIE = "rf_access_token";
+const PROTECTED_PREFIXES = ["/me", "/family"];
+
+function isProtectedPath(pathname: string) {
+  return PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
+function redirectToLogin(request: NextRequest, locale: string) {
+  const url = request.nextUrl.clone();
+  url.pathname = "/auth/login";
+  url.searchParams.set("redirect", request.nextUrl.pathname);
+
+  if (locale === defaultLocale) {
+    url.searchParams.delete("lang");
+  } else {
+    url.searchParams.set("lang", locale);
+  }
+
+  const response = NextResponse.redirect(url);
+  setLanguageCookie(response, locale);
+  return response;
+}
 
 function normalizeLocale(locale?: string | null) {
   if (!locale) return undefined;
@@ -51,6 +75,16 @@ export function proxy(request: NextRequest) {
 
   if (hasInvalidLocaleQuery || (!hasLocaleQuery && locale !== defaultLocale)) {
     return redirectWithLocale(request, request.nextUrl.pathname, locale);
+  }
+
+  const isLoggedIn = Boolean(request.cookies.get(ACCESS_COOKIE)?.value);
+
+  if (isProtectedPath(request.nextUrl.pathname) && !isLoggedIn) {
+    return redirectToLogin(request, locale);
+  }
+
+  if (request.nextUrl.pathname.startsWith("/auth") && isLoggedIn) {
+    return redirectWithLocale(request, "/me", locale);
   }
 
   const requestHeaders = new Headers(request.headers);
