@@ -20,7 +20,7 @@ interface UseZodFormSubmitOptions<TForm extends FieldValues, TResult> {
   request: {
     method: "post" | "put" | "patch" | "delete";
     url: string | ((values: TForm) => string);
-    apiRequest?: ApiRequestOptions;
+    apiRequest?: ApiRequestOptions | ((values: TForm) => ApiRequestOptions);
     omitBody?: boolean;
   };
   transform?: (values: TForm) => unknown;
@@ -91,11 +91,15 @@ export function useZodFormSubmit<TForm extends FieldValues, TResult = unknown>(
         : options.transform
           ? options.transform(values)
           : values;
+      const apiRequestOptions =
+        typeof options.request.apiRequest === "function"
+          ? options.request.apiRequest(values)
+          : options.request.apiRequest;
       const response = await apiRequest<unknown, TResult>(
         options.request.method,
         url,
         payload,
-        options.request.apiRequest,
+        apiRequestOptions,
       );
 
       if (!response.ok) {

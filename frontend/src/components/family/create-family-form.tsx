@@ -3,29 +3,14 @@
 import { type Tag, TagInput } from "emblor";
 import { ArrowLeftIcon, CheckIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
+import { type SetStateAction, useMemo, useState } from "react";
+import { z } from "zod";
+import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
-import { Textarea } from "@/components/ui/textarea";
-import apiRequest from "@/service/api";
+import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 
 type SelectOption = {
   value: string;
@@ -77,9 +62,14 @@ type CreateFamilyFormProps = {
   familyIndexHref: string;
 };
 
-type FieldErrors = Partial<
-  Record<"name" | "country" | "currency" | "cadence" | "inviteEmail", string>
->;
+type CreateFamilyFormValues = {
+  name: string;
+  country: string;
+  defaultCurrency: string;
+  contributionCadence: string;
+  description: string;
+  inviteEmails: Tag[];
+};
 
 const createSlug = (value: string) =>
   value
@@ -88,259 +78,207 @@ const createSlug = (value: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const getCreateFamilySchema = (copy: CreateFamilyFormCopy) =>
+  z.object({
+    name: z
+      .string()
+      .trim()
+      .min(1, copy.validation.nameRequired)
+      .min(2, copy.validation.nameLength)
+      .max(120),
+    country: z.string().min(1, copy.validation.countryRequired),
+    defaultCurrency: z.string().min(1, copy.validation.currencyRequired),
+    contributionCadence: z.string().min(1, copy.validation.cadenceRequired),
+    description: z.string().max(500),
+    inviteEmails: z
+      .array(
+        z.object({
+          id: z.string(),
+          text: z
+            .string()
+            .trim()
+            .refine((value) => emailPattern.test(value), {
+              message: copy.validation.inviteEmailInvalid,
+            }),
+        }),
+      )
+      .max(50, copy.validation.inviteEmailInvalid),
+  });
+
+const resolveTagUpdate = (update: SetStateAction<Tag[]>, currentTags: Tag[]) =>
+  typeof update === "function" ? update(currentTags) : update;
+
 export function CreateFamilyForm({
   copy,
   familyIndexHref,
 }: CreateFamilyFormProps) {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [country, setCountry] = useState("RW");
-  const [currency, setCurrency] = useState("RWF");
-  const [cadence, setCadence] = useState("monthly");
-  const [description, setDescription] = useState("");
-  const [inviteEmails, setInviteEmails] = useState<Tag[]>([]);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
-  const [errors, setErrors] = useState<FieldErrors>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
 
+  const schema = useMemo(() => getCreateFamilySchema(copy), [copy]);
+  const { form, onSubmit, error, success, isPending } = useZodFormSubmit<
+    CreateFamilyFormValues,
+    CreateFamilyResponse
+  >({
+    schema,
+    formOptions: {
+      defaultValues: {
+        name: "",
+        country: "RW",
+        defaultCurrency: "RWF",
+        contributionCadence: "monthly",
+        description: "",
+        inviteEmails: [],
+      },
+    },
+    request: {
+      method: "post",
+      url: "/families",
+      apiRequest: () => ({
+        idempotencyKey: crypto.randomUUID(),
+      }),
+    },
+    transform: (values) => ({
+      name: values.name.trim(),
+      slug: createSlug(values.name),
+      country: values.country,
+      defaultCurrency: values.defaultCurrency,
+      contributionCadence: values.contributionCadence,
+      description: values.description.trim() || undefined,
+      inviteEmails: values.inviteEmails.length
+        ? values.inviteEmails.map((tag) => tag.text.trim().toLowerCase())
+        : undefined,
+    }),
+    onSuccessMessage: copy.successDescription,
+    onSuccess: (data, values) => {
+      const createdSlug = data?.slug ?? createSlug(values.name);
+      router.push(`/family/${encodeURIComponent(createdSlug)}`);
+    },
+    toastOnError: true,
+  });
+
+  const name = form.watch("name");
   const slugPreview = useMemo(() => createSlug(name), [name]);
 
-  const validate = () => {
-    const nextErrors: FieldErrors = {};
-    const trimmedName = name.trim();
-
-    if (!trimmedName) {
-      nextErrors.name = copy.validation.nameRequired;
-    } else if (trimmedName.length < 2) {
-      nextErrors.name = copy.validation.nameLength;
-    }
-
-    if (!country) {
-      nextErrors.country = copy.validation.countryRequired;
-    }
-
-    if (!currency) {
-      nextErrors.currency = copy.validation.currencyRequired;
-    }
-
-    if (!cadence) {
-      nextErrors.cadence = copy.validation.cadenceRequired;
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const hasInvalidEmail = inviteEmails.some(
-      (tag) => !emailPattern.test(tag.text.trim()),
-    );
-    if (hasInvalidEmail) {
-      nextErrors.inviteEmail = copy.validation.inviteEmailInvalid;
-    }
-
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  };
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setFormError(null);
-    setSuccessMessage(null);
-
-    if (!validate()) {
-      return;
-    }
-
-    setIsPending(true);
-
-    const response = await apiRequest<unknown, CreateFamilyResponse>(
-      "post",
-      "/families",
-      {
-        name: name.trim(),
-        slug: slugPreview,
-        country,
-        defaultCurrency: currency,
-        contributionCadence: cadence,
-        description: description.trim() || undefined,
-        inviteEmails: inviteEmails.length
-          ? inviteEmails.map((tag) => tag.text.trim())
-          : undefined,
-      },
-      {
-        idempotencyKey: crypto.randomUUID(),
-      },
-    );
-
-    if (!response.ok) {
-      setFormError(
-        response.statusCode === 0
-          ? copy.networkError
-          : (response.message ?? copy.genericError),
-      );
-      setIsPending(false);
-      return;
-    }
-
-    setSuccessMessage(copy.successDescription);
-    const createdSlug = response.data?.slug ?? slugPreview;
-    router.push(`/family/${encodeURIComponent(createdSlug)}`);
-    setIsPending(false);
-  };
-
   return (
-    <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-      {formError ? (
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={form.handleSubmit(onSubmit)}
+    >
+      {error ? (
         <Alert variant="destructive">
           <AlertTitle>{copy.genericError}</AlertTitle>
-          <AlertDescription>{formError}</AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
 
-      {successMessage ? (
+      {success ? (
         <Alert>
           <CheckIcon aria-hidden="true" />
           <AlertTitle>{copy.successTitle}</AlertTitle>
-          <AlertDescription>{successMessage}</AlertDescription>
+          <AlertDescription>{success}</AlertDescription>
         </Alert>
       ) : null}
 
       <FieldGroup>
-        <Field data-invalid={Boolean(errors.name)}>
-          <FieldLabel htmlFor="familyName">{copy.nameLabel}</FieldLabel>
-          <Input
-            id="familyName"
-            name="familyName"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder={copy.namePlaceholder}
-            autoComplete="organization"
-            required
-            maxLength={120}
-            aria-invalid={Boolean(errors.name)}
-          />
-          <FieldDescription>
-            {slugPreview ? `/${slugPreview}` : copy.nameDescription}
-          </FieldDescription>
-          <FieldError>{errors.name}</FieldError>
-        </Field>
+        <CommonFormField
+          control={form.control}
+          name="name"
+          label={copy.nameLabel}
+          placeholder={copy.namePlaceholder}
+          description={slugPreview ? `/${slugPreview}` : copy.nameDescription}
+          required
+          inputProps={{
+            autoComplete: "organization",
+            maxLength: 120,
+          }}
+        />
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Field data-invalid={Boolean(errors.country)}>
-            <FieldLabel htmlFor="familyCountry">{copy.countryLabel}</FieldLabel>
-            <Select value={country} onValueChange={setCountry} required>
-              <SelectTrigger
-                id="familyCountry"
-                className="w-full"
-                aria-invalid={Boolean(errors.country)}
-              >
-                <SelectValue placeholder={copy.countryPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {copy.countries.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <FieldError>{errors.country}</FieldError>
-          </Field>
+          <CommonFormField
+            control={form.control}
+            name="country"
+            label={copy.countryLabel}
+            placeholder={copy.countryPlaceholder}
+            fieldType="select"
+            selectOptions={copy.countries}
+            required
+          />
 
-          <Field data-invalid={Boolean(errors.currency)}>
-            <FieldLabel htmlFor="familyCurrency">
-              {copy.currencyLabel}
-            </FieldLabel>
-            <Select value={currency} onValueChange={setCurrency} required>
-              <SelectTrigger
-                id="familyCurrency"
-                className="w-full"
-                aria-invalid={Boolean(errors.currency)}
-              >
-                <SelectValue placeholder={copy.currencyPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {copy.currencies.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-            <FieldError>{errors.currency}</FieldError>
-          </Field>
+          <CommonFormField
+            control={form.control}
+            name="defaultCurrency"
+            label={copy.currencyLabel}
+            placeholder={copy.currencyPlaceholder}
+            fieldType="select"
+            selectOptions={copy.currencies}
+            required
+          />
         </div>
 
-        <Field data-invalid={Boolean(errors.cadence)}>
-          <FieldLabel htmlFor="contributionCadence">
-            {copy.cadenceLabel}
-          </FieldLabel>
-          <Select value={cadence} onValueChange={setCadence} required>
-            <SelectTrigger
-              id="contributionCadence"
-              className="w-full"
-              aria-invalid={Boolean(errors.cadence)}
-            >
-              <SelectValue placeholder={copy.cadencePlaceholder} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {copy.cadences.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <FieldError>{errors.cadence}</FieldError>
-        </Field>
+        <CommonFormField
+          control={form.control}
+          name="contributionCadence"
+          label={copy.cadenceLabel}
+          placeholder={copy.cadencePlaceholder}
+          fieldType="select"
+          selectOptions={copy.cadences}
+          required
+        />
 
-        <Field>
-          <FieldLabel htmlFor="familyDescription">
-            {copy.descriptionLabel}
-          </FieldLabel>
-          <Textarea
-            id="familyDescription"
-            name="familyDescription"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            placeholder={copy.descriptionPlaceholder}
-            maxLength={500}
-          />
-          <FieldDescription>{copy.descriptionHint}</FieldDescription>
-        </Field>
+        <CommonFormField
+          control={form.control}
+          name="description"
+          label={copy.descriptionLabel}
+          placeholder={copy.descriptionPlaceholder}
+          description={copy.descriptionHint}
+          fieldType="textarea"
+          textareaProps={{
+            maxLength: 500,
+          }}
+        />
 
-        <Field data-invalid={Boolean(errors.inviteEmail)}>
-          <FieldLabel htmlFor="inviteEmail">{copy.inviteEmailLabel}</FieldLabel>
-          <TagInput
-            id="inviteEmail"
-            tags={inviteEmails}
-            setTags={(newTags) => setInviteEmails(newTags)}
-            activeTagIndex={activeTagIndex}
-            setActiveTagIndex={setActiveTagIndex}
-            placeholder={copy.inviteEmailPlaceholder}
-            inputFieldPosition="top"
-            addOnPaste
-            delimiterList={[",", " ", "Enter", "Tab"]}
-            validateTag={(tag) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tag.trim())}
-            styleClasses={{
-              input: "shadow-none",
-              inlineTagsContainer:
-                "border-input rounded-md bg-transparent shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] p-1 gap-1",
-              tag: {
-                body: "bg-secondary text-secondary-foreground rounded px-2 py-0.5",
-                closeButton: "text-muted-foreground hover:text-foreground",
-              },
-            }}
-            aria-invalid={Boolean(errors.inviteEmail)}
-          />
-          <FieldDescription>{copy.inviteEmailHint}</FieldDescription>
-          <FieldError>{errors.inviteEmail}</FieldError>
-        </Field>
+        <CommonFormField
+          control={form.control}
+          name="inviteEmails"
+          label={copy.inviteEmailLabel}
+          description={copy.inviteEmailHint}
+          fieldType="custom"
+          render={({ field, id, invalid, disabled }) => {
+            const currentTags = Array.isArray(field.value) ? field.value : [];
+
+            return (
+              <TagInput
+                id={id}
+                tags={currentTags}
+                setTags={(nextTags) => {
+                  field.onChange(resolveTagUpdate(nextTags, currentTags));
+                }}
+                activeTagIndex={activeTagIndex}
+                setActiveTagIndex={setActiveTagIndex}
+                placeholder={copy.inviteEmailPlaceholder}
+                inputFieldPosition="top"
+                addOnPaste
+                delimiterList={[",", " ", "Enter", "Tab"]}
+                validateTag={(tag) => emailPattern.test(tag.trim())}
+                maxTags={50}
+                disabled={disabled}
+                styleClasses={{
+                  input: "shadow-none",
+                  inlineTagsContainer:
+                    "border-input rounded-md bg-transparent shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] p-1 gap-1",
+                  tag: {
+                    body: "bg-secondary text-secondary-foreground rounded px-2 py-0.5",
+                    closeButton: "text-muted-foreground hover:text-foreground",
+                  },
+                }}
+                aria-invalid={invalid}
+              />
+            );
+          }}
+        />
       </FieldGroup>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
