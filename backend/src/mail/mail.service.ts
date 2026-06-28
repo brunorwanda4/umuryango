@@ -16,6 +16,14 @@ type PasswordResetEmailInput = {
   expiresInMinutes: number;
 };
 
+type FamilyInviteEmailInput = {
+  to: string;
+  familyName: string;
+  inviterName: string;
+  inviteUrl: string;
+  expiresInDays: number;
+};
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
@@ -144,6 +152,59 @@ export class MailService {
     } catch (error) {
       this.logger.error(
         `Failed to send password reset email to ${to}`,
+        error instanceof Error ? error.stack : undefined,
+      );
+      throw error;
+    }
+  }
+
+  async sendFamilyInvite({
+    to,
+    familyName,
+    inviterName,
+    inviteUrl,
+    expiresInDays,
+  }: FamilyInviteEmailInput): Promise<void> {
+    if (this.devMode) {
+      this.logger.log(
+        `[DEV] Family invite for ${to} to "${familyName}": ${inviteUrl} (expires in ${expiresInDays}d)`,
+      );
+      return;
+    }
+
+    const subject = `${inviterName} invited you to the ${familyName} family`;
+    const text = [
+      'Hi,',
+      '',
+      `${inviterName} invited you to join the "${familyName}" family workspace on Rwanda Family.`,
+      '',
+      `Accept the invite: ${inviteUrl}`,
+      '',
+      `This invite expires in ${expiresInDays} days.`,
+      'If you did not expect this, you can ignore this email.',
+    ].join('\n');
+
+    const html = `
+      <div style="font-family: Arial, Helvetica, sans-serif; color: #111; max-width: 480px; margin: 0 auto;">
+        <h2 style="margin-bottom: 8px;">You're invited</h2>
+        <p style="margin: 0 0 16px;">${inviterName} invited you to join the <strong>${familyName}</strong> family workspace on Rwanda Family.</p>
+        <p style="margin: 0 0 16px; text-align: center;">
+          <a href="${inviteUrl}" style="display: inline-block; padding: 12px 24px; background: #111; color: #fff; border-radius: 12px; text-decoration: none;">Accept invitation</a>
+        </p>
+        <p style="margin: 16px 0 0; color: #555;">This invite expires in ${expiresInDays} days. If you did not expect this, you can ignore this email.</p>
+      </div>`;
+
+    try {
+      await this.transporter?.sendMail({
+        from: this.from,
+        to,
+        subject,
+        text,
+        html,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to send family invite email to ${to}`,
         error instanceof Error ? error.stack : undefined,
       );
       throw error;

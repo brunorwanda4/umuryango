@@ -30,6 +30,19 @@ enum AuthAuditResult {
   FAILURE
 }
 
+enum FamilyMemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum FamilyInviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
 model User {
   id              String           @id @default(cuid())
   email           String           @unique
@@ -47,6 +60,8 @@ model User {
   authAuditEvents    AuthAuditEvent[]
   emailVerifications EmailVerification[]
   passwordResets     PasswordReset[]
+  createdFamilies    Family[]            @relation("FamiliesCreated")
+  familyMemberships  FamilyMember[]
 
   @@index([status])
 }
@@ -96,6 +111,54 @@ model AuthSession {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model Family {
+  id                  String         @id @default(cuid())
+  name                String
+  slug                String         @unique
+  country             String
+  defaultCurrency     String
+  contributionCadence String
+  description         String?
+  createdById         String
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  createdBy           User           @relation("FamiliesCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  members             FamilyMember[]
+  invites             FamilyInvite[]
+
+  @@index([createdById])
+}
+
+model FamilyMember {
+  id        String           @id @default(cuid())
+  familyId  String
+  userId    String
+  role      FamilyMemberRole @default(MEMBER)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  family    Family           @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, userId])
+  @@index([userId])
+}
+
+model FamilyInvite {
+  id        String             @id @default(cuid())
+  familyId  String
+  email     String
+  role      FamilyMemberRole   @default(MEMBER)
+  status    FamilyInviteStatus @default(PENDING)
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  family    Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, email])
+  @@index([email])
 }
 
 model AuthAuditEvent {

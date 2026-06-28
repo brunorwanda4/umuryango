@@ -26,6 +26,7 @@ async function bootstrap() {
 		)
 		.setVersion("1.0")
 		.addTag("auth", "Authentication and account verification")
+		.addTag("families", "Family workspace creation and membership")
 		.addCookieAuth(ACCESS_COOKIE_NAME, undefined, ACCESS_COOKIE_NAME)
 		.addCookieAuth(REFRESH_COOKIE_NAME, undefined, REFRESH_COOKIE_NAME)
 		.build();
