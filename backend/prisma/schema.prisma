@@ -87,6 +87,46 @@ enum FamilyAuditAction {
   CAPABILITIES_CHANGED
   HEAD_GRANTED
   SETTINGS_CHANGED
+  CONTRIBUTION_PLAN_CREATED
+  CONTRIBUTION_RECORDED
+  CONTRIBUTION_VERIFIED
+  CONTRIBUTION_REVERSED
+}
+
+enum ContributionCadence {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  ONE_TIME
+}
+
+enum ContributionPlanStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum ContributionCycleStatus {
+  OPEN
+  COMPLETED
+  OVERDUE
+}
+
+enum ContributionPaymentMethod {
+  CASH
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CARD
+  OTHER
+}
+
+enum ContributionPaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  REVERSED
 }
 
 enum FamilyInviteStatus {
@@ -181,6 +221,9 @@ model Family {
   members             FamilyMember[]
   invites             FamilyInvite[]
   auditEvents         FamilyAuditEvent[]
+  contributionPlans   FamilyContributionPlan[]
+  contributionCycles  FamilyContributionCycle[]
+  contributionPayments FamilyContributionPayment[]
 
   @@index([createdById])
 }
@@ -198,6 +241,8 @@ model FamilyMember {
   updatedAt     DateTime           @updatedAt
   family        Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
   user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributionAssignments FamilyContributionAssignment[]
+  contributionPayments    FamilyContributionPayment[]
 
   @@unique([familyId, userId])
   @@index([userId])
@@ -249,4 +294,90 @@ model AuthAuditEvent {
 
   @@index([userId, createdAt])
   @@index([action, result, createdAt])
+}
+
+model FamilyContributionPlan {
+  id               String                         @id @default(cuid())
+  familyId         String
+  name             String
+  description      String?
+  cadence          ContributionCadence
+  amountMinorUnits BigInt
+  currency         String
+  status           ContributionPlanStatus         @default(ACTIVE)
+  createdById      String
+  createdAt        DateTime                       @default(now())
+  updatedAt        DateTime                       @updatedAt
+  archivedAt       DateTime?
+  family           Family                         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  assignments      FamilyContributionAssignment[]
+  cycles           FamilyContributionCycle[]
+  payments         FamilyContributionPayment[]
+
+  @@index([familyId, status])
+}
+
+model FamilyContributionAssignment {
+  id               String                 @id @default(cuid())
+  planId           String
+  memberId         String
+  amountMinorUnits BigInt
+  removedAt        DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  plan             FamilyContributionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  member           FamilyMember           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, memberId])
+  @@index([memberId])
+}
+
+model FamilyContributionCycle {
+  id                 String                      @id @default(cuid())
+  familyId           String
+  planId             String
+  label              String
+  periodStart        DateTime
+  periodEnd          DateTime
+  dueDate            DateTime
+  expectedMinorUnits BigInt
+  status             ContributionCycleStatus     @default(OPEN)
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
+  family             Family                      @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  plan               FamilyContributionPlan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  payments           FamilyContributionPayment[]
+
+  @@index([familyId, dueDate])
+  @@index([planId, periodStart])
+}
+
+model FamilyContributionPayment {
+  id               String                    @id @default(cuid())
+  familyId         String
+  planId           String
+  cycleId          String?
+  memberId         String
+  amountMinorUnits BigInt
+  method           ContributionPaymentMethod @default(CASH)
+  status           ContributionPaymentStatus @default(PENDING)
+  reference        String?
+  note             String?
+  idempotencyKey   String?
+  paidAt           DateTime
+  recordedById     String
+  verifiedById     String?
+  verifiedAt       DateTime?
+  reversedAt       DateTime?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  family           Family                    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  plan             FamilyContributionPlan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  cycle            FamilyContributionCycle?  @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  member           FamilyMember              @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, idempotencyKey])
+  @@index([familyId, status, paidAt])
+  @@index([planId, cycleId])
+  @@index([memberId])
 }
