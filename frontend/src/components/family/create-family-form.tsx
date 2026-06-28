@@ -1,5 +1,6 @@
 "use client";
 
+import { type Tag, TagInput } from "emblor";
 import { ArrowLeftIcon, CheckIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
@@ -127,7 +128,8 @@ export function CreateFamilyForm({
   const [currency, setCurrency] = useState("");
   const [cadence, setCadence] = useState("");
   const [description, setDescription] = useState("");
-  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteEmails, setInviteEmails] = useState<Tag[]>([]);
+  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -138,7 +140,6 @@ export function CreateFamilyForm({
   const validate = () => {
     const nextErrors: FieldErrors = {};
     const trimmedName = name.trim();
-    const trimmedInviteEmail = inviteEmail.trim();
 
     if (!trimmedName) {
       nextErrors.name = copy.validation.nameRequired;
@@ -158,10 +159,11 @@ export function CreateFamilyForm({
       nextErrors.cadence = copy.validation.cadenceRequired;
     }
 
-    if (
-      trimmedInviteEmail &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedInviteEmail)
-    ) {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const hasInvalidEmail = inviteEmails.some(
+      (tag) => !emailPattern.test(tag.text.trim()),
+    );
+    if (hasInvalidEmail) {
       nextErrors.inviteEmail = copy.validation.inviteEmailInvalid;
     }
 
@@ -195,7 +197,9 @@ export function CreateFamilyForm({
           defaultCurrency: currency,
           contributionCadence: cadence,
           description: description.trim() || undefined,
-          inviteEmail: inviteEmail.trim() || undefined,
+          inviteEmails: inviteEmails.length
+            ? inviteEmails.map((tag) => tag.text.trim())
+            : undefined,
         }),
       });
       const payload = (await response.json().catch(() => ({}))) as
@@ -348,15 +352,26 @@ export function CreateFamilyForm({
 
         <Field data-invalid={Boolean(errors.inviteEmail)}>
           <FieldLabel htmlFor="inviteEmail">{copy.inviteEmailLabel}</FieldLabel>
-          <Input
+          <TagInput
             id="inviteEmail"
-            name="inviteEmail"
-            type="email"
-            value={inviteEmail}
-            onChange={(event) => setInviteEmail(event.target.value)}
+            tags={inviteEmails}
+            setTags={(newTags) => setInviteEmails(newTags)}
+            activeTagIndex={activeTagIndex}
+            setActiveTagIndex={setActiveTagIndex}
             placeholder={copy.inviteEmailPlaceholder}
-            autoComplete="email"
-            maxLength={254}
+            inputFieldPosition="top"
+            addOnPaste
+            delimiterList={[",", " ", "Enter", "Tab"]}
+            validateTag={(tag) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tag.trim())}
+            styleClasses={{
+              input: "shadow-none",
+              inlineTagsContainer:
+                "border-input rounded-md bg-transparent shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] p-1 gap-1",
+              tag: {
+                body: "bg-secondary text-secondary-foreground rounded px-2 py-0.5",
+                closeButton: "text-muted-foreground hover:text-foreground",
+              },
+            }}
             aria-invalid={Boolean(errors.inviteEmail)}
           />
           <FieldDescription>{copy.inviteEmailHint}</FieldDescription>

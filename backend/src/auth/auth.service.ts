@@ -31,6 +31,10 @@ type AuthenticatedUser = {
 	fullName: string;
 };
 
+export type CurrentUser = AuthenticatedUser & {
+	avatarUrl: string | null;
+};
+
 export type LoginResult = {
 	user: AuthenticatedUser;
 	accessToken: string;
@@ -526,6 +530,39 @@ export class AuthService {
 			refreshToken,
 			accessTokenExpiresInSeconds: this.accessTokenExpiresInSeconds,
 			refreshTokenExpiresAt,
+		};
+	}
+
+	async getCurrentUser(accessToken: string | undefined): Promise<CurrentUser> {
+		if (!accessToken) {
+			throw new UnauthorizedException("Not authenticated.");
+		}
+
+		let payload: { sub?: string };
+		try {
+			payload = await this.jwtService.verifyAsync(accessToken);
+		} catch {
+			throw new UnauthorizedException("Session expired. Please log in again.");
+		}
+
+		if (!payload.sub) {
+			throw new UnauthorizedException("Invalid session.");
+		}
+
+		const user = await this.prisma.user.findUnique({
+			where: { id: payload.sub },
+		});
+
+		if (!user) {
+			throw new UnauthorizedException("User no longer exists.");
+		}
+
+		return {
+			id: user.id,
+			email: user.email,
+			phoneNumber: user.phoneNumber,
+			fullName: user.fullName,
+			avatarUrl: user.avatarUrl,
 		};
 	}
 

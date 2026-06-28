@@ -188,6 +188,40 @@ export class AuthController {
     };
   }
 
+  @Get('me')
+  @ApiOperation({ summary: 'Get the currently authenticated user' })
+  @ApiOkResponse({
+    description: 'Authenticated user retrieved.',
+    schema: {
+      example: {
+        data: {
+          user: {
+            id: 'clx0000000000000000000000',
+            email: 'claudine@example.com',
+            phoneNumber: '+250788123456',
+            fullName: 'Claudine Uwase',
+            avatarUrl: 'https://lh3.googleusercontent.com/a/avatar.png',
+          },
+        },
+        message: 'Authenticated user retrieved.',
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'No valid session was found.',
+  })
+  async me(@Req() request: Request) {
+    const accessToken = request.cookies?.[ACCESS_COOKIE_NAME] as
+      | string
+      | undefined;
+    const user = await this.authService.getCurrentUser(accessToken);
+
+    return {
+      data: { user },
+      message: 'Authenticated user retrieved.',
+    };
+  }
+
   @Get('google')
   @ApiExcludeEndpoint()
   @UseGuards(AuthGuard('google'))
