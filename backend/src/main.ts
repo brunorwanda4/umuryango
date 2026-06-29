@@ -28,6 +28,7 @@ async function bootstrap() {
 		.addTag("auth", "Authentication and account verification")
 		.addTag("families", "Family workspace creation and membership")
 		.addTag("contributions", "Family contribution plans, cycles, and payments")
+		.addTag("projects", "Family project plans, budgets, contributions, and updates")
 		.addCookieAuth(ACCESS_COOKIE_NAME, undefined, ACCESS_COOKIE_NAME)
 		.addCookieAuth(REFRESH_COOKIE_NAME, undefined, REFRESH_COOKIE_NAME)
 		.build();

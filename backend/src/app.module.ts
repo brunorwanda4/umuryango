@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ContributionsModule } from './contributions/contributions.module';
 import { FamiliesModule } from './families/families.module';
 import { MoneyModule } from './money/money.module';
+import { ProjectsModule } from './projects/projects.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { MoneyModule } from './money/money.module';
     FamiliesModule,
     ContributionsModule,
     MoneyModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
