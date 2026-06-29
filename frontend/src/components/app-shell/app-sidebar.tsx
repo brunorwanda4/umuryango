@@ -10,14 +10,16 @@ import {
 	ChevronRightIcon,
 	ChevronsUpDownIcon,
 	ClipboardListIcon,
+	DownloadIcon,
 	FileTextIcon,
-	FolderKanbanIcon,
+	FolderKa nbanIcon,
 	HandCoinsIcon,
 	HomeIcon,
 	LandmarkIcon,
 	LayoutDashboardIcon,
 	ListChecksIcon,
 	LogOutIcon,
+	MenuIcon,
 	ReceiptTextIcon,
 	SettingsIcon,
 	ShieldCheckIcon,
@@ -407,11 +409,167 @@ function AppSidebarContent({
 				<SidebarResizeHandle open={open} />
 			</Sidebar>
 			<SidebarInset>
-				<main className="min-h-[calc(100svh-3.5rem)] p-4 sm:p-6">
+				<main className="min-h-[calc(100svh-3.5rem)] p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6">
 					{children}
 				</main>
 			</SidebarInset>
+			<MobileInstallPrompt />
+			<MobileBottomNavigation
+				mode={mode}
+				navigation={navigation}
+				onOpenMore={() => setOpenMobile(true)}
+				pathname={pathname}
+			/>
 		</>
+	);
+}
+
+type BeforeInstallPromptEvent = Event & {
+	prompt: () => Promise<void>;
+	userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
+function MobileInstallPrompt() {
+	const [installPrompt, setInstallPrompt] =
+		useState<BeforeInstallPromptEvent | null>(null);
+	const [dismissed, setDismissed] = useState(false);
+
+	useEffect(() => {
+		const nav = window.navigator as Navigator & { standalone?: boolean };
+		const isStandalone =
+			window.matchMedia("(display-mode: standalone)").matches ||
+			nav.standalone === true;
+
+		if (isStandalone || sessionStorage.getItem("install-prompt-dismissed")) {
+			return;
+		}
+
+		function handleBeforeInstallPrompt(event: Event) {
+			event.preventDefault();
+			setInstallPrompt(event as BeforeInstallPromptEvent);
+		}
+
+		function handleInstalled() {
+			setInstallPrompt(null);
+			setDismissed(true);
+		}
+
+		window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+		window.addEventListener("appinstalled", handleInstalled);
+
+		return () => {
+			window.removeEventListener(
+				"beforeinstallprompt",
+				handleBeforeInstallPrompt,
+			);
+			window.removeEventListener("appinstalled", handleInstalled);
+		};
+	}, []);
+
+	if (!installPrompt || dismissed) {
+		return null;
+	}
+
+	async function handleInstall() {
+		if (!installPrompt) return;
+
+		await installPrompt.prompt();
+		const choice = await installPrompt.userChoice;
+		setInstallPrompt(null);
+
+		if (choice.outcome === "dismissed") {
+			sessionStorage.setItem("install-prompt-dismissed", "true");
+			setDismissed(true);
+		}
+	}
+
+	function handleDismiss() {
+		sessionStorage.setItem("install-prompt-dismissed", "true");
+		setDismissed(true);
+	}
+
+	return (
+		<div className="fixed inset-x-3 z-40 md:hidden bottom-[calc(4.75rem+env(safe-area-inset-bottom))]">
+			<div className="mx-auto flex max-w-md items-center gap-2 rounded-md border bg-background/95 p-2 shadow-lg backdrop-blur">
+				<button
+					type="button"
+					className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-md bg-primary px-3 font-medium text-primary-foreground text-sm"
+					onClick={handleInstall}
+				>
+					<DownloadIcon aria-hidden="true" className="size-4" />
+					Install app
+				</button>
+				<button
+					type="button"
+					aria-label="Dismiss install app prompt"
+					className="flex size-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30"
+					onClick={handleDismiss}
+				>
+					Later
+				</button>
+			</div>
+		</div>
+	);
+}
+
+function MobileBottomNavigation({
+	mode,
+	navigation,
+	onOpenMore,
+	pathname,
+}: {
+	mode: AppSidebarMode;
+	navigation: NavigationGroup[];
+	onOpenMore: () => void;
+	pathname: string;
+}) {
+	const items = getMobileNavigationItems(mode, navigation);
+	const hasActiveItem = items.some((item) => isActivePath(pathname, item.href));
+
+	return (
+		<nav
+			aria-label="Primary mobile navigation"
+			className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
+		>
+			<div className="mx-auto grid max-w-md grid-cols-5 gap-1">
+				{items.map((item) => {
+					const isActive = isActivePath(pathname, item.href);
+					const label = getMobileNavigationLabel(item.title);
+
+					return (
+						<Link
+							key={item.href}
+							href={item.href}
+							aria-current={isActive ? "page" : undefined}
+							className={cn(
+								"flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
+								isActive && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+							)}
+						>
+							<item.icon aria-hidden="true" className="size-5 shrink-0" />
+							<span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
+								{label}
+							</span>
+						</Link>
+					);
+				})}
+				<button
+					type="button"
+					aria-label="Open all navigation links"
+					aria-current={!hasActiveItem ? "page" : undefined}
+					className={cn(
+						"flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
+						!hasActiveItem && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+					)}
+					onClick={onOpenMore}
+				>
+					<MenuIcon aria-hidden="true" className="size-5 shrink-0" />
+					<span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
+						More
+					</span>
+				</button>
+			</div>
+		</nav>
 	);
 }
 
@@ -559,6 +717,36 @@ function getActiveNavigationItem(
 	return navigation
 		.flatMap((group) => group.items)
 		.find((item) => isActivePath(pathname, item.href));
+}
+
+function getMobileNavigationItems(
+	mode: AppSidebarMode,
+	navigation: NavigationGroup[],
+) {
+	const items = navigation.flatMap((group) => group.items);
+	const preferredHrefs =
+		mode === "family"
+			? [
+					items.find((item) => item.title === "Dashboard")?.href,
+					items.find((item) => item.title === "Money")?.href,
+					items.find((item) => item.title === "Contributions")?.href,
+					items.find((item) => item.title === "Reports")?.href,
+				]
+			: ["/me", "/me/money", "/me/plans", "/family"];
+	const preferred = preferredHrefs
+		.filter((href): href is string => Boolean(href))
+		.map((href) => items.find((item) => item.href === href))
+		.filter((item): item is NavigationItem => Boolean(item));
+
+	return preferred.slice(0, 4);
+}
+
+function getMobileNavigationLabel(title: string) {
+	if (title === "Overview") return "Home";
+	if (title === "Contributions") return "Contribute";
+	if (title === "Family workspaces") return "Families";
+
+	return title;
 }
 
 function isActivePath(pathname: string, href: string) {

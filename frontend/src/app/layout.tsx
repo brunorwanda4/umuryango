@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
@@ -28,6 +28,15 @@ export const metadata: Metadata = {
   },
   description: enMessages.Metadata.description,
   applicationName: enMessages.Metadata.applicationName,
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: enMessages.Metadata.applicationName,
+  },
+  formatDetection: {
+    telephone: false,
+  },
   keywords: [
     "Rwanda Family",
     "family management",
@@ -57,6 +66,10 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({

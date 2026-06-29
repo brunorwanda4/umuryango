@@ -2,6 +2,7 @@
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type * as React from "react";
+import { PwaRegistration } from "@/components/pwa-registration";
 import { ThemeShortcut } from "@/components/theme-shortcut";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -18,6 +19,7 @@ export function Providers({ children }: ProvidersProps) {
       disableTransitionOnChange
     >
       <ThemeShortcut />
+      <PwaRegistration />
       <TooltipProvider>{children}</TooltipProvider>
     </NextThemesProvider>
   );
