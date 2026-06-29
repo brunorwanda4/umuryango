@@ -33,14 +33,14 @@ async function bootstrap() {
 		.addCookieAuth(REFRESH_COOKIE_NAME, undefined, REFRESH_COOKIE_NAME)
 		.build();
 	const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
-	SwaggerModule.setup("api/docs", app, swaggerDocument, {
+	SwaggerModule.setup("/", app, swaggerDocument, {
 		customSiteTitle: "Rwanda Family API Docs",
-		jsonDocumentUrl: "api/docs-json",
-		yamlDocumentUrl: "api/docs-yaml",
+		jsonDocumentUrl: "docs-json",
+		yamlDocumentUrl: "docs-yaml",
 	});
 
 	const port = process.env.PORT ?? 4915;
 	await app.listen(port);
-	console.log(`Swagger UI: http://localhost:${port}/api/docs`);
+	console.log(`Swagger UI: http://localhost:${port}/`);
 }
 void bootstrap();
