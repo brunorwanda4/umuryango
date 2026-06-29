@@ -3,7 +3,9 @@ import { Test } from '@nestjs/testing';
 import { UserStatus } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { plainToInstance } from 'class-transformer';
 import { AuthService } from './auth.service';
+import { LoginDto } from './dto/login.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import type { GoogleUser } from './strategies/google.strategy';
@@ -26,6 +28,18 @@ const baseUser = {
   status: UserStatus.ACTIVE,
   emailVerifiedAt: new Date(),
 };
+
+describe('LoginDto', () => {
+  it('normalizes identifiers copied from quoted seed values', () => {
+    const dto = plainToInstance(LoginDto, {
+      emailOrMobile: " 'aline.mukamana@example.com' ",
+      password: 'RwandaFamily123!',
+    });
+
+    expect(dto.emailOrMobile).toBe('aline.mukamana@example.com');
+    expect(dto.password).toBe('RwandaFamily123!');
+  });
+});
 
 describe('AuthService Google login', () => {
   let service: AuthService;

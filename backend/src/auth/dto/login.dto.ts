@@ -2,6 +2,12 @@ import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MaxLength, MinLength } from 'class-validator';
 
+const identifierBoundaryCharacters = /^[`'"]+|[`'"]+$/g;
+
+function normalizeLoginIdentifier(value: string) {
+  return value.trim().replace(identifierBoundaryCharacters, '');
+}
+
 export class LoginDto {
   @ApiProperty({
     description: 'Email address or phone number used during registration.',
@@ -10,7 +16,7 @@ export class LoginDto {
     maxLength: 254,
   })
   @Transform(({ value }: { value: unknown }) =>
-    typeof value === 'string' ? value.trim() : value,
+    typeof value === 'string' ? normalizeLoginIdentifier(value) : value,
   )
   @IsString()
   @MinLength(3)

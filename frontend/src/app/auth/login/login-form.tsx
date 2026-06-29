@@ -34,6 +34,12 @@ type LoginFormProps = {
   forgotPasswordHref: string;
 };
 
+const identifierBoundaryCharacters = /^[`'"]+|[`'"]+$/g;
+
+function normalizeLoginIdentifier(value: string) {
+  return value.trim().replace(identifierBoundaryCharacters, "");
+}
+
 export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -52,7 +58,9 @@ export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
     setIsPending(true);
 
     const formData = new FormData(event.currentTarget);
-    const emailOrMobile = String(formData.get("emailOrMobile") ?? "");
+    const emailOrMobile = normalizeLoginIdentifier(
+      String(formData.get("emailOrMobile") ?? ""),
+    );
     const password = String(formData.get("password") ?? "");
 
     const response = await apiRequest("post", "/auth/login", {

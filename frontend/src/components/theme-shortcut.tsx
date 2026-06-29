@@ -8,7 +8,15 @@ export function ThemeShortcut() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey && event.key.toLowerCase() === "i")) {
+      if (
+        !(
+          event.shiftKey &&
+          !event.ctrlKey &&
+          !event.altKey &&
+          !event.metaKey &&
+          event.key.toLowerCase() === "i"
+        )
+      ) {
         return;
       }
       event.preventDefault();
