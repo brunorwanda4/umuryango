@@ -7,9 +7,16 @@ import { cn } from "@/lib/utils";
 type FloatingFieldProps = Omit<React.ComponentProps<"input">, "placeholder"> & {
   id: string;
   label: string;
+  trailingSlot?: React.ReactNode;
 };
 
-function FloatingField({ id, label, className, ...props }: FloatingFieldProps) {
+function FloatingField({
+  id,
+  label,
+  className,
+  trailingSlot,
+  ...props
+}: FloatingFieldProps) {
   return (
     <div className="relative">
       <input
@@ -22,6 +29,7 @@ function FloatingField({ id, label, className, ...props }: FloatingFieldProps) {
           "focus-visible:border-foreground focus-visible:ring-4 focus-visible:ring-foreground/10",
           "aria-invalid:border-destructive aria-invalid:focus-visible:border-destructive aria-invalid:focus-visible:ring-destructive/15",
           "disabled:pointer-events-none disabled:opacity-50",
+          trailingSlot && "pr-12",
           className,
         )}
         {...props}
@@ -38,6 +46,11 @@ function FloatingField({ id, label, className, ...props }: FloatingFieldProps) {
       >
         {label}
       </label>
+      {trailingSlot ? (
+        <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          {trailingSlot}
+        </div>
+      ) : null}
     </div>
   );
 }

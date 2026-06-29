@@ -110,7 +110,9 @@
     "forgotPassword": "Forgot password?",
     "continueWithGoogle": "Continue with Google",
     "success": "You are logged in.",
-    "genericError": "Unable to log in. Check your details and try again."
+    "genericError": "Unable to log in. Check your details and try again.",
+    "showPasswordLabel": "Show password",
+    "hidePasswordLabel": "Hide password"
   },
   "RegisterPage": {
     "metadataTitle": "Create account",
@@ -147,6 +149,8 @@
     "resendLabel": "Resend code",
     "resendPendingLabel": "Sending",
     "resendSuccess": "A new code is on its way.",
+    "showPasswordLabel": "Show password",
+    "hidePasswordLabel": "Hide password",
     "genderOptions": [
       {
         "value": "female",

@@ -1,5 +1,6 @@
 "use client";
 
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
@@ -58,6 +59,8 @@ export type RegisterFormCopy = {
   resendLabel: string;
   resendPendingLabel: string;
   resendSuccess: string;
+  showPasswordLabel: string;
+  hidePasswordLabel: string;
   genderOptions: Array<{
     value: string;
     label: string;
@@ -87,6 +90,12 @@ export const RegisterForm = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const passwordToggleLabel = isPasswordVisible
+    ? copy.hidePasswordLabel
+    : copy.showPasswordLabel;
+  const PasswordIcon = isPasswordVisible ? EyeOffIcon : EyeIcon;
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -353,13 +362,26 @@ export const RegisterForm = ({
           <FloatingField
             id="password"
             name="password"
-            type="password"
+            type={isPasswordVisible ? "text" : "password"}
             label={copy.passwordLabel}
             autoComplete="new-password"
             required
             minLength={8}
             maxLength={128}
             aria-invalid={Boolean(error)}
+            trailingSlot={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={passwordToggleLabel}
+                aria-pressed={isPasswordVisible}
+                onClick={() => setIsPasswordVisible((visible) => !visible)}
+                className="rounded-full text-muted-foreground hover:text-foreground"
+              >
+                <PasswordIcon aria-hidden="true" />
+              </Button>
+            }
           />
           <FieldError>{error}</FieldError>
         </div>
