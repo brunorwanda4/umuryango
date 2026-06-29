@@ -1,9 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { FamilyKinship, FamilyType } from '@prisma/client';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
   IsEmail,
+  IsEnum,
   IsIn,
   IsNotEmpty,
   IsOptional,
@@ -11,7 +13,22 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+
+export class CreateFamilyInviteDto {
+  @ApiProperty({ example: 'claudine@example.com' })
+  @IsEmail()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
+  email: string;
+
+  @ApiPropertyOptional({ enum: FamilyKinship })
+  @IsEnum(FamilyKinship)
+  @IsOptional()
+  kinshipLabel?: FamilyKinship;
+}
 
 export const FAMILY_COUNTRIES = [
   'RW',
@@ -39,15 +56,21 @@ export const FAMILY_CADENCES = [
   'event-based',
 ] as const;
 
+export const FAMILY_TYPES = [
+  FamilyType.NUCLEAR,
+  FamilyType.JOINT_EXTENDED,
+  FamilyType.SINGLE_PARENT,
+  FamilyType.BLENDED,
+  FamilyType.ADOPTIVE,
+] as const;
+
 export class CreateFamilyDto {
   @ApiProperty({ example: 'Mutesi Family', maxLength: 120 })
   @IsString()
   @IsNotEmpty()
   @MinLength(2)
   @MaxLength(120)
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim() : value,
-  )
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   name: string;
 
   @ApiPropertyOptional({
@@ -79,30 +102,27 @@ export class CreateFamilyDto {
   @IsIn(FAMILY_CADENCES as unknown as string[])
   contributionCadence: string;
 
+  @ApiPropertyOptional({ enum: FAMILY_TYPES, example: FamilyType.NUCLEAR })
+  @IsIn(FAMILY_TYPES as unknown as string[])
+  @IsOptional()
+  type?: FamilyType;
+
   @ApiPropertyOptional({ maxLength: 500 })
   @IsString()
   @IsOptional()
   @MaxLength(500)
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim() : value,
-  )
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   description?: string;
 
   @ApiPropertyOptional({
-    type: [String],
-    example: ['claudine@example.com'],
-    description: 'Emails to invite as members after the family is created.',
+    type: [CreateFamilyInviteDto],
+    description:
+      'Members to invite after the family is created, each with an optional kinship role.',
   })
   @IsArray()
   @IsOptional()
   @ArrayMaxSize(50)
-  @IsEmail({}, { each: true })
-  @Transform(({ value }) =>
-    Array.isArray(value)
-      ? value.map((email) =>
-          typeof email === 'string' ? email.trim().toLowerCase() : email,
-        )
-      : value,
-  )
-  inviteEmails?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => CreateFamilyInviteDto)
+  invites?: CreateFamilyInviteDto[];
 }

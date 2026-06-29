@@ -1,28 +1,13 @@
 "use client";
 
-import {
-  BadgeDollarSignIcon,
-  BellIcon,
-  CalendarDaysIcon,
-  FolderKanbanIcon,
-  HandCoinsIcon,
-  LandmarkIcon,
-  type LucideIcon,
-  ReceiptTextIcon,
-  TargetIcon,
-  UsersIcon,
-} from "lucide-react";
+import { UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  FamilyDashboard,
+  FamilyDashboardSkeleton,
+} from "@/components/family/dashboard/family-dashboard";
+import type { FamilyDetail } from "@/components/family/dashboard/types";
 import {
   Empty,
   EmptyDescription,
@@ -30,103 +15,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import apiRequest from "@/service/api";
-
-type FamilyMemberRole = "OWNER" | "ADMIN" | "MEMBER";
-
-type FamilyMemberSummary = {
-  id: string;
-  userId: string;
-  fullName: string;
-  avatarUrl: string | null;
-  role: FamilyMemberRole;
-  joinedAt: string;
-};
-
-type FamilyDetail = {
-  id: string;
-  name: string;
-  slug: string;
-  country: string;
-  defaultCurrency: string;
-  contributionCadence: string;
-  description: string | null;
-  createdAt: string;
-  role: FamilyMemberRole;
-  memberCount: number;
-  members: FamilyMemberSummary[];
-};
 
 type FetchState =
   | { status: "loading" }
   | { status: "error"; message: string }
   | { status: "success"; family: FamilyDetail };
-
-const ROLE_LABELS: Record<FamilyMemberRole, string> = {
-  OWNER: "Owner",
-  ADMIN: "Leader",
-  MEMBER: "Member",
-};
-
-type ModuleCard = {
-  title: string;
-  description: string;
-  segment: string;
-  icon: LucideIcon;
-};
-
-const MODULE_CARDS: ModuleCard[] = [
-  {
-    title: "Money",
-    description: "Income and expenses",
-    segment: "money",
-    icon: BadgeDollarSignIcon,
-  },
-  {
-    title: "Contributions",
-    description: "Campaigns and payments",
-    segment: "contributions",
-    icon: HandCoinsIcon,
-  },
-  {
-    title: "Savings",
-    description: "Goals and milestones",
-    segment: "savings",
-    icon: TargetIcon,
-  },
-  {
-    title: "Debts",
-    description: "Borrowed and lent",
-    segment: "debts",
-    icon: LandmarkIcon,
-  },
-  {
-    title: "Projects",
-    description: "Budgets and timelines",
-    segment: "projects",
-    icon: FolderKanbanIcon,
-  },
-  {
-    title: "Events",
-    description: "Upcoming and RSVP",
-    segment: "events",
-    icon: CalendarDaysIcon,
-  },
-  {
-    title: "Reports",
-    description: "Generated summaries",
-    segment: "reports",
-    icon: ReceiptTextIcon,
-  },
-  {
-    title: "Announcements",
-    description: "Notices and alerts",
-    segment: "announcements",
-    icon: BellIcon,
-  },
-];
 
 export default function FamilyDashboardPage({
   params,
@@ -164,7 +58,7 @@ export default function FamilyDashboardPage({
   }, [familyName]);
 
   if (state.status === "loading") {
-    return <DashboardSkeleton />;
+    return <FamilyDashboardSkeleton />;
   }
 
   if (state.status === "error") {
@@ -184,144 +78,5 @@ export default function FamilyDashboardPage({
     );
   }
 
-  return <Dashboard family={state.family} />;
-}
-
-function Dashboard({ family }: { family: FamilyDetail }) {
-  return (
-    <div className="flex flex-col gap-6">
-      <FamilyHeader family={family} />
-      <Separator />
-      <MembersCard family={family} />
-      <section className="flex flex-col gap-3">
-        <h2 className="font-semibold text-lg tracking-tight">Workspace</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {MODULE_CARDS.map((module) => (
-            <ModuleSummaryCard
-              key={module.segment}
-              module={module}
-              familySlug={family.slug}
-            />
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function FamilyHeader({ family }: { family: FamilyDetail }) {
-  return (
-    <header className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="font-bold text-2xl tracking-tight">{family.name}</h1>
-        <Badge variant="secondary">{ROLE_LABELS[family.role]}</Badge>
-      </div>
-      {family.description ? (
-        <p className="text-muted-foreground text-sm">{family.description}</p>
-      ) : null}
-      <div className="flex flex-wrap gap-2">
-        <Badge variant="outline">{family.country}</Badge>
-        <Badge variant="outline">{family.defaultCurrency}</Badge>
-        <Badge variant="outline">{family.contributionCadence}</Badge>
-      </div>
-    </header>
-  );
-}
-
-function MembersCard({ family }: { family: FamilyDetail }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <UsersIcon className="size-4" aria-hidden="true" />
-          Members
-        </CardTitle>
-        <CardDescription>
-          {family.memberCount} {family.memberCount === 1 ? "member" : "members"}{" "}
-          in this family
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
-        {family.members.map((member) => (
-          <div key={member.id} className="flex items-center gap-3">
-            <Avatar size="sm">
-              {member.avatarUrl ? (
-                <AvatarImage src={member.avatarUrl} alt={member.fullName} />
-              ) : null}
-              <AvatarFallback>{getInitials(member.fullName)}</AvatarFallback>
-            </Avatar>
-            <span className="min-w-0 flex-1 truncate font-medium text-sm">
-              {member.fullName}
-            </span>
-            <Badge variant="outline">{ROLE_LABELS[member.role]}</Badge>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
-
-function ModuleSummaryCard({
-  module,
-  familySlug,
-}: {
-  module: ModuleCard;
-  familySlug: string;
-}) {
-  const Icon = module.icon;
-
-  return (
-    <Card className="flex flex-col">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Icon className="size-4" aria-hidden="true" />
-          {module.title}
-        </CardTitle>
-        <CardDescription>{module.description}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col">
-        <Empty className="flex-1 p-6">
-          <EmptyHeader>
-            <EmptyTitle className="text-base">Not set up yet</EmptyTitle>
-            <EmptyDescription>
-              <Link href={`/family/${familySlug}/${module.segment}`}>
-                Open {module.title.toLowerCase()}
-              </Link>
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      </CardContent>
-    </Card>
-  );
-}
-
-function DashboardSkeleton() {
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3">
-        <Skeleton className="h-8 w-48" />
-        <div className="flex gap-2">
-          <Skeleton className="h-5 w-16" />
-          <Skeleton className="h-5 w-16" />
-          <Skeleton className="h-5 w-20" />
-        </div>
-      </div>
-      <Separator />
-      <Skeleton className="h-32 w-full rounded-xl" />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {MODULE_CARDS.map((module) => (
-          <Skeleton key={module.segment} className="h-40 w-full rounded-xl" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function getInitials(value: string) {
-  return value
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
+  return <FamilyDashboard family={state.family} />;
 }

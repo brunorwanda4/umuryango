@@ -1,5 +1,6 @@
 "use client";
 
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { GoogleIcon } from "@/components/icons/google-icon";
@@ -24,6 +25,8 @@ export type LoginFormCopy = {
   continueWithGoogle: string;
   success: string;
   genericError: string;
+  showPasswordLabel: string;
+  hidePasswordLabel: string;
 };
 
 type LoginFormProps = {
@@ -35,6 +38,12 @@ export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const passwordToggleLabel = isPasswordVisible
+    ? copy.hidePasswordLabel
+    : copy.showPasswordLabel;
+  const PasswordIcon = isPasswordVisible ? EyeOffIcon : EyeIcon;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -84,13 +93,26 @@ export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
           <FloatingField
             id="password"
             name="password"
-            type="password"
+            type={isPasswordVisible ? "text" : "password"}
             label={copy.passwordPlaceholder}
             autoComplete="current-password"
             required
             minLength={8}
             maxLength={128}
             aria-invalid={Boolean(error)}
+            trailingSlot={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={passwordToggleLabel}
+                aria-pressed={isPasswordVisible}
+                onClick={() => setIsPasswordVisible((visible) => !visible)}
+                className="rounded-full text-muted-foreground hover:text-foreground"
+              >
+                <PasswordIcon aria-hidden="true" />
+              </Button>
+            }
           />
           <FieldError>{error}</FieldError>
         </div>

@@ -14,11 +14,11 @@ Keep this file short. Update it only for meaningful product or engineering progr
 | Area | Status | Notes |
 | --- | --- | --- |
 | Authentication | Planned | Register, login, verification, reset, MFA, sessions. |
-| Family Management | Planned | Create family, invite/approve members, roles, permissions, settings. |
+| Family Management | In progress | Create family exists; authority/capability member permissions, invites, settings, soft removal, and audit endpoints are implemented for the family module. |
 | Finance | Planned | Income, expenses, categories, approvals, receipts, budgets. |
 | Contributions/Savings | Planned | Campaigns, member status, payments, goals, progress. |
 | Debts | Planned | Borrowed/lent direction, schedules, repayments, reminders. |
-| Projects/Documents | Planned | Projects, budgets, updates, document upload/download/versioning. |
+| Projects/Documents | In progress | Project persistence, overview aggregation, and create-project API are implemented; documents and project contribution/update write flows remain. |
 | Communication/Events | Planned | Announcements, emergency alerts, events, RSVP, attendance, reminders. |
 | Reports/Exports | Planned | Monthly/annual/budget/savings/debt/project reports, PDF, Excel, print. |
 | Notifications | Planned | In-app, email, SMS, push. |

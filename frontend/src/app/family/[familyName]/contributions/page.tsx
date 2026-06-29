@@ -1,8 +1,11 @@
+import { FamilyContributionsWorkspace } from "@/components/family/contributions/family-contributions-workspace";
+
 export default async function FamilyContributionsPage({
   params,
 }: {
-  params: { familyName: string };
+  params: Promise<{ familyName: string }>;
 }) {
-  const { familyName } = params;
-  return <div>Family contributions page for {familyName}</div>;
+  const { familyName } = await params;
+
+  return <FamilyContributionsWorkspace familyName={familyName} />;
 }

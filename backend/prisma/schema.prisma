@@ -30,10 +30,138 @@ enum AuthAuditResult {
   FAILURE
 }
 
-enum FamilyMemberRole {
-  OWNER
+enum FamilyType {
+  NUCLEAR
+  JOINT_EXTENDED
+  SINGLE_PARENT
+  BLENDED
+  ADOPTIVE
+}
+
+enum FamilyAuthority {
+  HEAD
   ADMIN
   MEMBER
+}
+
+enum FamilyCapability {
+  MANAGE_FAMILY_SETTINGS
+  MANAGE_MEMBERS
+  MANAGE_SAVINGS
+  MANAGE_CONTRIBUTIONS
+  RECORD_INCOME
+  RECORD_EXPENSE
+  APPROVE_EXPENSE
+  MANAGE_DEBTS
+  MANAGE_PROJECTS
+  MANAGE_EVENTS
+  MANAGE_ANNOUNCEMENTS
+  MANAGE_DOCUMENTS
+  VIEW_REPORTS
+  EXPORT_REPORTS
+}
+
+enum FamilyKinship {
+  SON
+  DAUGHTER
+  FATHER
+  MOTHER
+  BROTHER
+  SISTER
+  UNCLE
+  AUNT
+  GRANDFATHER
+  GRANDMOTHER
+  COUSIN
+  IN_LAW
+  FAMILY_FRIEND
+  NEIGHBOR
+  CLEANER
+  OTHER
+}
+
+enum FamilyAuditAction {
+  MEMBER_INVITED
+  MEMBER_REMOVED
+  AUTHORITY_CHANGED
+  CAPABILITIES_CHANGED
+  HEAD_GRANTED
+  SETTINGS_CHANGED
+  CONTRIBUTION_PLAN_CREATED
+  CONTRIBUTION_RECORDED
+  CONTRIBUTION_VERIFIED
+  CONTRIBUTION_REVERSED
+  PROJECT_CREATED
+  PROJECT_UPDATED
+  PROJECT_CONTRIBUTION_RECORDED
+  PROJECT_UPDATE_CREATED
+}
+
+enum ContributionCadence {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  ONE_TIME
+}
+
+enum ContributionPlanStatus {
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum ContributionCycleStatus {
+  OPEN
+  COMPLETED
+  OVERDUE
+}
+
+enum ContributionPaymentMethod {
+  CASH
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CARD
+  OTHER
+}
+
+enum ContributionPaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  REVERSED
+}
+
+enum FamilyProjectCategory {
+  HOUSE
+  VEHICLE
+  EDUCATION
+  BUSINESS
+  EVENT
+  OTHER
+}
+
+enum FamilyProjectStatus {
+  PLANNED
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+enum FamilyProjectContributionStrategy {
+  EQUAL_SHARES
+  PLEDGES
+  MONTHLY
+  AS_AVAILABLE
+}
+
+enum FamilyProjectContributionStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  REVERSED
 }
 
 enum FamilyInviteStatus {
@@ -44,24 +172,28 @@ enum FamilyInviteStatus {
 }
 
 model User {
-  id              String           @id @default(cuid())
-  email           String           @unique
-  phoneNumber     String?          @unique
-  fullName        String
-  gender          String?
-  passwordHash    String?
-  googleId        String?          @unique
-  avatarUrl       String?
-  status          UserStatus       @default(ACTIVE)
-  emailVerifiedAt DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  authSessions       AuthSession[]
-  authAuditEvents    AuthAuditEvent[]
-  emailVerifications EmailVerification[]
-  passwordResets     PasswordReset[]
-  createdFamilies    Family[]            @relation("FamiliesCreated")
-  familyMemberships  FamilyMember[]
+  id                           String                      @id @default(cuid())
+  email                        String                      @unique
+  phoneNumber                  String?                     @unique
+  fullName                     String
+  gender                       String?
+  passwordHash                 String?
+  googleId                     String?                     @unique
+  avatarUrl                    String?
+  status                       UserStatus                  @default(ACTIVE)
+  emailVerifiedAt              DateTime?
+  createdAt                    DateTime                    @default(now())
+  updatedAt                    DateTime                    @updatedAt
+  authSessions                 AuthSession[]
+  authAuditEvents              AuthAuditEvent[]
+  emailVerifications           EmailVerification[]
+  passwordResets               PasswordReset[]
+  createdFamilies              Family[]                    @relation("FamiliesCreated")
+  familyMemberships            FamilyMember[]
+  createdFamilyProjects        FamilyProject[]             @relation("FamilyProjectsCreated")
+  recordedProjectContributions FamilyProjectContribution[] @relation("ProjectContributionsRecorded")
+  verifiedProjectContributions FamilyProjectContribution[] @relation("ProjectContributionsVerified")
+  createdProjectUpdates        FamilyProjectUpdate[]       @relation("ProjectUpdatesCreated")
 
   @@index([status])
 }
@@ -96,7 +228,6 @@ model PasswordReset {
   @@index([expiresAt])
 }
 
-
 model AuthSession {
   id               String    @id @default(cuid())
   userId           String
@@ -114,51 +245,85 @@ model AuthSession {
 }
 
 model Family {
-  id                  String         @id @default(cuid())
-  name                String
-  slug                String         @unique
-  country             String
-  defaultCurrency     String
-  contributionCadence String
-  description         String?
-  createdById         String
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  createdBy           User           @relation("FamiliesCreated", fields: [createdById], references: [id], onDelete: Cascade)
-  members             FamilyMember[]
-  invites             FamilyInvite[]
+  id                   String                      @id @default(cuid())
+  name                 String
+  slug                 String                      @unique
+  country              String
+  defaultCurrency      String
+  contributionCadence  String
+  type                 FamilyType                  @default(NUCLEAR)
+  description          String?
+  createdById          String
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+  createdBy            User                        @relation("FamiliesCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  members              FamilyMember[]
+  invites              FamilyInvite[]
+  auditEvents          FamilyAuditEvent[]
+  contributionPlans    FamilyContributionPlan[]
+  contributionCycles   FamilyContributionCycle[]
+  contributionPayments FamilyContributionPayment[]
+  projects             FamilyProject[]
+  projectContributions FamilyProjectContribution[]
+  projectUpdates       FamilyProjectUpdate[]
 
   @@index([createdById])
 }
 
 model FamilyMember {
-  id        String           @id @default(cuid())
-  familyId  String
-  userId    String
-  role      FamilyMemberRole @default(MEMBER)
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
-  family    Family           @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                      String                         @id @default(cuid())
+  familyId                String
+  userId                  String
+  authority               FamilyAuthority                @default(MEMBER)
+  kinshipLabel            FamilyKinship?
+  kinshipCustom           String?
+  capabilities            FamilyCapability[]
+  removedAt               DateTime?
+  createdAt               DateTime                       @default(now())
+  updatedAt               DateTime                       @updatedAt
+  family                  Family                         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user                    User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributionAssignments FamilyContributionAssignment[]
+  contributionPayments    FamilyContributionPayment[]
+  ownedProjects           FamilyProject[]                @relation("ProjectOwner")
+  projectParticipants     FamilyProjectParticipant[]
+  projectContributions    FamilyProjectContribution[]
 
   @@unique([familyId, userId])
   @@index([userId])
 }
 
 model FamilyInvite {
-  id        String             @id @default(cuid())
-  familyId  String
-  email     String
-  role      FamilyMemberRole   @default(MEMBER)
-  status    FamilyInviteStatus @default(PENDING)
-  tokenHash String
-  expiresAt DateTime
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  family    Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  id            String             @id @default(cuid())
+  familyId      String
+  email         String
+  authority     FamilyAuthority    @default(MEMBER)
+  kinshipLabel  FamilyKinship?
+  kinshipCustom String?
+  capabilities  FamilyCapability[]
+  status        FamilyInviteStatus @default(PENDING)
+  tokenHash     String
+  expiresAt     DateTime
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  family        Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
   @@unique([familyId, email])
   @@index([email])
+}
+
+model FamilyAuditEvent {
+  id             String            @id @default(cuid())
+  familyId       String
+  actorId        String
+  action         FamilyAuditAction
+  targetMemberId String?
+  before         Json?
+  after          Json?
+  createdAt      DateTime          @default(now())
+  family         Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, createdAt])
 }
 
 model AuthAuditEvent {
@@ -174,4 +339,187 @@ model AuthAuditEvent {
 
   @@index([userId, createdAt])
   @@index([action, result, createdAt])
+}
+
+model FamilyContributionPlan {
+  id               String                         @id @default(cuid())
+  familyId         String
+  name             String
+  description      String?
+  cadence          ContributionCadence
+  amountMinorUnits BigInt
+  currency         String
+  status           ContributionPlanStatus         @default(ACTIVE)
+  createdById      String
+  createdAt        DateTime                       @default(now())
+  updatedAt        DateTime                       @updatedAt
+  archivedAt       DateTime?
+  family           Family                         @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  assignments      FamilyContributionAssignment[]
+  cycles           FamilyContributionCycle[]
+  payments         FamilyContributionPayment[]
+
+  @@index([familyId, status])
+}
+
+model FamilyContributionAssignment {
+  id               String                 @id @default(cuid())
+  planId           String
+  memberId         String
+  amountMinorUnits BigInt
+  removedAt        DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  plan             FamilyContributionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  member           FamilyMember           @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, memberId])
+  @@index([memberId])
+}
+
+model FamilyContributionCycle {
+  id                 String                      @id @default(cuid())
+  familyId           String
+  planId             String
+  label              String
+  periodStart        DateTime
+  periodEnd          DateTime
+  dueDate            DateTime
+  expectedMinorUnits BigInt
+  status             ContributionCycleStatus     @default(OPEN)
+  createdAt          DateTime                    @default(now())
+  updatedAt          DateTime                    @updatedAt
+  family             Family                      @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  plan               FamilyContributionPlan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  payments           FamilyContributionPayment[]
+
+  @@index([familyId, dueDate])
+  @@index([planId, periodStart])
+}
+
+model FamilyContributionPayment {
+  id               String                    @id @default(cuid())
+  familyId         String
+  planId           String
+  cycleId          String?
+  memberId         String
+  amountMinorUnits BigInt
+  method           ContributionPaymentMethod @default(CASH)
+  status           ContributionPaymentStatus @default(PENDING)
+  reference        String?
+  note             String?
+  idempotencyKey   String?
+  paidAt           DateTime
+  recordedById     String
+  verifiedById     String?
+  verifiedAt       DateTime?
+  reversedAt       DateTime?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  family           Family                    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  plan             FamilyContributionPlan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  cycle            FamilyContributionCycle?  @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  member           FamilyMember              @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, idempotencyKey])
+  @@index([familyId, status, paidAt])
+  @@index([planId, cycleId])
+  @@index([memberId])
+}
+
+model FamilyProject {
+  id                             String                            @id @default(cuid())
+  familyId                       String
+  name                           String
+  category                       FamilyProjectCategory
+  description                    String?
+  targetAmountMinorUnits         BigInt
+  currency                       String
+  startDate                      DateTime?
+  targetDate                     DateTime
+  status                         FamilyProjectStatus               @default(ACTIVE)
+  ownerMemberId                  String?
+  contributionStrategy           FamilyProjectContributionStrategy
+  expectedContributionMinorUnits BigInt?
+  participantNotes               String?
+  idempotencyKey                 String?
+  createdById                    String
+  completedAt                    DateTime?
+  archivedAt                     DateTime?
+  createdAt                      DateTime                          @default(now())
+  updatedAt                      DateTime                          @updatedAt
+  family                         Family                            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  ownerMember                    FamilyMember?                     @relation("ProjectOwner", fields: [ownerMemberId], references: [id], onDelete: SetNull)
+  createdBy                      User                              @relation("FamilyProjectsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  participants                   FamilyProjectParticipant[]
+  contributions                  FamilyProjectContribution[]
+  updates                        FamilyProjectUpdate[]
+
+  @@unique([familyId, idempotencyKey])
+  @@index([familyId, status])
+  @@index([familyId, targetDate])
+  @@index([ownerMemberId])
+  @@index([createdById])
+}
+
+model FamilyProjectParticipant {
+  id        String        @id @default(cuid())
+  projectId String
+  memberId  String
+  roleNotes String?
+  removedAt DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  project   FamilyProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  member    FamilyMember  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, memberId])
+  @@index([memberId])
+}
+
+model FamilyProjectContribution {
+  id               String                          @id @default(cuid())
+  familyId         String
+  projectId        String
+  memberId         String
+  amountMinorUnits BigInt
+  currency         String
+  status           FamilyProjectContributionStatus @default(PENDING)
+  reference        String?
+  note             String?
+  idempotencyKey   String?
+  paidAt           DateTime
+  recordedById     String
+  verifiedById     String?
+  verifiedAt       DateTime?
+  reversedAt       DateTime?
+  createdAt        DateTime                        @default(now())
+  updatedAt        DateTime                        @updatedAt
+  family           Family                          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  project          FamilyProject                   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  member           FamilyMember                    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  recordedBy       User                            @relation("ProjectContributionsRecorded", fields: [recordedById], references: [id], onDelete: Cascade)
+  verifiedBy       User?                           @relation("ProjectContributionsVerified", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  @@unique([familyId, idempotencyKey])
+  @@index([familyId, status, paidAt])
+  @@index([projectId, paidAt])
+  @@index([memberId])
+}
+
+model FamilyProjectUpdate {
+  id          String        @id @default(cuid())
+  familyId    String
+  projectId   String
+  title       String
+  body        String?
+  createdById String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  family      Family        @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  project     FamilyProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy   User          @relation("ProjectUpdatesCreated", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([familyId, createdAt])
+  @@index([projectId, createdAt])
 }
