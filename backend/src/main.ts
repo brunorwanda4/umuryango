@@ -35,6 +35,12 @@ async function bootstrap() {
 	const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
 	SwaggerModule.setup("/", app, swaggerDocument, {
 		customSiteTitle: "Rwanda Family API Docs",
+		customCssUrl:
+			"https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.6/swagger-ui.css",
+		customJs: [
+			"https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.6/swagger-ui-bundle.js",
+			"https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.6/swagger-ui-standalone-preset.js",
+		],
 		jsonDocumentUrl: "docs-json",
 		yamlDocumentUrl: "docs-yaml",
 	});
