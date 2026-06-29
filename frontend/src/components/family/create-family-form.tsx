@@ -1,9 +1,9 @@
 "use client";
 
-import { type Tag, TagInput } from "emblor";
-import { ArrowLeftIcon, CheckIcon } from "lucide-react";
+import { ArrowLeftIcon, CheckIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type SetStateAction, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -35,6 +35,10 @@ export type CreateFamilyFormCopy = {
   inviteEmailLabel: string;
   inviteEmailPlaceholder: string;
   inviteEmailHint: string;
+  kinshipLabel: string;
+  kinshipPlaceholder: string;
+  addMemberLabel: string;
+  removeMemberLabel: string;
   submitLabel: string;
   pendingLabel: string;
   cancelLabel: string;
@@ -55,6 +59,7 @@ export type CreateFamilyFormCopy = {
   currencies: SelectOption[];
   cadences: SelectOption[];
   familyTypes: SelectOption[];
+  kinships: SelectOption[];
 };
 
 type CreateFamilyResponse = {
@@ -73,7 +78,7 @@ type CreateFamilyFormValues = {
   contributionCadence: string;
   type: string;
   description: string;
-  inviteEmails: Tag[];
+  inviteMembers: { email: string; kinshipLabel: string }[];
 };
 
 const createSlug = (value: string) =>
@@ -98,30 +103,26 @@ const getCreateFamilySchema = (copy: CreateFamilyFormCopy) =>
     contributionCadence: z.string().min(1, copy.validation.cadenceRequired),
     type: z.string().min(1, copy.validation.familyTypeRequired),
     description: z.string().max(500),
-    inviteEmails: z
+    inviteMembers: z
       .array(
         z.object({
-          id: z.string(),
-          text: z
+          email: z
             .string()
             .trim()
-            .refine((value) => emailPattern.test(value), {
+            .refine((value) => value === "" || emailPattern.test(value), {
               message: copy.validation.inviteEmailInvalid,
             }),
+          kinshipLabel: z.string(),
         }),
       )
       .max(50, copy.validation.inviteEmailInvalid),
   });
-
-const resolveTagUpdate = (update: SetStateAction<Tag[]>, currentTags: Tag[]) =>
-  typeof update === "function" ? update(currentTags) : update;
 
 export function CreateFamilyForm({
   copy,
   familyIndexHref,
 }: CreateFamilyFormProps) {
   const router = useRouter();
-  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const schema = useMemo(() => getCreateFamilySchema(copy), [copy]);
   const { form, onSubmit, error, success, isPending } = useZodFormSubmit<
@@ -137,7 +138,7 @@ export function CreateFamilyForm({
         contributionCadence: "monthly",
         type: "NUCLEAR",
         description: "",
-        inviteEmails: [],
+        inviteMembers: [{ email: "", kinshipLabel: "" }],
       },
     },
     request: {
@@ -155,9 +156,15 @@ export function CreateFamilyForm({
       contributionCadence: values.contributionCadence,
       type: values.type,
       description: values.description.trim() || undefined,
-      inviteEmails: values.inviteEmails.length
-        ? values.inviteEmails.map((tag) => tag.text.trim().toLowerCase())
-        : undefined,
+      invites: (() => {
+        const invites = values.inviteMembers
+          .filter((member) => member.email.trim() !== "")
+          .map((member) => ({
+            email: member.email.trim().toLowerCase(),
+            kinshipLabel: member.kinshipLabel || undefined,
+          }));
+        return invites.length ? invites : undefined;
+      })(),
     }),
     onSuccessMessage: copy.successDescription,
     onSuccess: (data, values) => {
@@ -166,6 +173,12 @@ export function CreateFamilyForm({
     },
     toastOnError: true,
   });
+
+  const {
+    fields: inviteFields,
+    append: appendInvite,
+    remove: removeInvite,
+  } = useFieldArray({ control: form.control, name: "inviteMembers" });
 
   const name = form.watch("name");
   const slugPreview = useMemo(() => createSlug(name), [name]);
@@ -258,45 +271,59 @@ export function CreateFamilyForm({
           }}
         />
 
-        <CommonFormField
-          control={form.control}
-          name="inviteEmails"
-          label={copy.inviteEmailLabel}
-          description={copy.inviteEmailHint}
-          fieldType="custom"
-          render={({ field, id, invalid, disabled }) => {
-            const currentTags = Array.isArray(field.value) ? field.value : [];
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <span className="font-medium text-sm">{copy.inviteEmailLabel}</span>
+            <span className="text-muted-foreground text-sm">
+              {copy.inviteEmailHint}
+            </span>
+          </div>
 
-            return (
-              <TagInput
-                id={id}
-                tags={currentTags}
-                setTags={(nextTags) => {
-                  field.onChange(resolveTagUpdate(nextTags, currentTags));
-                }}
-                activeTagIndex={activeTagIndex}
-                setActiveTagIndex={setActiveTagIndex}
+          {inviteFields.map((memberField, index) => (
+            <div
+              key={memberField.id}
+              className="grid gap-3 sm:grid-cols-[1fr_minmax(0,12rem)_auto] sm:items-end"
+            >
+              <CommonFormField
+                control={form.control}
+                name={`inviteMembers.${index}.email`}
+                label={copy.inviteEmailLabel}
                 placeholder={copy.inviteEmailPlaceholder}
-                inputFieldPosition="top"
-                addOnPaste
-                delimiterList={[",", " ", "Enter", "Tab"]}
-                validateTag={(tag) => emailPattern.test(tag.trim())}
-                maxTags={50}
-                disabled={disabled}
-                styleClasses={{
-                  input: "shadow-none",
-                  inlineTagsContainer:
-                    "border-input rounded-md bg-transparent shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px] p-1 gap-1",
-                  tag: {
-                    body: "bg-secondary text-secondary-foreground rounded px-2 py-0.5",
-                    closeButton: "text-muted-foreground hover:text-foreground",
-                  },
-                }}
-                aria-invalid={invalid}
+                type="email"
+                inputProps={{ autoComplete: "email" }}
               />
-            );
-          }}
-        />
+              <CommonFormField
+                control={form.control}
+                name={`inviteMembers.${index}.kinshipLabel`}
+                label={copy.kinshipLabel}
+                placeholder={copy.kinshipPlaceholder}
+                fieldType="select"
+                selectOptions={copy.kinships}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => removeInvite(index)}
+                disabled={inviteFields.length === 1}
+                aria-label={copy.removeMemberLabel}
+              >
+                <Trash2Icon aria-hidden="true" />
+              </Button>
+            </div>
+          ))}
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-fit"
+            onClick={() => appendInvite({ email: "", kinshipLabel: "" })}
+            disabled={inviteFields.length >= 50}
+          >
+            <PlusIcon data-icon="inline-start" aria-hidden="true" />
+            {copy.addMemberLabel}
+          </Button>
+        </div>
       </FieldGroup>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

@@ -1,10 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { FamilyType } from '@prisma/client';
-import { Transform } from 'class-transformer';
+import { FamilyKinship, FamilyType } from '@prisma/client';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
   IsEmail,
+  IsEnum,
   IsIn,
   IsNotEmpty,
   IsOptional,
@@ -12,7 +13,22 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
+
+export class CreateFamilyInviteDto {
+  @ApiProperty({ example: 'claudine@example.com' })
+  @IsEmail()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  )
+  email: string;
+
+  @ApiPropertyOptional({ enum: FamilyKinship })
+  @IsEnum(FamilyKinship)
+  @IsOptional()
+  kinshipLabel?: FamilyKinship;
+}
 
 export const FAMILY_COUNTRIES = [
   'RW',
@@ -99,20 +115,14 @@ export class CreateFamilyDto {
   description?: string;
 
   @ApiPropertyOptional({
-    type: [String],
-    example: ['claudine@example.com'],
-    description: 'Emails to invite as members after the family is created.',
+    type: [CreateFamilyInviteDto],
+    description:
+      'Members to invite after the family is created, each with an optional kinship role.',
   })
   @IsArray()
   @IsOptional()
   @ArrayMaxSize(50)
-  @IsEmail({}, { each: true })
-  @Transform(({ value }) =>
-    Array.isArray(value)
-      ? value.map((email) =>
-          typeof email === 'string' ? email.trim().toLowerCase() : email,
-        )
-      : value,
-  )
-  inviteEmails?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => CreateFamilyInviteDto)
+  invites?: CreateFamilyInviteDto[];
 }

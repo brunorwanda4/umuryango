@@ -20,7 +20,10 @@ import {
 import { hash } from 'bcryptjs';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
-import type { CreateFamilyDto } from './dto/create-family.dto';
+import type {
+  CreateFamilyDto,
+  CreateFamilyInviteDto,
+} from './dto/create-family.dto';
 import type { InviteMemberDto } from './dto/invite-member.dto';
 import type { UpdateFamilySettingsDto } from './dto/update-family-settings.dto';
 import type { UpdateMemberDto } from './dto/update-member.dto';
@@ -140,16 +143,23 @@ export class FamiliesService {
 
     const slug = await this.resolveUniqueSlug(dto.slug ?? dto.name);
 
-    const inviteEmails = (dto.inviteEmails ?? []).filter(
-      (email) => email !== creator.email.toLowerCase(),
-    );
-    const uniqueInviteEmails = [...new Set(inviteEmails)];
+    const creatorEmail = creator.email.toLowerCase();
+    const uniqueInvitesByEmail = new Map<string, CreateFamilyInviteDto>();
+    for (const invite of dto.invites ?? []) {
+      const email = invite.email.toLowerCase();
+      if (email === creatorEmail || uniqueInvitesByEmail.has(email)) {
+        continue;
+      }
+      uniqueInvitesByEmail.set(email, invite);
+    }
+    const uniqueInviteEmails = [...uniqueInvitesByEmail.keys()];
 
     const invites = await Promise.all(
-      uniqueInviteEmails.map(async (email) => {
+      [...uniqueInvitesByEmail.values()].map(async (invite) => {
         const token = randomBytes(32).toString('base64url');
         return {
-          email,
+          email: invite.email.toLowerCase(),
+          kinshipLabel: invite.kinshipLabel ?? null,
           token,
           tokenHash: await hash(token, 10),
         };
@@ -181,6 +191,7 @@ export class FamiliesService {
           create: invites.map((invite) => ({
             email: invite.email,
             authority: FamilyAuthority.MEMBER,
+            kinshipLabel: invite.kinshipLabel,
             capabilities: DEFAULT_CAPABILITIES[FamilyAuthority.MEMBER],
             tokenHash: invite.tokenHash,
             status: FamilyInviteStatus.PENDING,
