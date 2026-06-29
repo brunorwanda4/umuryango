@@ -117,7 +117,7 @@ async function upsertUsers(seedPasswordHash: string) {
 
   for (const user of users) {
     await prisma.user.upsert({
-      where: { email: user.email },
+      where: { id: user.id },
       create: {
         ...user,
         passwordHash: seedPasswordHash,
@@ -153,7 +153,7 @@ async function upsertUsers(seedPasswordHash: string) {
 
 async function upsertFamily() {
   await prisma.family.upsert({
-    where: { slug: 'mukamana-family' },
+    where: { id: ids.family },
     create: {
       id: ids.family,
       name: 'Mukamana Family',

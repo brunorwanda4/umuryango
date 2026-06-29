@@ -334,6 +334,72 @@
         "value": "ADOPTIVE",
         "label": "Adoptive family"
       }
+    ],
+    "kinships": [
+      {
+        "value": "SON",
+        "label": "Son"
+      },
+      {
+        "value": "DAUGHTER",
+        "label": "Daughter"
+      },
+      {
+        "value": "FATHER",
+        "label": "Father"
+      },
+      {
+        "value": "MOTHER",
+        "label": "Mother"
+      },
+      {
+        "value": "BROTHER",
+        "label": "Brother"
+      },
+      {
+        "value": "SISTER",
+        "label": "Sister"
+      },
+      {
+        "value": "UNCLE",
+        "label": "Uncle"
+      },
+      {
+        "value": "AUNT",
+        "label": "Aunt"
+      },
+      {
+        "value": "GRANDFATHER",
+        "label": "Grandfather"
+      },
+      {
+        "value": "GRANDMOTHER",
+        "label": "Grandmother"
+      },
+      {
+        "value": "COUSIN",
+        "label": "Cousin"
+      },
+      {
+        "value": "IN_LAW",
+        "label": "In-law"
+      },
+      {
+        "value": "FAMILY_FRIEND",
+        "label": "Family friend"
+      },
+      {
+        "value": "NEIGHBOR",
+        "label": "Neighbor"
+      },
+      {
+        "value": "CLEANER",
+        "label": "Cleaner"
+      },
+      {
+        "value": "OTHER",
+        "label": "Other"
+      }
     ]
   },
   "ItemsPage": {
