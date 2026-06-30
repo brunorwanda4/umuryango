@@ -13,6 +13,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+import { MoneyInput } from "@/components/common/form/money-input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -51,6 +52,7 @@ type CommonFormFieldType =
   | "checkbox"
   | "date"
   | "time"
+  | "money"
   | "phone"
   | "otp-input"
   | "custom";
@@ -65,6 +67,7 @@ interface CommonFormFieldProps<T extends FieldValues> {
   required?: boolean;
   type?: HTMLInputTypeAttribute;
   fieldType?: CommonFormFieldType;
+  currency?: string;
   className?: string;
   fieldClassName?: string;
   selectOptions?: CommonFormOption[];
@@ -98,6 +101,7 @@ export function CommonFormField<T extends FieldValues>({
   description,
   className,
   fieldClassName,
+  currency,
   render,
   inputProps,
   textareaProps,
@@ -199,6 +203,24 @@ export function CommonFormField<T extends FieldValues>({
                   aria-invalid={invalid}
                   className={className}
                   onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                  {...inputProps}
+                />
+              );
+
+            case "money":
+              return (
+                <MoneyInput
+                  id={id}
+                  name={field.name}
+                  currency={currency ?? "RWF"}
+                  disabled={disabled}
+                  placeholder={placeholder}
+                  value={field.value}
+                  aria-invalid={invalid}
+                  className={className}
+                  onValueChange={field.onChange}
                   onBlur={field.onBlur}
                   ref={field.ref}
                   {...inputProps}

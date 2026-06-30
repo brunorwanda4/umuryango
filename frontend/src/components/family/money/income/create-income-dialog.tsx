@@ -128,8 +128,9 @@ export function CreateIncomeDialog({
               control={form.control}
               name="amountMinorUnits"
               label={`Amount (${family.defaultCurrency})`}
-              type="number"
-              placeholder="e.g. 500000"
+              fieldType="money"
+              currency={family.defaultCurrency}
+              placeholder="e.g. 500,000"
               required
             />
 
