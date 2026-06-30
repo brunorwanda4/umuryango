@@ -85,7 +85,7 @@ export function CreateProjectDialog({
           New project
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl md:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create a family project</DialogTitle>
           <DialogDescription>
@@ -229,7 +229,20 @@ function CreateProjectForm({
             autoComplete: "off",
           }}
         />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <CommonFormField
+          control={form.control}
+          name="expectedContributionAmount"
+          label={`Expected contribution per member (${currency})`}
+          placeholder={
+            getCurrencyFractionDigits(currency) === 0 ? "10000" : "100.00"
+          }
+          description="Optional. Use this for equal shares, monthly plans, or expected pledges."
+          inputProps={{
+            inputMode: "decimal",
+            autoComplete: "off",
+          }}
+        />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 col-span-2">
           <CommonFormField
             control={form.control}
             name="startDate"
@@ -279,6 +292,7 @@ function CreateProjectForm({
           fieldType="textarea"
           placeholder="Example: Jean leads construction follow-up, Alice tracks supplier receipts."
           textareaProps={{ rows: 3 }}
+          fieldClassName="col-span-2"
         />
         <CommonFormField
           control={form.control}
@@ -287,7 +301,7 @@ function CreateProjectForm({
           fieldType="textarea"
           placeholder="Add purpose, location, payment rules, documents needed, or approval notes."
           textareaProps={{ rows: 4 }}
-          className=" col-span-2"
+          fieldClassName="col-span-2"
         />
       </FieldGroup>
 
