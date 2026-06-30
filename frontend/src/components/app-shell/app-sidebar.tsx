@@ -2,188 +2,188 @@
 
 import type { LucideIcon } from "lucide-react";
 import {
-	BadgeDollarSignIcon,
-	BanknoteArrowDownIcon,
-	BellIcon,
-	BookOpenCheckIcon,
-	CalendarDaysIcon,
-	ChevronRightIcon,
-	ChevronsUpDownIcon,
-	ClipboardListIcon,
-	DownloadIcon,
-	FileTextIcon,
-	FolderKa nbanIcon,
-	HandCoinsIcon,
-	HomeIcon,
-	LandmarkIcon,
-	LayoutDashboardIcon,
-	ListChecksIcon,
-	LogOutIcon,
-	MenuIcon,
-	ReceiptTextIcon,
-	SettingsIcon,
-	ShieldCheckIcon,
-	TargetIcon,
-	UsersIcon,
-	WalletCardsIcon,
+  BadgeDollarSignIcon,
+  BanknoteArrowDownIcon,
+  BellIcon,
+  BookOpenCheckIcon,
+  CalendarDaysIcon,
+  ChevronRightIcon,
+  ChevronsUpDownIcon,
+  ClipboardListIcon,
+  DownloadIcon,
+  FileTextIcon,
+  FolderKanbanIcon,
+  HandCoinsIcon,
+  HomeIcon,
+  LandmarkIcon,
+  LayoutDashboardIcon,
+  ListChecksIcon,
+  LogOutIcon,
+  MenuIcon,
+  ReceiptTextIcon,
+  SettingsIcon,
+  ShieldCheckIcon,
+  TargetIcon,
+  UsersIcon,
+  WalletCardsIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useLayoutEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-	Sidebar,
-	SidebarContent,
-	SidebarFooter,
-	SidebarGroup,
-	SidebarGroupContent,
-	SidebarGroupLabel,
-	SidebarHeader,
-	SidebarInset,
-	SidebarMenu,
-	SidebarMenuButton,
-	SidebarMenuItem,
-	SidebarMenuSub,
-	SidebarMenuSubButton,
-	SidebarMenuSubItem,
-	SidebarProvider,
-	SidebarRail,
-	SidebarSeparator,
-	SidebarTrigger,
-	useSidebar,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { type CurrentUser, useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 import apiRequest from "@/service/api";
 
 type NavigationItem = {
-	title: string;
-	href: string;
-	icon: LucideIcon;
-	items?: NavigationItem[];
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  items?: NavigationItem[];
 };
 
 const settingsChildren: NavigationItem[] = [
-	{ title: "Security", href: "/me/security", icon: ShieldCheckIcon },
-	{ title: "Help and guides", href: "/items", icon: BookOpenCheckIcon },
+  { title: "Security", href: "/me/security", icon: ShieldCheckIcon },
+  { title: "Help and guides", href: "/items", icon: BookOpenCheckIcon },
 ];
 
 type NavigationGroup = {
-	label: string;
-	items: NavigationItem[];
+  label: string;
+  items: NavigationItem[];
 };
 
 type AppSidebarMode = "family" | "personal";
 
 type AppSidebarShellProps = {
-	children: ReactNode;
-	mode: AppSidebarMode;
-	familySlug?: string;
+  children: ReactNode;
+  mode: AppSidebarMode;
+  familySlug?: string;
 };
 
 const personalNavigation: NavigationGroup[] = [
-	{
-		label: "Personal",
-		items: [
-			{ title: "Overview", href: "/me", icon: LayoutDashboardIcon },
-			{ title: "My money", href: "/me/money", icon: WalletCardsIcon },
-			{ title: "Plans", href: "/me/plans", icon: ListChecksIcon },
-			{ title: "Savings goals", href: "/me/savings", icon: TargetIcon },
-			{ title: "Debts", href: "/me/debts", icon: LandmarkIcon },
-		],
-	},
-	{
-		label: "Workspace",
-		items: [
-			{ title: "Documents", href: "/me/documents", icon: FileTextIcon },
-			{ title: "Family workspaces", href: "/family", icon: UsersIcon },
-			{
-				title: "Settings",
-				href: "/me/settings",
-				icon: SettingsIcon,
-				items: settingsChildren,
-			},
-		],
-	},
+  {
+    label: "Personal",
+    items: [
+      { title: "Overview", href: "/me", icon: LayoutDashboardIcon },
+      { title: "My money", href: "/me/money", icon: WalletCardsIcon },
+      { title: "Plans", href: "/me/plans", icon: ListChecksIcon },
+      { title: "Savings goals", href: "/me/savings", icon: TargetIcon },
+      { title: "Debts", href: "/me/debts", icon: LandmarkIcon },
+    ],
+  },
+  {
+    label: "Workspace",
+    items: [
+      { title: "Documents", href: "/me/documents", icon: FileTextIcon },
+      { title: "Family workspaces", href: "/family", icon: UsersIcon },
+      {
+        title: "Settings",
+        href: "/me/settings",
+        icon: SettingsIcon,
+        items: settingsChildren,
+      },
+    ],
+  },
 ];
 
 const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
-	const familyHref = `/family/${familySlug}`;
+  const familyHref = `/family/${familySlug}`;
 
-	return [
-		{
-			label: "Family",
-			items: [
-				{ title: "Dashboard", href: familyHref, icon: HomeIcon },
-				{
-					title: "Money",
-					href: `${familyHref}/money`,
-					icon: BadgeDollarSignIcon,
-				},
-				{
-					title: "Contributions",
-					href: `${familyHref}/contributions`,
-					icon: HandCoinsIcon,
-				},
-				{
-					title: "Projects",
-					href: `${familyHref}/projects`,
-					icon: FolderKanbanIcon,
-				},
-				{
-					title: "Reports",
-					href: `${familyHref}/reports`,
-					icon: ReceiptTextIcon,
-				},
-			],
-		},
-		{
-			label: "Operations",
-			items: [
-				{
-					title: "Events",
-					href: `${familyHref}/events`,
-					icon: CalendarDaysIcon,
-				},
-				{
-					title: "Announcements",
-					href: `${familyHref}/announcements`,
-					icon: BellIcon,
-				},
-				{
-					title: "Documents",
-					href: `${familyHref}/documents`,
-					icon: FileTextIcon,
-				},
-				{ title: "Members", href: `${familyHref}/members`, icon: UsersIcon },
-				{
-					title: "Settings",
-					href: `${familyHref}/settings`,
-					icon: SettingsIcon,
-					items: settingsChildren,
-				},
-			],
-		},
-	];
+  return [
+    {
+      label: "Family",
+      items: [
+        { title: "Dashboard", href: familyHref, icon: HomeIcon },
+        {
+          title: "Money",
+          href: `${familyHref}/money`,
+          icon: BadgeDollarSignIcon,
+        },
+        {
+          title: "Contributions",
+          href: `${familyHref}/contributions`,
+          icon: HandCoinsIcon,
+        },
+        {
+          title: "Projects",
+          href: `${familyHref}/projects`,
+          icon: FolderKanbanIcon,
+        },
+        {
+          title: "Reports",
+          href: `${familyHref}/reports`,
+          icon: ReceiptTextIcon,
+        },
+      ],
+    },
+    {
+      label: "Operations",
+      items: [
+        {
+          title: "Events",
+          href: `${familyHref}/events`,
+          icon: CalendarDaysIcon,
+        },
+        {
+          title: "Announcements",
+          href: `${familyHref}/announcements`,
+          icon: BellIcon,
+        },
+        {
+          title: "Documents",
+          href: `${familyHref}/documents`,
+          icon: FileTextIcon,
+        },
+        { title: "Members", href: `${familyHref}/members`, icon: UsersIcon },
+        {
+          title: "Settings",
+          href: `${familyHref}/settings`,
+          icon: SettingsIcon,
+          items: settingsChildren,
+        },
+      ],
+    },
+  ];
 };
 
 const workspaceLinks = [
-	{ title: "Personal workspace", href: "/me", icon: WalletCardsIcon },
-	{ title: "All families", href: "/family", icon: UsersIcon },
+  { title: "Personal workspace", href: "/me", icon: WalletCardsIcon },
+  { title: "All families", href: "/family", icon: UsersIcon },
 ];
 
 const RESIZE_STORAGE_KEY = "sidebar-width";
@@ -192,588 +192,575 @@ const SIDEBAR_MAX_WIDTH = 420;
 const SIDEBAR_DEFAULT_WIDTH = 256;
 
 function SidebarResizeHandle({ open }: { open: boolean }) {
-	const { toggleSidebar, state } = useSidebar();
+  const { toggleSidebar, state } = useSidebar();
 
-	useLayoutEffect(() => {
-		const stored = localStorage.getItem(RESIZE_STORAGE_KEY);
-		if (!stored) return;
-		const wrapper = document.querySelector(
-			'[data-slot="sidebar-wrapper"]',
-		) as HTMLElement | null;
-		if (wrapper) wrapper.style.setProperty("--sidebar-width", stored);
-	}, []);
+  useLayoutEffect(() => {
+    const stored = localStorage.getItem(RESIZE_STORAGE_KEY);
+    if (!stored) return;
+    const wrapper = document.querySelector(
+      '[data-slot="sidebar-wrapper"]',
+    ) as HTMLElement | null;
+    if (wrapper) wrapper.style.setProperty("--sidebar-width", stored);
+  }, []);
 
-	function handleMouseDown(e: React.MouseEvent<HTMLButtonElement>) {
-		if (state === "collapsed") {
-			toggleSidebar();
-			return;
-		}
-		e.preventDefault();
+  function handleMouseDown(e: React.MouseEvent<HTMLButtonElement>) {
+    if (state === "collapsed") {
+      toggleSidebar();
+      return;
+    }
+    e.preventDefault();
 
-		const wrapper = document.querySelector(
-			'[data-slot="sidebar-wrapper"]',
-		) as HTMLElement | null;
-		if (!wrapper) return;
-		const sidebarWrapper = wrapper;
+    const wrapper = document.querySelector(
+      '[data-slot="sidebar-wrapper"]',
+    ) as HTMLElement | null;
+    if (!wrapper) return;
+    const sidebarWrapper = wrapper;
 
-		const gap = sidebarWrapper.querySelector(
-			'[data-slot="sidebar-gap"]',
-		) as HTMLElement | null;
-		const startWidth = gap
-			? gap.getBoundingClientRect().width
-			: SIDEBAR_DEFAULT_WIDTH;
-		const startX = e.clientX;
-		let didMove = false;
+    const gap = sidebarWrapper.querySelector(
+      '[data-slot="sidebar-gap"]',
+    ) as HTMLElement | null;
+    const startWidth = gap
+      ? gap.getBoundingClientRect().width
+      : SIDEBAR_DEFAULT_WIDTH;
+    const startX = e.clientX;
+    let didMove = false;
 
-		document.body.style.cursor = "col-resize";
-		document.body.style.userSelect = "none";
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
 
-		function onMove(me: MouseEvent) {
-			const delta = me.clientX - startX;
-			if (Math.abs(delta) > 3) didMove = true;
-			const newW = Math.min(
-				SIDEBAR_MAX_WIDTH,
-				Math.max(SIDEBAR_MIN_WIDTH, startWidth + delta),
-			);
-			sidebarWrapper.style.setProperty("--sidebar-width", `${newW}px`);
-		}
+    function onMove(me: MouseEvent) {
+      const delta = me.clientX - startX;
+      if (Math.abs(delta) > 3) didMove = true;
+      const newW = Math.min(
+        SIDEBAR_MAX_WIDTH,
+        Math.max(SIDEBAR_MIN_WIDTH, startWidth + delta),
+      );
+      sidebarWrapper.style.setProperty("--sidebar-width", `${newW}px`);
+    }
 
-		function onUp() {
-			document.body.style.cursor = "";
-			document.body.style.userSelect = "";
-			if (!didMove) {
-				toggleSidebar();
-			} else {
-				const w = sidebarWrapper.style.getPropertyValue("--sidebar-width");
-				if (w) localStorage.setItem(RESIZE_STORAGE_KEY, w);
-			}
-			document.removeEventListener("mousemove", onMove);
-			document.removeEventListener("mouseup", onUp);
-		}
+    function onUp() {
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      if (!didMove) {
+        toggleSidebar();
+      } else {
+        const w = sidebarWrapper.style.getPropertyValue("--sidebar-width");
+        if (w) localStorage.setItem(RESIZE_STORAGE_KEY, w);
+      }
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    }
 
-		document.addEventListener("mousemove", onMove);
-		document.addEventListener("mouseup", onUp);
-	}
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  }
 
-	return (
-		<button
-			type="button"
-			data-sidebar="rail"
-			data-slot="sidebar-rail"
-			aria-label="Resize Sidebar"
-			tabIndex={-1}
-			onMouseDown={handleMouseDown}
-			title={state === "collapsed" ? "Expand Sidebar" : "Resize Sidebar"}
-			className={cn(
-				"absolute inset-y-0 z-20 hidden w-4 transition-colors ease-linear sm:flex",
-				"group-data-[side=left]:-right-4 group-data-[side=right]:left-0",
-				open
-					? "after:absolute after:inset-y-0 after:start-1/2 after:w-[1px] after:bg-sidebar-border"
-					: null,
-				"group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full hover:group-data-[collapsible=offcanvas]:bg-sidebar",
-				"[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
-				"[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
-				state === "collapsed" ? "cursor-e-resize" : "cursor-col-resize",
-			)}
-		/>
-	);
+  return (
+    <button
+      type="button"
+      data-sidebar="rail"
+      data-slot="sidebar-rail"
+      aria-label="Resize Sidebar"
+      tabIndex={-1}
+      onMouseDown={handleMouseDown}
+      title={state === "collapsed" ? "Expand Sidebar" : "Resize Sidebar"}
+      className={cn(
+        "absolute inset-y-0 z-20 hidden w-4 transition-colors ease-linear sm:flex",
+        "group-data-[side=left]:-right-4 group-data-[side=right]:left-0",
+        open
+          ? "after:absolute after:inset-y-0 after:start-1/2 after:w-[1px] after:bg-sidebar-border"
+          : null,
+        "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full hover:group-data-[collapsible=offcanvas]:bg-sidebar",
+        "[[data-side=left][data-collapsible=offcanvas]_&]:-right-2",
+        "[[data-side=right][data-collapsible=offcanvas]_&]:-left-2",
+        state === "collapsed" ? "cursor-e-resize" : "cursor-col-resize",
+      )}
+    />
+  );
 }
 
 export function AppSidebarShell(props: AppSidebarShellProps) {
-	return (
-		<SidebarProvider>
-			<AppSidebarContent {...props} />
-		</SidebarProvider>
-	);
+  return (
+    <SidebarProvider>
+      <AppSidebarContent {...props} />
+    </SidebarProvider>
+  );
 }
 
 function AppSidebarContent({
-	children,
-	mode,
-	familySlug,
+  children,
+  mode,
+  familySlug,
 }: AppSidebarShellProps) {
-	const pathname = usePathname();
-	const encodedFamilySlug = encodeURIComponent(familySlug ?? "");
-	const { isMobile, setOpenMobile, open } = useSidebar();
-	const { user } = useCurrentUser();
-	const familyName = formatFamilyName(familySlug);
-	const navigation =
-		mode === "family" && encodedFamilySlug
-			? getFamilyNavigation(encodedFamilySlug)
-			: personalNavigation;
-	const activeItem = getActiveNavigationItem(pathname, navigation);
-	const title =
-		activeItem?.title ??
-		(mode === "family" ? familyName : "Personal workspace");
-	const contextLabel =
-		mode === "family" ? "Family workspace" : "Personal workspace";
+  const pathname = usePathname();
+  const encodedFamilySlug = encodeURIComponent(familySlug ?? "");
+  const { setOpenMobile, open } = useSidebar();
+  const { user } = useCurrentUser();
+  const familyName = formatFamilyName(familySlug);
+  const navigation =
+    mode === "family" && encodedFamilySlug
+      ? getFamilyNavigation(encodedFamilySlug)
+      : personalNavigation;
 
-	return (
-		<>
-			<Sidebar
-				collapsible="icon"
-				className={cn(
-					"[&_[data-slot=sidebar-inner]]:bg-background",
-					open &&
-						"md:!border-r-0 md:!bg-transparent md:[&>[data-slot=sidebar-inner]]:!bg-transparent",
-				)}
-			>
-				<SidebarHeader>
-					<div className="flex items-center justify-between gap-2 px-1">
-						<span className="truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-base text-transparent tracking-tight group-data-[collapsible=icon]:hidden">
-							{mode === "family" ? familyName : "Personal workspace"}
-						</span>
-						<SidebarTrigger />
-					</div>
-				</SidebarHeader>
-				<SidebarContent>
-					{navigation.map((group) => (
-						<SidebarGroup key={group.label}>
-							<SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-							<SidebarGroupContent>
-								<SidebarMenu>
-									{group.items.map((item) =>
-										item.items?.length ? (
-											<Collapsible
-												key={item.href}
-												asChild
-												defaultOpen={isActivePath(pathname, item.href)}
-												className="group/collapsible"
-											>
-												<SidebarMenuItem>
-													<CollapsibleTrigger asChild>
-														<SidebarMenuButton
-															isActive={isActivePath(pathname, item.href)}
-															tooltip={item.title}
-														>
-															<item.icon aria-hidden="true" />
-															<span>{item.title}</span>
-															<ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-														</SidebarMenuButton>
-													</CollapsibleTrigger>
-													<CollapsibleContent>
-														<SidebarMenuSub>
-															{item.items.map((sub) => (
-																<SidebarMenuSubItem key={sub.href}>
-																	<SidebarMenuSubButton
-																		asChild
-																		isActive={isActivePath(pathname, sub.href)}
-																	>
-																		<Link href={sub.href}>
-																			<sub.icon aria-hidden="true" />
-																			<span>{sub.title}</span>
-																		</Link>
-																	</SidebarMenuSubButton>
-																</SidebarMenuSubItem>
-															))}
-														</SidebarMenuSub>
-													</CollapsibleContent>
-												</SidebarMenuItem>
-											</Collapsible>
-										) : (
-											<SidebarMenuItem key={item.href}>
-												<SidebarMenuButton
-													asChild
-													isActive={isActivePath(pathname, item.href)}
-													tooltip={item.title}
-												>
-													<Link href={item.href}>
-														<item.icon aria-hidden="true" />
-														<span>{item.title}</span>
-													</Link>
-												</SidebarMenuButton>
-											</SidebarMenuItem>
-										),
-									)}
-								</SidebarMenu>
-							</SidebarGroupContent>
-						</SidebarGroup>
-					))}
-				</SidebarContent>
-				<SidebarSeparator />
-				<SidebarFooter>
-					<SidebarMenu>
-						<SidebarMenuItem>
-							<WorkspaceSwitcher
-								currentFamilyName={familyName}
-								currentFamilyHref={
-									encodedFamilySlug ? `/family/${encodedFamilySlug}` : undefined
-								}
-								mode={mode}
-								user={user}
-							/>
-						</SidebarMenuItem>
-					</SidebarMenu>
-				</SidebarFooter>
-				<SidebarRail />
-				<SidebarResizeHandle open={open} />
-			</Sidebar>
-			<SidebarInset>
-				<main className="min-h-[calc(100svh-3.5rem)] p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6">
-					{children}
-				</main>
-			</SidebarInset>
-			<MobileInstallPrompt />
-			<MobileBottomNavigation
-				mode={mode}
-				navigation={navigation}
-				onOpenMore={() => setOpenMobile(true)}
-				pathname={pathname}
-			/>
-		</>
-	);
+  return (
+    <>
+      <Sidebar
+        collapsible="icon"
+        className={cn(
+          "[&_[data-slot=sidebar-inner]]:bg-background",
+          open &&
+            "md:!border-r-0 md:!bg-transparent md:[&>[data-slot=sidebar-inner]]:!bg-transparent",
+        )}
+      >
+        <SidebarHeader>
+          <div className="flex items-center justify-between gap-2 px-1">
+            <span className="truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-base text-transparent tracking-tight group-data-[collapsible=icon]:hidden">
+              {mode === "family" ? familyName : "Personal workspace"}
+            </span>
+            <SidebarTrigger />
+          </div>
+        </SidebarHeader>
+        <SidebarContent>
+          {navigation.map((group) => (
+            <SidebarGroup key={group.label}>
+              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {group.items.map((item) =>
+                    item.items?.length ? (
+                      <Collapsible
+                        key={item.href}
+                        asChild
+                        defaultOpen={isActivePath(pathname, item.href)}
+                        className="group/collapsible"
+                      >
+                        <SidebarMenuItem>
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuButton
+                              isActive={isActivePath(pathname, item.href)}
+                              tooltip={item.title}
+                            >
+                              <item.icon aria-hidden="true" />
+                              <span>{item.title}</span>
+                              <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </SidebarMenuButton>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub>
+                              {item.items.map((sub) => (
+                                <SidebarMenuSubItem key={sub.href}>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={isActivePath(pathname, sub.href)}
+                                  >
+                                    <Link href={sub.href}>
+                                      <sub.icon aria-hidden="true" />
+                                      <span>{sub.title}</span>
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              ))}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </SidebarMenuItem>
+                      </Collapsible>
+                    ) : (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActivePath(pathname, item.href)}
+                          tooltip={item.title}
+                        >
+                          <Link href={item.href}>
+                            <item.icon aria-hidden="true" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ),
+                  )}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+        </SidebarContent>
+        <SidebarSeparator />
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <WorkspaceSwitcher
+                currentFamilyName={familyName}
+                currentFamilyHref={
+                  encodedFamilySlug ? `/family/${encodedFamilySlug}` : undefined
+                }
+                mode={mode}
+                user={user}
+              />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+        <SidebarRail />
+        <SidebarResizeHandle open={open} />
+      </Sidebar>
+      <SidebarInset>
+        <main className="min-h-[calc(100svh-3.5rem)] p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6">
+          {children}
+        </main>
+      </SidebarInset>
+      <MobileInstallPrompt />
+      <MobileBottomNavigation
+        mode={mode}
+        navigation={navigation}
+        onOpenMore={() => setOpenMobile(true)}
+        pathname={pathname}
+      />
+    </>
+  );
 }
 
 type BeforeInstallPromptEvent = Event & {
-	prompt: () => Promise<void>;
-	userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
 };
 
 function MobileInstallPrompt() {
-	const [installPrompt, setInstallPrompt] =
-		useState<BeforeInstallPromptEvent | null>(null);
-	const [dismissed, setDismissed] = useState(false);
+  const [installPrompt, setInstallPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [dismissed, setDismissed] = useState(false);
 
-	useEffect(() => {
-		const nav = window.navigator as Navigator & { standalone?: boolean };
-		const isStandalone =
-			window.matchMedia("(display-mode: standalone)").matches ||
-			nav.standalone === true;
+  useEffect(() => {
+    const nav = window.navigator as Navigator & { standalone?: boolean };
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      nav.standalone === true;
 
-		if (isStandalone || sessionStorage.getItem("install-prompt-dismissed")) {
-			return;
-		}
+    if (isStandalone || sessionStorage.getItem("install-prompt-dismissed")) {
+      return;
+    }
 
-		function handleBeforeInstallPrompt(event: Event) {
-			event.preventDefault();
-			setInstallPrompt(event as BeforeInstallPromptEvent);
-		}
+    function handleBeforeInstallPrompt(event: Event) {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    }
 
-		function handleInstalled() {
-			setInstallPrompt(null);
-			setDismissed(true);
-		}
+    function handleInstalled() {
+      setInstallPrompt(null);
+      setDismissed(true);
+    }
 
-		window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-		window.addEventListener("appinstalled", handleInstalled);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleInstalled);
 
-		return () => {
-			window.removeEventListener(
-				"beforeinstallprompt",
-				handleBeforeInstallPrompt,
-			);
-			window.removeEventListener("appinstalled", handleInstalled);
-		};
-	}, []);
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("appinstalled", handleInstalled);
+    };
+  }, []);
 
-	if (!installPrompt || dismissed) {
-		return null;
-	}
+  if (!installPrompt || dismissed) {
+    return null;
+  }
 
-	async function handleInstall() {
-		if (!installPrompt) return;
+  async function handleInstall() {
+    if (!installPrompt) return;
 
-		await installPrompt.prompt();
-		const choice = await installPrompt.userChoice;
-		setInstallPrompt(null);
+    await installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+    setInstallPrompt(null);
 
-		if (choice.outcome === "dismissed") {
-			sessionStorage.setItem("install-prompt-dismissed", "true");
-			setDismissed(true);
-		}
-	}
+    if (choice.outcome === "dismissed") {
+      sessionStorage.setItem("install-prompt-dismissed", "true");
+      setDismissed(true);
+    }
+  }
 
-	function handleDismiss() {
-		sessionStorage.setItem("install-prompt-dismissed", "true");
-		setDismissed(true);
-	}
+  function handleDismiss() {
+    sessionStorage.setItem("install-prompt-dismissed", "true");
+    setDismissed(true);
+  }
 
-	return (
-		<div className="fixed inset-x-3 z-40 md:hidden bottom-[calc(4.75rem+env(safe-area-inset-bottom))]">
-			<div className="mx-auto flex max-w-md items-center gap-2 rounded-md border bg-background/95 p-2 shadow-lg backdrop-blur">
-				<button
-					type="button"
-					className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-md bg-primary px-3 font-medium text-primary-foreground text-sm"
-					onClick={handleInstall}
-				>
-					<DownloadIcon aria-hidden="true" className="size-4" />
-					Install app
-				</button>
-				<button
-					type="button"
-					aria-label="Dismiss install app prompt"
-					className="flex size-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30"
-					onClick={handleDismiss}
-				>
-					Later
-				</button>
-			</div>
-		</div>
-	);
+  return (
+    <div className="fixed inset-x-3 z-40 md:hidden bottom-[calc(4.75rem+env(safe-area-inset-bottom))]">
+      <div className="mx-auto flex max-w-md items-center gap-2 rounded-md border bg-background/95 p-2 shadow-lg backdrop-blur">
+        <button
+          type="button"
+          className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-md bg-primary px-3 font-medium text-primary-foreground text-sm"
+          onClick={handleInstall}
+        >
+          <DownloadIcon aria-hidden="true" className="size-4" />
+          Install app
+        </button>
+        <button
+          type="button"
+          aria-label="Dismiss install app prompt"
+          className="flex size-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30"
+          onClick={handleDismiss}
+        >
+          Later
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function MobileBottomNavigation({
-	mode,
-	navigation,
-	onOpenMore,
-	pathname,
+  mode,
+  navigation,
+  onOpenMore,
+  pathname,
 }: {
-	mode: AppSidebarMode;
-	navigation: NavigationGroup[];
-	onOpenMore: () => void;
-	pathname: string;
+  mode: AppSidebarMode;
+  navigation: NavigationGroup[];
+  onOpenMore: () => void;
+  pathname: string;
 }) {
-	const items = getMobileNavigationItems(mode, navigation);
-	const hasActiveItem = items.some((item) => isActivePath(pathname, item.href));
+  const items = getMobileNavigationItems(mode, navigation);
+  const hasActiveItem = items.some((item) => isActivePath(pathname, item.href));
 
-	return (
-		<nav
-			aria-label="Primary mobile navigation"
-			className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
-		>
-			<div className="mx-auto grid max-w-md grid-cols-5 gap-1">
-				{items.map((item) => {
-					const isActive = isActivePath(pathname, item.href);
-					const label = getMobileNavigationLabel(item.title);
+  return (
+    <nav
+      aria-label="Primary mobile navigation"
+      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
+    >
+      <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
+        {items.map((item) => {
+          const isActive = isActivePath(pathname, item.href);
+          const label = getMobileNavigationLabel(item.title);
 
-					return (
-						<Link
-							key={item.href}
-							href={item.href}
-							aria-current={isActive ? "page" : undefined}
-							className={cn(
-								"flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
-								isActive && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-							)}
-						>
-							<item.icon aria-hidden="true" className="size-5 shrink-0" />
-							<span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
-								{label}
-							</span>
-						</Link>
-					);
-				})}
-				<button
-					type="button"
-					aria-label="Open all navigation links"
-					aria-current={!hasActiveItem ? "page" : undefined}
-					className={cn(
-						"flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
-						!hasActiveItem && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-					)}
-					onClick={onOpenMore}
-				>
-					<MenuIcon aria-hidden="true" className="size-5 shrink-0" />
-					<span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
-						More
-					</span>
-				</button>
-			</div>
-		</nav>
-	);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={isActive ? "page" : undefined}
+              className={cn(
+                "flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
+                isActive &&
+                  "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+              )}
+            >
+              <item.icon aria-hidden="true" className="size-5 shrink-0" />
+              <span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
+                {label}
+              </span>
+            </Link>
+          );
+        })}
+        <button
+          type="button"
+          aria-label="Open all navigation links"
+          aria-current={!hasActiveItem ? "page" : undefined}
+          className={cn(
+            "flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
+            !hasActiveItem &&
+              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+          )}
+          onClick={onOpenMore}
+        >
+          <MenuIcon aria-hidden="true" className="size-5 shrink-0" />
+          <span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
+            More
+          </span>
+        </button>
+      </div>
+    </nav>
+  );
 }
 
 function WorkspaceSwitcher({
-	currentFamilyName,
-	currentFamilyHref,
-	mode,
-	user,
+  currentFamilyName,
+  currentFamilyHref,
+  mode,
+  user,
 }: {
-	currentFamilyName: string;
-	currentFamilyHref?: string;
-	mode: AppSidebarMode;
-	user: CurrentUser | null;
+  currentFamilyName: string;
+  currentFamilyHref?: string;
+  mode: AppSidebarMode;
+  user: CurrentUser | null;
 }) {
-	const router = useRouter();
-	const recentFamilies = useRecentFamilies();
-	const workspaceTitle =
-		mode === "family" ? currentFamilyName : "Personal workspace";
-	const title = user?.fullName ?? workspaceTitle;
-	const description =
-		user?.email ?? (mode === "family" ? "Family workspace" : "Your money");
+  const router = useRouter();
+  const recentFamilies = useRecentFamilies();
+  const workspaceTitle =
+    mode === "family" ? currentFamilyName : "Personal workspace";
+  const title = user?.fullName ?? workspaceTitle;
+  const description =
+    user?.email ?? (mode === "family" ? "Family workspace" : "Your money");
 
-	async function handleLogout() {
-		await apiRequest("post", "/auth/logout");
-		router.push("/auth/login");
-		router.refresh();
-	}
+  async function handleLogout() {
+    await apiRequest("post", "/auth/logout");
+    router.push("/auth/login");
+    router.refresh();
+  }
 
-	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<SidebarMenuButton size="lg" tooltip={title}>
-					<Avatar size="sm">
-						{user?.avatarUrl ? (
-							<AvatarImage src={user.avatarUrl} alt={title} />
-						) : null}
-						<AvatarFallback>{getInitials(title)}</AvatarFallback>
-					</Avatar>
-					<span className="flex min-w-0 flex-1 flex-col">
-						<span className="truncate font-medium">{title}</span>
-						<span className="truncate text-muted-foreground text-xs">
-							{description}
-						</span>
-					</span>
-					<ChevronsUpDownIcon aria-hidden="true" />
-				</SidebarMenuButton>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent side="bottom" align="start">
-				<DropdownMenuLabel>Workspaces</DropdownMenuLabel>
-				<DropdownMenuGroup>
-					{currentFamilyHref ? (
-						<DropdownMenuItem asChild>
-							<Link href={currentFamilyHref}>
-								<UsersIcon aria-hidden="true" />
-								{currentFamilyName}
-							</Link>
-						</DropdownMenuItem>
-					) : null}
-					{workspaceLinks.map((link) => (
-						<DropdownMenuItem key={link.href} asChild>
-							<Link href={link.href}>
-								<link.icon aria-hidden="true" />
-								{link.title}
-							</Link>
-						</DropdownMenuItem>
-					))}
-				</DropdownMenuGroup>
-				{recentFamilies.length ? (
-					<>
-						<DropdownMenuSeparator />
-						<DropdownMenuLabel>Recent families</DropdownMenuLabel>
-						<DropdownMenuGroup>
-							{recentFamilies.map((family) => (
-								<DropdownMenuItem key={family.id} asChild>
-									<Link href={`/family/${encodeURIComponent(family.slug)}`}>
-										<UsersIcon aria-hidden="true" />
-										{family.name}
-									</Link>
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuGroup>
-					</>
-				) : null}
-				<DropdownMenuSeparator />
-				<DropdownMenuGroup>
-					<DropdownMenuItem asChild>
-						<Link href="/family">
-							<ClipboardListIcon aria-hidden="true" />
-							Manage family access
-						</Link>
-					</DropdownMenuItem>
-					<DropdownMenuItem asChild>
-						<Link href="/family/new">
-							<BanknoteArrowDownIcon aria-hidden="true" />
-							Create family
-						</Link>
-					</DropdownMenuItem>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem variant="destructive" onSelect={handleLogout}>
-					<LogOutIcon aria-hidden="true" />
-					Log out
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
-	);
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <SidebarMenuButton size="lg" tooltip={title}>
+          <Avatar size="sm">
+            {user?.avatarUrl ? (
+              <AvatarImage src={user.avatarUrl} alt={title} />
+            ) : null}
+            <AvatarFallback>{getInitials(title)}</AvatarFallback>
+          </Avatar>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="truncate font-medium">{title}</span>
+            <span className="truncate text-muted-foreground text-xs">
+              {description}
+            </span>
+          </span>
+          <ChevronsUpDownIcon aria-hidden="true" />
+        </SidebarMenuButton>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="bottom" align="start">
+        <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          {currentFamilyHref ? (
+            <DropdownMenuItem asChild>
+              <Link href={currentFamilyHref}>
+                <UsersIcon aria-hidden="true" />
+                {currentFamilyName}
+              </Link>
+            </DropdownMenuItem>
+          ) : null}
+          {workspaceLinks.map((link) => (
+            <DropdownMenuItem key={link.href} asChild>
+              <Link href={link.href}>
+                <link.icon aria-hidden="true" />
+                {link.title}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+        {recentFamilies.length ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Recent families</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              {recentFamilies.map((family) => (
+                <DropdownMenuItem key={family.id} asChild>
+                  <Link href={`/family/${encodeURIComponent(family.slug)}`}>
+                    <UsersIcon aria-hidden="true" />
+                    {family.name}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+          </>
+        ) : null}
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link href="/family">
+              <ClipboardListIcon aria-hidden="true" />
+              Manage family access
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/family/new">
+              <BanknoteArrowDownIcon aria-hidden="true" />
+              Create family
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
+          <LogOutIcon aria-hidden="true" />
+          Log out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 type RecentFamily = {
-	id: string;
-	name: string;
-	slug: string;
-	role: string;
+  id: string;
+  name: string;
+  slug: string;
+  role: string;
 };
 
 function useRecentFamilies() {
-	const [families, setFamilies] = useState<RecentFamily[]>([]);
+  const [families, setFamilies] = useState<RecentFamily[]>([]);
 
-	useEffect(() => {
-		let active = true;
+  useEffect(() => {
+    let active = true;
 
-		(async () => {
-			const response = await apiRequest<undefined, RecentFamily[]>(
-				"get",
-				"/families?limit=3",
-			);
+    (async () => {
+      const response = await apiRequest<undefined, RecentFamily[]>(
+        "get",
+        "/families?limit=3",
+      );
 
-			if (active && response.ok) {
-				setFamilies(response.data ?? []);
-			}
-		})();
+      if (active && response.ok) {
+        setFamilies(response.data ?? []);
+      }
+    })();
 
-		return () => {
-			active = false;
-		};
-	}, []);
+    return () => {
+      active = false;
+    };
+  }, []);
 
-	return families;
-}
-
-function getActiveNavigationItem(
-	pathname: string,
-	navigation: NavigationGroup[],
-) {
-	return navigation
-		.flatMap((group) => group.items)
-		.find((item) => isActivePath(pathname, item.href));
+  return families;
 }
 
 function getMobileNavigationItems(
-	mode: AppSidebarMode,
-	navigation: NavigationGroup[],
+  mode: AppSidebarMode,
+  navigation: NavigationGroup[],
 ) {
-	const items = navigation.flatMap((group) => group.items);
-	const preferredHrefs =
-		mode === "family"
-			? [
-					items.find((item) => item.title === "Dashboard")?.href,
-					items.find((item) => item.title === "Money")?.href,
-					items.find((item) => item.title === "Contributions")?.href,
-					items.find((item) => item.title === "Reports")?.href,
-				]
-			: ["/me", "/me/money", "/me/plans", "/family"];
-	const preferred = preferredHrefs
-		.filter((href): href is string => Boolean(href))
-		.map((href) => items.find((item) => item.href === href))
-		.filter((item): item is NavigationItem => Boolean(item));
+  const items = navigation.flatMap((group) => group.items);
+  const preferredHrefs =
+    mode === "family"
+      ? [
+          items.find((item) => item.title === "Dashboard")?.href,
+          items.find((item) => item.title === "Money")?.href,
+          items.find((item) => item.title === "Contributions")?.href,
+          items.find((item) => item.title === "Reports")?.href,
+        ]
+      : ["/me", "/me/money", "/me/plans", "/family"];
+  const preferred = preferredHrefs
+    .filter((href): href is string => Boolean(href))
+    .map((href) => items.find((item) => item.href === href))
+    .filter((item): item is NavigationItem => Boolean(item));
 
-	return preferred.slice(0, 4);
+  return preferred.slice(0, 4);
 }
 
 function getMobileNavigationLabel(title: string) {
-	if (title === "Overview") return "Home";
-	if (title === "Contributions") return "Contribute";
-	if (title === "Family workspaces") return "Families";
+  if (title === "Overview") return "Home";
+  if (title === "Contributions") return "Contribute";
+  if (title === "Family workspaces") return "Families";
 
-	return title;
+  return title;
 }
 
 function isActivePath(pathname: string, href: string) {
-	if (href === "/me" || /^\/family\/[^/]+$/.test(href)) {
-		return pathname === href;
-	}
+  if (href === "/me" || /^\/family\/[^/]+$/.test(href)) {
+    return pathname === href;
+  }
 
-	return pathname === href || pathname.startsWith(`${href}/`);
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 function formatFamilyName(familySlug?: string) {
-	if (!familySlug) {
-		return "Family workspace";
-	}
+  if (!familySlug) {
+    return "Family workspace";
+  }
 
-	return decodeURIComponent(familySlug)
-		.replace(/[-_]+/g, " ")
-		.replace(/\s+/g, " ")
-		.trim()
-		.replace(/\b\w/g, (letter) => letter.toUpperCase());
+  return decodeURIComponent(familySlug)
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function getInitials(value: string) {
-	return value
-		.split(" ")
-		.filter(Boolean)
-		.slice(0, 2)
-		.map((part) => part[0]?.toUpperCase())
-		.join("");
+  return value
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
 }

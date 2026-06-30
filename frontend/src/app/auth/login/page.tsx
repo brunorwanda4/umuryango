@@ -167,6 +167,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
               "/auth/forgot-password",
               locale,
             )}
+            postLoginHref={getLocalizedHref("/me", locale)}
           />
 
           <Button

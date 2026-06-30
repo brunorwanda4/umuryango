@@ -1,6 +1,7 @@
 "use client";
 
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { GoogleIcon } from "@/components/icons/google-icon";
@@ -32,6 +33,7 @@ export type LoginFormCopy = {
 type LoginFormProps = {
   copy: LoginFormCopy;
   forgotPasswordHref: string;
+  postLoginHref: string;
 };
 
 const identifierBoundaryCharacters = /^[`'"]+|[`'"]+$/g;
@@ -40,7 +42,12 @@ function normalizeLoginIdentifier(value: string) {
   return value.trim().replace(identifierBoundaryCharacters, "");
 }
 
-export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
+export const LoginForm = ({
+  copy,
+  forgotPasswordHref,
+  postLoginHref,
+}: LoginFormProps) => {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -79,6 +86,7 @@ export const LoginForm = ({ copy, forgotPasswordHref }: LoginFormProps) => {
     }
 
     setSuccessMessage(copy.success);
+    router.push(postLoginHref);
     setIsPending(false);
   };
 
