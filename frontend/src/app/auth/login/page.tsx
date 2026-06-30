@@ -40,7 +40,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
 
   return (
     <main className="grid min-h-dvh bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_minmax(28rem,1fr)]">
-      <section className="relative flex min-h-[42rem] flex-col overflow-hidden border-border px-6 py-8 sm:px-10 lg:min-h-dvh lg:border-r lg:px-12">
+      <section className="relative order-2 flex min-h-[42rem] flex-col overflow-hidden border-border px-6 py-8 sm:px-10 lg:order-1 lg:min-h-dvh lg:border-r lg:px-12">
         <Link
           href={getLocalizedHref("/", locale)}
           className="flex size-14 items-center justify-center rounded-2xl bg-card shadow-sm ring-1 ring-border"
@@ -153,7 +153,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
         </div>
       </section>
 
-      <section className="flex mt-12 items-start border-t border-border px-6 py-10 sm:px-10 lg:min-h-dvh lg:items-center lg:border-t-0 lg:px-14">
+      <section className="order-1 flex min-h-dvh items-center border-border px-6 py-10 sm:px-10 lg:order-2 lg:min-h-dvh lg:border-t-0 lg:px-14">
         <div className="mx-auto flex w-full max-w-[32.75rem] flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h2 className="text-xl font-semibold tracking-normal">
