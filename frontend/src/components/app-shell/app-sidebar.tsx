@@ -148,18 +148,17 @@ const personalSettingsNavigation: NavigationGroup[] = [
 const getFamilySettingsChildren = (familyHref: string): NavigationItem[] => [
   {
     title: "General",
-    href: `${familyHref}/settings#general`,
+    href: `${familyHref}/settings/general`,
     icon: SettingsIcon,
   },
   {
     title: "Members and access",
-    href: `${familyHref}/settings`,
+    href: `${familyHref}/settings/members`,
     icon: UsersIcon,
-    exact: true,
   },
   {
     title: "Audit",
-    href: `${familyHref}/settings#audit`,
+    href: `${familyHref}/settings/audit`,
     icon: ClipboardListIcon,
   },
 ];

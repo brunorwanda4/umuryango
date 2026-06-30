@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  ArrowRightIcon,
+  ClipboardListIcon,
+  SettingsIcon,
+  UsersIcon,
+} from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +28,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ALL_CAPABILITIES,
@@ -72,6 +78,8 @@ type AuditEvent = {
   createdAt: string;
 };
 
+type FamilySettingsPage = "overview" | "general" | "members" | "audit";
+
 const FAMILY_TYPE_OPTIONS: { value: FamilyType; label: string }[] = [
   { value: "NUCLEAR", label: "Nuclear family" },
   { value: "JOINT_EXTENDED", label: "Joint / extended family" },
@@ -89,7 +97,13 @@ const CADENCE_OPTIONS = [
   { value: "event-based", label: "Event based" },
 ];
 
-export function FamilySettings({ familySlug }: { familySlug: string }) {
+export function FamilySettings({
+  familySlug,
+  page = "overview",
+}: {
+  familySlug: string;
+  page?: FamilySettingsPage;
+}) {
   const [family, setFamily] = useState<FamilyDetail>();
   const [error, setError] = useState<string>();
 
@@ -126,36 +140,35 @@ export function FamilySettings({ familySlug }: { familySlug: string }) {
 
   const canManageMembers = hasCapability(family, "MANAGE_MEMBERS");
   const canManageSettings = hasCapability(family, "MANAGE_FAMILY_SETTINGS");
+  const settingsHref = `/family/${encodeURIComponent(familySlug)}/settings`;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="font-bold text-2xl tracking-tight">Family settings</h1>
+        <h1 className="font-bold text-2xl tracking-tight">
+          {getPageTitle(page)}
+        </h1>
         <p className="text-muted-foreground text-sm">{family.name}</p>
       </div>
 
-      <Tabs defaultValue="members">
-        <TabsList className="max-w-full overflow-x-auto">
-          {canManageSettings ? (
-            <TabsTrigger value="general">General</TabsTrigger>
-          ) : null}
-          <TabsTrigger value="members">Members &amp; access</TabsTrigger>
-          {canManageMembers ? (
-            <TabsTrigger value="audit">Audit</TabsTrigger>
-          ) : null}
-        </TabsList>
+      {page === "overview" ? (
+        <SettingsOverview
+          canManageMembers={canManageMembers}
+          canManageSettings={canManageSettings}
+          settingsHref={settingsHref}
+        />
+      ) : null}
 
-        {canManageSettings ? (
-          <TabsContent value="general">
-            <GeneralTab
-              familySlug={familySlug}
-              family={family}
-              onSaved={load}
-            />
-          </TabsContent>
-        ) : null}
+      {page === "general" ? (
+        canManageSettings ? (
+          <GeneralTab familySlug={familySlug} family={family} onSaved={load} />
+        ) : (
+          <SettingsPermissionAlert action="manage general family settings" />
+        )
+      ) : null}
 
-        <TabsContent value="members" className="flex flex-col gap-3">
+      {page === "members" ? (
+        <div className="flex flex-col gap-3">
           {family.members.map((member) => (
             <MemberAccessCard
               key={member.id}
@@ -165,16 +178,104 @@ export function FamilySettings({ familySlug }: { familySlug: string }) {
               onChanged={load}
             />
           ))}
-        </TabsContent>
+        </div>
+      ) : null}
 
-        {canManageMembers ? (
-          <TabsContent value="audit">
-            <AuditTab familySlug={familySlug} />
-          </TabsContent>
-        ) : null}
-      </Tabs>
+      {page === "audit" ? (
+        canManageMembers ? (
+          <AuditTab familySlug={familySlug} />
+        ) : (
+          <SettingsPermissionAlert action="view the family audit log" />
+        )
+      ) : null}
     </div>
   );
+}
+
+function SettingsOverview({
+  canManageMembers,
+  canManageSettings,
+  settingsHref,
+}: {
+  canManageMembers: boolean;
+  canManageSettings: boolean;
+  settingsHref: string;
+}) {
+  const sections = [
+    {
+      title: "General",
+      description: "Edit family name, type, currency, and contribution rhythm.",
+      href: `${settingsHref}/general`,
+      icon: SettingsIcon,
+      enabled: canManageSettings,
+    },
+    {
+      title: "Members and access",
+      description: "Control capabilities for each family member.",
+      href: `${settingsHref}/members`,
+      icon: UsersIcon,
+      enabled: true,
+    },
+    {
+      title: "Audit",
+      description: "Review recent permission and member activity.",
+      href: `${settingsHref}/audit`,
+      icon: ClipboardListIcon,
+      enabled: canManageMembers,
+    },
+  ];
+
+  return (
+    <div className="grid gap-4 md:grid-cols-3">
+      {sections.map((section) => (
+        <Card key={section.href}>
+          <CardHeader>
+            <div className="flex items-center justify-between gap-3">
+              <section.icon className="size-5" aria-hidden="true" />
+              {section.enabled ? null : (
+                <Badge variant="outline">No access</Badge>
+              )}
+            </div>
+            <CardTitle className="text-base">{section.title}</CardTitle>
+            <CardDescription>{section.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {section.enabled ? (
+              <Button asChild variant="outline" className="w-full">
+                <Link href={section.href}>
+                  Open
+                  <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="outline" className="w-full" disabled>
+                Restricted
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function SettingsPermissionAlert({ action }: { action: string }) {
+  return (
+    <Alert variant="destructive">
+      <AlertTitle>Access restricted</AlertTitle>
+      <AlertDescription>
+        You do not have permission to {action}.
+      </AlertDescription>
+    </Alert>
+  );
+}
+
+function getPageTitle(page: FamilySettingsPage) {
+  if (page === "general") return "General settings";
+  if (page === "members") return "Member access";
+  if (page === "audit") return "Audit log";
+
+  return "Family settings";
 }
 
 function MemberAccessCard({
@@ -290,6 +391,14 @@ function GeneralTab({
   const [error, setError] = useState<string>();
   const nameId = `${family.id}-settings-name`;
   const descriptionId = `${family.id}-settings-description`;
+
+  useEffect(() => {
+    setName(family.name);
+    setType(family.type);
+    setCurrency(family.defaultCurrency);
+    setCadence(family.contributionCadence);
+    setDescription(family.description ?? "");
+  }, [family]);
 
   const save = async () => {
     setPending(true);
