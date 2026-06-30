@@ -20,7 +20,7 @@ Keep this file short. Update it only for meaningful product or engineering progr
 | Debts | Planned | Borrowed/lent direction, schedules, repayments, reminders. |
 | Projects/Documents | In progress | Project persistence, overview aggregation, and create-project API are implemented; documents and project contribution/update write flows remain. |
 | Communication/Events | Planned | Announcements, emergency alerts, events, RSVP, attendance, reminders. |
-| Reports/Exports | Planned | Monthly/annual/budget/savings/debt/project reports, PDF, Excel, print. |
+| Reports/Exports | In progress | `GET /api/v1/families/:familyId/reports/overview` implemented — aggregates contribution payments and project budgets server-side with VIEW_REPORTS permission check. Income/expense/savings/debt ledgers return null until those modules are modelled. Export table not yet modelled. |
 | Notifications | Planned | In-app, email, SMS, push. |
 | Dashboard/UI System | Planned | Role dashboards, black-and-white theme, light/dark mode, localization-ready text. |
 
