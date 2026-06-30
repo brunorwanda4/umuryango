@@ -126,6 +126,7 @@ function CreateProjectForm({
     ],
     [family.members],
   );
+  const defaultProjectDates = useMemo(() => getDefaultProjectDates(), []);
   const { form, onSubmit, error, success, isPending } =
     useZodFormSubmit<CreateProjectFormValues>({
       schema,
@@ -134,8 +135,8 @@ function CreateProjectForm({
           name: "",
           category: "house",
           targetAmount: "",
-          startDate: "",
-          targetDate: "",
+          startDate: defaultProjectDates.startDate,
+          targetDate: defaultProjectDates.targetDate,
           ownerMemberId: "unassigned",
           contributionStrategy: "equal_shares",
           expectedContributionAmount: "",
@@ -272,19 +273,7 @@ function CreateProjectForm({
           selectOptions={contributionStrategyOptions}
           required
         />
-        <CommonFormField
-          control={form.control}
-          name="expectedContributionAmount"
-          label={`Expected contribution per member (${currency})`}
-          placeholder={
-            getCurrencyFractionDigits(currency) === 0 ? "10000" : "100.00"
-          }
-          description="Optional. Use this for equal shares, monthly plans, or expected pledges."
-          inputProps={{
-            inputMode: "decimal",
-            autoComplete: "off",
-          }}
-        />
+
         <CommonFormField
           control={form.control}
           name="participantNotes"
@@ -404,4 +393,39 @@ function getCurrencyFractionDigits(currency: string) {
   } catch {
     return 2;
   }
+}
+
+function getDefaultProjectDates() {
+  const today = new Date();
+
+  return {
+    startDate: formatDateInputValue(addCalendarMonths(today, 1)),
+    targetDate: formatDateInputValue(addCalendarMonths(today, 12)),
+  };
+}
+
+function addCalendarMonths(date: Date, monthOffset: number) {
+  const target = new Date(date);
+  const dayOfMonth = target.getDate();
+
+  target.setDate(1);
+  target.setMonth(target.getMonth() + monthOffset);
+
+  const lastDayOfTargetMonth = new Date(
+    target.getFullYear(),
+    target.getMonth() + 1,
+    0,
+  ).getDate();
+
+  target.setDate(Math.min(dayOfMonth, lastDayOfTargetMonth));
+
+  return target;
+}
+
+function formatDateInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
