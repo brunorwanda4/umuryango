@@ -1,0 +1,104 @@
+import {
+  CalendarClockIcon,
+  HammerIcon,
+  HandCoinsIcon,
+  UsersRoundIcon,
+  TargetIcon,
+  WalletCardsIcon,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import type { ProjectsOverview } from "./types";
+import { formatOptionalMoney } from "./utils";
+
+export function ProjectMetricCards({
+  currency,
+  projects,
+}: {
+  currency: string;
+  projects: ProjectsOverview | null;
+}) {
+  const totals = projects?.totals;
+  const cards = [
+    {
+      title: "Planned budget",
+      value: formatOptionalMoney(totals?.plannedMinorUnits, currency),
+      description: "Approved target amounts across projects",
+      icon: WalletCardsIcon,
+    },
+    {
+      title: "Contributed",
+      value: formatOptionalMoney(totals?.contributedMinorUnits, currency),
+      description: "Verified project contributions received",
+      icon: HandCoinsIcon,
+    },
+    {
+      title: "Outstanding",
+      value: formatOptionalMoney(totals?.outstandingMinorUnits, currency),
+      description: "Remaining amount needed for open plans",
+      icon: TargetIcon,
+    },
+    {
+      title: "Active projects",
+      value:
+        typeof totals?.activeProjectCount === "number"
+          ? totals.activeProjectCount.toLocaleString()
+          : "No records",
+      description: "Projects currently being worked on",
+      icon: HammerIcon,
+    },
+    {
+      title: "Past target date",
+      value:
+        typeof totals?.overdueProjectCount === "number"
+          ? totals.overdueProjectCount.toLocaleString()
+          : "No records",
+      description: "Projects that need review or a new date",
+      icon: CalendarClockIcon,
+    },
+    {
+      title: "Contributors",
+      value:
+        typeof totals?.contributorCount === "number"
+          ? totals.contributorCount.toLocaleString()
+          : "No records",
+      description: "Members who contributed to projects",
+      icon: UsersRoundIcon,
+    },
+  ];
+
+  return (
+    <section
+      aria-label="Family projects summary"
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6"
+    >
+      {cards.map((card) => {
+        const Icon = card.icon;
+
+        return (
+          <Card key={card.title}>
+            <CardHeader className="flex flex-row items-center justify-between gap-3">
+              <div className="min-w-0">
+                <CardDescription>{card.title}</CardDescription>
+                <CardTitle className="mt-1 truncate text-xl">
+                  {card.value}
+                </CardTitle>
+              </div>
+              <Icon className="size-5 shrink-0 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground text-xs leading-5">
+                {card.description}
+              </p>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </section>
+  );
+}
