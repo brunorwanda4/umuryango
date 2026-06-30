@@ -66,6 +66,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { type CurrentUser, useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 import apiRequest from "@/service/api";
@@ -74,10 +75,12 @@ type NavigationItem = {
   title: string;
   href: string;
   icon: LucideIcon;
+  exact?: boolean;
   items?: NavigationItem[];
 };
 
-const settingsChildren: NavigationItem[] = [
+const personalSettingsChildren: NavigationItem[] = [
+  { title: "Account", href: "/me/settings", icon: SettingsIcon },
   { title: "Security", href: "/me/security", icon: ShieldCheckIcon },
   { title: "Help and guides", href: "/items", icon: BookOpenCheckIcon },
 ];
@@ -88,6 +91,7 @@ type NavigationGroup = {
 };
 
 type AppSidebarMode = "family" | "personal";
+type SidebarView = "main" | "settings";
 
 type AppSidebarShellProps = {
   children: ReactNode;
@@ -115,9 +119,49 @@ const personalNavigation: NavigationGroup[] = [
         title: "Settings",
         href: "/me/settings",
         icon: SettingsIcon,
-        items: settingsChildren,
+        items: personalSettingsChildren,
       },
     ],
+  },
+];
+
+const personalSettingsNavigation: NavigationGroup[] = [
+  {
+    label: "Personal settings",
+    items: [
+      {
+        title: "Account",
+        href: "/me/settings",
+        icon: SettingsIcon,
+        exact: true,
+      },
+      { title: "Security", href: "/me/security", icon: ShieldCheckIcon },
+    ],
+  },
+  {
+    label: "Support",
+    items: [
+      { title: "Help and guides", href: "/items", icon: BookOpenCheckIcon },
+    ],
+  },
+];
+
+const getFamilySettingsChildren = (familyHref: string): NavigationItem[] => [
+  {
+    title: "General",
+    href: `${familyHref}/settings#general`,
+    icon: SettingsIcon,
+  },
+  {
+    title: "Members and access",
+    href: `${familyHref}/settings`,
+    icon: UsersIcon,
+    exact: true,
+  },
+  {
+    title: "Audit",
+    href: `${familyHref}/settings#audit`,
+    icon: ClipboardListIcon,
   },
 ];
 
@@ -174,7 +218,29 @@ const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
           title: "Settings",
           href: `${familyHref}/settings`,
           icon: SettingsIcon,
-          items: settingsChildren,
+          items: getFamilySettingsChildren(familyHref),
+        },
+      ],
+    },
+  ];
+};
+
+const getFamilySettingsNavigation = (familySlug: string): NavigationGroup[] => {
+  const familyHref = `/family/${familySlug}`;
+
+  return [
+    {
+      label: "Family settings",
+      items: getFamilySettingsChildren(familyHref),
+    },
+    {
+      label: "Related pages",
+      items: [
+        { title: "Members", href: `${familyHref}/members`, icon: UsersIcon },
+        {
+          title: "Documents",
+          href: `${familyHref}/documents`,
+          icon: FileTextIcon,
         },
       ],
     },
@@ -296,11 +362,36 @@ function AppSidebarContent({
   const encodedFamilySlug = encodeURIComponent(familySlug ?? "");
   const { setOpenMobile, open } = useSidebar();
   const { user } = useCurrentUser();
+  const currentHash = useCurrentHash();
   const familyName = formatFamilyName(familySlug);
   const navigation =
     mode === "family" && encodedFamilySlug
       ? getFamilyNavigation(encodedFamilySlug)
       : personalNavigation;
+  const settingsNavigation =
+    mode === "family" && encodedFamilySlug
+      ? getFamilySettingsNavigation(encodedFamilySlug)
+      : personalSettingsNavigation;
+  const isSettingsArea = isSettingsPath(pathname, mode, encodedFamilySlug);
+  const [sidebarView, setSidebarView] = useState<SidebarView>(
+    isSettingsArea ? "settings" : "main",
+  );
+  const showingSettingsNavigation =
+    isSettingsArea && sidebarView === "settings";
+  const activeNavigation = showingSettingsNavigation
+    ? settingsNavigation
+    : navigation;
+  const sidebarTitle = showingSettingsNavigation
+    ? mode === "family"
+      ? "Family settings"
+      : "Personal settings"
+    : mode === "family"
+      ? familyName
+      : "Personal workspace";
+
+  useEffect(() => {
+    setSidebarView(isSettingsArea ? "settings" : "main");
+  }, [isSettingsArea]);
 
   return (
     <>
@@ -313,31 +404,73 @@ function AppSidebarContent({
         )}
       >
         <SidebarHeader>
-          <div className="flex items-center justify-between gap-2 px-1">
-            <span className="truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-base text-transparent tracking-tight group-data-[collapsible=icon]:hidden">
-              {mode === "family" ? familyName : "Personal workspace"}
-            </span>
-            <SidebarTrigger />
+          <div className="flex flex-col gap-2 px-1">
+            <div className="flex items-center justify-between gap-2">
+              <span className="truncate bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-base text-transparent tracking-tight group-data-[collapsible=icon]:hidden">
+                {sidebarTitle}
+              </span>
+              <SidebarTrigger />
+            </div>
+            {isSettingsArea ? (
+              <ToggleGroup
+                type="single"
+                value={sidebarView}
+                onValueChange={(value) => {
+                  if (value === "main" || value === "settings") {
+                    setSidebarView(value);
+                  }
+                }}
+                className="w-full group-data-[collapsible=icon]:hidden"
+                aria-label="Sidebar navigation"
+              >
+                <ToggleGroupItem
+                  value="main"
+                  className="h-8 flex-1"
+                  aria-label="Show main sidebar"
+                >
+                  Main
+                </ToggleGroupItem>
+                <ToggleGroupItem
+                  value="settings"
+                  className="h-8 flex-1"
+                  aria-label="Show settings sidebar"
+                >
+                  Settings
+                </ToggleGroupItem>
+              </ToggleGroup>
+            ) : null}
           </div>
         </SidebarHeader>
         <SidebarContent>
-          {navigation.map((group) => (
+          {activeNavigation.map((group) => (
             <SidebarGroup key={group.label}>
               <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {group.items.map((item) =>
-                    item.items?.length ? (
+                  {group.items.map((item) => {
+                    const childIsActive = item.items?.some((sub) =>
+                      isActivePath(pathname, sub.href, currentHash, sub.exact),
+                    );
+                    const itemIsActive =
+                      childIsActive ||
+                      isActivePath(
+                        pathname,
+                        item.href,
+                        currentHash,
+                        item.exact,
+                      );
+
+                    return item.items?.length ? (
                       <Collapsible
                         key={item.href}
                         asChild
-                        defaultOpen={isActivePath(pathname, item.href)}
+                        defaultOpen={itemIsActive}
                         className="group/collapsible"
                       >
                         <SidebarMenuItem>
                           <CollapsibleTrigger asChild>
                             <SidebarMenuButton
-                              isActive={isActivePath(pathname, item.href)}
+                              isActive={itemIsActive}
                               tooltip={item.title}
                             >
                               <item.icon aria-hidden="true" />
@@ -351,7 +484,12 @@ function AppSidebarContent({
                                 <SidebarMenuSubItem key={sub.href}>
                                   <SidebarMenuSubButton
                                     asChild
-                                    isActive={isActivePath(pathname, sub.href)}
+                                    isActive={isActivePath(
+                                      pathname,
+                                      sub.href,
+                                      currentHash,
+                                      sub.exact,
+                                    )}
                                   >
                                     <Link href={sub.href}>
                                       <sub.icon aria-hidden="true" />
@@ -368,7 +506,7 @@ function AppSidebarContent({
                       <SidebarMenuItem key={item.href}>
                         <SidebarMenuButton
                           asChild
-                          isActive={isActivePath(pathname, item.href)}
+                          isActive={itemIsActive}
                           tooltip={item.title}
                         >
                           <Link href={item.href}>
@@ -377,8 +515,8 @@ function AppSidebarContent({
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
-                    ),
-                  )}
+                    );
+                  })}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -410,9 +548,10 @@ function AppSidebarContent({
       <MobileInstallPrompt />
       <MobileBottomNavigation
         mode={mode}
-        navigation={navigation}
+        navigation={activeNavigation}
         onOpenMore={() => setOpenMobile(true)}
         pathname={pathname}
+        currentHash={currentHash}
       />
     </>
   );
@@ -511,14 +650,18 @@ function MobileBottomNavigation({
   navigation,
   onOpenMore,
   pathname,
+  currentHash,
 }: {
   mode: AppSidebarMode;
   navigation: NavigationGroup[];
   onOpenMore: () => void;
   pathname: string;
+  currentHash: string;
 }) {
   const items = getMobileNavigationItems(mode, navigation);
-  const hasActiveItem = items.some((item) => isActivePath(pathname, item.href));
+  const hasActiveItem = items.some((item) =>
+    isActivePath(pathname, item.href, currentHash, item.exact),
+  );
 
   return (
     <nav
@@ -527,7 +670,12 @@ function MobileBottomNavigation({
     >
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
         {items.map((item) => {
-          const isActive = isActivePath(pathname, item.href);
+          const isActive = isActivePath(
+            pathname,
+            item.href,
+            currentHash,
+            item.exact,
+          );
           const label = getMobileNavigationLabel(item.title);
 
           return (
@@ -725,7 +873,7 @@ function getMobileNavigationItems(
     .map((href) => items.find((item) => item.href === href))
     .filter((item): item is NavigationItem => Boolean(item));
 
-  return preferred.slice(0, 4);
+  return (preferred.length ? preferred : items).slice(0, 4);
 }
 
 function getMobileNavigationLabel(title: string) {
@@ -736,12 +884,68 @@ function getMobileNavigationLabel(title: string) {
   return title;
 }
 
-function isActivePath(pathname: string, href: string) {
-  if (href === "/me" || /^\/family\/[^/]+$/.test(href)) {
-    return pathname === href;
+function useCurrentHash() {
+  const [hash, setHash] = useState("");
+
+  useEffect(() => {
+    function syncHash() {
+      setHash(window.location.hash);
+    }
+
+    syncHash();
+    window.addEventListener("hashchange", syncHash);
+    window.addEventListener("popstate", syncHash);
+
+    return () => {
+      window.removeEventListener("hashchange", syncHash);
+      window.removeEventListener("popstate", syncHash);
+    };
+  }, []);
+
+  return hash;
+}
+
+function isSettingsPath(
+  pathname: string,
+  mode: AppSidebarMode,
+  encodedFamilySlug: string,
+) {
+  if (mode === "family" && encodedFamilySlug) {
+    const settingsHref = `/family/${encodedFamilySlug}/settings`;
+
+    return pathname === settingsHref || pathname.startsWith(`${settingsHref}/`);
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return (
+    pathname === "/me/settings" ||
+    pathname.startsWith("/me/settings/") ||
+    pathname === "/me/security" ||
+    pathname.startsWith("/me/security/")
+  );
+}
+
+function isActivePath(
+  pathname: string,
+  href: string,
+  currentHash = "",
+  exact = false,
+) {
+  const [hrefPath, hrefHash] = href.split("#");
+  const targetPath = hrefPath || href;
+
+  if (hrefHash !== undefined) {
+    return pathname === targetPath && currentHash === `#${hrefHash}`;
+  }
+
+  if (exact) {
+    return pathname === targetPath && !currentHash;
+  }
+
+  if (targetPath === "/me" || /^\/family\/[^/]+$/.test(targetPath)) {
+    return pathname === targetPath;
+  }
+
+  return pathname === targetPath || pathname.startsWith(`${targetPath}/`);
 }
 
 function formatFamilyName(familySlug?: string) {
