@@ -23,7 +23,7 @@ import { CreateReceiptDto } from './dto/create-receipt.dto';
 @ApiTags('money-receipts')
 @ApiCookieAuth(ACCESS_COOKIE_NAME)
 @UseGuards(JwtAuthGuard)
-@Controller('api/v1/families/:familyId/receipts')
+@Controller('api/v1/families/:familyId/money/receipts')
 export class ReceiptsController {
   constructor(private readonly receiptsService: ReceiptsService) {}
 

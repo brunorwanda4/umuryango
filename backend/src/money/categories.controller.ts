@@ -24,7 +24,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 @ApiTags('money-categories')
 @ApiCookieAuth(ACCESS_COOKIE_NAME)
 @UseGuards(JwtAuthGuard)
-@Controller('api/v1/families/:familyId/categories')
+@Controller('api/v1/families/:familyId/money/categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 

@@ -25,7 +25,7 @@ import { UpdateBudgetDto } from './dto/update-budget.dto';
 @ApiTags('money-budgets')
 @ApiCookieAuth(ACCESS_COOKIE_NAME)
 @UseGuards(JwtAuthGuard)
-@Controller('api/v1/families/:familyId/budgets')
+@Controller('api/v1/families/:familyId/money/budgets')
 export class BudgetsController {
   constructor(private readonly budgetsService: BudgetsService) {}
 

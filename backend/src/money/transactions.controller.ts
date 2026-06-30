@@ -28,7 +28,7 @@ import { UpdateTransactionDto } from './dto/update-transaction.dto';
 @ApiTags('money-transactions')
 @ApiCookieAuth(ACCESS_COOKIE_NAME)
 @UseGuards(JwtAuthGuard)
-@Controller('api/v1/families/:familyId/transactions')
+@Controller('api/v1/families/:familyId/money/transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
