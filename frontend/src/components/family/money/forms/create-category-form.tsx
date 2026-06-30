@@ -37,8 +37,12 @@ const colorOptions = [
 
 function getColorInputValue(value: unknown) {
   const color = typeof value === "string" ? value : "";
-
+  // Only return a valid hex for the native color input; CSS vars are handled by presets
   return /^#[\da-f]{6}$/i.test(color) ? color : "#111111";
+}
+
+function isHexColor(value: unknown): value is string {
+  return typeof value === "string" && /^#[\da-f]{6}$/i.test(value);
 }
 
 function normalizeCategoryName(value: string) {
@@ -190,8 +194,10 @@ export function CreateCategoryForm({
             fieldType="custom"
             required
             description="Choose a preset or use a custom color for category lists and future reports."
-            render={({ field, id, invalid, disabled }) => {
+          render={({ field, id, invalid, disabled }) => {
               const selectedColor = field.value?.toString() ?? "";
+              const isPreset = colorOptions.some((o) => o.value === selectedColor);
+              const isHex = isHexColor(selectedColor);
 
               return (
                 <div className="flex min-w-0 flex-col gap-3">
@@ -222,18 +228,27 @@ export function CreateCategoryForm({
                       );
                     })}
                   </div>
-                  <Input
-                    aria-invalid={invalid}
-                    className="h-10 cursor-pointer p-1"
-                    disabled={disabled}
-                    id={id}
-                    name={field.name}
-                    onBlur={field.onBlur}
-                    onChange={(event) => field.onChange(event.target.value)}
-                    ref={field.ref}
-                    type="color"
-                    value={getColorInputValue(selectedColor)}
-                  />
+                  <div className="flex items-center gap-2">
+                    <Input
+                      aria-invalid={invalid}
+                      className="h-10 w-16 cursor-pointer p-1"
+                      disabled={disabled}
+                      id={id}
+                      name={field.name}
+                      onBlur={field.onBlur}
+                      onChange={(event) => field.onChange(event.target.value)}
+                      ref={field.ref}
+                      type="color"
+                      value={getColorInputValue(selectedColor)}
+                    />
+                    <span className="text-muted-foreground text-xs">
+                      {isPreset
+                        ? "Preset color selected"
+                        : isHex
+                          ? selectedColor
+                          : "Pick a custom color"}
+                    </span>
+                  </div>
                 </div>
               );
             }}

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TransactionType } from '@prisma/client';
+import { CategoryStatus, TransactionType } from '@prisma/client';
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateCategoryDto {
@@ -16,4 +16,19 @@ export class CreateCategoryDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @ApiPropertyOptional({ description: 'Lucide icon name for the category' })
+  @IsString()
+  @IsOptional()
+  icon?: string;
+
+  @ApiPropertyOptional({ description: 'Color value (hex or CSS variable) for the category' })
+  @IsString()
+  @IsOptional()
+  color?: string;
+
+  @ApiPropertyOptional({ enum: CategoryStatus, description: 'Status of the category' })
+  @IsEnum(CategoryStatus)
+  @IsOptional()
+  status?: CategoryStatus;
 }

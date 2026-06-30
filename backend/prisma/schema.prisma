@@ -143,6 +143,11 @@ enum TransactionType {
   EXPENSE
 }
 
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
 enum TransactionStatus {
   PENDING
   APPROVED
@@ -215,6 +220,7 @@ model User {
   approvedTransactions         FamilyTransaction[]         @relation("TransactionsApproved")
   uploadedReceipts             FamilyReceipt[]             @relation("ReceiptsUploaded")
   createdBudgets               FamilyBudget[]              @relation("BudgetsCreated")
+  createdCategories            FamilyTransactionCategory[] @relation("CategoryCreatedBy")
 
   @@index([status])
 }
@@ -550,18 +556,25 @@ model FamilyProjectUpdate {
 }
 
 model FamilyTransactionCategory {
-  id          String            @id @default(cuid())
-  familyId    String
-  name        String
-  type        TransactionType
-  description String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  family      Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  transactions FamilyTransaction[]
-  budgets     FamilyBudget[]
+  id            String          @id @default(cuid())
+  familyId      String
+  name          String
+  type          TransactionType
+  description   String?
+  icon          String?
+  color         String?
+  status        CategoryStatus  @default(ACTIVE)
+  isDefault     Boolean         @default(false)
+  createdById   String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  family        Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdBy     User?           @relation("CategoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  transactions  FamilyTransaction[]
+  budgets       FamilyBudget[]
 
   @@index([familyId, type])
+  @@index([familyId, status])
 }
 
 model FamilyTransaction {

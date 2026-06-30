@@ -16,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ACCESS_COOKIE_NAME } from '../auth/auth.constants';
+import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -32,10 +33,11 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Create a new transaction category' })
   @ApiCreatedResponse({ description: 'Category created successfully.' })
   async create(
+    @CurrentUserId() userId: string,
     @Param('familyId') familyId: string,
     @Body() createCategoryDto: CreateCategoryDto,
   ) {
-    const data = await this.categoriesService.create(familyId, createCategoryDto);
+    const data = await this.categoriesService.create(familyId, createCategoryDto, userId);
     return { data, message: 'Category created successfully.' };
   }
 

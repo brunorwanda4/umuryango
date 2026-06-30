@@ -7,7 +7,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(familyId: string, createCategoryDto: CreateCategoryDto) {
+  async create(familyId: string, createCategoryDto: CreateCategoryDto, createdById?: string) {
     // Basic check if family exists
     const family = await this.prisma.family.findUnique({
       where: { id: familyId },
@@ -22,15 +22,27 @@ export class CategoriesService {
         name: createCategoryDto.name,
         type: createCategoryDto.type,
         description: createCategoryDto.description,
+        icon: createCategoryDto.icon,
+        color: createCategoryDto.color,
+        status: createCategoryDto.status ?? 'ACTIVE',
+        createdById: createdById ?? null,
       },
     });
   }
 
   async findAll(familyId: string) {
-    return this.prisma.familyTransactionCategory.findMany({
+    const categories = await this.prisma.familyTransactionCategory.findMany({
       where: { familyId },
       orderBy: { createdAt: 'desc' },
+      include: {
+        createdBy: { select: { fullName: true } },
+      },
     });
+
+    return categories.map(({ createdBy, ...rest }) => ({
+      ...rest,
+      createdByName: createdBy?.fullName ?? null,
+    }));
   }
 
   async findOne(familyId: string, id: string) {
