@@ -133,6 +133,18 @@ enum ContributionPaymentStatus {
   REVERSED
 }
 
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVERSED
+}
+
 enum FamilyProjectCategory {
   HOUSE
   VEHICLE
@@ -194,6 +206,10 @@ model User {
   recordedProjectContributions FamilyProjectContribution[] @relation("ProjectContributionsRecorded")
   verifiedProjectContributions FamilyProjectContribution[] @relation("ProjectContributionsVerified")
   createdProjectUpdates        FamilyProjectUpdate[]       @relation("ProjectUpdatesCreated")
+  createdTransactions          FamilyTransaction[]         @relation("TransactionsCreated")
+  approvedTransactions         FamilyTransaction[]         @relation("TransactionsApproved")
+  uploadedReceipts             FamilyReceipt[]             @relation("ReceiptsUploaded")
+  createdBudgets               FamilyBudget[]              @relation("BudgetsCreated")
 
   @@index([status])
 }
@@ -266,6 +282,10 @@ model Family {
   projects             FamilyProject[]
   projectContributions FamilyProjectContribution[]
   projectUpdates       FamilyProjectUpdate[]
+  transactionCategories FamilyTransactionCategory[]
+  transactions         FamilyTransaction[]
+  receipts             FamilyReceipt[]
+  budgets              FamilyBudget[]
 
   @@index([createdById])
 }
@@ -522,4 +542,86 @@ model FamilyProjectUpdate {
 
   @@index([familyId, createdAt])
   @@index([projectId, createdAt])
+}
+
+model FamilyTransactionCategory {
+  id          String            @id @default(cuid())
+  familyId    String
+  name        String
+  type        TransactionType
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  family      Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  transactions FamilyTransaction[]
+  budgets     FamilyBudget[]
+
+  @@index([familyId, type])
+}
+
+model FamilyTransaction {
+  id               String            @id @default(cuid())
+  familyId         String
+  categoryId       String
+  amountMinorUnits BigInt
+  currency         String
+  type             TransactionType
+  status           TransactionStatus @default(PENDING)
+  date             DateTime
+  description      String?
+  paymentMethod    String?
+  idempotencyKey   String?
+  createdById      String
+  approvedById     String?
+  approvedAt       DateTime?
+  reversedAt       DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  family           Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  category         FamilyTransactionCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdBy        User              @relation("TransactionsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  approvedBy       User?             @relation("TransactionsApproved", fields: [approvedById], references: [id], onDelete: SetNull)
+  receipts         FamilyReceipt[]
+
+  @@unique([familyId, idempotencyKey])
+  @@index([familyId, type, date])
+  @@index([familyId, status])
+  @@index([categoryId])
+}
+
+model FamilyReceipt {
+  id             String            @id @default(cuid())
+  familyId       String
+  transactionId  String
+  fileName       String
+  fileType       String
+  fileSizeBytes  Int
+  storageKey     String 
+  uploadedById   String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  family         Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  transaction    FamilyTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  uploadedBy     User              @relation("ReceiptsUploaded", fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@index([familyId, transactionId])
+}
+
+model FamilyBudget {
+  id               String            @id @default(cuid())
+  familyId         String
+  categoryId       String?
+  amountMinorUnits BigInt
+  currency         String
+  startDate        DateTime
+  endDate          DateTime
+  createdById      String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  family           Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  category         FamilyTransactionCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdBy        User              @relation("BudgetsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([familyId, startDate, endDate])
+  @@index([categoryId])
 }

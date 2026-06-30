@@ -4,6 +4,8 @@ import {
   ContributionPaymentStatus,
   FamilyAuthority,
   FamilyCapability,
+  TransactionStatus,
+  TransactionType,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -50,7 +52,17 @@ export class MoneyService {
     const now = new Date();
     const currency = membership.family.defaultCurrency;
 
-    const [payments, cycles, pendingApprovalCount] = await Promise.all([
+    const [
+      payments,
+      cycles,
+      pendingPaymentApprovalCount,
+      incomes,
+      expenses,
+      budgetsData,
+      pendingTxApprovals,
+      txRecords,
+      pendingTxApprovalCount,
+    ] = await Promise.all([
       this.prisma.familyContributionPayment.findMany({
         where: {
           familyId,
@@ -78,6 +90,65 @@ export class MoneyService {
           status: ContributionPaymentStatus.PENDING,
         },
       }),
+      this.prisma.familyTransaction.findMany({
+        where: {
+          familyId,
+          type: TransactionType.INCOME,
+          status: TransactionStatus.APPROVED,
+          date: { gte: range.start, lt: range.end },
+          reversedAt: null,
+        },
+      }),
+      this.prisma.familyTransaction.findMany({
+        where: {
+          familyId,
+          type: TransactionType.EXPENSE,
+          status: TransactionStatus.APPROVED,
+          date: { gte: range.start, lt: range.end },
+          reversedAt: null,
+        },
+      }),
+      this.prisma.familyBudget.findMany({
+        where: {
+          familyId,
+          startDate: { lte: range.end },
+          endDate: { gte: range.start },
+        },
+        include: { category: { select: { name: true } } },
+      }),
+      this.prisma.familyTransaction.findMany({
+        where: {
+          familyId,
+          reversedAt: null,
+          status: TransactionStatus.PENDING,
+        },
+        include: {
+          createdBy: { select: { fullName: true } },
+          category: { select: { name: true } },
+        },
+        orderBy: { date: 'desc' },
+        take: 25,
+      }),
+      this.prisma.familyTransaction.findMany({
+        where: {
+          familyId,
+          date: { gte: range.start, lt: range.end },
+          reversedAt: null,
+        },
+        include: {
+          category: { select: { name: true } },
+          createdBy: { select: { fullName: true } },
+        },
+        orderBy: { date: 'desc' },
+        take: 25,
+      }),
+      this.prisma.familyTransaction.count({
+        where: {
+          familyId,
+          reversedAt: null,
+          status: TransactionStatus.PENDING,
+        },
+      }),
     ]);
 
     const verifiedPayments = payments.filter(
@@ -88,6 +159,10 @@ export class MoneyService {
       0n,
     );
 
+    const totalIncome = incomes.reduce((sum, tx) => sum + tx.amountMinorUnits, 0n);
+    const totalExpense = expenses.reduce((sum, tx) => sum + tx.amountMinorUnits, 0n);
+    const cashBalance = totalIncome + contributionsPaid - totalExpense;
+
     const overdueCount = cycles.filter(
       (cycle) =>
         cycle.status === ContributionCycleStatus.OVERDUE ||
@@ -95,7 +170,7 @@ export class MoneyService {
           cycle.dueDate < now),
     ).length;
 
-    const approvals = payments
+    const paymentApprovalItems = payments
       .filter((payment) => payment.status === ContributionPaymentStatus.PENDING)
       .slice(0, 25)
       .map((payment) => ({
@@ -108,7 +183,21 @@ export class MoneyService {
         status: 'pending',
       }));
 
-    const records = payments.slice(0, 25).map((payment) => ({
+    const txApprovalItems = pendingTxApprovals.map((tx) => ({
+      id: tx.id,
+      type: 'transaction',
+      title: `${tx.category.name} — ${tx.description || tx.type}`,
+      amountMinorUnits: tx.amountMinorUnits.toString(),
+      submittedBy: tx.createdBy.fullName,
+      submittedAt: tx.createdAt.toISOString(),
+      status: 'pending',
+    }));
+
+    const approvals = [...paymentApprovalItems, ...txApprovalItems]
+      .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+      .slice(0, 25);
+
+    const paymentRecords = payments.slice(0, 25).map((payment) => ({
       id: payment.id,
       type: 'contribution',
       title: `${payment.plan.name} — ${payment.member.user.fullName}`,
@@ -119,15 +208,36 @@ export class MoneyService {
       createdBy: payment.member.user.fullName,
     }));
 
-    const allocation =
-      contributionsPaid > 0n
-        ? [
-            {
-              label: 'Contributions',
-              amountMinorUnits: contributionsPaid.toString(),
-            },
-          ]
-        : [];
+    const transactionRecords = txRecords.map((tx) => ({
+      id: tx.id,
+      type: 'transaction',
+      title: `${tx.category.name} — ${tx.description || tx.type}`,
+      category: tx.category.name,
+      amountMinorUnits: tx.amountMinorUnits.toString(),
+      date: tx.date.toISOString(),
+      status: tx.status.toLowerCase(),
+      createdBy: tx.createdBy.fullName,
+    }));
+
+    const records = [...paymentRecords, ...transactionRecords]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 25);
+
+    const allocation: { label: string; amountMinorUnits: string }[] = [];
+    if (contributionsPaid > 0n) {
+      allocation.push({ label: 'Contributions', amountMinorUnits: contributionsPaid.toString() });
+    }
+    if (totalIncome > 0n) {
+      allocation.push({ label: 'Income', amountMinorUnits: totalIncome.toString() });
+    }
+
+    const budgets = budgetsData.map((b) => ({
+      id: b.id,
+      category: b.category ? b.category.name : 'Global',
+      amountMinorUnits: b.amountMinorUnits.toString(),
+      startDate: b.startDate.toISOString(),
+      endDate: b.endDate.toISOString(),
+    }));
 
     return {
       currency,
@@ -137,23 +247,20 @@ export class MoneyService {
         endDate: range.end.toISOString(),
       },
       generatedAt: now.toISOString(),
-      sourceRecordCount: payments.length,
+      sourceRecordCount: payments.length + txRecords.length,
       totals: {
-        // No income/expense ledger yet, so a cash balance cannot be derived.
-        cashBalanceMinorUnits: null,
-        incomeMinorUnits: null,
-        expenseMinorUnits: null,
+        cashBalanceMinorUnits: cashBalance.toString(),
+        incomeMinorUnits: totalIncome.toString(),
+        expenseMinorUnits: totalExpense.toString(),
         contributionsPaidMinorUnits: contributionsPaid.toString(),
         savingsMinorUnits: null,
         debtOutstandingMinorUnits: null,
-        pendingApprovalCount,
+        pendingApprovalCount: pendingPaymentApprovalCount + pendingTxApprovalCount,
         overdueCount,
       },
-      // Cash flow needs income and expense records that are not modelled yet.
       cashFlow: [],
       allocation,
-      // Budgets are not modelled yet.
-      budgets: [],
+      budgets,
       approvals,
       records,
     };
