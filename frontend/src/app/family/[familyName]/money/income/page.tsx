@@ -1,11 +1,11 @@
 import { MoneyIncomePage } from "@/components/family/money/money-income-page";
 
 export default async function FamilyMoneyIncomePage({
-  params,
+	params,
 }: {
-  params: Promise<{ familyName: string }>;
+	params: Promise<{ familyName: string }>;
 }) {
-  const { familyName } = await params;
+	const { familyName } = await params;
 
-  return <MoneyIncomePage familyName={familyName} />;
+	return <div>Money Income</div>;
 }
