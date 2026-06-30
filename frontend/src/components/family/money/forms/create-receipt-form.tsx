@@ -7,14 +7,14 @@ import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import type { MoneyRecordRow } from "../types";
 
@@ -68,26 +68,26 @@ export function CreateReceiptForm({
   });
 
   return (
-    <Sheet
+    <Dialog
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) resetMessages();
       }}
     >
-      <SheetTrigger asChild>
+      <DialogTrigger asChild>
         <Button size="sm">
           <UploadIcon aria-hidden="true" data-icon="inline-start" />
           Upload receipt
         </Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Upload Receipt</SheetTitle>
-          <SheetDescription>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Upload Receipt</DialogTitle>
+          <DialogDescription>
             Attach a receipt document to an existing transaction.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <form
           id="receipt-form"
           onSubmit={form.handleSubmit(onSubmit)}
@@ -116,7 +116,7 @@ export function CreateReceiptForm({
             description="Since the Bunny Storage file upload hook isn't built yet, you can leave this blank or pick a file. We will mock the upload to the backend."
           />
         </form>
-        <SheetFooter>
+        <DialogFooter>
           <Button
             type="submit"
             form="receipt-form"
@@ -125,8 +125,8 @@ export function CreateReceiptForm({
           >
             {isPending ? "Uploading..." : "Upload receipt"}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

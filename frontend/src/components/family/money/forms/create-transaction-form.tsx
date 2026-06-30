@@ -7,14 +7,14 @@ import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
 
@@ -102,26 +102,26 @@ export function CreateTransactionForm({
   });
 
   return (
-    <Sheet
+    <Dialog
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) resetMessages();
       }}
     >
-      <SheetTrigger asChild>
+      <DialogTrigger asChild>
         <Button size="sm">
           <Icon aria-hidden="true" data-icon="inline-start" />
           {actionLabel}
         </Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Record {type === "INCOME" ? "Income" : "Expense"}</SheetTitle>
-          <SheetDescription>
+      </DialogTrigger>
+      <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl md:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Record {type === "INCOME" ? "Income" : "Expense"}</DialogTitle>
+          <DialogDescription>
             Enter the details of the transaction. {type === "EXPENSE" && "It will require approval."}
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <form
           id="transaction-form"
           onSubmit={form.handleSubmit(onSubmit)}
@@ -177,7 +177,7 @@ export function CreateTransactionForm({
             placeholder="Optional notes"
           />
         </form>
-        <SheetFooter>
+        <DialogFooter>
           <Button
             type="submit"
             form="transaction-form"
@@ -186,8 +186,8 @@ export function CreateTransactionForm({
           >
             {isPending ? "Recording..." : `Record ${type.toLowerCase()}`}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

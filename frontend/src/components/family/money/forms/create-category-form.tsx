@@ -1,20 +1,20 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon, FolderTreeIcon } from "lucide-react";
+import { PlusIcon, FolderPlusIcon } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import { useRouter } from "next/navigation";
 
@@ -56,26 +56,26 @@ export function CreateCategoryForm({ familyId }: { familyId: string }) {
   });
 
   return (
-    <Sheet
+    <Dialog
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) resetMessages();
       }}
     >
-      <SheetTrigger asChild>
+      <DialogTrigger asChild>
         <Button size="sm">
-          <FolderTreeIcon aria-hidden="true" data-icon="inline-start" />
-          Manage categories
+          <FolderPlusIcon aria-hidden="true" data-icon="inline-start" />
+          Create category
         </Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Add a Category</SheetTitle>
-          <SheetDescription>
-            Create a new category to organize your family's transactions.
-          </SheetDescription>
-        </SheetHeader>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Category</DialogTitle>
+          <DialogDescription>
+            Add a new category to group related money records.
+          </DialogDescription>
+        </DialogHeader>
         <form
           id="category-form"
           onSubmit={form.handleSubmit(onSubmit)}
@@ -112,7 +112,7 @@ export function CreateCategoryForm({ familyId }: { familyId: string }) {
             required
           />
         </form>
-        <SheetFooter>
+        <DialogFooter>
           <Button
             type="submit"
             form="category-form"
@@ -121,8 +121,8 @@ export function CreateCategoryForm({ familyId }: { familyId: string }) {
           >
             {isPending ? "Creating..." : "Create category"}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

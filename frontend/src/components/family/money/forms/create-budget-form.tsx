@@ -7,14 +7,14 @@ import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
 
@@ -88,26 +88,26 @@ export function CreateBudgetForm({ familyId }: { familyId: string }) {
   });
 
   return (
-    <Sheet
+    <Dialog
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);
         if (!isOpen) resetMessages();
       }}
     >
-      <SheetTrigger asChild>
+      <DialogTrigger asChild>
         <Button size="sm">
           <ListChecksIcon aria-hidden="true" data-icon="inline-start" />
           Create budget
         </Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Create Budget</SheetTitle>
-          <SheetDescription>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create Budget</DialogTitle>
+          <DialogDescription>
             Set a spending limit for a specific period and optional category.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <form
           id="budget-form"
           onSubmit={form.handleSubmit(onSubmit)}
@@ -161,7 +161,7 @@ export function CreateBudgetForm({ familyId }: { familyId: string }) {
             }
           />
         </form>
-        <SheetFooter>
+        <DialogFooter>
           <Button
             type="submit"
             form="budget-form"
@@ -170,8 +170,8 @@ export function CreateBudgetForm({ familyId }: { familyId: string }) {
           >
             {isPending ? "Creating..." : "Create budget"}
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
