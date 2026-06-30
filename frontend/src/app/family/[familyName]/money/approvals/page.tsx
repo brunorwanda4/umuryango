@@ -1,4 +1,4 @@
-import { FamilyMoneySectionPage } from "@/components/family/money/family-money-section-page";
+import { MoneyApprovalsPage } from "@/components/family/money/money-approvals-page";
 
 export default async function FamilyMoneyApprovalsPage({
   params,
@@ -7,5 +7,5 @@ export default async function FamilyMoneyApprovalsPage({
 }) {
   const { familyName } = await params;
 
-  return <FamilyMoneySectionPage familyName={familyName} section="approvals" />;
+  return <MoneyApprovalsPage familyName={familyName} />;
 }
