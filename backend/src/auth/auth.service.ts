@@ -5,12 +5,12 @@ import {
 	Injectable,
 	UnauthorizedException,
 } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
-import type { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
 import { AuthAuditAction, AuthAuditResult, UserStatus } from "@prisma/client";
 import { compare, hash } from "bcryptjs";
-import type { MailService } from "../mail/mail.service";
-import type { PrismaService } from "../prisma/prisma.service";
+import { MailService } from "../mail/mail.service";
+import { PrismaService } from "../prisma/prisma.service";
 import type { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import type { LoginDto } from "./dto/login.dto";
 import type { RegisterDto } from "./dto/register.dto";

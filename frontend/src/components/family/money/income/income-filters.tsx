@@ -2,6 +2,13 @@ import { FilterXIcon, SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { FamilyDetail } from "../../dashboard/types";
 import type { Category } from "./types-and-schemas";
 
@@ -58,63 +65,75 @@ export function IncomeFilters({
           </div>
 
           {/* Category Filter */}
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="all">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Payment Method Filter */}
-          <select
+          <Select
             value={filterPaymentMethod}
-            onChange={(e) => setFilterPaymentMethod(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onValueChange={setFilterPaymentMethod}
           >
-            <option value="all">All Payments</option>
-            <option value="CASH">Cash</option>
-            <option value="MOBILE_MONEY">Mobile Money</option>
-            <option value="BANK_TRANSFER">Bank Transfer</option>
-            <option value="CARD">Card</option>
-            <option value="CHEQUE">Cheque</option>
-            <option value="OTHER">Other</option>
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="All Payments" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Payments</SelectItem>
+              <SelectItem value="CASH">Cash</SelectItem>
+              <SelectItem value="MOBILE_MONEY">Mobile Money</SelectItem>
+              <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+              <SelectItem value="CARD">Card</SelectItem>
+              <SelectItem value="CHEQUE">Cheque</SelectItem>
+              <SelectItem value="OTHER">Other</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Status Filter */}
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="all">All Statuses</option>
-            <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="REVERSED">Reversed</option>
-          </select>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="PENDING">Pending</SelectItem>
+              <SelectItem value="APPROVED">Approved</SelectItem>
+              <SelectItem value="REJECTED">Rejected</SelectItem>
+              <SelectItem value="REVERSED">Reversed</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Member Filter */}
-          <select
-            value={filterMember}
-            onChange={(e) => setFilterMember(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="all">All Members</option>
-            {family.members.map((m) => (
-              <option key={m.id} value={m.fullName}>
-                {m.fullName}
-              </option>
-            ))}
-          </select>
+          <Select value={filterMember} onValueChange={setFilterMember}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="All Members" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Members</SelectItem>
+              {family.members.map((m) => (
+                <SelectItem key={m.id} value={m.fullName}>
+                  {m.fullName}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* Reset Button */}
-          <Button variant="outline" onClick={resetFilters} className="w-full">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetFilters}
+            className="w-full"
+          >
             <FilterXIcon className="size-4" data-icon="inline-start" />
             Reset Filters
           </Button>
