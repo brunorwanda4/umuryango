@@ -50,6 +50,13 @@ export type RegisterResult = {
 	verificationCodeExpiresInMinutes: number;
 };
 
+type AccessTokenPayload = {
+	sub?: string;
+	email?: string;
+	sessionId?: string;
+	type?: string;
+};
+
 @Injectable()
 export class AuthService {
 	private readonly accessTokenExpiresInSeconds = 15 * 60;
@@ -513,12 +520,7 @@ export class AuthService {
 			},
 		});
 
-		const accessToken = await this.jwtService.signAsync({
-			sub: user.id,
-			email: user.email,
-			sessionId: session.id,
-			type: "access",
-		});
+		const accessToken = await this.createAccessToken(user, session.id);
 
 		return {
 			user: {
@@ -534,26 +536,97 @@ export class AuthService {
 		};
 	}
 
-	async logout(accessToken: string | undefined): Promise<void> {
-		if (!accessToken) {
-			return;
+	async refreshSession(
+		refreshToken: string | undefined,
+		context: RequestContext,
+	): Promise<LoginResult> {
+		const session = await this.findSessionByRefreshToken(refreshToken);
+
+		if (!session) {
+			await this.writeLoginAudit({
+				emailOrMobile: "unknown",
+				result: AuthAuditResult.FAILURE,
+				context,
+				action: AuthAuditAction.REFRESH_TOKEN,
+			});
+			throw new UnauthorizedException("Session expired. Please log in again.");
 		}
 
-		let payload: { sessionId?: string };
-		try {
-			payload = await this.jwtService.verifyAsync(accessToken);
-		} catch {
-			return;
+		if (session.user.status !== UserStatus.ACTIVE) {
+			await this.prisma.authSession.update({
+				where: { id: session.id },
+				data: { revokedAt: new Date() },
+			});
+			await this.writeLoginAudit({
+				emailOrMobile: session.user.email,
+				result: AuthAuditResult.FAILURE,
+				context,
+				userId: session.userId,
+				action: AuthAuditAction.REFRESH_TOKEN,
+			});
+			throw new UnauthorizedException("Session expired. Please log in again.");
 		}
 
-		if (!payload.sessionId) {
-			return;
-		}
+		const nextRefreshToken = randomBytes(64).toString("base64url");
+		const refreshTokenHash = await hash(nextRefreshToken, 12);
+		const refreshTokenExpiresAt = this.getRefreshTokenExpiresAt();
 
-		await this.prisma.authSession.updateMany({
-			where: { id: payload.sessionId, revokedAt: null },
-			data: { revokedAt: new Date() },
+		await this.prisma.authSession.update({
+			where: { id: session.id },
+			data: {
+				refreshTokenHash,
+				expiresAt: refreshTokenExpiresAt,
+				ipAddress: context.ipAddress,
+				userAgent: context.userAgent,
+			},
 		});
+
+		await this.writeLoginAudit({
+			emailOrMobile: session.user.email,
+			result: AuthAuditResult.SUCCESS,
+			context,
+			userId: session.userId,
+			action: AuthAuditAction.REFRESH_TOKEN,
+		});
+
+		return {
+			user: {
+				id: session.user.id,
+				email: session.user.email,
+				phoneNumber: session.user.phoneNumber,
+				fullName: session.user.fullName,
+			},
+			accessToken: await this.createAccessToken(session.user, session.id),
+			refreshToken: nextRefreshToken,
+			accessTokenExpiresInSeconds: this.accessTokenExpiresInSeconds,
+			refreshTokenExpiresAt,
+		};
+	}
+
+	async logout(
+		accessToken: string | undefined,
+		refreshToken?: string,
+	): Promise<void> {
+		if (!accessToken && !refreshToken) {
+			return;
+		}
+
+		const sessionId = await this.getSessionIdFromAccessToken(accessToken);
+		if (sessionId) {
+			await this.prisma.authSession.updateMany({
+				where: { id: sessionId, revokedAt: null },
+				data: { revokedAt: new Date() },
+			});
+			return;
+		}
+
+		const session = await this.findSessionByRefreshToken(refreshToken);
+		if (session) {
+			await this.prisma.authSession.updateMany({
+				where: { id: session.id, revokedAt: null },
+				data: { revokedAt: new Date() },
+			});
+		}
 	}
 
 	async getCurrentUser(accessToken: string | undefined): Promise<CurrentUser> {
@@ -561,32 +634,86 @@ export class AuthService {
 			throw new UnauthorizedException("Not authenticated.");
 		}
 
-		let payload: { sub?: string };
+		let payload: AccessTokenPayload;
 		try {
 			payload = await this.jwtService.verifyAsync(accessToken);
 		} catch {
 			throw new UnauthorizedException("Session expired. Please log in again.");
 		}
 
-		if (!payload.sub) {
+		if (!payload.sub || !payload.sessionId || payload.type !== "access") {
 			throw new UnauthorizedException("Invalid session.");
 		}
 
-		const user = await this.prisma.user.findUnique({
-			where: { id: payload.sub },
+		const session = await this.prisma.authSession.findFirst({
+			where: {
+				id: payload.sessionId,
+				userId: payload.sub,
+				revokedAt: null,
+				expiresAt: { gt: new Date() },
+			},
+			include: { user: true },
 		});
 
-		if (!user) {
-			throw new UnauthorizedException("User no longer exists.");
+		if (!session || session.user.status !== UserStatus.ACTIVE) {
+			throw new UnauthorizedException("Invalid session.");
 		}
 
 		return {
-			id: user.id,
-			email: user.email,
-			phoneNumber: user.phoneNumber,
-			fullName: user.fullName,
-			avatarUrl: user.avatarUrl,
+			id: session.user.id,
+			email: session.user.email,
+			phoneNumber: session.user.phoneNumber,
+			fullName: session.user.fullName,
+			avatarUrl: session.user.avatarUrl,
 		};
+	}
+
+	private createAccessToken(
+		user: { id: string; email: string },
+		sessionId: string,
+	) {
+		return this.jwtService.signAsync({
+			sub: user.id,
+			email: user.email,
+			sessionId,
+			type: "access",
+		});
+	}
+
+	private async getSessionIdFromAccessToken(accessToken: string | undefined) {
+		if (!accessToken) {
+			return undefined;
+		}
+
+		try {
+			const payload =
+				await this.jwtService.verifyAsync<AccessTokenPayload>(accessToken);
+			return payload.type === "access" ? payload.sessionId : undefined;
+		} catch {
+			return undefined;
+		}
+	}
+
+	private async findSessionByRefreshToken(refreshToken: string | undefined) {
+		if (!refreshToken) {
+			return null;
+		}
+
+		const sessions = await this.prisma.authSession.findMany({
+			where: {
+				revokedAt: null,
+				expiresAt: { gt: new Date() },
+			},
+			include: { user: true },
+		});
+
+		for (const session of sessions) {
+			if (await compare(refreshToken, session.refreshTokenHash)) {
+				return session;
+			}
+		}
+
+		return null;
 	}
 
 	private getRefreshTokenExpiresAt() {

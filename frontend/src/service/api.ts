@@ -22,6 +22,7 @@ export interface ApiRequestOptions
   headers?: HeadersInit;
   credentials?: RequestCredentials;
   idempotencyKey?: string;
+  skipAuthRefresh?: boolean;
 }
 
 const DEFAULT_API_URL = "http://localhost:4915";
@@ -97,6 +98,46 @@ async function parseJson<T>(response: Response) {
   }
 }
 
+let authRefreshPromise: Promise<boolean> | null = null;
+
+function shouldAttemptAuthRefresh(url: string) {
+  const path = /^https?:\/\//.test(url) ? new URL(url).pathname : url;
+  const normalizedPath = path.startsWith("/api/v1")
+    ? path.replace(/^\/api\/v1/, "")
+    : path;
+
+  return ![
+    "/auth/login",
+    "/auth/logout",
+    "/auth/register",
+    "/auth/refresh",
+    "/auth/verify-email",
+    "/auth/resend-verification",
+    "/auth/forgot-password",
+    "/auth/reset-password",
+  ].some((authPath) => normalizedPath === authPath);
+}
+
+async function refreshAuthSession(
+  baseUrl: string | undefined,
+  credentials: RequestCredentials,
+) {
+  if (!authRefreshPromise) {
+    authRefreshPromise = fetch(getApiUrl("/auth/refresh", baseUrl), {
+      method: "POST",
+      credentials,
+      headers: { Accept: "application/json" },
+    })
+      .then((response) => response.ok)
+      .catch(() => false)
+      .finally(() => {
+        authRefreshPromise = null;
+      });
+  }
+
+  return authRefreshPromise;
+}
+
 async function apiRequest<TRequest = unknown, TResponse = unknown>(
   method: HttpMethod,
   url: string,
@@ -108,6 +149,7 @@ async function apiRequest<TRequest = unknown, TResponse = unknown>(
     credentials = "include",
     headers: requestHeaders,
     idempotencyKey,
+    skipAuthRefresh,
     ...requestOptions
   } = options;
   const headers = new Headers(requestHeaders);
@@ -141,6 +183,18 @@ async function apiRequest<TRequest = unknown, TResponse = unknown>(
     const payload = await parseJson<TResponse>(response);
 
     if (!response.ok) {
+      if (
+        response.status === 401 &&
+        !skipAuthRefresh &&
+        shouldAttemptAuthRefresh(url) &&
+        (await refreshAuthSession(baseUrl, credentials))
+      ) {
+        return apiRequest<TRequest, TResponse>(method, url, data, {
+          ...options,
+          skipAuthRefresh: true,
+        });
+      }
+
       const message = getMessage(payload, response.statusText);
 
       return {

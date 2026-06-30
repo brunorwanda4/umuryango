@@ -1,10 +1,11 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { isSupportedLocale, defaultLocale } from "@/i18n/config";
+import { defaultLocale, isSupportedLocale } from "@/i18n/config";
 
 const LANGUAGE_COOKIE = "rf_language";
 const LANGUAGE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 const ACCESS_COOKIE = "rf_access_token";
+const REFRESH_COOKIE = "rf_refresh_token";
 const PROTECTED_PREFIXES = ["/me", "/family"];
 
 function isProtectedPath(pathname: string) {
@@ -77,13 +78,15 @@ export function proxy(request: NextRequest) {
     return redirectWithLocale(request, request.nextUrl.pathname, locale);
   }
 
-  const isLoggedIn = Boolean(request.cookies.get(ACCESS_COOKIE)?.value);
+  const hasAccessCookie = Boolean(request.cookies.get(ACCESS_COOKIE)?.value);
+  const hasRefreshCookie = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
+  const canEnterProtectedRoute = hasAccessCookie || hasRefreshCookie;
 
-  if (isProtectedPath(request.nextUrl.pathname) && !isLoggedIn) {
+  if (isProtectedPath(request.nextUrl.pathname) && !canEnterProtectedRoute) {
     return redirectToLogin(request, locale);
   }
 
-  if (request.nextUrl.pathname.startsWith("/auth") && isLoggedIn) {
+  if (request.nextUrl.pathname.startsWith("/auth") && hasAccessCookie) {
     return redirectWithLocale(request, "/me", locale);
   }
 

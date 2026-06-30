@@ -241,12 +241,63 @@ export class AuthController {
     const accessToken = request.cookies?.[ACCESS_COOKIE_NAME] as
       | string
       | undefined;
-    await this.authService.logout(accessToken);
+    const refreshToken = request.cookies?.[REFRESH_COOKIE_NAME] as
+      | string
+      | undefined;
+    await this.authService.logout(accessToken, refreshToken);
     this.clearAuthCookies(response);
 
     return {
       data: {},
       message: 'Logged out successfully.',
+    };
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh the current authenticated session' })
+  @ApiOkResponse({
+    description: 'Session refreshed and auth cookies rotated.',
+    schema: {
+      example: {
+        data: {
+          user: {
+            id: 'clx0000000000000000000000',
+            email: 'claudine@example.com',
+            phoneNumber: '+250788123456',
+            fullName: 'Claudine Uwase',
+          },
+          accessTokenExpiresInSeconds: 900,
+          refreshTokenExpiresAt: '2026-07-30T07:00:00.000Z',
+        },
+        message: 'Session refreshed successfully.',
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'No valid refresh session was found.',
+  })
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const refreshToken = request.cookies?.[REFRESH_COOKIE_NAME] as
+      | string
+      | undefined;
+    const loginResult = await this.authService.refreshSession(refreshToken, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+
+    this.setAuthCookies(response, loginResult);
+
+    return {
+      data: {
+        user: loginResult.user,
+        accessTokenExpiresInSeconds: loginResult.accessTokenExpiresInSeconds,
+        refreshTokenExpiresAt: loginResult.refreshTokenExpiresAt,
+      },
+      message: 'Session refreshed successfully.',
     };
   }
 
