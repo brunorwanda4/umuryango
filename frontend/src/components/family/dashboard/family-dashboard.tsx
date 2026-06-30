@@ -2,6 +2,7 @@ import { Separator } from "@/components/ui/separator";
 import { DashboardCharts } from "./family-dashboard-charts";
 import { FamilyDashboardHeader } from "./family-dashboard-header";
 import { FamilyDashboardSkeleton } from "./family-dashboard-skeleton";
+import { FamilyFinanceDashboard } from "./family-finance-dashboard";
 import { FamilyMembersOverview } from "./family-members-overview";
 import { FamilyOverviewCards } from "./family-overview-cards";
 import { FamilyWorkspaceGrid } from "./family-workspace-grid";
@@ -14,6 +15,7 @@ export function FamilyDashboard({ family }: { family: FamilyDetail }) {
       <FamilyDashboardHeader family={family} />
       <Separator />
       <FamilyOverviewCards family={family} />
+      <FamilyFinanceDashboard family={family} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <DashboardCharts family={family} />
         <NextStepsCard family={family} />
