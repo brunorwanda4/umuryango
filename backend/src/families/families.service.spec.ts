@@ -10,8 +10,10 @@ import {
   FamilyAuthority,
   FamilyCapability,
   FamilyType,
+  TransactionType,
 } from '@prisma/client';
 import { MailService } from '../mail/mail.service';
+import { DEFAULT_MONEY_CATEGORIES } from '../money/default-categories';
 import { PrismaService } from '../prisma/prisma.service';
 import { FamiliesService } from './families.service';
 
@@ -71,7 +73,7 @@ const familyRecord = {
 describe('FamiliesService', () => {
   let service: FamiliesService;
   let prisma: {
-    family: { findUnique: jest.Mock; update: jest.Mock };
+    family: { create: jest.Mock; findUnique: jest.Mock; update: jest.Mock };
     familyMember: { findMany: jest.Mock; update: jest.Mock };
     familyInvite: { upsert: jest.Mock };
     familyAuditEvent: { create: jest.Mock; findMany: jest.Mock };
@@ -82,7 +84,7 @@ describe('FamiliesService', () => {
 
   beforeEach(async () => {
     prisma = {
-      family: { findUnique: jest.fn(), update: jest.fn() },
+      family: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
       familyMember: { findMany: jest.fn(), update: jest.fn() },
       familyInvite: { upsert: jest.fn() },
       familyAuditEvent: { create: jest.fn(), findMany: jest.fn() },
@@ -104,6 +106,60 @@ describe('FamiliesService', () => {
     }).compile();
 
     service = moduleRef.get(FamiliesService);
+  });
+
+  describe('create', () => {
+    it('creates a family with default income and expense categories', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'u-1',
+        email: 'aline@example.com',
+        fullName: 'Aline Uwimana',
+      });
+      prisma.family.findUnique.mockResolvedValue(null);
+      prisma.family.create.mockResolvedValue({
+        ...familyRecord,
+        invitedEmails: [],
+      });
+
+      await service.create('u-1', {
+        name: 'Mutesi Family',
+        country: 'RW',
+        defaultCurrency: 'RWF',
+        contributionCadence: 'monthly',
+        type: FamilyType.NUCLEAR,
+      });
+
+      expect(prisma.family.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            transactionCategories: {
+              create: DEFAULT_MONEY_CATEGORIES,
+            },
+          }),
+        }),
+      );
+      expect(DEFAULT_MONEY_CATEGORIES).toHaveLength(29);
+      expect(DEFAULT_MONEY_CATEGORIES).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: 'Food',
+            type: TransactionType.EXPENSE,
+          }),
+          expect.objectContaining({
+            name: 'School Fees',
+            type: TransactionType.EXPENSE,
+          }),
+          expect.objectContaining({
+            name: 'Salary',
+            type: TransactionType.INCOME,
+          }),
+          expect.objectContaining({
+            name: 'Family Contribution',
+            type: TransactionType.INCOME,
+          }),
+        ]),
+      );
+    });
   });
 
   describe('getBySlugForUser', () => {

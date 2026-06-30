@@ -19,6 +19,7 @@ import {
 } from '@prisma/client';
 import { hash } from 'bcryptjs';
 import { MailService } from '../mail/mail.service';
+import { DEFAULT_MONEY_CATEGORIES } from '../money/default-categories';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
   CreateFamilyDto,
@@ -197,6 +198,9 @@ export class FamiliesService {
             status: FamilyInviteStatus.PENDING,
             expiresAt,
           })),
+        },
+        transactionCategories: {
+          create: DEFAULT_MONEY_CATEGORIES,
         },
       },
     });
