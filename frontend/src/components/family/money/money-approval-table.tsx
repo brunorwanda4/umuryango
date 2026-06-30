@@ -1,7 +1,9 @@
-import { FileClockIcon, CheckIcon, XIcon, Loader2Icon } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { CheckIcon, FileClockIcon, Loader2Icon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import apiRequest from "@/service/api";
+import { CommonDataTable } from "@/components/common/table/common-data-table";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,17 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import apiRequest from "@/service/api";
 import { StatusBadge, TableEmptyState } from "./money-ui-helpers";
-import type { MoneyOverview } from "./types";
+import type { MoneyApprovalRow, MoneyOverview } from "./types";
 import { formatOptionalMoney, formatTitle } from "./utils";
 
 export function MoneyApprovalTable({
@@ -39,7 +33,7 @@ export function MoneyApprovalTable({
     try {
       const response = await apiRequest(
         "patch",
-        `/families/${encodeURIComponent(familyId)}/money/transactions/${id}/${action}`
+        `/families/${encodeURIComponent(familyId)}/money/transactions/${id}/${action}`,
       );
       if (response.ok) {
         toast.success(`Transaction ${action}d successfully`);
@@ -47,12 +41,82 @@ export function MoneyApprovalTable({
       } else {
         toast.error(response.message || "Failed to process transaction");
       }
-    } catch (err) {
+    } catch {
       toast.error("An error occurred");
     } finally {
       setProcessingId(null);
     }
   };
+
+  const columns: ColumnDef<MoneyApprovalRow>[] = [
+    {
+      accessorKey: "title",
+      header: "Record",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.title}</span>
+      ),
+    },
+    {
+      accessorKey: "type",
+      header: "Type",
+      cell: ({ row }) => formatTitle(row.original.type),
+    },
+    {
+      accessorKey: "submittedBy",
+      header: "Submitted by",
+      cell: ({ row }) => row.original.submittedBy ?? "Unknown",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <StatusBadge value={row.original.status ?? "pending"} />
+      ),
+    },
+    {
+      accessorKey: "amountMinorUnits",
+      header: () => <div className="text-right">Amount</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">Actions</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-end gap-2">
+          <Button
+            size="icon-sm"
+            variant="outline"
+            title="Approve"
+            disabled={processingId === row.original.id}
+            onClick={() => handleAction(row.original.id, "approve")}
+          >
+            {processingId === row.original.id ? (
+              <Loader2Icon className="animate-spin" />
+            ) : (
+              <CheckIcon className="text-green-600" />
+            )}
+          </Button>
+          <Button
+            size="icon-sm"
+            variant="outline"
+            title="Reject"
+            disabled={processingId === row.original.id}
+            onClick={() => handleAction(row.original.id, "reject")}
+          >
+            {processingId === row.original.id ? (
+              <Loader2Icon className="animate-spin" />
+            ) : (
+              <XIcon className="text-destructive" />
+            )}
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Card>
@@ -64,63 +128,7 @@ export function MoneyApprovalTable({
       </CardHeader>
       <CardContent>
         {approvals.length ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Record</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Submitted by</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {approvals.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="font-medium">{row.title}</TableCell>
-                  <TableCell>{formatTitle(row.type)}</TableCell>
-                  <TableCell>{row.submittedBy ?? "Unknown"}</TableCell>
-                  <TableCell>
-                    <StatusBadge value={row.status ?? "pending"} />
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatOptionalMoney(row.amountMinorUnits, currency)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        size="icon-sm"
-                        variant="outline"
-                        title="Approve"
-                        disabled={processingId === row.id}
-                        onClick={() => handleAction(row.id, "approve")}
-                      >
-                        {processingId === row.id ? (
-                          <Loader2Icon className="animate-spin" />
-                        ) : (
-                          <CheckIcon className="text-green-600" />
-                        )}
-                      </Button>
-                      <Button
-                        size="icon-sm"
-                        variant="outline"
-                        title="Reject"
-                        disabled={processingId === row.id}
-                        onClick={() => handleAction(row.id, "reject")}
-                      >
-                        {processingId === row.id ? (
-                          <Loader2Icon className="animate-spin" />
-                        ) : (
-                          <XIcon className="text-destructive" />
-                        )}
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CommonDataTable columns={columns} data={approvals} />
         ) : (
           <TableEmptyState
             icon={FileClockIcon}

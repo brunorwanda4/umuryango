@@ -1,4 +1,6 @@
+import type { ColumnDef } from "@tanstack/react-table";
 import { DownloadIcon, FileSpreadsheetIcon } from "lucide-react";
+import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,16 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { StatusBadge, TableEmptyState } from "./reports-ui-helpers";
-import type { ReportsOverview } from "./types";
+import type { ReportExportRow, ReportsOverview } from "./types";
 import { formatDateTime, formatTitle } from "./utils";
 
 export function ExportsTable({
@@ -30,6 +24,37 @@ export function ExportsTable({
   reports: ReportsOverview | null;
 }) {
   const exports = reports?.exports ?? [];
+  const columns: ColumnDef<ReportExportRow>[] = [
+    {
+      accessorKey: "title",
+      header: "Export",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.title}</span>
+      ),
+    },
+    {
+      accessorKey: "format",
+      header: "Format",
+      cell: ({ row }) => formatTitle(row.original.format),
+    },
+    {
+      accessorKey: "requestedBy",
+      header: "Requested by",
+      cell: ({ row }) => row.original.requestedBy ?? "Unknown",
+    },
+    {
+      accessorKey: "requestedAt",
+      header: "Requested",
+      cell: ({ row }) => formatDateTime(row.original.requestedAt),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <StatusBadge value={row.original.status ?? "queued"} />
+      ),
+    },
+  ];
 
   return (
     <Card>
@@ -51,32 +76,7 @@ export function ExportsTable({
       </CardHeader>
       <CardContent>
         {exports.length ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Export</TableHead>
-                <TableHead>Format</TableHead>
-                <TableHead>Requested by</TableHead>
-                <TableHead>Requested</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {exports.map((exportRow) => (
-                <TableRow key={exportRow.id}>
-                  <TableCell className="font-medium">
-                    {exportRow.title}
-                  </TableCell>
-                  <TableCell>{formatTitle(exportRow.format)}</TableCell>
-                  <TableCell>{exportRow.requestedBy ?? "Unknown"}</TableCell>
-                  <TableCell>{formatDateTime(exportRow.requestedAt)}</TableCell>
-                  <TableCell>
-                    <StatusBadge value={exportRow.status ?? "queued"} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CommonDataTable columns={columns} data={exports} />
         ) : (
           <TableEmptyState
             description="Generated PDF and Excel export jobs will appear here after the backend report workflow saves them."

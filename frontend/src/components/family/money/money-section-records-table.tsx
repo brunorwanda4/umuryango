@@ -1,11 +1,5 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import type { ColumnDef } from "@tanstack/react-table";
+import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { StatusBadge } from "./money-ui-helpers";
 import type { MoneyRecordRow } from "./types";
 import { formatDate, formatOptionalMoney, formatTitle } from "./utils";
@@ -17,39 +11,45 @@ export function MoneySectionRecordsTable({
   currency: string;
   records: MoneyRecordRow[];
 }) {
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Record</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {records.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell>
-              <div className="flex flex-col gap-1">
-                <span className="font-medium">{row.title}</span>
-                <span className="text-muted-foreground text-xs">
-                  {formatTitle(row.type)} by {row.createdBy ?? "Unknown"}
-                </span>
-              </div>
-            </TableCell>
-            <TableCell>{row.category ?? "Uncategorized"}</TableCell>
-            <TableCell>{formatDate(row.date)}</TableCell>
-            <TableCell>
-              <StatusBadge value={row.status ?? "draft"} />
-            </TableCell>
-            <TableCell className="text-right font-mono">
-              {formatOptionalMoney(row.amountMinorUnits, currency)}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
+  const columns: ColumnDef<MoneyRecordRow>[] = [
+    {
+      accessorKey: "title",
+      header: "Record",
+      cell: ({ row }) => (
+        <div className="flex flex-col gap-1">
+          <span className="font-medium">{row.original.title}</span>
+          <span className="text-muted-foreground text-xs">
+            {formatTitle(row.original.type)} by{" "}
+            {row.original.createdBy ?? "Unknown"}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+      cell: ({ row }) => row.original.category ?? "Uncategorized",
+    },
+    {
+      accessorKey: "date",
+      header: "Date",
+      cell: ({ row }) => formatDate(row.original.date),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => <StatusBadge value={row.original.status ?? "draft"} />,
+    },
+    {
+      accessorKey: "amountMinorUnits",
+      header: () => <div className="text-right">Amount</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+        </div>
+      ),
+    },
+  ];
+
+  return <CommonDataTable columns={columns} data={records} />;
 }

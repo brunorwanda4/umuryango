@@ -1,5 +1,6 @@
 "use client";
 
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   AlertCircleIcon,
   BadgeCheckIcon,
@@ -29,6 +30,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { CommonDataTable } from "@/components/common/table/common-data-table";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -64,14 +66,6 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AUTHORITY_LABELS,
@@ -852,6 +846,55 @@ function ContributionsPlanTable({
   currency: string;
 }) {
   const plans = contributions?.plans ?? [];
+  const columns: ColumnDef<ContributionPlanRow>[] = [
+    {
+      accessorKey: "name",
+      header: "Plan",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.name}</span>
+      ),
+    },
+    {
+      accessorKey: "cadence",
+      header: "Cadence",
+      cell: ({ row }) =>
+        row.original.cadence ? formatTitle(row.original.cadence) : "Not set",
+    },
+    {
+      accessorKey: "contributorCount",
+      header: "Contributors",
+      cell: ({ row }) =>
+        typeof row.original.contributorCount === "number"
+          ? row.original.contributorCount.toLocaleString()
+          : "-",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <StatusBadge value={row.original.status ?? "active"} />
+      ),
+    },
+    {
+      accessorKey: "amountMinorUnits",
+      header: () => <div className="text-right">Per cycle</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "collectedMinorUnits",
+      header: () => <div className="text-right">Collected</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.collectedMinorUnits, currency)} /{" "}
+          {formatOptionalMoney(row.original.expectedMinorUnits, currency)}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Card>
@@ -863,43 +906,7 @@ function ContributionsPlanTable({
       </CardHeader>
       <CardContent>
         {plans.length ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Plan</TableHead>
-                <TableHead>Cadence</TableHead>
-                <TableHead>Contributors</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Per cycle</TableHead>
-                <TableHead className="text-right">Collected</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {plans.map((plan) => (
-                <TableRow key={plan.id ?? plan.name}>
-                  <TableCell className="font-medium">{plan.name}</TableCell>
-                  <TableCell>
-                    {plan.cadence ? formatTitle(plan.cadence) : "Not set"}
-                  </TableCell>
-                  <TableCell>
-                    {typeof plan.contributorCount === "number"
-                      ? plan.contributorCount.toLocaleString()
-                      : "—"}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge value={plan.status ?? "active"} />
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatOptionalMoney(plan.amountMinorUnits, currency)}
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatOptionalMoney(plan.collectedMinorUnits, currency)} /{" "}
-                    {formatOptionalMoney(plan.expectedMinorUnits, currency)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CommonDataTable columns={columns} data={plans} />
         ) : (
           <TableEmptyState
             icon={CoinsIcon}
@@ -920,6 +927,54 @@ function ContributionsMemberTable({
   currency: string;
 }) {
   const members = contributions?.members ?? [];
+  const columns: ColumnDef<ContributionMemberRow>[] = [
+    {
+      accessorKey: "fullName",
+      header: "Member",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.fullName}</span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <StatusBadge value={row.original.status ?? "pending"} />
+      ),
+    },
+    {
+      accessorKey: "lastPaymentDate",
+      header: "Last payment",
+      cell: ({ row }) => formatDate(row.original.lastPaymentDate),
+    },
+    {
+      accessorKey: "expectedMinorUnits",
+      header: () => <div className="text-right">Expected</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.expectedMinorUnits, currency)}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "paidMinorUnits",
+      header: () => <div className="text-right">Paid</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.paidMinorUnits, currency)}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "outstandingMinorUnits",
+      header: () => <div className="text-right">Outstanding</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.outstandingMinorUnits, currency)}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Card>
@@ -931,43 +986,7 @@ function ContributionsMemberTable({
       </CardHeader>
       <CardContent>
         {members.length ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Last payment</TableHead>
-                <TableHead className="text-right">Expected</TableHead>
-                <TableHead className="text-right">Paid</TableHead>
-                <TableHead className="text-right">Outstanding</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {members.map((member) => (
-                <TableRow key={member.id}>
-                  <TableCell className="font-medium">
-                    {member.fullName}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge value={member.status ?? "pending"} />
-                  </TableCell>
-                  <TableCell>{formatDate(member.lastPaymentDate)}</TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatOptionalMoney(member.expectedMinorUnits, currency)}
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatOptionalMoney(member.paidMinorUnits, currency)}
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatOptionalMoney(
-                      member.outstandingMinorUnits,
-                      currency,
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CommonDataTable columns={columns} data={members} />
         ) : (
           <TableEmptyState
             icon={UsersRoundIcon}
@@ -1010,7 +1029,7 @@ function ContributionsCycleList({
                   <p className="text-muted-foreground text-sm">
                     {formatOptionalMoney(cycle.collectedMinorUnits, currency)}{" "}
                     of {formatOptionalMoney(cycle.expectedMinorUnits, currency)}
-                    {cycle.dueDate ? ` · due ${formatDate(cycle.dueDate)}` : ""}
+                    {cycle.dueDate ? ` - due ${formatDate(cycle.dueDate)}` : ""}
                   </p>
                 </div>
                 <StatusBadge value={cycle.status ?? "collecting"} />
@@ -1045,6 +1064,47 @@ function ContributionsPaymentTable({
   currency: string;
 }) {
   const payments = contributions?.payments ?? [];
+  const columns: ColumnDef<ContributionPaymentRow>[] = [
+    {
+      accessorKey: "contributor",
+      header: "Contributor",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.contributor}</span>
+      ),
+    },
+    {
+      accessorKey: "planName",
+      header: "Plan",
+      cell: ({ row }) => row.original.planName ?? "General",
+    },
+    {
+      accessorKey: "method",
+      header: "Method",
+      cell: ({ row }) =>
+        row.original.method ? formatTitle(row.original.method) : "Unknown",
+    },
+    {
+      accessorKey: "date",
+      header: "Date",
+      cell: ({ row }) => formatDate(row.original.date),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <StatusBadge value={row.original.status ?? "recorded"} />
+      ),
+    },
+    {
+      accessorKey: "amountMinorUnits",
+      header: () => <div className="text-right">Amount</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Card>
@@ -1056,38 +1116,7 @@ function ContributionsPaymentTable({
       </CardHeader>
       <CardContent>
         {payments.length ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Contributor</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Method</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {payments.map((payment) => (
-                <TableRow key={payment.id}>
-                  <TableCell className="font-medium">
-                    {payment.contributor}
-                  </TableCell>
-                  <TableCell>{payment.planName ?? "General"}</TableCell>
-                  <TableCell>
-                    {payment.method ? formatTitle(payment.method) : "Unknown"}
-                  </TableCell>
-                  <TableCell>{formatDate(payment.date)}</TableCell>
-                  <TableCell>
-                    <StatusBadge value={payment.status ?? "recorded"} />
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatOptionalMoney(payment.amountMinorUnits, currency)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CommonDataTable columns={columns} data={payments} />
         ) : (
           <TableEmptyState
             icon={ReceiptTextIcon}

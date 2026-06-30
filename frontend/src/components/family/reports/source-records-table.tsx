@@ -1,5 +1,7 @@
+import type { ColumnDef } from "@tanstack/react-table";
 import { ReceiptTextIcon } from "lucide-react";
 import { useMemo } from "react";
+import { CommonDataTable } from "@/components/common/table/common-data-table";
 import {
   Card,
   CardContent,
@@ -7,16 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { StatusBadge, TableEmptyState } from "./reports-ui-helpers";
-import type { MoneyOverview, ReportsOverview } from "./types";
+import type {
+  MoneyOverview,
+  ReportSourceRecordRow,
+  ReportsOverview,
+} from "./types";
 import {
   formatDate,
   formatOptionalMoney,
@@ -37,6 +35,46 @@ export function SourceRecordsTable({
     () => getSourceRecords(reports, money),
     [reports, money],
   );
+  const columns: ColumnDef<ReportSourceRecordRow>[] = [
+    {
+      accessorKey: "title",
+      header: "Record",
+      cell: ({ row }) => (
+        <div className="flex flex-col gap-1">
+          <span className="font-medium">{row.original.title}</span>
+          <span className="text-muted-foreground text-xs">
+            Created by {row.original.createdBy ?? "Unknown"}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "module",
+      header: "Module",
+      cell: ({ row }) => formatTitle(row.original.module),
+    },
+    {
+      accessorKey: "date",
+      header: "Date",
+      cell: ({ row }) => formatDate(row.original.date),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <StatusBadge value={row.original.status ?? "recorded"} />
+      ),
+    },
+    {
+      accessorKey: "amountMinorUnits",
+      header: () => <div className="text-right">Amount</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Card>
@@ -48,39 +86,7 @@ export function SourceRecordsTable({
       </CardHeader>
       <CardContent>
         {records.length ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Record</TableHead>
-                <TableHead>Module</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {records.map((record) => (
-                <TableRow key={`${record.module}-${record.id}`}>
-                  <TableCell>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-medium">{record.title}</span>
-                      <span className="text-muted-foreground text-xs">
-                        Created by {record.createdBy ?? "Unknown"}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{formatTitle(record.module)}</TableCell>
-                  <TableCell>{formatDate(record.date)}</TableCell>
-                  <TableCell>
-                    <StatusBadge value={record.status ?? "recorded"} />
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatOptionalMoney(record.amountMinorUnits, currency)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CommonDataTable columns={columns} data={records} />
         ) : (
           <TableEmptyState
             description="Income, expenses, contribution payments, savings movements, debts, budgets, projects, and generated report inputs will appear here."

@@ -1,4 +1,6 @@
+import type { ColumnDef } from "@tanstack/react-table";
 import { HandCoinsIcon } from "lucide-react";
+import { CommonDataTable } from "@/components/common/table/common-data-table";
 import {
   Card,
   CardContent,
@@ -6,16 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { StatusBadge, TableEmptyState } from "./projects-ui-helpers";
-import type { ProjectsOverview } from "./types";
+import type { ProjectContributionRow, ProjectsOverview } from "./types";
 import { formatDate, formatOptionalMoney } from "./utils";
 
 export function ProjectContributionTable({
@@ -26,6 +20,40 @@ export function ProjectContributionTable({
   projects: ProjectsOverview | null;
 }) {
   const contributions = projects?.contributions ?? [];
+  const columns: ColumnDef<ProjectContributionRow>[] = [
+    {
+      accessorKey: "projectName",
+      header: "Project",
+      cell: ({ row }) => (
+        <span className="font-medium">{row.original.projectName}</span>
+      ),
+    },
+    {
+      accessorKey: "contributorName",
+      header: "Contributor",
+    },
+    {
+      accessorKey: "paidAt",
+      header: "Date",
+      cell: ({ row }) => formatDate(row.original.paidAt),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => (
+        <StatusBadge value={row.original.status ?? "pending"} />
+      ),
+    },
+    {
+      accessorKey: "amountMinorUnits",
+      header: () => <div className="text-right">Amount</div>,
+      cell: ({ row }) => (
+        <div className="text-right font-mono">
+          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+        </div>
+      ),
+    },
+  ];
 
   return (
     <Card>
@@ -37,37 +65,7 @@ export function ProjectContributionTable({
       </CardHeader>
       <CardContent>
         {contributions.length ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Project</TableHead>
-                <TableHead>Contributor</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {contributions.map((contribution) => (
-                <TableRow key={contribution.id}>
-                  <TableCell className="font-medium">
-                    {contribution.projectName}
-                  </TableCell>
-                  <TableCell>{contribution.contributorName}</TableCell>
-                  <TableCell>{formatDate(contribution.paidAt)}</TableCell>
-                  <TableCell>
-                    <StatusBadge value={contribution.status ?? "pending"} />
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatOptionalMoney(
-                      contribution.amountMinorUnits,
-                      currency,
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CommonDataTable columns={columns} data={contributions} />
         ) : (
           <TableEmptyState
             description="Member payments and pledges connected to projects will show here once saved."
