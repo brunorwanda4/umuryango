@@ -66,7 +66,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { type CurrentUser, useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 import apiRequest from "@/service/api";
@@ -412,32 +411,10 @@ function AppSidebarContent({
               <SidebarTrigger />
             </div>
             {isSettingsArea ? (
-              <ToggleGroup
-                type="single"
+              <SidebarViewSwitcher
                 value={sidebarView}
-                onValueChange={(value) => {
-                  if (value === "main" || value === "settings") {
-                    setSidebarView(value);
-                  }
-                }}
-                className="w-full group-data-[collapsible=icon]:hidden"
-                aria-label="Sidebar navigation"
-              >
-                <ToggleGroupItem
-                  value="main"
-                  className="h-8 flex-1"
-                  aria-label="Show main sidebar"
-                >
-                  Main
-                </ToggleGroupItem>
-                <ToggleGroupItem
-                  value="settings"
-                  className="h-8 flex-1"
-                  aria-label="Show settings sidebar"
-                >
-                  Settings
-                </ToggleGroupItem>
-              </ToggleGroup>
+                onChange={setSidebarView}
+              />
             ) : null}
           </div>
         </SidebarHeader>
@@ -554,6 +531,46 @@ function AppSidebarContent({
         currentHash={currentHash}
       />
     </>
+  );
+}
+
+function SidebarViewSwitcher({
+  value,
+  onChange,
+}: {
+  value: SidebarView;
+  onChange: (value: SidebarView) => void;
+}) {
+  const label = value === "settings" ? "Settings sidebar" : "Main sidebar";
+  const Icon = value === "settings" ? SettingsIcon : LayoutDashboardIcon;
+
+  return (
+    <SidebarMenu className="group-data-[collapsible=icon]:hidden">
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton size="sm" tooltip={label}>
+              <Icon aria-hidden="true" />
+              <span>{label}</span>
+              <ChevronsUpDownIcon aria-hidden="true" className="ml-auto" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="bottom" align="start">
+            <DropdownMenuLabel>Sidebar</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuItem onSelect={() => onChange("main")}>
+                <LayoutDashboardIcon aria-hidden="true" />
+                Main sidebar
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => onChange("settings")}>
+                <SettingsIcon aria-hidden="true" />
+                Settings sidebar
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
   );
 }
 
