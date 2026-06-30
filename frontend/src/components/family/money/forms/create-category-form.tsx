@@ -14,8 +14,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import { isLucideIconName } from "@/lib/lucide-icons";
+import { cn } from "@/lib/utils";
 
 type CategoryNameSource = {
   id?: string;
@@ -32,6 +34,12 @@ const colorOptions = [
   { label: "Chart 4", value: "var(--chart-4)" },
   { label: "Chart 5", value: "var(--chart-5)" },
 ] as const;
+
+function getColorInputValue(value: unknown) {
+  const color = typeof value === "string" ? value : "";
+
+  return /^#[\da-f]{6}$/i.test(color) ? color : "#111111";
+}
 
 function normalizeCategoryName(value: string) {
   return value.trim().replace(/\s+/g, " ").toLowerCase();
@@ -88,13 +96,16 @@ export function CreateCategoryForm({
         description: "",
         type: "EXPENSE",
         icon: "Circle",
-        color: "var(--primary)",
+        color: colorOptions[0].value,
         status: "ACTIVE",
       },
     },
     transform: (values) => ({
+      color: values.color,
       description: values.description,
+      icon: values.icon,
       name: values.name,
+      status: values.status,
       type: values.type,
     }),
     request: {
@@ -176,13 +187,56 @@ export function CreateCategoryForm({
             control={form.control}
             name="color"
             label="Color"
-            fieldType="select"
-            selectOptions={colorOptions.map((option) => ({
-              label: option.label,
-              value: option.value,
-            }))}
+            fieldType="custom"
             required
-            description="Used as a visual marker in category lists and future reports."
+            description="Choose a preset or use a custom color for category lists and future reports."
+            render={({ field, id, invalid, disabled }) => {
+              const selectedColor = field.value?.toString() ?? "";
+
+              return (
+                <div className="flex min-w-0 flex-col gap-3">
+                  <div className="flex flex-wrap gap-2">
+                    {colorOptions.map((option) => {
+                      const selected = selectedColor === option.value;
+
+                      return (
+                        <Button
+                          aria-label={`Use ${option.label}`}
+                          aria-pressed={selected}
+                          className={cn(
+                            "size-8 rounded-full border-border p-0",
+                            selected && "ring-2 ring-ring ring-offset-2",
+                          )}
+                          disabled={disabled}
+                          key={option.value}
+                          onClick={() => field.onChange(option.value)}
+                          type="button"
+                          variant="outline"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="size-5 rounded-full border"
+                            style={{ backgroundColor: option.value }}
+                          />
+                        </Button>
+                      );
+                    })}
+                  </div>
+                  <Input
+                    aria-invalid={invalid}
+                    className="h-10 cursor-pointer p-1"
+                    disabled={disabled}
+                    id={id}
+                    name={field.name}
+                    onBlur={field.onBlur}
+                    onChange={(event) => field.onChange(event.target.value)}
+                    ref={field.ref}
+                    type="color"
+                    value={getColorInputValue(selectedColor)}
+                  />
+                </div>
+              );
+            }}
           />
           <CommonFormField
             control={form.control}
