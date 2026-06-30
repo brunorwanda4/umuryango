@@ -2,8 +2,8 @@ import {
   CalendarClockIcon,
   HammerIcon,
   HandCoinsIcon,
-  UsersRoundIcon,
   TargetIcon,
+  UsersRoundIcon,
   WalletCardsIcon,
 } from "lucide-react";
 import {

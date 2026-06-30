@@ -1,6 +1,7 @@
 "use client";
 
-import { type Control } from "react-hook-form";
+import Link from "next/link";
+import type { Control } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import type { Category, TransactionFormValues } from "./types-and-schemas";
@@ -63,12 +64,31 @@ export function IncomeFormFields({
           name="categoryId"
           label="Category"
           fieldType="select"
+          disabled={categories.length === 0}
           selectOptions={categories.map((c) => ({
             label: c.name,
             value: c.id,
           }))}
-          placeholder="Select Category"
+          placeholder={
+            categories.length === 0
+              ? "No categories available"
+              : "Select Category"
+          }
           required
+          description={
+            categories.length === 0 ? (
+              <span className="text-destructive font-medium text-xs mt-1 block">
+                Please{" "}
+                <Link
+                  href={`/family/${family.slug}/money/categories`}
+                  className="underline hover:opacity-80 font-semibold"
+                >
+                  create a category of income
+                </Link>{" "}
+                first.
+              </span>
+            ) : undefined
+          }
         />
 
         <CommonFormField

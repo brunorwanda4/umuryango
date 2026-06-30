@@ -33,8 +33,8 @@ import type {
   MoneyOverview,
   ProjectsOverview,
   ReportPeriod,
-  ReportTypeFilter,
   ReportsOverview,
+  ReportTypeFilter,
 } from "./types";
 import {
   getSourceRecordCount,

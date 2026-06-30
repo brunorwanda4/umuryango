@@ -33,8 +33,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { hasCapability } from "@/lib/family-access";
-import { formatDate, formatMinorUnits } from "../utils";
 import type { FamilyDetail } from "../../dashboard/types";
+import { formatDate, formatMinorUnits } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
 
 export function IncomeTable({

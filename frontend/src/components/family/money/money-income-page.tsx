@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  AlertCircleIcon,
-  CoinsIcon,
-  PlusIcon,
-} from "lucide-react";
+import { AlertCircleIcon, CoinsIcon, PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -20,19 +16,19 @@ import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import type { FamilyDetail } from "../dashboard/types";
 import { FamilyMoneySkeleton } from "./family-money-skeleton";
-import {
-  type Category,
-  type IncomeTransaction,
-  type Receipt,
-} from "./income/types-and-schemas";
-import { IncomeMetricCards } from "./income/income-metric-cards";
-import { IncomeFilters } from "./income/income-filters";
-import { IncomeTable } from "./income/income-table";
-import { CreateIncomeDialog } from "./income/create-income-dialog";
-import { EditIncomeDialog } from "./income/edit-income-dialog";
 import { AttachReceiptDialog } from "./income/attach-receipt-dialog";
-import { ViewDetailsDialog } from "./income/view-details-dialog";
+import { CreateIncomeDialog } from "./income/create-income-dialog";
 import { DeleteTransactionDialog } from "./income/delete-transaction-dialog";
+import { EditIncomeDialog } from "./income/edit-income-dialog";
+import { IncomeFilters } from "./income/income-filters";
+import { IncomeMetricCards } from "./income/income-metric-cards";
+import { IncomeTable } from "./income/income-table";
+import type {
+  Category,
+  IncomeTransaction,
+  Receipt,
+} from "./income/types-and-schemas";
+import { ViewDetailsDialog } from "./income/view-details-dialog";
 
 export function MoneyIncomePage({ familyName }: { familyName: string }) {
   const [family, setFamily] = useState<FamilyDetail | null>(null);

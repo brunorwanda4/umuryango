@@ -15,8 +15,8 @@ import type {
   ProjectsOverview,
   ReportBreakdownPoint,
   ReportPeriod,
-  ReportTypeFilter,
   ReportsOverview,
+  ReportTypeFilter,
 } from "./types";
 
 export const periodLabels: Record<ReportPeriod, string> = {

@@ -2,6 +2,15 @@
 
 import { FolderPlusIcon } from "lucide-react";
 import { useState } from "react";
+import {
+  CategoryFormFields,
+  colorOptions,
+} from "@/components/family/money/categories/category-form-fields";
+import {
+  type EditCategoryFormValues,
+  editCategorySchema,
+  normalizeName,
+} from "@/components/family/money/categories/types-and-constants";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,15 +22,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
-import {
-  CategoryFormFields,
-  colorOptions,
-} from "@/components/family/money/categories/category-form-fields";
-import {
-  editCategorySchema,
-  type EditCategoryFormValues,
-  normalizeName,
-} from "@/components/family/money/categories/types-and-constants";
 
 type CategoryNameSource = {
   id?: string;

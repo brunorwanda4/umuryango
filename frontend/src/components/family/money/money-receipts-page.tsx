@@ -9,13 +9,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FamilyMoneyPageData } from "./family-money-page-data";
+import { CreateReceiptForm } from "./forms/create-receipt-form";
 import { MoneySectionLayout } from "./money-section-layout";
 import { MoneySectionRecordsTable } from "./money-section-records-table";
 import type { MoneySectionHeader } from "./money-section-types";
 import { filterRecordsBySection } from "./money-section-utils";
 import { TableEmptyState } from "./money-ui-helpers";
 import type { MoneyOverview } from "./types";
-import { CreateReceiptForm } from "./forms/create-receipt-form";
 
 const receiptsHeader: MoneySectionHeader = {
   section: "receipts",

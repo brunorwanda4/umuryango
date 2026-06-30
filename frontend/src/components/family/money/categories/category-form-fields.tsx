@@ -1,6 +1,6 @@
 "use client";
 
-import { type Control } from "react-hook-form";
+import type { Control } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

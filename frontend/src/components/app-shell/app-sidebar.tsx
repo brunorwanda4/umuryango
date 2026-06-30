@@ -24,13 +24,13 @@ import { SidebarNavigationGroups } from "./sidebar-navigation";
 import { SidebarResizeHandle } from "./sidebar-resize-handle";
 import {
   type AppSidebarMode,
-  type SidebarView,
   formatFamilyName,
   getFamilyNavigation,
   getFamilySettingsNavigation,
   isSettingsPath,
   personalNavigation,
   personalSettingsNavigation,
+  type SidebarView,
 } from "./sidebar-utils";
 import { SidebarViewSwitcher } from "./sidebar-view-switcher";
 import { WorkspaceSwitcher } from "./workspace-switcher";

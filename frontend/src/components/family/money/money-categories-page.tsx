@@ -3,27 +3,27 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import apiRequest from "@/service/api";
-import { FamilyMoneyPageData } from "./family-money-page-data";
-import { CreateCategoryForm } from "./forms/create-category-form";
-import { MoneySectionLayout } from "./money-section-layout";
+import { CategoryDeleteDialog } from "./categories/category-delete-dialog";
+import { CategoryFilters } from "./categories/category-filters";
+import { CategoryStatsCards } from "./categories/category-stats-cards";
+import { CategoryTable } from "./categories/category-table";
+import { EditCategoryDialog } from "./categories/edit-category-dialog";
 import {
+  type ApiCategory,
   type CategorySort,
   type CategoryStatus,
   type CategoryType,
-  type MoneyCategory,
-  type ApiCategory,
   categoryHeader,
   demoCategories,
   enrichApiCategories,
   filterAndSortCategories,
   getCategoryStats,
+  type MoneyCategory,
   todayIso,
 } from "./categories/types-and-constants";
-import { CategoryStatsCards } from "./categories/category-stats-cards";
-import { CategoryFilters } from "./categories/category-filters";
-import { CategoryTable } from "./categories/category-table";
-import { EditCategoryDialog } from "./categories/edit-category-dialog";
-import { CategoryDeleteDialog } from "./categories/category-delete-dialog";
+import { FamilyMoneyPageData } from "./family-money-page-data";
+import { CreateCategoryForm } from "./forms/create-category-form";
+import { MoneySectionLayout } from "./money-section-layout";
 import type { MoneyOverview } from "./types";
 
 export function MoneyCategoriesPage({ familyName }: { familyName: string }) {

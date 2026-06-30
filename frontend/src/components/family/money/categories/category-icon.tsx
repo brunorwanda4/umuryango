@@ -13,11 +13,7 @@ export function CategoryIcon({ category }: { category: MoneyCategory }) {
         borderColor: `color-mix(in srgb, ${color} 30%, transparent)`,
       }}
     >
-      <Icon
-        aria-hidden="true"
-        className="size-4"
-        style={{ color }}
-      />
+      <Icon aria-hidden="true" className="size-4" style={{ color }} />
     </span>
   );
 }

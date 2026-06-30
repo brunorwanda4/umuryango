@@ -18,7 +18,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { type NavigationGroup, isActivePath } from "./sidebar-utils";
+import { isActivePath, type NavigationGroup } from "./sidebar-utils";
 
 export function SidebarNavigationGroups({
   groups,
