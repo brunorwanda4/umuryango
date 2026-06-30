@@ -1,9 +1,10 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { UserStatus } from '@prisma/client';
+import { AuthAuditAction, UserStatus } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { plainToInstance } from 'class-transformer';
+import { hash as bcryptHash } from 'bcryptjs';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -43,6 +44,7 @@ describe('LoginDto', () => {
 
 describe('AuthService Google login', () => {
   let service: AuthService;
+  let jwtService: { signAsync: jest.Mock; verifyAsync: jest.Mock };
   let prisma: {
     user: {
       findUnique: jest.Mock;
@@ -50,7 +52,13 @@ describe('AuthService Google login', () => {
       update: jest.Mock;
       findFirst: jest.Mock;
     };
-    authSession: { create: jest.Mock };
+    authSession: {
+      create: jest.Mock;
+      findMany: jest.Mock;
+      update: jest.Mock;
+      updateMany: jest.Mock;
+      findFirst: jest.Mock;
+    };
     authAuditEvent: { create: jest.Mock };
   };
 
@@ -62,8 +70,18 @@ describe('AuthService Google login', () => {
         update: jest.fn(),
         findFirst: jest.fn(),
       },
-      authSession: { create: jest.fn().mockResolvedValue({ id: 's-1' }) },
+      authSession: {
+        create: jest.fn().mockResolvedValue({ id: 's-1' }),
+        findMany: jest.fn(),
+        update: jest.fn(),
+        updateMany: jest.fn(),
+        findFirst: jest.fn(),
+      },
       authAuditEvent: { create: jest.fn().mockResolvedValue({}) },
+    };
+    jwtService = {
+      signAsync: jest.fn().mockResolvedValue('access-token'),
+      verifyAsync: jest.fn(),
     };
 
     const moduleRef = await Test.createTestingModule({
@@ -72,7 +90,7 @@ describe('AuthService Google login', () => {
         { provide: PrismaService, useValue: prisma },
         {
           provide: JwtService,
-          useValue: { signAsync: jest.fn().mockResolvedValue('access-token') },
+          useValue: jwtService,
         },
         {
           provide: ConfigService,
@@ -150,5 +168,62 @@ describe('AuthService Google login', () => {
         {},
       ),
     ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('rotates refresh tokens for an active session', async () => {
+    const refreshToken = 'refresh-token';
+    const refreshTokenHash = await bcryptHash(refreshToken, 12);
+    prisma.authSession.findMany.mockResolvedValue([
+      {
+        id: 's-1',
+        userId: 'u-1',
+        refreshTokenHash,
+        user: baseUser,
+      },
+    ]);
+    prisma.authSession.update.mockResolvedValue({});
+
+    const result = await service.refreshSession(refreshToken, {
+      ipAddress: '127.0.0.1',
+      userAgent: 'jest',
+    });
+
+    expect(result.accessToken).toBe('access-token');
+    expect(result.refreshToken).not.toBe(refreshToken);
+    expect(prisma.authSession.update).toHaveBeenCalledWith({
+      where: { id: 's-1' },
+      data: expect.objectContaining({
+        refreshTokenHash: expect.any(String),
+        expiresAt: expect.any(Date),
+        ipAddress: '127.0.0.1',
+        userAgent: 'jest',
+      }),
+    });
+    expect(prisma.authAuditEvent.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: AuthAuditAction.REFRESH_TOKEN,
+        userId: 'u-1',
+      }),
+    });
+  });
+
+  it('revokes by refresh token when the access token is unavailable', async () => {
+    const refreshToken = 'refresh-token';
+    const refreshTokenHash = await bcryptHash(refreshToken, 12);
+    prisma.authSession.findMany.mockResolvedValue([
+      {
+        id: 's-1',
+        userId: 'u-1',
+        refreshTokenHash,
+        user: baseUser,
+      },
+    ]);
+
+    await service.logout(undefined, refreshToken);
+
+    expect(prisma.authSession.updateMany).toHaveBeenCalledWith({
+      where: { id: 's-1', revokedAt: null },
+      data: { revokedAt: expect.any(Date) },
+    });
   });
 });
