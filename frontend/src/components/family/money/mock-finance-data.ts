@@ -1,0 +1,143 @@
+import {
+  Wallet,
+  Home,
+  GraduationCap,
+  Zap,
+  Bus,
+  Activity,
+  Shirt,
+  Smartphone,
+  Church,
+  PartyPopper,
+  Gift,
+  Heart,
+  Baby,
+  Users,
+  HardHat,
+  Car,
+  Fuel,
+  ShoppingCart,
+  Briefcase,
+  Tractor,
+  Bird,
+  Building2,
+  Receipt,
+  Shield,
+  Wrench,
+  CreditCard,
+  Banknote,
+  TrendingUp,
+  AlertCircle,
+  MoreHorizontal,
+  Landmark,
+  TreePine,
+  Laptop
+} from "lucide-react";
+
+export const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  "Food": ShoppingCart,
+  "House Rent": Home,
+  "School Fees": GraduationCap,
+  "Utilities": Zap,
+  "Transport": Bus,
+  "Healthcare": Activity,
+  "Clothing": Shirt,
+  "Phone & Airtime": Smartphone,
+  "Church Contribution": Church,
+  "Family Events": PartyPopper,
+  "Gifts": Gift,
+  "Weddings": Heart,
+  "Children Expenses": Baby,
+  "Parents Support": Users,
+  "Home Construction": HardHat,
+  "Vehicle Expenses": Car,
+  "Fuel": Fuel,
+  "Shopping": ShoppingCart,
+  "Salary Payments": Briefcase,
+  "Farming Expenses": Tractor,
+  "Livestock": Bird,
+  "Business Investment": Building2,
+  "Taxes": Receipt,
+  "Insurance": Shield,
+  "Home Maintenance": Wrench,
+  "Loan Repayment": CreditCard,
+  "Debt Payment": Banknote,
+  "Investments": TrendingUp,
+  "Emergency Fund": AlertCircle,
+  "Miscellaneous": MoreHorizontal,
+  "Salary": Briefcase,
+  "Business Income": Building2,
+  "Farming Income": TreePine,
+  "Rental Income": Home,
+  "Investment Returns": TrendingUp,
+  "Family Contributions": Users,
+  "Gifts Received": Gift,
+  "Donations": Heart,
+  "Pension": Landmark,
+  "Freelancing": Laptop,
+  "Side Hustles": Activity,
+  "Other Income": MoreHorizontal,
+};
+
+export const MOCK_CURRENCY = "RWF";
+
+export const MOCK_SUMMARY = {
+  totalBalance: 4500000,
+  monthlyIncome: 2150000,
+  monthlyExpenses: 1250000,
+  totalSavings: 8500000,
+  outstandingDebts: 500000,
+};
+
+export const MOCK_EXPENSE_CATEGORIES = [
+  { name: "Food", amount: 350000, lastMonth: 320000, percentage: 28, count: 24, trend: "up" },
+  { name: "School Fees", amount: 250000, lastMonth: 250000, percentage: 20, count: 2, trend: "neutral" },
+  { name: "House Rent", amount: 200000, lastMonth: 200000, percentage: 16, count: 1, trend: "neutral" },
+  { name: "Transport", amount: 80000, lastMonth: 95000, percentage: 6, count: 18, trend: "down" },
+  { name: "Parents Support", amount: 100000, lastMonth: 100000, percentage: 8, count: 2, trend: "neutral" },
+  { name: "Church Contribution", amount: 50000, lastMonth: 50000, percentage: 4, count: 4, trend: "neutral" },
+  { name: "Utilities", amount: 75000, lastMonth: 65000, percentage: 6, count: 3, trend: "up" },
+  { name: "Healthcare", amount: 45000, lastMonth: 15000, percentage: 3, count: 2, trend: "up" },
+  { name: "Phone & Airtime", amount: 25000, lastMonth: 30000, percentage: 2, count: 5, trend: "down" },
+  { name: "Miscellaneous", amount: 75000, lastMonth: 50000, percentage: 6, count: 8, trend: "up" },
+];
+
+export const MOCK_INCOME_SOURCES = [
+  { name: "Salary", amount: 1200000, frequency: "Monthly" },
+  { name: "Business Income", amount: 650000, frequency: "Weekly" },
+  { name: "Farming Income", amount: 300000, frequency: "Seasonal" },
+];
+
+export const MOCK_SAVINGS_GOALS = [
+  { name: "Emergency Fund", target: 5000000, saved: 3200000 },
+  { name: "Education Savings", target: 2000000, saved: 800000 },
+  { name: "Home Construction", target: 15000000, saved: 4500000 },
+];
+
+export const MOCK_CONTRIBUTIONS = [
+  { name: "Monthly Family Contribution", target: 50000, paid: 50000, members: ["Papa", "Mama", "Uncle"] },
+  { name: "Cousin's Wedding", target: 500000, paid: 350000, members: ["Papa", "Aunt Alice", "Brother"] },
+];
+
+export const MOCK_DEBTS = [
+  { name: "Car Loan", type: "Borrowed", amount: 4500000, monthlyPayment: 150000, dueDate: "2026-07-15" },
+  { name: "Lent to Uncle", type: "Lent", amount: 500000, monthlyPayment: 50000, dueDate: "2026-07-05" },
+];
+
+export const MOCK_TRANSACTIONS = [
+  { id: "1", date: "2026-06-29", category: "Food", member: "Mama", amount: 45000, method: "Mobile Money", status: "Completed", type: "expense" },
+  { id: "2", date: "2026-06-28", category: "School Fees", member: "Papa", amount: 250000, method: "Bank Transfer", status: "Completed", type: "expense" },
+  { id: "3", date: "2026-06-27", category: "Business Income", member: "Papa", amount: 150000, method: "Cash", status: "Completed", type: "income" },
+  { id: "4", date: "2026-06-26", category: "Transport", member: "Mama", amount: 15000, method: "Mobile Money", status: "Completed", type: "expense" },
+  { id: "5", date: "2026-06-25", category: "Church Contribution", member: "Papa", amount: 20000, method: "Mobile Money", status: "Completed", type: "expense" },
+  { id: "6", date: "2026-06-25", category: "Salary", member: "Mama", amount: 1200000, method: "Bank Transfer", status: "Completed", type: "income" },
+];
+
+export const MOCK_MONTHLY_CASHFLOW = [
+  { month: "Jan", income: 1900000, expenses: 1100000 },
+  { month: "Feb", income: 2000000, expenses: 1150000 },
+  { month: "Mar", income: 2100000, expenses: 1200000 },
+  { month: "Apr", income: 2050000, expenses: 1300000 },
+  { month: "May", income: 2150000, expenses: 1250000 },
+  { month: "Jun", income: 2200000, expenses: 1200000 },
+];
