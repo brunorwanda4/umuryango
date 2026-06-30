@@ -1,12 +1,16 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
   BadgeDollarSignIcon,
   BellIcon,
   BookOpenCheckIcon,
   CalendarDaysIcon,
   ClipboardListIcon,
+  FileClockIcon,
   FileTextIcon,
   FolderKanbanIcon,
+  FolderTreeIcon,
   HandCoinsIcon,
   HomeIcon,
   LandmarkIcon,
@@ -107,6 +111,45 @@ const getFamilySettingsChildren = (familyHref: string): NavigationItem[] => [
   },
 ];
 
+const getFamilyMoneyChildren = (familyHref: string): NavigationItem[] => [
+  {
+    title: "Overview",
+    href: `${familyHref}/money`,
+    icon: BadgeDollarSignIcon,
+    exact: true,
+  },
+  {
+    title: "Income",
+    href: `${familyHref}/money/income`,
+    icon: ArrowDownIcon,
+  },
+  {
+    title: "Expenses",
+    href: `${familyHref}/money/expenses`,
+    icon: ArrowUpIcon,
+  },
+  {
+    title: "Categories",
+    href: `${familyHref}/money/categories`,
+    icon: FolderTreeIcon,
+  },
+  {
+    title: "Approvals",
+    href: `${familyHref}/money/approvals`,
+    icon: FileClockIcon,
+  },
+  {
+    title: "Receipts",
+    href: `${familyHref}/money/receipts`,
+    icon: ReceiptTextIcon,
+  },
+  {
+    title: "Budgets",
+    href: `${familyHref}/money/budgets`,
+    icon: ListChecksIcon,
+  },
+];
+
 export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
   const familyHref = `/family/${familySlug}`;
 
@@ -119,6 +162,7 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
           title: "Money",
           href: `${familyHref}/money`,
           icon: BadgeDollarSignIcon,
+          items: getFamilyMoneyChildren(familyHref),
         },
         {
           title: "Contributions",
