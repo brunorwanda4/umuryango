@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import type { FamilyDetail } from "../../dashboard/types";
+import { IncomeFormFields } from "./income-form-fields";
 import {
   type Category,
   type IncomeTransaction,
@@ -121,106 +121,10 @@ export function EditIncomeDialog({
             <div className="text-sm text-destructive font-medium">{error}</div>
           )}
 
-          <CommonFormField
+          <IncomeFormFields
             control={form.control}
-            name="title"
-            label="Income title"
-            placeholder="e.g. June Salary"
-            required
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <CommonFormField
-              control={form.control}
-              name="amountMinorUnits"
-              label={`Amount (${family.defaultCurrency})`}
-              fieldType="money"
-              currency={family.defaultCurrency}
-              placeholder="e.g. 500,000"
-              required
-            />
-
-            <CommonFormField
-              control={form.control}
-              name="date"
-              label="Date received"
-              fieldType="date"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <CommonFormField
-              control={form.control}
-              name="categoryId"
-              label="Category"
-              fieldType="select"
-              selectOptions={categories.map((c) => ({
-                label: c.name,
-                value: c.id,
-              }))}
-              placeholder="Select Category"
-              required
-            />
-
-            <CommonFormField
-              control={form.control}
-              name="paymentMethod"
-              label="Payment method"
-              fieldType="select"
-              selectOptions={[
-                { label: "Cash", value: "CASH" },
-                { label: "Mobile Money", value: "MOBILE_MONEY" },
-                { label: "Bank Transfer", value: "BANK_TRANSFER" },
-                { label: "Card", value: "CARD" },
-                { label: "Cheque", value: "CHEQUE" },
-                { label: "Other", value: "OTHER" },
-              ]}
-              placeholder="Select Payment Method"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <CommonFormField
-              control={form.control}
-              name="receivedFrom"
-              label="Received from"
-              placeholder="e.g. MTN Rwanda"
-            />
-
-            <CommonFormField
-              control={form.control}
-              name="receivedBy"
-              label="Received by"
-              fieldType="select"
-              selectOptions={family.members.map((m) => ({
-                label: m.fullName,
-                value: m.fullName,
-              }))}
-              placeholder="Select Member"
-            />
-          </div>
-
-          <CommonFormField
-            control={form.control}
-            name="notes"
-            label="Notes"
-            fieldType="textarea"
-            placeholder="Optional additional notes"
-          />
-
-          <CommonFormField
-            control={form.control}
-            name="status"
-            label="Status"
-            fieldType="select"
-            selectOptions={[
-              { label: "Pending Approval", value: "PENDING" },
-              { label: "Approved", value: "APPROVED" },
-              { label: "Rejected", value: "REJECTED" },
-            ]}
-            required
+            family={family}
+            categories={categories}
           />
         </form>
 

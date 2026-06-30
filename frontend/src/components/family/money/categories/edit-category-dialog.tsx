@@ -1,8 +1,9 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,8 +14,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import apiRequest from "@/service/api";
+import { CategoryFormFields } from "./category-form-fields";
 import {
-  categoryColors,
   type EditCategoryFormValues,
   getEditCategorySchema,
   type MoneyCategory,
@@ -62,8 +63,11 @@ export function EditCategoryDialog({
         "patch",
         `/families/${encodeURIComponent(familyId)}/money/categories/${category.id}`,
         {
+          color: values.color,
           description: values.description,
+          icon: values.icon,
           name: values.name,
+          status: values.status,
           type: values.type,
         },
       );
@@ -100,63 +104,11 @@ export function EditCategoryDialog({
           </DialogDescription>
         </DialogHeader>
         <form
-          className="flex flex-col gap-4 py-6"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6"
           id="edit-category-form"
           onSubmit={form.handleSubmit(handleSubmit)}
         >
-          <CommonFormField
-            control={form.control}
-            name="name"
-            label="Name"
-            required
-          />
-          <CommonFormField
-            control={form.control}
-            name="type"
-            label="Type"
-            fieldType="select"
-            selectOptions={[
-              { label: "Expense", value: "EXPENSE" },
-              { label: "Income", value: "INCOME" },
-            ]}
-            required
-          />
-          <CommonFormField
-            control={form.control}
-            name="icon"
-            label="Icon"
-            fieldType="lucide-icon"
-            placeholder="Search icons"
-            required
-          />
-          <CommonFormField
-            control={form.control}
-            name="color"
-            label="Color"
-            fieldType="select"
-            selectOptions={categoryColors.map((color, index) => ({
-              label: `Color ${index + 1}`,
-              value: color,
-            }))}
-            required
-          />
-          <CommonFormField
-            control={form.control}
-            name="description"
-            label="Description"
-            fieldType="textarea"
-          />
-          <CommonFormField
-            control={form.control}
-            name="status"
-            label="Status"
-            fieldType="select"
-            selectOptions={[
-              { label: "Active", value: "ACTIVE" },
-              { label: "Inactive", value: "INACTIVE" },
-            ]}
-            required
-          />
+          <CategoryFormFields control={form.control} />
         </form>
         <DialogFooter>
           <Button
