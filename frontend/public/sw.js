@@ -1,4 +1,4 @@
-  self.addEventListener("install", (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());
 });
 

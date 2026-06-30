@@ -95,6 +95,11 @@ enum FamilyAuditAction {
   PROJECT_UPDATED
   PROJECT_CONTRIBUTION_RECORDED
   PROJECT_UPDATE_CREATED
+  TRANSACTION_CREATED
+  TRANSACTION_UPDATED
+  TRANSACTION_APPROVED
+  TRANSACTION_REJECTED
+  TRANSACTION_REVERSED
 }
 
 enum ContributionCadence {
@@ -575,6 +580,9 @@ model FamilyTransaction {
   approvedById     String?
   approvedAt       DateTime?
   reversedAt       DateTime?
+  notes            String?
+  receivedFrom     String?
+  receivedBy       String?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   family           Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)

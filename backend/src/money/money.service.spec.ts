@@ -41,6 +41,8 @@ describe('MoneyService', () => {
     familyMember: { findFirst: jest.Mock };
     familyContributionPayment: { findMany: jest.Mock; count: jest.Mock };
     familyContributionCycle: { findMany: jest.Mock };
+    familyTransaction: { findMany: jest.Mock; count: jest.Mock };
+    familyBudget: { findMany: jest.Mock };
   };
 
   beforeEach(async () => {
@@ -48,6 +50,8 @@ describe('MoneyService', () => {
       familyMember: { findFirst: jest.fn() },
       familyContributionPayment: { findMany: jest.fn(), count: jest.fn() },
       familyContributionCycle: { findMany: jest.fn() },
+      familyTransaction: { findMany: jest.fn(), count: jest.fn() },
+      familyBudget: { findMany: jest.fn() },
     };
 
     const moduleRef = await Test.createTestingModule({
@@ -86,6 +90,9 @@ describe('MoneyService', () => {
       },
     ]);
     prisma.familyContributionPayment.count.mockResolvedValue(2);
+    prisma.familyTransaction.findMany.mockResolvedValue([]);
+    prisma.familyTransaction.count.mockResolvedValue(0);
+    prisma.familyBudget.findMany.mockResolvedValue([]);
 
     const result = (await service.getOverview('u-1', 'fam-1')) as {
       currency: string;
@@ -105,10 +112,10 @@ describe('MoneyService', () => {
     expect(result.totals.pendingApprovalCount).toBe(2);
     // Past-due open cycle is overdue.
     expect(result.totals.overdueCount).toBe(1);
-    // No ledger model, so these stay null instead of invented totals.
-    expect(result.totals.cashBalanceMinorUnits).toBeNull();
-    expect(result.totals.incomeMinorUnits).toBeNull();
-    expect(result.totals.expenseMinorUnits).toBeNull();
+    // Cash balance and transaction values are now calculated and not null
+    expect(result.totals.cashBalanceMinorUnits).toBe('5000');
+    expect(result.totals.incomeMinorUnits).toBe('0');
+    expect(result.totals.expenseMinorUnits).toBe('0');
     expect(result.totals.savingsMinorUnits).toBeNull();
     expect(result.totals.debtOutstandingMinorUnits).toBeNull();
 
@@ -127,6 +134,9 @@ describe('MoneyService', () => {
     prisma.familyContributionPayment.findMany.mockResolvedValue([]);
     prisma.familyContributionCycle.findMany.mockResolvedValue([]);
     prisma.familyContributionPayment.count.mockResolvedValue(0);
+    prisma.familyTransaction.findMany.mockResolvedValue([]);
+    prisma.familyTransaction.count.mockResolvedValue(0);
+    prisma.familyBudget.findMany.mockResolvedValue([]);
 
     const result = (await service.getOverview('u-1', 'fam-1', 'bogus')) as {
       period: { label: string };

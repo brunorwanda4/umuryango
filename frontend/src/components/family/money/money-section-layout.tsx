@@ -40,6 +40,8 @@ export function MoneySectionLayout({
   money,
   moneyMessage,
   actionDialog,
+  exampleDescription,
+  showMoneyMetrics = true,
 }: {
   children: ReactNode;
   currency: string;
@@ -48,6 +50,8 @@ export function MoneySectionLayout({
   money: MoneyOverview | null;
   moneyMessage?: string;
   actionDialog?: ReactNode;
+  exampleDescription?: string;
+  showMoneyMetrics?: boolean;
 }) {
   const Icon = header.icon;
   const ActionIcon = header.actionIcon;
@@ -78,18 +82,18 @@ export function MoneySectionLayout({
               {header.description}
             </p>
           </div>
-          {canUseAction ? (
-            actionDialog ?? (
-              <Button
-                disabled
-                size="sm"
-                title="This needs the backend money write workflow before records can be saved."
-              >
-                <ActionIcon aria-hidden="true" data-icon="inline-start" />
-                {header.actionLabel}
-              </Button>
-            )
-          ) : null}
+          {canUseAction
+            ? (actionDialog ?? (
+                <Button
+                  disabled
+                  size="sm"
+                  title="This needs the backend money write workflow before records can be saved."
+                >
+                  <ActionIcon aria-hidden="true" data-icon="inline-start" />
+                  {header.actionLabel}
+                </Button>
+              ))
+            : null}
         </div>
         <MoneySectionNavigation
           activeSection={header.section}
@@ -108,8 +112,10 @@ export function MoneySectionLayout({
           </AlertDescription>
         </Alert>
       ) : null}
-      <MoneyMetricCards currency={currency} money={money} />
-      <MoneyWorkflowExamples header={header} />
+      {showMoneyMetrics ? (
+        <MoneyMetricCards currency={currency} money={money} />
+      ) : null}
+      <MoneyWorkflowExamples description={exampleDescription} header={header} />
       {children}
     </div>
   );
@@ -145,7 +151,13 @@ function MoneySectionNavigation({
   );
 }
 
-function MoneyWorkflowExamples({ header }: { header: MoneySectionHeader }) {
+function MoneyWorkflowExamples({
+  description = "Save the amount, date, category, creator, approval state, and any supporting note or receipt.",
+  header,
+}: {
+  description?: string;
+  header: MoneySectionHeader;
+}) {
   return (
     <section
       aria-label={`${header.title} examples`}
@@ -158,10 +170,7 @@ function MoneyWorkflowExamples({ header }: { header: MoneySectionHeader }) {
               <ClipboardListIcon className="size-4 text-muted-foreground" />
             </CardAction>
             <CardTitle className="text-base">{example}</CardTitle>
-            <CardDescription>
-              Save the amount, date, category, creator, approval state, and any
-              supporting note or receipt.
-            </CardDescription>
+            <CardDescription>{description}</CardDescription>
           </CardHeader>
         </Card>
       ))}

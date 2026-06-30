@@ -1,4 +1,8 @@
-import type { MoneyMinorValue, ProjectStatusFilter, ProjectsOverview } from "./types";
+import type {
+  MoneyMinorValue,
+  ProjectStatusFilter,
+  ProjectsOverview,
+} from "./types";
 
 export const statusLabels: Record<ProjectStatusFilter, string> = {
   active: "Active",

@@ -78,11 +78,12 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Update a transaction' })
   @ApiOkResponse({ description: 'Transaction updated successfully.' })
   async update(
+    @CurrentUserId() userId: string,
     @Param('familyId') familyId: string,
     @Param('id') id: string,
     @Body() dto: UpdateTransactionDto,
   ) {
-    const data = await this.transactionsService.update(familyId, id, dto);
+    const data = await this.transactionsService.update(userId, familyId, id, dto);
     return { data, message: 'Transaction updated successfully.' };
   }
 
@@ -114,10 +115,11 @@ export class TransactionsController {
   @ApiOperation({ summary: 'Reverse/soft-delete a transaction' })
   @ApiOkResponse({ description: 'Transaction reversed successfully.' })
   async remove(
+    @CurrentUserId() userId: string,
     @Param('familyId') familyId: string,
     @Param('id') id: string,
   ) {
-    const data = await this.transactionsService.remove(familyId, id);
+    const data = await this.transactionsService.remove(userId, familyId, id);
     return { data, message: 'Transaction reversed successfully.' };
   }
 }

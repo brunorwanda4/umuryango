@@ -176,7 +176,11 @@ function MoneyWorkspaceContent({
           <MoneyOperationsGrid family={family} money={money} />
         </TabsContent>
         <TabsContent value="approvals">
-          <MoneyApprovalTable currency={currency} money={money} familyId={family.id} />
+          <MoneyApprovalTable
+            currency={currency}
+            money={money}
+            familyId={family.id}
+          />
         </TabsContent>
         <TabsContent value="budgets">
           <MoneyBudgetList currency={currency} money={money} />

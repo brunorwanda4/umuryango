@@ -10,7 +10,6 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/ui/sidebar";
 import {
   Table,
   TableBody,
@@ -20,8 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-
-const SIDEBAR_WIDTH = "16rem";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -50,7 +47,6 @@ export function CommonDataTable<TData, TValue>({
   loading = false,
   className,
 }: DataTableProps<TData, TValue>) {
-  const { open } = useSidebar();
   const internalTable = useReactTable({
     data,
     columns,
@@ -61,16 +57,12 @@ export function CommonDataTable<TData, TValue>({
   const table = externalTable ?? internalTable;
 
   return (
-    <div className="w-full space-y-4">
+    <div className="min-w-0 w-full space-y-4">
       <div
         className={cn(
-          "w-full overflow-x-auto rounded-md border transition-all duration-300",
-          open ? "max-w-full" : "max-w-full", // can keep default
+          "min-w-0 max-w-full overflow-x-auto rounded-md border transition-all duration-300",
           className,
         )}
-        style={{
-          maxWidth: open ? `calc(100% - ${SIDEBAR_WIDTH}px)` : "100%",
-        }}
       >
         <Table className="table-auto border-collapse">
           <TableHeader>

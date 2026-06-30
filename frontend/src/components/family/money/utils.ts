@@ -34,7 +34,9 @@ export const summarySkeletonKeys = [
   "debts",
 ];
 
-export function normalizeMoneyOverview(money?: MoneyOverview): MoneyOverview | null {
+export function normalizeMoneyOverview(
+  money?: MoneyOverview,
+): MoneyOverview | null {
   if (!money) {
     return null;
   }

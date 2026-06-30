@@ -42,12 +42,7 @@ export function SidebarNavigationGroups({
                 );
                 const itemIsActive =
                   childIsActive ||
-                  isActivePath(
-                    pathname,
-                    item.href,
-                    currentHash,
-                    item.exact,
-                  );
+                  isActivePath(pathname, item.href, currentHash, item.exact);
 
                 return item.items?.length ? (
                   <Collapsible

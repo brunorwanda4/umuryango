@@ -8,7 +8,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ProjectFact, StatusBadge, TableEmptyState } from "./projects-ui-helpers";
+import {
+  ProjectFact,
+  StatusBadge,
+  TableEmptyState,
+} from "./projects-ui-helpers";
 import type { ProjectsOverview } from "./types";
 import {
   clampPercent,

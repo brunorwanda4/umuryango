@@ -34,7 +34,11 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
           money={money}
           moneyMessage={moneyMessage}
         >
-          <MoneyApprovalTable currency={currency} money={money} familyId={family.id} />
+          <MoneyApprovalTable
+            currency={currency}
+            money={money}
+            familyId={family.id}
+          />
         </MoneySectionLayout>
       )}
     </FamilyMoneyPageData>

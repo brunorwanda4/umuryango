@@ -48,4 +48,19 @@ export class CreateTransactionDto {
   @IsString()
   @IsOptional()
   idempotencyKey?: string;
+
+  @ApiPropertyOptional({ description: 'Optional notes' })
+  @IsString()
+  @IsOptional()
+  notes?: string;
+
+  @ApiPropertyOptional({ description: 'Person/organization who sent the money' })
+  @IsString()
+  @IsOptional()
+  receivedFrom?: string;
+
+  @ApiPropertyOptional({ description: 'Member who received the money' })
+  @IsString()
+  @IsOptional()
+  receivedBy?: string;
 }

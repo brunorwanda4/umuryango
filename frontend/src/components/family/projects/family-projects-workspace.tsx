@@ -25,7 +25,11 @@ import { ProjectMetricCards } from "./project-metric-cards";
 import { ProjectOperationsGrid } from "./project-operations-grid";
 import { ProjectUpdatesList } from "./project-updates-list";
 import { ProjectsHeader } from "./projects-header";
-import type { FetchState, ProjectStatusFilter, ProjectsOverview } from "./types";
+import type {
+  FetchState,
+  ProjectStatusFilter,
+  ProjectsOverview,
+} from "./types";
 import { normalizeProjectsOverview, statusLabels } from "./utils";
 
 export function FamilyProjectsWorkspace({

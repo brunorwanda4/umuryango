@@ -2,7 +2,13 @@ import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { formatTitle } from "./utils";
 
-export function ProjectFact({ label, value }: { label: string; value: string }) {
+export function ProjectFact({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <div className="rounded-xl border bg-muted/20 p-3">
       <p className="text-muted-foreground text-xs">{label}</p>

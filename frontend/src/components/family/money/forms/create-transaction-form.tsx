@@ -117,9 +117,12 @@ export function CreateTransactionForm({
       </DialogTrigger>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl md:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Record {type === "INCOME" ? "Income" : "Expense"}</DialogTitle>
+          <DialogTitle>
+            Record {type === "INCOME" ? "Income" : "Expense"}
+          </DialogTitle>
           <DialogDescription>
-            Enter the details of the transaction. {type === "EXPENSE" && "It will require approval."}
+            Enter the details of the transaction.{" "}
+            {type === "EXPENSE" && "It will require approval."}
           </DialogDescription>
         </DialogHeader>
         <form

@@ -50,7 +50,9 @@ export function CreateBudgetForm({ familyId }: { familyId: string }) {
     ).then((response) => {
       if (active && response.ok && response.data) {
         setCategories(
-          response.data.filter((c) => c.type === "EXPENSE" || c.type === "BOTH"),
+          response.data.filter(
+            (c) => c.type === "EXPENSE" || c.type === "BOTH",
+          ),
         );
       }
       if (active) setLoadingCategories(false);

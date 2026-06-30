@@ -1,9 +1,11 @@
-export default async function FamilyMoneyCategoriesPage({
-	params,
-}: {
-	params: Promise<{ familyName: string }>;
-}) {
-	const { familyName } = await params;
+import { MoneyCategoriesPage } from "@/components/family/money/money-categories-page";
 
-	return <div>Money Categories</div>;
+export default async function FamilyMoneyCategoriesPage({
+  params,
+}: {
+  params: Promise<{ familyName: string }>;
+}) {
+  const { familyName } = await params;
+
+  return <MoneyCategoriesPage familyName={familyName} />;
 }
