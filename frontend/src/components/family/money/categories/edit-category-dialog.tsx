@@ -14,11 +14,10 @@ import {
 } from "@/components/ui/dialog";
 import apiRequest from "@/service/api";
 import {
-  type EditCategoryFormValues,
-  type MoneyCategory,
   categoryColors,
-  categoryIconMap,
+  type EditCategoryFormValues,
   getEditCategorySchema,
+  type MoneyCategory,
   todayIso,
 } from "./types-and-constants";
 
@@ -126,11 +125,8 @@ export function EditCategoryDialog({
             control={form.control}
             name="icon"
             label="Icon"
-            fieldType="select"
-            selectOptions={Object.keys(categoryIconMap).map((icon) => ({
-              label: icon,
-              value: icon,
-            }))}
+            fieldType="lucide-icon"
+            placeholder="Search icons"
             required
           />
           <CommonFormField

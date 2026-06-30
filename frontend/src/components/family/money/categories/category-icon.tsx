@@ -1,8 +1,8 @@
-import { CircleIcon } from "lucide-react";
-import { type MoneyCategory, categoryIconMap } from "./types-and-constants";
+import { getLucideIcon } from "@/lib/lucide-icons";
+import type { MoneyCategory } from "./types-and-constants";
 
 export function CategoryIcon({ category }: { category: MoneyCategory }) {
-  const Icon = categoryIconMap[category.icon] ?? CircleIcon;
+  const Icon = getLucideIcon(category.icon);
 
   return (
     <span className="flex size-9 items-center justify-center rounded-md border bg-background">

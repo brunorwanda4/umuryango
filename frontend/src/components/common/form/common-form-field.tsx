@@ -13,6 +13,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+import { LucideIconPicker } from "@/components/common/form/lucide-icon-picker";
 import { MoneyInput } from "@/components/common/form/money-input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -52,6 +53,7 @@ type CommonFormFieldType =
   | "checkbox"
   | "date"
   | "time"
+  | "lucide-icon"
   | "money"
   | "phone"
   | "otp-input"
@@ -223,7 +225,22 @@ export function CommonFormField<T extends FieldValues>({
                   onValueChange={field.onChange}
                   onBlur={field.onBlur}
                   ref={field.ref}
-                  {...inputProps}
+                />
+              );
+
+            case "lucide-icon":
+              return (
+                <LucideIconPicker
+                  id={id}
+                  name={field.name}
+                  disabled={disabled}
+                  placeholder={placeholder || "Select icon"}
+                  value={field.value}
+                  invalid={invalid}
+                  className={className}
+                  onValueChange={field.onChange}
+                  onBlur={() => field.onBlur()}
+                  ref={field.ref}
                 />
               );
 

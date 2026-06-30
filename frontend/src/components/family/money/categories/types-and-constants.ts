@@ -1,30 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ArchiveIcon,
-  BanknoteIcon,
-  BriefcaseBusinessIcon,
-  BusIcon,
-  CircleDollarSignIcon,
-  CircleIcon,
-  CoinsIcon,
-  FolderCogIcon,
-  FuelIcon,
-  GiftIcon,
-  GraduationCapIcon,
-  HandCoinsIcon,
-  HeartPulseIcon,
-  HomeIcon,
-  LandmarkIcon,
-  type LucideIcon,
-  PlusIcon,
-  ShieldIcon,
-  ShirtIcon,
-  TractorIcon,
-  UtensilsIcon,
-  WifiIcon,
-  WrenchIcon,
-} from "lucide-react";
+import { FolderCogIcon, icons, PlusIcon } from "lucide-react";
 import { z } from "zod";
+import { isLucideIconName } from "@/lib/lucide-icons";
 import type { MoneySectionHeader } from "../money-section-types";
 import type { MoneyMinorValue, MoneyOverview } from "../types";
 import { normalizeMinorUnitString } from "../utils";
@@ -90,29 +66,9 @@ export const categoryHeader: MoneySectionHeader = {
   ],
 };
 
-export const categoryIconMap = {
-  Banknote: BanknoteIcon,
-  Briefcase: BriefcaseBusinessIcon,
-  Bus: BusIcon,
-  Circle: CircleIcon,
-  Coins: CoinsIcon,
-  "Circle dollar": CircleDollarSignIcon,
-  Fuel: FuelIcon,
-  Gift: GiftIcon,
-  "Graduation cap": GraduationCapIcon,
-  "Hand coins": HandCoinsIcon,
-  "Heart pulse": HeartPulseIcon,
-  Home: HomeIcon,
-  Landmark: LandmarkIcon,
-  Shield: ShieldIcon,
-  Shirt: ShirtIcon,
-  Tractor: TractorIcon,
-  Utensils: UtensilsIcon,
-  Wifi: WifiIcon,
-  Wrench: WrenchIcon,
-} satisfies Record<string, LucideIcon>;
+export const categoryIconMap = icons;
 
-export type CategoryIconName = keyof typeof categoryIconMap;
+export type CategoryIconName = string;
 
 export const categoryColors = [
   "var(--primary)",
@@ -192,7 +148,7 @@ export const demoCategories: MoneyCategory[] = [
     "expense-school",
     "School Fees",
     "EXPENSE",
-    "Graduation cap",
+    "GraduationCap",
     2,
     "Tuition, uniforms, books, and school contribution payments.",
     "ACTIVE",
@@ -237,7 +193,7 @@ export const demoCategories: MoneyCategory[] = [
     "expense-healthcare",
     "Healthcare",
     "EXPENSE",
-    "Heart pulse",
+    "HeartPulse",
     5,
     "Medication, insurance gap payments, clinics, and emergency care.",
     "ACTIVE",
@@ -372,7 +328,7 @@ export const demoCategories: MoneyCategory[] = [
     "expense-loan",
     "Loan Repayment",
     "EXPENSE",
-    "Hand coins",
+    "HandCoins",
     0,
     "Loan principal and interest repayments made by the family.",
     "ACTIVE",
@@ -387,7 +343,7 @@ export const demoCategories: MoneyCategory[] = [
     "expense-emergency",
     "Emergency",
     "EXPENSE",
-    "Circle dollar",
+    "CircleDollarSign",
     1,
     "Urgent support that needs clear audit history.",
     "ACTIVE",
@@ -522,7 +478,7 @@ export const demoCategories: MoneyCategory[] = [
     "income-contribution",
     "Family Contribution",
     "INCOME",
-    "Hand coins",
+    "HandCoins",
     3,
     "Member contributions transferred into family money records.",
     "ACTIVE",
@@ -639,7 +595,7 @@ export function enrichApiCategories(
             category.description ??
             `Reusable ${category.type.toLowerCase()} category.`,
           icon:
-            category.icon && category.icon in categoryIconMap
+            category.icon && isLucideIconName(category.icon)
               ? category.icon
               : "Circle",
           id: category.id,
@@ -726,9 +682,7 @@ export function getCategoryStats(categories: MoneyCategory[]) {
 export const editCategorySchema = z.object({
   color: z.string().min(1, "Color is required"),
   description: z.string().optional(),
-  icon: z.enum(
-    Object.keys(categoryIconMap) as [CategoryIconName, ...CategoryIconName[]],
-  ),
+  icon: z.string().refine(isLucideIconName, "Select a valid Lucide icon"),
   name: z.string().trim().min(1, "Name is required"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
   type: z.enum(["INCOME", "EXPENSE"]),
