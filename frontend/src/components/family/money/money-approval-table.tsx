@@ -1,4 +1,7 @@
-import { FileClockIcon } from "lucide-react";
+import { FileClockIcon, CheckIcon, XIcon, Loader2Icon } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import apiRequest from "@/service/api";
 import {
   Card,
   CardContent,
@@ -6,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -21,11 +25,34 @@ import { formatOptionalMoney, formatTitle } from "./utils";
 export function MoneyApprovalTable({
   currency,
   money,
+  familyId,
 }: {
   currency: string;
   money: MoneyOverview | null;
+  familyId: string;
 }) {
   const approvals = money?.approvals ?? [];
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
+  const handleAction = async (id: string, action: "approve" | "reject") => {
+    setProcessingId(id);
+    try {
+      const response = await apiRequest(
+        "patch",
+        `/families/${encodeURIComponent(familyId)}/money/transactions/${id}/${action}`
+      );
+      if (response.ok) {
+        toast.success(`Transaction ${action}d successfully`);
+        window.location.reload();
+      } else {
+        toast.error(response.message || "Failed to process transaction");
+      }
+    } catch (err) {
+      toast.error("An error occurred");
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   return (
     <Card>
@@ -45,6 +72,7 @@ export function MoneyApprovalTable({
                 <TableHead>Submitted by</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Amount</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -58,6 +86,36 @@ export function MoneyApprovalTable({
                   </TableCell>
                   <TableCell className="text-right font-mono">
                     {formatOptionalMoney(row.amountMinorUnits, currency)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        size="icon-sm"
+                        variant="outline"
+                        title="Approve"
+                        disabled={processingId === row.id}
+                        onClick={() => handleAction(row.id, "approve")}
+                      >
+                        {processingId === row.id ? (
+                          <Loader2Icon className="animate-spin" />
+                        ) : (
+                          <CheckIcon className="text-green-600" />
+                        )}
+                      </Button>
+                      <Button
+                        size="icon-sm"
+                        variant="outline"
+                        title="Reject"
+                        disabled={processingId === row.id}
+                        onClick={() => handleAction(row.id, "reject")}
+                      >
+                        {processingId === row.id ? (
+                          <Loader2Icon className="animate-spin" />
+                        ) : (
+                          <XIcon className="text-destructive" />
+                        )}
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

@@ -39,6 +39,7 @@ export function MoneySectionLayout({
   header,
   money,
   moneyMessage,
+  actionDialog,
 }: {
   children: ReactNode;
   currency: string;
@@ -46,6 +47,7 @@ export function MoneySectionLayout({
   header: MoneySectionHeader;
   money: MoneyOverview | null;
   moneyMessage?: string;
+  actionDialog?: ReactNode;
 }) {
   const Icon = header.icon;
   const ActionIcon = header.actionIcon;
@@ -77,14 +79,16 @@ export function MoneySectionLayout({
             </p>
           </div>
           {canUseAction ? (
-            <Button
-              disabled
-              size="sm"
-              title="This needs the backend money write workflow before records can be saved."
-            >
-              <ActionIcon aria-hidden="true" data-icon="inline-start" />
-              {header.actionLabel}
-            </Button>
+            actionDialog ?? (
+              <Button
+                disabled
+                size="sm"
+                title="This needs the backend money write workflow before records can be saved."
+              >
+                <ActionIcon aria-hidden="true" data-icon="inline-start" />
+                {header.actionLabel}
+              </Button>
+            )
           ) : null}
         </div>
         <MoneySectionNavigation

@@ -15,6 +15,7 @@ import type { MoneySectionHeader } from "./money-section-types";
 import { filterRecordsBySection } from "./money-section-utils";
 import { TableEmptyState } from "./money-ui-helpers";
 import type { MoneyOverview } from "./types";
+import { CreateTransactionForm } from "./forms/create-transaction-form";
 
 const incomeHeader: MoneySectionHeader = {
   section: "income",
@@ -43,6 +44,14 @@ export function MoneyIncomePage({ familyName }: { familyName: string }) {
           header={incomeHeader}
           money={money}
           moneyMessage={moneyMessage}
+          actionDialog={
+            <CreateTransactionForm
+              familyId={family.id}
+              type="INCOME"
+              actionLabel={incomeHeader.actionLabel}
+              icon={incomeHeader.actionIcon}
+            />
+          }
         >
           <IncomeRecordsView currency={currency} money={money} />
         </MoneySectionLayout>

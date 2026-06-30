@@ -15,6 +15,7 @@ import type { MoneySectionHeader } from "./money-section-types";
 import { filterRecordsBySection } from "./money-section-utils";
 import { TableEmptyState } from "./money-ui-helpers";
 import type { MoneyOverview } from "./types";
+import { CreateReceiptForm } from "./forms/create-receipt-form";
 
 const receiptsHeader: MoneySectionHeader = {
   section: "receipts",
@@ -43,6 +44,12 @@ export function MoneyReceiptsPage({ familyName }: { familyName: string }) {
           header={receiptsHeader}
           money={money}
           moneyMessage={moneyMessage}
+          actionDialog={
+            <CreateReceiptForm
+              familyId={family.id}
+              transactions={money?.records ?? []}
+            />
+          }
         >
           <ReceiptRecordsView currency={currency} money={money} />
         </MoneySectionLayout>

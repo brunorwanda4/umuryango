@@ -23,6 +23,7 @@ import { summarizeRecordsByCategory } from "./money-section-utils";
 import { TableEmptyState } from "./money-ui-helpers";
 import type { MoneyOverview } from "./types";
 import { formatOptionalMoney } from "./utils";
+import { CreateCategoryForm } from "./forms/create-category-form";
 
 const categoriesHeader: MoneySectionHeader = {
   section: "categories",
@@ -50,6 +51,7 @@ export function MoneyCategoriesPage({ familyName }: { familyName: string }) {
           header={categoriesHeader}
           money={money}
           moneyMessage={moneyMessage}
+          actionDialog={<CreateCategoryForm familyId={family.id} />}
         >
           <CategorySummaryView currency={currency} money={money} />
         </MoneySectionLayout>

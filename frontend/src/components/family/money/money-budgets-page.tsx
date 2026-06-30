@@ -5,6 +5,7 @@ import { FamilyMoneyPageData } from "./family-money-page-data";
 import { MoneyBudgetList } from "./money-budget-list";
 import { MoneySectionLayout } from "./money-section-layout";
 import type { MoneySectionHeader } from "./money-section-types";
+import { CreateBudgetForm } from "./forms/create-budget-form";
 
 const budgetsHeader: MoneySectionHeader = {
   section: "budgets",
@@ -32,6 +33,7 @@ export function MoneyBudgetsPage({ familyName }: { familyName: string }) {
           header={budgetsHeader}
           money={money}
           moneyMessage={moneyMessage}
+          actionDialog={<CreateBudgetForm familyId={family.id} />}
         >
           <MoneyBudgetList currency={currency} money={money} />
         </MoneySectionLayout>
