@@ -1,11 +1,9 @@
-import { MoneyApprovalsPage } from "@/components/family/money/money-approvals-page";
-
 export default async function FamilyMoneyApprovalsPage({
-  params,
+	params,
 }: {
-  params: Promise<{ familyName: string }>;
+	params: Promise<{ familyName: string }>;
 }) {
-  const { familyName } = await params;
+	const { familyName } = await params;
 
-  return <MoneyApprovalsPage familyName={familyName} />;
+	return <div>MoneyApprovalsPage</div>;
 }
