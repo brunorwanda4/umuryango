@@ -50,9 +50,9 @@ export function IncomeFilters({
   family: FamilyDetail;
 }) {
   return (
-    <Card className="bg-card/50">
-      <CardContent className="p-4 flex flex-col gap-4">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-4 lg:grid-cols-6">
+    <Card className="min-w-0 bg-card/50">
+      <CardContent className="flex min-w-0 flex-col gap-4 p-4">
+        <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-4 lg:grid-cols-6">
           {/* Search Input */}
           <div className="relative">
             <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
@@ -139,21 +139,21 @@ export function IncomeFilters({
           </Button>
         </div>
 
-        <div className="flex flex-col gap-2 md:flex-row md:items-center">
-          <span className="text-xs text-muted-foreground shrink-0">
+        <div className="flex min-w-0 flex-col gap-2 md:flex-row md:items-center">
+          <span className="shrink-0 text-muted-foreground text-xs">
             Received date range:
           </span>
-          <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="flex min-w-0 w-full flex-wrap items-center gap-2 md:w-auto">
             <Input
               type="date"
-              className="h-8 max-w-[160px]"
+              className="h-8 max-w-[160px] min-w-0"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
             <span className="text-xs text-muted-foreground">to</span>
             <Input
               type="date"
-              className="h-8 max-w-[160px]"
+              className="h-8 max-w-[160px] min-w-0"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />

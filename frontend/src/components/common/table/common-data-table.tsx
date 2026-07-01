@@ -14,9 +14,9 @@ import {
   ChevronRightIcon,
   ChevronUpIcon,
 } from "lucide-react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -52,6 +52,7 @@ export function CommonDataTable<TData, TValue>({
   loading = false,
   className,
 }: DataTableProps<TData, TValue>) {
+  const tableScrollRef = useRef<HTMLDivElement>(null);
   const internalTable = useReactTable({
     data,
     columns,
@@ -60,126 +61,165 @@ export function CommonDataTable<TData, TValue>({
     initialState: { pagination: { pageSize } },
   });
   const table = externalTable ?? internalTable;
+  const scrollTable = (direction: -1 | 1) => {
+    const scrollElement = tableScrollRef.current;
+
+    if (!scrollElement) {
+      return;
+    }
+
+    scrollElement.scrollBy({
+      behavior: "smooth",
+      left: direction * Math.max(scrollElement.clientWidth * 0.75, 280),
+    });
+  };
 
   return (
     <div className="flex min-w-0 w-full flex-col gap-4">
       <div
         className={cn(
-          "min-w-0 max-w-full overflow-hidden rounded-md border transition-all duration-300",
+          "min-w-0 w-full max-w-full overflow-hidden rounded-md border transition-all duration-300",
           className,
         )}
       >
-        <Table className="min-w-max table-auto border-collapse">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-muted/50">
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className="relative h-10 border-t select-none"
-                      aria-sort={
-                        header.column.getIsSorted() === "asc"
-                          ? "ascending"
-                          : header.column.getIsSorted() === "desc"
-                            ? "descending"
-                            : "none"
-                      }
-                    >
-                      {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                        <button
-                          type="button"
-                          className={cn(
-                            header.column.getCanSort() &&
-                              "flex h-full w-full cursor-pointer appearance-none items-center justify-between gap-2 border-0 bg-transparent p-0 text-left select-none",
-                          )}
-                          onClick={header.column.getToggleSortingHandler()}
-                          onKeyDown={(e) => {
-                            // Enhanced keyboard handling for sorting
-                            if (
+        <div
+          ref={tableScrollRef}
+          className="min-w-0 w-full max-w-full overflow-x-auto overscroll-x-contain"
+        >
+          <table className="w-max min-w-full table-auto border-collapse caption-bottom text-sm">
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className="bg-muted/50">
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead
+                        key={header.id}
+                        className="relative h-10 border-t select-none"
+                        aria-sort={
+                          header.column.getIsSorted() === "asc"
+                            ? "ascending"
+                            : header.column.getIsSorted() === "desc"
+                              ? "descending"
+                              : "none"
+                        }
+                      >
+                        {header.isPlaceholder ? null : header.column.getCanSort() ? (
+                          <button
+                            type="button"
+                            className={cn(
                               header.column.getCanSort() &&
-                              (e.key === "Enter" || e.key === " ")
-                            ) {
-                              e.preventDefault();
-                              header.column.getToggleSortingHandler()?.(e);
+                                "flex h-full w-full cursor-pointer appearance-none items-center justify-between gap-2 border-0 bg-transparent p-0 text-left select-none",
+                            )}
+                            onClick={header.column.getToggleSortingHandler()}
+                            onKeyDown={(e) => {
+                              // Enhanced keyboard handling for sorting
+                              if (
+                                header.column.getCanSort() &&
+                                (e.key === "Enter" || e.key === " ")
+                              ) {
+                                e.preventDefault();
+                                header.column.getToggleSortingHandler()?.(e);
+                              }
+                            }}
+                            tabIndex={
+                              header.column.getCanSort() ? 0 : undefined
                             }
-                          }}
-                          tabIndex={header.column.getCanSort() ? 0 : undefined}
-                        >
-                          {flexRender(
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                            {{
+                              asc: (
+                                <ChevronUpIcon
+                                  className="shrink-0 opacity-60"
+                                  size={16}
+                                  aria-hidden="true"
+                                />
+                              ),
+                              desc: (
+                                <ChevronDownIcon
+                                  className="shrink-0 opacity-60"
+                                  size={16}
+                                  aria-hidden="true"
+                                />
+                              ),
+                            }[header.column.getIsSorted() as string] ?? (
+                              <span className="size-4" aria-hidden="true" />
+                            )}
+                          </button>
+                        ) : (
+                          flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
-                          )}
-                          {{
-                            asc: (
-                              <ChevronUpIcon
-                                className="shrink-0 opacity-60"
-                                size={16}
-                                aria-hidden="true"
-                              />
-                            ),
-                            desc: (
-                              <ChevronDownIcon
-                                className="shrink-0 opacity-60"
-                                size={16}
-                                aria-hidden="true"
-                              />
-                            ),
-                          }[header.column.getIsSorted() as string] ?? (
-                            <span className="size-4" aria-hidden="true" />
-                          )}
-                        </button>
-                      ) : (
-                        flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )
-                      )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground text-sm"
-                >
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={rowClassName ? rowClassName(row) : undefined}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
+                          )
+                        )}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground text-sm"
-                >
-                  No items found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-muted-foreground text-sm"
+                  >
+                    Loading...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className={rowClassName ? rowClassName(row) : undefined}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-muted-foreground text-sm"
+                  >
+                    No items found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </table>
+        </div>
+        <div className="flex justify-end gap-1 border-t bg-muted/20 p-1">
+          <Button
+            aria-label="Scroll table left"
+            size="icon"
+            type="button"
+            variant="ghost"
+            onClick={() => scrollTable(-1)}
+          >
+            <ChevronLeftIcon aria-hidden="true" />
+          </Button>
+          <Button
+            aria-label="Scroll table right"
+            size="icon"
+            type="button"
+            variant="ghost"
+            onClick={() => scrollTable(1)}
+          >
+            <ChevronRightIcon aria-hidden="true" />
+          </Button>
+        </div>
       </div>
 
       {!noFooter && (

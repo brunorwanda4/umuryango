@@ -208,14 +208,14 @@ export function IncomeTable({
   ];
 
   return (
-    <Card>
+    <Card className="min-w-0">
       <CardHeader className="pb-3">
         <CardTitle>Income History</CardTitle>
         <CardDescription>
           List of all incoming money recorded for this family.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-w-0">
         {filteredTransactions.length > 0 ? (
           <CommonDataTable columns={columns} data={filteredTransactions} />
         ) : (

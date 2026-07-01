@@ -241,7 +241,7 @@ export function MoneyIncomePage({ familyName }: { familyName: string }) {
   const currency = family.defaultCurrency;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex min-w-0 max-w-full flex-col gap-6">
       {/* Title Header */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex min-w-0 flex-col gap-2">
