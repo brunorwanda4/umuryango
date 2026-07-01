@@ -1,4 +1,4 @@
-import { CommonFormField } from "@/components/common/form/common-form-field";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
 import type { FamilyDetail } from "../../dashboard/types";
@@ -18,6 +19,21 @@ import {
   type TransactionFormValues,
   transactionSchema,
 } from "./types-and-schemas";
+
+function getDefaultValues(receivedBy: string): TransactionFormValues {
+  return {
+    title: "",
+    amountMinorUnits: 0,
+    categoryId: "",
+    date: new Date().toISOString().split("T")[0],
+    paymentMethod: "CASH",
+    receivedFrom: "",
+    receivedBy,
+    notes: "",
+    status: "PENDING",
+    fileName: "",
+  };
+}
 
 export function CreateIncomeDialog({
   open,
@@ -32,24 +48,19 @@ export function CreateIncomeDialog({
   categories: Category[];
   onSuccess: () => void;
 }) {
+  const { user } = useCurrentUser();
+  const defaultReceivedBy =
+    family.members.find((member) => member.userId === user?.id)?.fullName ??
+    user?.fullName ??
+    "";
+
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     TransactionFormValues,
     IncomeTransaction
   >({
     schema: transactionSchema,
     formOptions: {
-      defaultValues: {
-        title: "",
-        amountMinorUnits: 0,
-        categoryId: "",
-        date: new Date().toISOString().split("T")[0],
-        paymentMethod: "CASH",
-        receivedFrom: "",
-        receivedBy: "",
-        notes: "",
-        status: "PENDING",
-        fileName: "",
-      },
+      defaultValues: getDefaultValues(defaultReceivedBy),
     },
     transform: (values) => ({
       categoryId: values.categoryId,
@@ -86,10 +97,19 @@ export function CreateIncomeDialog({
         );
       }
       onOpenChange(false);
-      form.reset();
+      form.reset(getDefaultValues(defaultReceivedBy));
       onSuccess();
     },
   });
+
+  useEffect(() => {
+    if (!open || !defaultReceivedBy || form.getValues("receivedBy")) return;
+
+    form.setValue("receivedBy", defaultReceivedBy, {
+      shouldDirty: false,
+      shouldValidate: true,
+    });
+  }, [defaultReceivedBy, form, open]);
 
   return (
     <Dialog
