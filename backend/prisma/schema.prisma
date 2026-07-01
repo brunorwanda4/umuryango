@@ -155,6 +155,67 @@ enum TransactionStatus {
   REVERSED
 }
 
+enum LoanType {
+  BORROWED
+  LENT
+}
+
+enum LoanInterestType {
+  NONE
+  FIXED
+  PERCENTAGE
+}
+
+enum LoanRepaymentFrequency {
+  ONCE
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+  CUSTOM
+}
+
+enum LoanStatus {
+  DRAFT
+  ACTIVE
+  OVERDUE
+  COMPLETED
+  CANCELLED
+}
+
+enum LoanApprovalStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum LoanRepaymentMethod {
+  CASH
+  MOBILE_MONEY
+  BANK_TRANSFER
+  CARD
+  OTHER
+}
+
+enum LoanAuditAction {
+  CREATED
+  UPDATED
+  SUBMITTED_FOR_APPROVAL
+  APPROVED
+  CANCELLED
+  COMPLETED
+  DELETED
+  REPAYMENT_CREATED
+  REPAYMENT_UPDATED
+  REPAYMENT_DELETED
+  DOCUMENT_UPLOADED
+  DOCUMENT_DELETED
+  STATUS_UPDATED
+}
+
 enum FamilyProjectCategory {
   HOUSE
   VEHICLE
@@ -221,6 +282,12 @@ model User {
   uploadedReceipts             FamilyReceipt[]             @relation("ReceiptsUploaded")
   createdBudgets               FamilyBudget[]              @relation("BudgetsCreated")
   createdCategories            FamilyTransactionCategory[] @relation("CategoryCreatedBy")
+  createdLoans                 FamilyLoan[]                @relation("LoansCreated")
+  updatedLoans                 FamilyLoan[]                @relation("LoansUpdated")
+  approvedLoans                FamilyLoan[]                @relation("LoansApproved")
+  createdLoanRepayments        FamilyLoanRepayment[]       @relation("LoanRepaymentsCreated")
+  uploadedLoanDocuments        FamilyLoanDocument[]        @relation("LoanDocumentsUploaded")
+  performedLoanAuditLogs       FamilyLoanAuditLog[]        @relation("LoanAuditPerformed")
 
   @@index([status])
 }
@@ -272,31 +339,33 @@ model AuthSession {
 }
 
 model Family {
-  id                   String                      @id @default(cuid())
-  name                 String
-  slug                 String                      @unique
-  country              String
-  defaultCurrency      String
-  contributionCadence  String
-  type                 FamilyType                  @default(NUCLEAR)
-  description          String?
-  createdById          String
-  createdAt            DateTime                    @default(now())
-  updatedAt            DateTime                    @updatedAt
-  createdBy            User                        @relation("FamiliesCreated", fields: [createdById], references: [id], onDelete: Cascade)
-  members              FamilyMember[]
-  invites              FamilyInvite[]
-  auditEvents          FamilyAuditEvent[]
-  contributionPlans    FamilyContributionPlan[]
-  contributionCycles   FamilyContributionCycle[]
-  contributionPayments FamilyContributionPayment[]
-  projects             FamilyProject[]
-  projectContributions FamilyProjectContribution[]
-  projectUpdates       FamilyProjectUpdate[]
+  id                    String                      @id @default(cuid())
+  name                  String
+  slug                  String                      @unique
+  country               String
+  defaultCurrency       String
+  contributionCadence   String
+  type                  FamilyType                  @default(NUCLEAR)
+  description           String?
+  createdById           String
+  createdAt             DateTime                    @default(now())
+  updatedAt             DateTime                    @updatedAt
+  createdBy             User                        @relation("FamiliesCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  members               FamilyMember[]
+  invites               FamilyInvite[]
+  auditEvents           FamilyAuditEvent[]
+  contributionPlans     FamilyContributionPlan[]
+  contributionCycles    FamilyContributionCycle[]
+  contributionPayments  FamilyContributionPayment[]
+  projects              FamilyProject[]
+  projectContributions  FamilyProjectContribution[]
+  projectUpdates        FamilyProjectUpdate[]
   transactionCategories FamilyTransactionCategory[]
-  transactions         FamilyTransaction[]
-  receipts             FamilyReceipt[]
-  budgets              FamilyBudget[]
+  transactions          FamilyTransaction[]
+  receipts              FamilyReceipt[]
+  budgets               FamilyBudget[]
+  loans                 FamilyLoan[]
+  loanRepayments        FamilyLoanRepayment[]
 
   @@index([createdById])
 }
@@ -319,6 +388,10 @@ model FamilyMember {
   ownedProjects           FamilyProject[]                @relation("ProjectOwner")
   projectParticipants     FamilyProjectParticipant[]
   projectContributions    FamilyProjectContribution[]
+  borrowedLoans           FamilyLoan[]                   @relation("LoanBorrowerMember")
+  lentLoans               FamilyLoan[]                   @relation("LoanLenderMember")
+  paidLoanRepayments      FamilyLoanRepayment[]          @relation("LoanRepaymentsPaidBy")
+  receivedLoanRepayments  FamilyLoanRepayment[]          @relation("LoanRepaymentsReceivedBy")
 
   @@unique([familyId, userId])
   @@index([userId])
@@ -556,35 +629,36 @@ model FamilyProjectUpdate {
 }
 
 model FamilyTransactionCategory {
-  id            String          @id @default(cuid())
-  familyId      String
-  name          String
-  type          TransactionType
-  description   String?
-  icon          String?
-  color         String?
-  status        CategoryStatus  @default(ACTIVE)
-  isDefault     Boolean         @default(false)
-  createdById   String?
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  family        Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  createdBy     User?           @relation("CategoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  transactions  FamilyTransaction[]
-  budgets       FamilyBudget[]
+  id           String              @id @default(cuid())
+  familyId     String
+  name         String
+  type         TransactionType
+  description  String?
+  icon         String?
+  color        String?
+  status       CategoryStatus      @default(ACTIVE)
+  isDefault    Boolean             @default(false)
+  createdById  String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  family       Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdBy    User?               @relation("CategoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  transactions FamilyTransaction[]
+  budgets      FamilyBudget[]
+  loans        FamilyLoan[]
 
   @@index([familyId, type])
   @@index([familyId, status])
 }
 
 model FamilyTransaction {
-  id               String            @id @default(cuid())
+  id               String                    @id @default(cuid())
   familyId         String
   categoryId       String
   amountMinorUnits BigInt
   currency         String
   type             TransactionType
-  status           TransactionStatus @default(PENDING)
+  status           TransactionStatus         @default(PENDING)
   date             DateTime
   description      String?
   paymentMethod    String?
@@ -596,12 +670,12 @@ model FamilyTransaction {
   notes            String?
   receivedFrom     String?
   receivedBy       String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  family           Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  family           Family                    @relation(fields: [familyId], references: [id], onDelete: Cascade)
   category         FamilyTransactionCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  createdBy        User              @relation("TransactionsCreated", fields: [createdById], references: [id], onDelete: Cascade)
-  approvedBy       User?             @relation("TransactionsApproved", fields: [approvedById], references: [id], onDelete: SetNull)
+  createdBy        User                      @relation("TransactionsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  approvedBy       User?                     @relation("TransactionsApproved", fields: [approvedById], references: [id], onDelete: SetNull)
   receipts         FamilyReceipt[]
 
   @@unique([familyId, idempotencyKey])
@@ -611,25 +685,26 @@ model FamilyTransaction {
 }
 
 model FamilyReceipt {
-  id             String            @id @default(cuid())
+  id             String                @id @default(cuid())
   familyId       String
   transactionId  String
   fileName       String
   fileType       String
   fileSizeBytes  Int
-  storageKey     String 
+  storageKey     String
   uploadedById   String
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  family         Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  transaction    FamilyTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  uploadedBy     User              @relation("ReceiptsUploaded", fields: [uploadedById], references: [id], onDelete: Cascade)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  family         Family                @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  transaction    FamilyTransaction     @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  uploadedBy     User                  @relation("ReceiptsUploaded", fields: [uploadedById], references: [id], onDelete: Cascade)
+  loanRepayments FamilyLoanRepayment[]
 
   @@index([familyId, transactionId])
 }
 
 model FamilyBudget {
-  id               String            @id @default(cuid())
+  id               String                     @id @default(cuid())
   familyId         String
   categoryId       String?
   amountMinorUnits BigInt
@@ -637,12 +712,130 @@ model FamilyBudget {
   startDate        DateTime
   endDate          DateTime
   createdById      String
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  family           Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  family           Family                     @relation(fields: [familyId], references: [id], onDelete: Cascade)
   category         FamilyTransactionCategory? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  createdBy        User              @relation("BudgetsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  createdBy        User                       @relation("BudgetsCreated", fields: [createdById], references: [id], onDelete: Cascade)
 
   @@index([familyId, startDate, endDate])
   @@index([categoryId])
+}
+
+model FamilyLoan {
+  id                            String                     @id @default(cuid())
+  familyId                      String
+  title                         String
+  description                   String?
+  loanType                      LoanType
+  principalAmountMinorUnits     BigInt
+  interestRate                  Decimal                    @default(0) @db.Decimal(12, 4)
+  interestType                  LoanInterestType           @default(NONE)
+  totalExpectedAmountMinorUnits BigInt
+  paidAmountMinorUnits          BigInt                     @default(0)
+  remainingBalanceMinorUnits    BigInt
+  currency                      String
+  borrowerName                  String?
+  borrowerMemberId              String?
+  lenderName                    String?
+  lenderMemberId                String?
+  categoryId                    String?
+  startDate                     DateTime
+  dueDate                       DateTime
+  repaymentFrequency            LoanRepaymentFrequency     @default(ONCE)
+  status                        LoanStatus                 @default(DRAFT)
+  approvalStatus                LoanApprovalStatus         @default(DRAFT)
+  approvedById                  String?
+  approvedAt                    DateTime?
+  createdById                   String
+  updatedById                   String?
+  idempotencyKey                String?
+  deletedAt                     DateTime?
+  createdAt                     DateTime                   @default(now())
+  updatedAt                     DateTime                   @updatedAt
+  family                        Family                     @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  borrowerMember                FamilyMember?              @relation("LoanBorrowerMember", fields: [borrowerMemberId], references: [id], onDelete: SetNull)
+  lenderMember                  FamilyMember?              @relation("LoanLenderMember", fields: [lenderMemberId], references: [id], onDelete: SetNull)
+  category                      FamilyTransactionCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  approvedBy                    User?                      @relation("LoansApproved", fields: [approvedById], references: [id], onDelete: SetNull)
+  createdBy                     User                       @relation("LoansCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  updatedBy                     User?                      @relation("LoansUpdated", fields: [updatedById], references: [id], onDelete: SetNull)
+  repayments                    FamilyLoanRepayment[]
+  documents                     FamilyLoanDocument[]
+  auditLogs                     FamilyLoanAuditLog[]
+
+  @@unique([familyId, idempotencyKey])
+  @@index([familyId, status])
+  @@index([familyId, approvalStatus])
+  @@index([familyId, dueDate])
+  @@index([familyId, loanType])
+  @@index([familyId, categoryId])
+  @@index([borrowerMemberId])
+  @@index([lenderMemberId])
+  @@index([createdById])
+}
+
+model FamilyLoanRepayment {
+  id                 String              @id @default(cuid())
+  loanId             String
+  familyId           String
+  amountMinorUnits   BigInt
+  paymentDate        DateTime
+  paymentMethod      LoanRepaymentMethod @default(CASH)
+  paidByMemberId     String?
+  receivedByMemberId String?
+  receiptId          String?
+  notes              String?
+  idempotencyKey     String?
+  createdById        String
+  deletedAt          DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  loan               FamilyLoan          @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  family             Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  paidByMember       FamilyMember?       @relation("LoanRepaymentsPaidBy", fields: [paidByMemberId], references: [id], onDelete: SetNull)
+  receivedByMember   FamilyMember?       @relation("LoanRepaymentsReceivedBy", fields: [receivedByMemberId], references: [id], onDelete: SetNull)
+  receipt            FamilyReceipt?      @relation(fields: [receiptId], references: [id], onDelete: SetNull)
+  createdBy          User                @relation("LoanRepaymentsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, idempotencyKey])
+  @@index([familyId, paymentDate])
+  @@index([loanId, deletedAt])
+  @@index([paidByMemberId])
+  @@index([receivedByMemberId])
+  @@index([receiptId])
+}
+
+model FamilyLoanDocument {
+  id            String     @id @default(cuid())
+  loanId        String
+  fileName      String
+  fileUrl       String
+  fileType      String
+  fileSizeBytes Int?
+  uploadedById  String
+  deletedAt     DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  loan          FamilyLoan @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  uploadedBy    User       @relation("LoanDocumentsUploaded", fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@index([loanId, deletedAt])
+  @@index([uploadedById])
+}
+
+model FamilyLoanAuditLog {
+  id            String          @id @default(cuid())
+  loanId        String
+  action        LoanAuditAction
+  oldValue      Json?
+  newValue      Json?
+  description   String?
+  performedById String
+  createdAt     DateTime        @default(now())
+  loan          FamilyLoan      @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  performedBy   User            @relation("LoanAuditPerformed", fields: [performedById], references: [id], onDelete: Cascade)
+
+  @@index([loanId, createdAt])
+  @@index([performedById])
 }

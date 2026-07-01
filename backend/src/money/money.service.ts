@@ -159,8 +159,14 @@ export class MoneyService {
       0n,
     );
 
-    const totalIncome = incomes.reduce((sum, tx) => sum + tx.amountMinorUnits, 0n);
-    const totalExpense = expenses.reduce((sum, tx) => sum + tx.amountMinorUnits, 0n);
+    const totalIncome = incomes.reduce(
+      (sum, tx) => sum + tx.amountMinorUnits,
+      0n,
+    );
+    const totalExpense = expenses.reduce(
+      (sum, tx) => sum + tx.amountMinorUnits,
+      0n,
+    );
     const cashBalance = totalIncome + contributionsPaid - totalExpense;
 
     const overdueCount = cycles.filter(
@@ -194,7 +200,10 @@ export class MoneyService {
     }));
 
     const approvals = [...paymentApprovalItems, ...txApprovalItems]
-      .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime(),
+      )
       .slice(0, 25);
 
     const paymentRecords = payments.slice(0, 25).map((payment) => ({
@@ -225,10 +234,16 @@ export class MoneyService {
 
     const allocation: { label: string; amountMinorUnits: string }[] = [];
     if (contributionsPaid > 0n) {
-      allocation.push({ label: 'Contributions', amountMinorUnits: contributionsPaid.toString() });
+      allocation.push({
+        label: 'Contributions',
+        amountMinorUnits: contributionsPaid.toString(),
+      });
     }
     if (totalIncome > 0n) {
-      allocation.push({ label: 'Income', amountMinorUnits: totalIncome.toString() });
+      allocation.push({
+        label: 'Income',
+        amountMinorUnits: totalIncome.toString(),
+      });
     }
 
     const budgets = budgetsData.map((b) => ({
@@ -255,7 +270,8 @@ export class MoneyService {
         contributionsPaidMinorUnits: contributionsPaid.toString(),
         savingsMinorUnits: null,
         debtOutstandingMinorUnits: null,
-        pendingApprovalCount: pendingPaymentApprovalCount + pendingTxApprovalCount,
+        pendingApprovalCount:
+          pendingPaymentApprovalCount + pendingTxApprovalCount,
         overdueCount,
       },
       cashFlow: [],

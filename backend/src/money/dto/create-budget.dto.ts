@@ -1,8 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateBudgetDto {
-  @ApiPropertyOptional({ description: 'Category ID, if the budget is for a specific category' })
+  @ApiPropertyOptional({
+    description: 'Category ID, if the budget is for a specific category',
+  })
   @IsString()
   @IsOptional()
   categoryId?: string;

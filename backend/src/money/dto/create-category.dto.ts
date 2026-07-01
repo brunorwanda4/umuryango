@@ -8,11 +8,16 @@ export class CreateCategoryDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ enum: TransactionType, description: 'Type of the category (INCOME or EXPENSE)' })
+  @ApiProperty({
+    enum: TransactionType,
+    description: 'Type of the category (INCOME or EXPENSE)',
+  })
   @IsEnum(TransactionType)
   type: TransactionType;
 
-  @ApiPropertyOptional({ description: 'An optional description for the category' })
+  @ApiPropertyOptional({
+    description: 'An optional description for the category',
+  })
   @IsString()
   @IsOptional()
   description?: string;
@@ -22,12 +27,17 @@ export class CreateCategoryDto {
   @IsOptional()
   icon?: string;
 
-  @ApiPropertyOptional({ description: 'Color value (hex or CSS variable) for the category' })
+  @ApiPropertyOptional({
+    description: 'Color value (hex or CSS variable) for the category',
+  })
   @IsString()
   @IsOptional()
   color?: string;
 
-  @ApiPropertyOptional({ enum: CategoryStatus, description: 'Status of the category' })
+  @ApiPropertyOptional({
+    enum: CategoryStatus,
+    description: 'Status of the category',
+  })
   @IsEnum(CategoryStatus)
   @IsOptional()
   status?: CategoryStatus;

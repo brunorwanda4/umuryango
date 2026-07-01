@@ -26,12 +26,12 @@ export class UpdateFamilySettingsDto {
   type?: FamilyType;
 
   @ApiPropertyOptional({ enum: FAMILY_CURRENCIES })
-  @IsIn(FAMILY_CURRENCIES as unknown as string[])
+  @IsIn(FAMILY_CURRENCIES)
   @IsOptional()
   defaultCurrency?: string;
 
   @ApiPropertyOptional({ enum: FAMILY_CADENCES })
-  @IsIn(FAMILY_CADENCES as unknown as string[])
+  @IsIn(FAMILY_CADENCES)
   @IsOptional()
   contributionCadence?: string;
 

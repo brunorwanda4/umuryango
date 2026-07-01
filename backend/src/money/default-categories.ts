@@ -62,7 +62,8 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
   {
     name: 'Healthcare',
     type: TransactionType.EXPENSE,
-    description: 'Medication, clinic visits, insurance gaps, and emergency care.',
+    description:
+      'Medication, clinic visits, insurance gaps, and emergency care.',
     icon: 'HeartPulse',
     color: 'var(--chart-1)',
     status: CategoryStatus.ACTIVE,
@@ -80,7 +81,8 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
   {
     name: 'Internet',
     type: TransactionType.EXPENSE,
-    description: 'Data bundles, home internet, and communication subscriptions.',
+    description:
+      'Data bundles, home internet, and communication subscriptions.',
     icon: 'Wifi',
     color: 'var(--chart-3)',
     status: CategoryStatus.ACTIVE,
@@ -116,7 +118,8 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
   {
     name: 'Farming',
     type: TransactionType.EXPENSE,
-    description: 'Seeds, fertilizer, tools, livestock care, and harvest support.',
+    description:
+      'Seeds, fertilizer, tools, livestock care, and harvest support.',
     icon: 'Tractor',
     color: 'var(--chart-2)',
     status: CategoryStatus.ACTIVE,
@@ -159,6 +162,15 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
     isDefault: false,
   },
   {
+    name: 'Money Lent',
+    type: TransactionType.EXPENSE,
+    description: 'Funds lent by the family to a person or organization.',
+    icon: 'ArrowUpRight',
+    color: 'var(--chart-2)',
+    status: CategoryStatus.ACTIVE,
+    isDefault: false,
+  },
+  {
     name: 'Emergency',
     type: TransactionType.EXPENSE,
     description: 'Urgent support and unplanned family needs.',
@@ -170,7 +182,8 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
   {
     name: 'Other',
     type: TransactionType.EXPENSE,
-    description: 'Fallback expense category for records that need later cleanup.',
+    description:
+      'Fallback expense category for records that need later cleanup.',
     icon: 'Circle',
     color: 'var(--muted-foreground)',
     status: CategoryStatus.ACTIVE,
@@ -217,7 +230,8 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
   {
     name: 'Freelance',
     type: TransactionType.INCOME,
-    description: 'Short-term work, consulting, and independent service payments.',
+    description:
+      'Short-term work, consulting, and independent service payments.',
     icon: 'Briefcase',
     color: 'var(--chart-2)',
     status: CategoryStatus.ACTIVE,
@@ -233,6 +247,15 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
     isDefault: false,
   },
   {
+    name: 'Borrowed Money',
+    type: TransactionType.INCOME,
+    description: 'Funds borrowed by the family from a lender.',
+    icon: 'ArrowDownLeft',
+    color: 'var(--chart-2)',
+    status: CategoryStatus.ACTIVE,
+    isDefault: false,
+  },
+  {
     name: 'Family Contribution',
     type: TransactionType.INCOME,
     description: 'Member contributions transferred into family money records.',
@@ -244,7 +267,8 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
   {
     name: 'Donations',
     type: TransactionType.INCOME,
-    description: 'Support received from relatives, friends, or community groups.',
+    description:
+      'Support received from relatives, friends, or community groups.',
     icon: 'Gift',
     color: 'var(--chart-5)',
     status: CategoryStatus.ACTIVE,
@@ -253,7 +277,8 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
   {
     name: 'Gifts',
     type: TransactionType.INCOME,
-    description: 'Personal gifts received and recorded for family transparency.',
+    description:
+      'Personal gifts received and recorded for family transparency.',
     icon: 'Gift',
     color: 'var(--chart-1)',
     status: CategoryStatus.ACTIVE,
@@ -271,7 +296,8 @@ export const DEFAULT_MONEY_CATEGORIES: DefaultMoneyCategory[] = [
   {
     name: 'Other',
     type: TransactionType.INCOME,
-    description: 'Fallback income category for records that need later cleanup.',
+    description:
+      'Fallback income category for records that need later cleanup.',
     icon: 'Circle',
     color: 'var(--muted-foreground)',
     status: CategoryStatus.ACTIVE,

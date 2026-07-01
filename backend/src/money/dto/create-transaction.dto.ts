@@ -44,7 +44,9 @@ export class CreateTransactionDto {
   @IsOptional()
   paymentMethod?: string;
 
-  @ApiPropertyOptional({ description: 'Idempotency key to prevent duplicate records' })
+  @ApiPropertyOptional({
+    description: 'Idempotency key to prevent duplicate records',
+  })
   @IsString()
   @IsOptional()
   idempotencyKey?: string;
@@ -54,7 +56,9 @@ export class CreateTransactionDto {
   @IsOptional()
   notes?: string;
 
-  @ApiPropertyOptional({ description: 'Person/organization who sent the money' })
+  @ApiPropertyOptional({
+    description: 'Person/organization who sent the money',
+  })
   @IsString()
   @IsOptional()
   receivedFrom?: string;

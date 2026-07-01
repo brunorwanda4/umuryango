@@ -11,6 +11,8 @@ import { BudgetsController } from './budgets.controller';
 import { BudgetsService } from './budgets.service';
 import { ReceiptsController } from './receipts.controller';
 import { ReceiptsService } from './receipts.service';
+import { LoansController } from './loans.controller';
+import { LoansService } from './loans.service';
 
 @Module({
   imports: [PrismaModule, AuthModule],
@@ -20,6 +22,7 @@ import { ReceiptsService } from './receipts.service';
     TransactionsController,
     BudgetsController,
     ReceiptsController,
+    LoansController,
   ],
   providers: [
     MoneyService,
@@ -27,6 +30,7 @@ import { ReceiptsService } from './receipts.service';
     TransactionsService,
     BudgetsService,
     ReceiptsService,
+    LoansService,
   ],
 })
 export class MoneyModule {}

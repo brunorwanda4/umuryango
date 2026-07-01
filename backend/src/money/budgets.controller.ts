@@ -37,8 +37,15 @@ export class BudgetsController {
     @Param('familyId') familyId: string,
     @Body() createBudgetDto: CreateBudgetDto,
   ) {
-    const data = await this.budgetsService.create(userId, familyId, createBudgetDto);
-    return { data: { ...data, amountMinorUnits: data.amountMinorUnits.toString() }, message: 'Budget created successfully.' };
+    const data = await this.budgetsService.create(
+      userId,
+      familyId,
+      createBudgetDto,
+    );
+    return {
+      data: { ...data, amountMinorUnits: data.amountMinorUnits.toString() },
+      message: 'Budget created successfully.',
+    };
   }
 
   @Get()
@@ -52,10 +59,7 @@ export class BudgetsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific budget by ID' })
   @ApiOkResponse({ description: 'Budget retrieved successfully.' })
-  async findOne(
-    @Param('familyId') familyId: string,
-    @Param('id') id: string,
-  ) {
+  async findOne(@Param('familyId') familyId: string, @Param('id') id: string) {
     const data = await this.budgetsService.findOne(familyId, id);
     return { data, message: 'Budget retrieved successfully.' };
   }
@@ -68,17 +72,18 @@ export class BudgetsController {
     @Param('id') id: string,
     @Body() updateBudgetDto: UpdateBudgetDto,
   ) {
-    const data = await this.budgetsService.update(familyId, id, updateBudgetDto);
+    const data = await this.budgetsService.update(
+      familyId,
+      id,
+      updateBudgetDto,
+    );
     return { data, message: 'Budget updated successfully.' };
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a budget' })
   @ApiOkResponse({ description: 'Budget deleted successfully.' })
-  async remove(
-    @Param('familyId') familyId: string,
-    @Param('id') id: string,
-  ) {
+  async remove(@Param('familyId') familyId: string, @Param('id') id: string) {
     const data = await this.budgetsService.remove(familyId, id);
     return { data, message: 'Budget deleted successfully.' };
   }

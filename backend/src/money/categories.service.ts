@@ -7,7 +7,11 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(familyId: string, createCategoryDto: CreateCategoryDto, createdById?: string) {
+  async create(
+    familyId: string,
+    createCategoryDto: CreateCategoryDto,
+    createdById?: string,
+  ) {
     // Basic check if family exists
     const family = await this.prisma.family.findUnique({
       where: { id: familyId },
@@ -57,7 +61,11 @@ export class CategoriesService {
     return category;
   }
 
-  async update(familyId: string, id: string, updateCategoryDto: UpdateCategoryDto) {
+  async update(
+    familyId: string,
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ) {
     await this.findOne(familyId, id); // Ensure it exists and belongs to the family
 
     return this.prisma.familyTransactionCategory.update({

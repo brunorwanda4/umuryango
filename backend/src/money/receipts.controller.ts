@@ -46,17 +46,17 @@ export class ReceiptsController {
     @Param('familyId') familyId: string,
     @Param('transactionId') transactionId: string,
   ) {
-    const data = await this.receiptsService.findAllByTransaction(familyId, transactionId);
+    const data = await this.receiptsService.findAllByTransaction(
+      familyId,
+      transactionId,
+    );
     return { data, message: 'Receipts retrieved successfully.' };
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a receipt' })
   @ApiOkResponse({ description: 'Receipt deleted successfully.' })
-  async remove(
-    @Param('familyId') familyId: string,
-    @Param('id') id: string,
-  ) {
+  async remove(@Param('familyId') familyId: string, @Param('id') id: string) {
     const data = await this.receiptsService.remove(familyId, id);
     return { data, message: 'Receipt deleted successfully.' };
   }

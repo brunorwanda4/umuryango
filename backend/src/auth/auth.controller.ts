@@ -224,7 +224,9 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Revoke the current session and clear auth cookies' })
+  @ApiOperation({
+    summary: 'Revoke the current session and clear auth cookies',
+  })
   @ApiOkResponse({
     description: 'Logged out and auth cookies cleared.',
     schema: {

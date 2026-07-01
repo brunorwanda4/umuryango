@@ -22,7 +22,10 @@ export class CreateReceiptDto {
   @IsNotEmpty()
   fileSizeBytes: number;
 
-  @ApiProperty({ description: 'Storage key/path where the file is stored (e.g. Bunny Storage)' })
+  @ApiProperty({
+    description:
+      'Storage key/path where the file is stored (e.g. Bunny Storage)',
+  })
   @IsString()
   @IsNotEmpty()
   storageKey: string;

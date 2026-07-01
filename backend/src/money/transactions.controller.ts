@@ -46,7 +46,10 @@ export class TransactionsController {
       ...data,
       amountMinorUnits: data.amountMinorUnits.toString(),
     };
-    return { data: serializedData, message: 'Transaction recorded successfully.' };
+    return {
+      data: serializedData,
+      message: 'Transaction recorded successfully.',
+    };
   }
 
   @Get()
@@ -59,17 +62,17 @@ export class TransactionsController {
     @Query('type') type?: TransactionType,
     @Query('status') status?: TransactionStatus,
   ) {
-    const data = await this.transactionsService.findAll(familyId, { type, status });
+    const data = await this.transactionsService.findAll(familyId, {
+      type,
+      status,
+    });
     return { data, message: 'Transactions retrieved successfully.' };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific transaction by ID' })
   @ApiOkResponse({ description: 'Transaction retrieved successfully.' })
-  async findOne(
-    @Param('familyId') familyId: string,
-    @Param('id') id: string,
-  ) {
+  async findOne(@Param('familyId') familyId: string, @Param('id') id: string) {
     const data = await this.transactionsService.findOne(familyId, id);
     return { data, message: 'Transaction retrieved successfully.' };
   }
@@ -83,7 +86,12 @@ export class TransactionsController {
     @Param('id') id: string,
     @Body() dto: UpdateTransactionDto,
   ) {
-    const data = await this.transactionsService.update(userId, familyId, id, dto);
+    const data = await this.transactionsService.update(
+      userId,
+      familyId,
+      id,
+      dto,
+    );
     return { data, message: 'Transaction updated successfully.' };
   }
 

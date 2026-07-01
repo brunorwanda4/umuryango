@@ -22,7 +22,10 @@ export class TransactionsService {
     if (dto.idempotencyKey) {
       const existing = await this.prisma.familyTransaction.findUnique({
         where: {
-          familyId_idempotencyKey: { familyId, idempotencyKey: dto.idempotencyKey },
+          familyId_idempotencyKey: {
+            familyId,
+            idempotencyKey: dto.idempotencyKey,
+          },
         },
       });
       if (existing) {
@@ -81,7 +84,10 @@ export class TransactionsService {
     });
   }
 
-  async findAll(familyId: string, query?: { type?: TransactionType; status?: TransactionStatus }) {
+  async findAll(
+    familyId: string,
+    query?: { type?: TransactionType; status?: TransactionStatus },
+  ) {
     const where: any = { familyId };
     if (query?.type) where.type = query.type;
     if (query?.status) where.status = query.status;
@@ -119,7 +125,12 @@ export class TransactionsService {
     };
   }
 
-  async update(userId: string, familyId: string, id: string, dto: UpdateTransactionDto) {
+  async update(
+    userId: string,
+    familyId: string,
+    id: string,
+    dto: UpdateTransactionDto,
+  ) {
     const membership = await this.prisma.familyMember.findFirst({
       where: { familyId, userId, removedAt: null },
     });
@@ -142,7 +153,9 @@ export class TransactionsService {
         membership.authority === FamilyAuthority.HEAD ||
         membership.authority === FamilyAuthority.ADMIN;
       if (!isAdmin) {
-        throw new ForbiddenException('Only family heads or admins can edit approved transactions');
+        throw new ForbiddenException(
+          'Only family heads or admins can edit approved transactions',
+        );
       }
     }
 
@@ -236,7 +249,10 @@ export class TransactionsService {
         },
       });
 
-      return { ...updated, amountMinorUnits: updated.amountMinorUnits.toString() };
+      return {
+        ...updated,
+        amountMinorUnits: updated.amountMinorUnits.toString(),
+      };
     });
   }
 
@@ -271,7 +287,10 @@ export class TransactionsService {
         },
       });
 
-      return { ...updated, amountMinorUnits: updated.amountMinorUnits.toString() };
+      return {
+        ...updated,
+        amountMinorUnits: updated.amountMinorUnits.toString(),
+      };
     });
   }
 
@@ -303,7 +322,10 @@ export class TransactionsService {
         },
       });
 
-      return { ...updated, amountMinorUnits: updated.amountMinorUnits.toString() };
+      return {
+        ...updated,
+        amountMinorUnits: updated.amountMinorUnits.toString(),
+      };
     });
   }
 
@@ -317,7 +339,9 @@ export class TransactionsService {
     }
 
     if (!membership.capabilities.includes(FamilyCapability.APPROVE_EXPENSE)) {
-      throw new ForbiddenException('You do not have permission to approve transactions');
+      throw new ForbiddenException(
+        'You do not have permission to approve transactions',
+      );
     }
   }
 }

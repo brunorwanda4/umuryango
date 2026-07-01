@@ -91,19 +91,19 @@ export class CreateFamilyDto {
   slug?: string;
 
   @ApiProperty({ enum: FAMILY_COUNTRIES, example: 'RW' })
-  @IsIn(FAMILY_COUNTRIES as unknown as string[])
+  @IsIn(FAMILY_COUNTRIES)
   country: string;
 
   @ApiProperty({ enum: FAMILY_CURRENCIES, example: 'RWF' })
-  @IsIn(FAMILY_CURRENCIES as unknown as string[])
+  @IsIn(FAMILY_CURRENCIES)
   defaultCurrency: string;
 
   @ApiProperty({ enum: FAMILY_CADENCES, example: 'monthly' })
-  @IsIn(FAMILY_CADENCES as unknown as string[])
+  @IsIn(FAMILY_CADENCES)
   contributionCadence: string;
 
   @ApiPropertyOptional({ enum: FAMILY_TYPES, example: FamilyType.NUCLEAR })
-  @IsIn(FAMILY_TYPES as unknown as string[])
+  @IsIn(FAMILY_TYPES)
   @IsOptional()
   type?: FamilyType;
 

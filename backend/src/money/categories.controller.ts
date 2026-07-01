@@ -37,7 +37,11 @@ export class CategoriesController {
     @Param('familyId') familyId: string,
     @Body() createCategoryDto: CreateCategoryDto,
   ) {
-    const data = await this.categoriesService.create(familyId, createCategoryDto, userId);
+    const data = await this.categoriesService.create(
+      familyId,
+      createCategoryDto,
+      userId,
+    );
     return { data, message: 'Category created successfully.' };
   }
 
@@ -52,10 +56,7 @@ export class CategoriesController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific category by ID' })
   @ApiOkResponse({ description: 'Category retrieved successfully.' })
-  async findOne(
-    @Param('familyId') familyId: string,
-    @Param('id') id: string,
-  ) {
+  async findOne(@Param('familyId') familyId: string, @Param('id') id: string) {
     const data = await this.categoriesService.findOne(familyId, id);
     return { data, message: 'Category retrieved successfully.' };
   }
@@ -68,17 +69,18 @@ export class CategoriesController {
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    const data = await this.categoriesService.update(familyId, id, updateCategoryDto);
+    const data = await this.categoriesService.update(
+      familyId,
+      id,
+      updateCategoryDto,
+    );
     return { data, message: 'Category updated successfully.' };
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a category' })
   @ApiOkResponse({ description: 'Category deleted successfully.' })
-  async remove(
-    @Param('familyId') familyId: string,
-    @Param('id') id: string,
-  ) {
+  async remove(@Param('familyId') familyId: string, @Param('id') id: string) {
     const data = await this.categoriesService.remove(familyId, id);
     return { data, message: 'Category deleted successfully.' };
   }

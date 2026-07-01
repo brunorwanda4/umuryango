@@ -138,7 +138,7 @@ describe('FamiliesService', () => {
           }),
         }),
       );
-      expect(DEFAULT_MONEY_CATEGORIES).toHaveLength(29);
+      expect(DEFAULT_MONEY_CATEGORIES).toHaveLength(31);
       expect(DEFAULT_MONEY_CATEGORIES).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -156,6 +156,14 @@ describe('FamiliesService', () => {
           expect.objectContaining({
             name: 'Family Contribution',
             type: TransactionType.INCOME,
+          }),
+          expect.objectContaining({
+            name: 'Borrowed Money',
+            type: TransactionType.INCOME,
+          }),
+          expect.objectContaining({
+            name: 'Money Lent',
+            type: TransactionType.EXPENSE,
           }),
         ]),
       );
