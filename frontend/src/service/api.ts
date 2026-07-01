@@ -25,9 +25,17 @@ export interface ApiRequestOptions
   skipAuthRefresh?: boolean;
 }
 
-const DEFAULT_API_URL = "http://localhost:4915";
+const DEFAULT_API_URL =
+  process.env.NODE_ENV === "production" ? "" : "http://localhost:4915";
 
 export function getApiBaseUrl() {
+  if (process.env.NODE_ENV === "production") {
+    return (process.env.NEXT_PUBLIC_DIRECT_API_URL ?? DEFAULT_API_URL).replace(
+      /\/$/,
+      "",
+    );
+  }
+
   return (
     process.env.NEXT_PUBLIC_API_URL ??
     process.env.NEXT_PUBLIC_API_BASE_URL ??

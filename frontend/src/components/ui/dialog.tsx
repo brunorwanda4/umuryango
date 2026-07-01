@@ -8,25 +8,21 @@ import { cn } from "@/lib/utils";
 
 type DialogSearchParamHistory = "replace" | "push";
 
-type DialogSearchParamSyncProps =
-  | {
-      searchParamHistory?: DialogSearchParamHistory;
-      searchParamName?: string;
-      searchParamSegment?: number;
-      searchParamValue?: never;
-      syncWithSearchParams?: false;
-    }
-  | {
-      /**
-       * Keeps dialog open state in the URL search params. Use a stable,
-       * page-unique value such as "create-project".
-       */
-      searchParamValue: string;
-      searchParamHistory?: DialogSearchParamHistory;
-      searchParamName?: string;
-      searchParamSegment?: number;
-      syncWithSearchParams: true;
-    };
+type DialogSearchParamSyncProps = {
+  /**
+   * Keeps dialog open state in the URL search params. Defaults to true and
+   * uses the DialogTitle text, like "Add Income" -> ?dialog=add-income.
+   */
+  syncWithSearchParams?: boolean;
+  /**
+   * Escape hatch for pages with duplicate titles or title text that should not
+   * be used in the URL.
+   */
+  searchParamValue?: string;
+  searchParamHistory?: DialogSearchParamHistory;
+  searchParamName?: string;
+  searchParamSegment?: number;
+};
 
 type DialogProps = React.ComponentProps<typeof DialogPrimitive.Root> &
   DialogSearchParamSyncProps;
@@ -39,6 +35,7 @@ const DialogSearchParamSegmentContext = React.createContext<{
 } | null>(null);
 
 function Dialog({
+  children,
   defaultOpen,
   onOpenChange,
   open,
@@ -46,10 +43,17 @@ function Dialog({
   searchParamName = "dialog",
   searchParamSegment,
   searchParamValue,
-  syncWithSearchParams = false,
+  syncWithSearchParams = true,
   ...props
 }: DialogProps) {
   const parentSearchParam = React.useContext(DialogSearchParamSegmentContext);
+  const fallbackSearchParamValue = React.useId();
+  const resolvedSearchParamValue = React.useMemo(
+    () =>
+      searchParamValue ??
+      getAutoSearchParamValue(children, fallbackSearchParamValue),
+    [children, fallbackSearchParamValue, searchParamValue],
+  );
   const resolvedSearchParamSegment =
     searchParamSegment ??
     (parentSearchParam?.name === searchParamName
@@ -57,24 +61,25 @@ function Dialog({
       : 0);
   const canSyncWithSearchParams =
     syncWithSearchParams &&
-    typeof searchParamValue === "string" &&
-    searchParamValue.length > 0;
+    typeof resolvedSearchParamValue === "string" &&
+    resolvedSearchParamValue.length > 0;
   const isControlled = open !== undefined;
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false);
   const activeOpen = isControlled ? open : internalOpen;
   const activeOpenRef = React.useRef(activeOpen);
+  const shouldSkipNextUrlWriteRef = React.useRef(true);
 
   React.useEffect(() => {
     activeOpenRef.current = activeOpen;
   }, [activeOpen]);
 
   React.useEffect(() => {
-    if (!syncWithSearchParams || searchParamValue) return;
+    if (!syncWithSearchParams || resolvedSearchParamValue) return;
 
     console.warn(
-      "Dialog syncWithSearchParams requires a non-empty searchParamValue.",
+      "Dialog syncWithSearchParams requires a DialogTitle or non-empty searchParamValue.",
     );
-  }, [searchParamValue, syncWithSearchParams]);
+  }, [resolvedSearchParamValue, syncWithSearchParams]);
 
   React.useEffect(() => {
     if (!canSyncWithSearchParams) return;
@@ -84,7 +89,7 @@ function Dialog({
         getSearchParamDialogValue(
           searchParamName,
           resolvedSearchParamSegment,
-        ) === searchParamValue;
+        ) === resolvedSearchParamValue;
 
       if (shouldOpen === activeOpenRef.current) return;
 
@@ -116,8 +121,32 @@ function Dialog({
     isControlled,
     onOpenChange,
     resolvedSearchParamSegment,
+    resolvedSearchParamValue,
     searchParamName,
-    searchParamValue,
+  ]);
+
+  React.useEffect(() => {
+    if (!canSyncWithSearchParams) return;
+
+    if (shouldSkipNextUrlWriteRef.current) {
+      shouldSkipNextUrlWriteRef.current = false;
+      return;
+    }
+
+    writeSearchParamDialogValue({
+      history: searchParamHistory,
+      name: searchParamName,
+      open: activeOpen ?? false,
+      segment: resolvedSearchParamSegment,
+      value: resolvedSearchParamValue,
+    });
+  }, [
+    activeOpen,
+    canSyncWithSearchParams,
+    resolvedSearchParamSegment,
+    resolvedSearchParamValue,
+    searchParamHistory,
+    searchParamName,
   ]);
 
   const handleOpenChange = React.useCallback(
@@ -136,7 +165,7 @@ function Dialog({
           name: searchParamName,
           open: nextOpen,
           segment: resolvedSearchParamSegment,
-          value: searchParamValue,
+          value: resolvedSearchParamValue,
         });
       }
     },
@@ -145,9 +174,9 @@ function Dialog({
       isControlled,
       onOpenChange,
       resolvedSearchParamSegment,
+      resolvedSearchParamValue,
       searchParamHistory,
       searchParamName,
-      searchParamValue,
     ],
   );
 
@@ -159,7 +188,9 @@ function Dialog({
         onOpenChange={onOpenChange}
         open={open}
         {...props}
-      />
+      >
+        {children}
+      </DialogPrimitive.Root>
     );
   }
 
@@ -175,7 +206,9 @@ function Dialog({
         onOpenChange={handleOpenChange}
         open={activeOpen}
         {...props}
-      />
+      >
+        {children}
+      </DialogPrimitive.Root>
     </DialogSearchParamSegmentContext.Provider>
   );
 }
@@ -318,6 +351,87 @@ function DialogDescription({
       {...props}
     />
   );
+}
+
+function getAutoSearchParamValue(
+  children: React.ReactNode,
+  fallbackValue: string,
+) {
+  const titleText = getDialogTitleText(children);
+  const titleValue = slugifySearchParamValue(titleText);
+  const fallbackDialogValue = slugifySearchParamValue(fallbackValue);
+
+  return titleValue ?? `dialog-${fallbackDialogValue ?? "root"}`;
+}
+
+function getDialogTitleText(children: React.ReactNode) {
+  let titleText: string | undefined;
+
+  function visit(node: React.ReactNode) {
+    if (titleText) return;
+
+    React.Children.forEach(node, (child) => {
+      if (titleText || !React.isValidElement(child)) return;
+
+      const childProps = child.props as {
+        children?: React.ReactNode;
+      };
+
+      if (child.type === DialogTitle) {
+        titleText = getTextContent(childProps.children);
+        return;
+      }
+
+      if (child.type === Dialog) return;
+
+      if (childProps.children) {
+        visit(childProps.children);
+      }
+    });
+  }
+
+  visit(children);
+
+  return titleText;
+}
+
+function getTextContent(node: React.ReactNode): string | undefined {
+  const parts: string[] = [];
+
+  function visit(childNode: React.ReactNode) {
+    React.Children.forEach(childNode, (child) => {
+      if (typeof child === "string" || typeof child === "number") {
+        parts.push(String(child));
+        return;
+      }
+
+      if (!React.isValidElement(child)) return;
+
+      const childProps = child.props as {
+        children?: React.ReactNode;
+      };
+
+      if (childProps.children) {
+        visit(childProps.children);
+      }
+    });
+  }
+
+  visit(node);
+
+  const textContent = parts.join(" ").replace(/\s+/g, " ").trim();
+
+  return textContent || undefined;
+}
+
+function slugifySearchParamValue(value?: string) {
+  const slug = value
+    ?.trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || undefined;
 }
 
 function getSearchParamDialogValue(name: string, segment: number) {
