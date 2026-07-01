@@ -67,7 +67,8 @@ function Dialog({
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen ?? false);
   const activeOpen = isControlled ? open : internalOpen;
   const activeOpenRef = React.useRef(activeOpen);
-  const shouldSkipNextUrlWriteRef = React.useRef(true);
+  const hasSyncedInitialSearchParamRef = React.useRef(false);
+  const pendingSearchParamOpenRef = React.useRef(false);
 
   React.useEffect(() => {
     activeOpenRef.current = activeOpen;
@@ -90,6 +91,11 @@ function Dialog({
           searchParamName,
           resolvedSearchParamSegment,
         ) === resolvedSearchParamValue;
+      hasSyncedInitialSearchParamRef.current = true;
+
+      if (shouldOpen && !activeOpenRef.current) {
+        pendingSearchParamOpenRef.current = true;
+      }
 
       if (shouldOpen === activeOpenRef.current) return;
 
@@ -127,9 +133,18 @@ function Dialog({
 
   React.useEffect(() => {
     if (!canSyncWithSearchParams) return;
+    if (!hasSyncedInitialSearchParamRef.current) return;
+    if (pendingSearchParamOpenRef.current && !activeOpen) return;
 
-    if (shouldSkipNextUrlWriteRef.current) {
-      shouldSkipNextUrlWriteRef.current = false;
+    if (pendingSearchParamOpenRef.current && activeOpen) {
+      pendingSearchParamOpenRef.current = false;
+    }
+
+    if (
+      !activeOpen &&
+      getSearchParamDialogValue(searchParamName, resolvedSearchParamSegment) !==
+        resolvedSearchParamValue
+    ) {
       return;
     }
 
@@ -152,6 +167,9 @@ function Dialog({
   const handleOpenChange = React.useCallback(
     (nextOpen: boolean) => {
       activeOpenRef.current = nextOpen;
+      if (!nextOpen) {
+        pendingSearchParamOpenRef.current = false;
+      }
 
       if (!isControlled) {
         setInternalOpen(nextOpen);
