@@ -9,7 +9,8 @@ export type MoneySection =
   | "categories"
   | "approvals"
   | "receipts"
-  | "budgets";
+  | "budgets"
+  | "loans";
 
 export type MoneySectionHeader = {
   section: MoneySection;

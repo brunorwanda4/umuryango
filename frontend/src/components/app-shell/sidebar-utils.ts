@@ -148,6 +148,11 @@ const getFamilyMoneyChildren = (familyHref: string): NavigationItem[] => [
     href: `${familyHref}/money/budgets`,
     icon: ListChecksIcon,
   },
+  {
+    title: "Loans",
+    href: `${familyHref}/money/loans`,
+    icon: LandmarkIcon,
+  },
 ];
 
 export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
