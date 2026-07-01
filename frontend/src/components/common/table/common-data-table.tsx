@@ -8,7 +8,12 @@ import {
   type Table as TanStackTable,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronUpIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -57,14 +62,14 @@ export function CommonDataTable<TData, TValue>({
   const table = externalTable ?? internalTable;
 
   return (
-    <div className="min-w-0 w-full space-y-4">
+    <div className="flex min-w-0 w-full flex-col gap-4">
       <div
         className={cn(
-          "min-w-0 max-w-full overflow-x-auto rounded-md border transition-all duration-300",
+          "min-w-0 max-w-full overflow-hidden rounded-md border transition-all duration-300",
           className,
         )}
       >
-        <Table className="table-auto border-collapse">
+        <Table className="min-w-max table-auto border-collapse">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="bg-muted/50">
@@ -141,7 +146,7 @@ export function CommonDataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-muted-foreground h-24 text-center text-sm"
+                  className="h-24 text-center text-muted-foreground text-sm"
                 >
                   Loading...
                 </TableCell>
@@ -167,7 +172,7 @@ export function CommonDataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-muted-foreground h-24 text-center text-sm"
+                  className="h-24 text-center text-muted-foreground text-sm"
                 >
                   No items found.
                 </TableCell>
@@ -178,7 +183,7 @@ export function CommonDataTable<TData, TValue>({
       </div>
 
       {!noFooter && (
-        <div className="flex items-center justify-start gap-2">
+        <div className="flex flex-wrap items-center justify-start gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -194,6 +199,7 @@ export function CommonDataTable<TData, TValue>({
               serverMode ? (pageIndex ?? 0) === 0 : !table.getCanPreviousPage()
             }
           >
+            <ChevronLeftIcon aria-hidden="true" data-icon="inline-start" />
             Previous
           </Button>
 
@@ -221,6 +227,7 @@ export function CommonDataTable<TData, TValue>({
             }
           >
             Next
+            <ChevronRightIcon aria-hidden="true" data-icon="inline-end" />
           </Button>
         </div>
       )}
