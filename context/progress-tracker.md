@@ -15,11 +15,11 @@ Keep this file short. Update it only for meaningful product or engineering progr
 | --- | --- | --- |
 | Authentication | Planned | Register, login, verification, reset, MFA, sessions. |
 | Family Management | In progress | Create family exists; authority/capability member permissions, invites, settings, soft removal, and audit endpoints are implemented for the family module. |
-| Finance | In progress | Family money overview UI plus income, expenses, categories, approvals, receipts, and budgets pages/navigation exist. Backend Loans API, Prisma models, repayment balance logic, loan documents metadata, audit logs, and loan tests are implemented. Broader frontend wiring and some finance write-flow hardening remain. |
+| Finance | In progress | Family money overview UI plus income, expenses, categories, approvals, receipts, and budgets pages/navigation exist. Backend Loans API, Prisma models, repayment balance logic, loan documents metadata, audit logs, contact-aware borrower/lender selection, and loan tests are implemented. Broader finance write-flow hardening remains. |
 | Contributions/Savings | Planned | Campaigns, member status, payments, goals, progress. |
 | Debts | Planned | Borrowed/lent direction, schedules, repayments, reminders. |
 | Projects/Documents | In progress | Project persistence, overview aggregation, and create-project API are implemented; documents and project contribution/update write flows remain. |
-| Communication/Events | Planned | Announcements, emergency alerts, events, RSVP, attendance, reminders. |
+| Communication/Events | In progress | Family Contacts module is implemented with trusted people/organizations, emergency and loan contact flags, search/filter UI, soft delete, audit events, and loan integration. Announcements, emergency alerts, events, RSVP, attendance, and reminders remain. |
 | Reports/Exports | In progress | `GET /api/v1/families/:familyId/reports/overview` implemented — aggregates contribution payments and project budgets server-side with VIEW_REPORTS permission check. Income/expense/savings/debt ledgers return null until those modules are modelled. Export table not yet modelled. |
 | Notifications | Planned | In-app, email, SMS, push. |
 | Dashboard/UI System | Planned | Role dashboards, black-and-white theme, light/dark mode, localization-ready text. |

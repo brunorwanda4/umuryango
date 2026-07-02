@@ -8,6 +8,9 @@ import {
   CategoryStatus,
   FamilyAuthority,
   FamilyCapability,
+  type FamilyContact,
+  type FamilyLoan,
+  type FamilyLoanRepayment,
   LoanApprovalStatus,
   LoanAuditAction,
   LoanInterestType,
@@ -15,8 +18,6 @@ import {
   LoanType,
   Prisma,
   TransactionType,
-  type FamilyLoan,
-  type FamilyLoanRepayment,
 } from '@prisma/client';
 import { can } from '../families/family-access';
 import { PrismaService } from '../prisma/prisma.service';
@@ -44,7 +45,25 @@ const ACTIVE_LOAN_STATUSES: LoanStatus[] = [
 
 const LOAN_INCLUDE = Prisma.validator<Prisma.FamilyLoanInclude>()({
   borrowerMember: { include: { user: { select: { fullName: true } } } },
+  borrowerContact: {
+    select: {
+      id: true,
+      fullName: true,
+      phoneNumber: true,
+      relationshipToFamily: true,
+      organization: true,
+    },
+  },
   lenderMember: { include: { user: { select: { fullName: true } } } },
+  lenderContact: {
+    select: {
+      id: true,
+      fullName: true,
+      phoneNumber: true,
+      relationshipToFamily: true,
+      organization: true,
+    },
+  },
   category: { select: { id: true, name: true, type: true } },
   createdBy: { select: { fullName: true } },
   updatedBy: { select: { fullName: true } },
@@ -121,6 +140,16 @@ export class LoansService {
       dto.lenderMemberId,
     ]);
     await this.assertLoanCategory(familyId, dto.categoryId, dto.loanType);
+    const contacts = await this.getLoanContacts(familyId, {
+      borrowerContactId: dto.borrowerContactId,
+      lenderContactId: dto.lenderContactId,
+    });
+    this.assertRequiredCounterparty(dto.loanType, {
+      borrowerName: dto.borrowerName,
+      borrowerContact: contacts.borrowerContact,
+      lenderName: dto.lenderName,
+      lenderContact: contacts.lenderContact,
+    });
 
     const principal = BigInt(dto.principalAmountMinorUnits);
     const interestRate = dto.interestRate ?? '0';
@@ -144,10 +173,14 @@ export class LoansService {
           paidAmountMinorUnits: 0n,
           remainingBalanceMinorUnits: totalExpected,
           currency: dto.currency ?? membership.family.defaultCurrency,
-          borrowerName: dto.borrowerName || null,
+          borrowerName:
+            contacts.borrowerContact?.fullName ?? dto.borrowerName ?? null,
           borrowerMemberId: dto.borrowerMemberId || null,
-          lenderName: dto.lenderName || null,
+          borrowerContactId: contacts.borrowerContact?.id ?? null,
+          lenderName:
+            contacts.lenderContact?.fullName ?? dto.lenderName ?? null,
           lenderMemberId: dto.lenderMemberId || null,
+          lenderContactId: contacts.lenderContact?.id ?? null,
           categoryId: dto.categoryId || null,
           startDate,
           dueDate,
@@ -192,6 +225,26 @@ export class LoansService {
       dto.lenderMemberId,
     ]);
     await this.assertLoanCategory(familyId, dto.categoryId, nextLoanType);
+    const contacts = await this.getLoanContacts(familyId, {
+      borrowerContactId:
+        dto.borrowerContactId === undefined
+          ? loan.borrowerContactId
+          : dto.borrowerContactId,
+      lenderContactId:
+        dto.lenderContactId === undefined
+          ? loan.lenderContactId
+          : dto.lenderContactId,
+    });
+    this.assertRequiredCounterparty(nextLoanType, {
+      borrowerName:
+        contacts.borrowerContact?.fullName ??
+        dto.borrowerName ??
+        loan.borrowerName,
+      borrowerContact: contacts.borrowerContact,
+      lenderName:
+        contacts.lenderContact?.fullName ?? dto.lenderName ?? loan.lenderName,
+      lenderContact: contacts.lenderContact,
+    });
 
     const nextStartDate = dto.startDate
       ? this.toDate(dto.startDate, 'startDate')
@@ -245,21 +298,35 @@ export class LoansService {
         data.interestType = interestType;
       }
       if (dto.currency !== undefined) data.currency = dto.currency;
-      if (dto.borrowerName !== undefined)
-        data.borrowerName = dto.borrowerName || null;
+      if (dto.borrowerName !== undefined || dto.borrowerContactId !== undefined)
+        data.borrowerName =
+          contacts.borrowerContact?.fullName ?? dto.borrowerName ?? null;
       if (dto.borrowerMemberId !== undefined) {
         data.borrowerMember =
           dto.borrowerMemberId === null || dto.borrowerMemberId === ''
             ? { disconnect: true }
             : { connect: { id: dto.borrowerMemberId } };
       }
-      if (dto.lenderName !== undefined)
-        data.lenderName = dto.lenderName || null;
+      if (dto.borrowerContactId !== undefined) {
+        data.borrowerContact =
+          dto.borrowerContactId === null || dto.borrowerContactId === ''
+            ? { disconnect: true }
+            : { connect: { id: dto.borrowerContactId } };
+      }
+      if (dto.lenderName !== undefined || dto.lenderContactId !== undefined)
+        data.lenderName =
+          contacts.lenderContact?.fullName ?? dto.lenderName ?? null;
       if (dto.lenderMemberId !== undefined) {
         data.lenderMember =
           dto.lenderMemberId === null || dto.lenderMemberId === ''
             ? { disconnect: true }
             : { connect: { id: dto.lenderMemberId } };
+      }
+      if (dto.lenderContactId !== undefined) {
+        data.lenderContact =
+          dto.lenderContactId === null || dto.lenderContactId === ''
+            ? { disconnect: true }
+            : { connect: { id: dto.lenderContactId } };
       }
       if (dto.categoryId !== undefined) {
         data.category =
@@ -352,6 +419,16 @@ export class LoansService {
         { description: { contains: search, mode: 'insensitive' } },
         { borrowerName: { contains: search, mode: 'insensitive' } },
         { lenderName: { contains: search, mode: 'insensitive' } },
+        {
+          borrowerContact: {
+            fullName: { contains: search, mode: 'insensitive' },
+          },
+        },
+        {
+          lenderContact: {
+            fullName: { contains: search, mode: 'insensitive' },
+          },
+        },
       ];
     }
 
@@ -1097,6 +1174,74 @@ export class LoansService {
     }
   }
 
+  private async getLoanContacts(
+    familyId: string,
+    input: {
+      borrowerContactId?: string | null;
+      lenderContactId?: string | null;
+    },
+  ) {
+    const ids = [
+      input.borrowerContactId || null,
+      input.lenderContactId || null,
+    ].filter(Boolean) as string[];
+    if (!ids.length) {
+      return {
+        borrowerContact: null,
+        lenderContact: null,
+      };
+    }
+
+    const contacts = await this.prisma.familyContact.findMany({
+      where: { familyId, id: { in: [...new Set(ids)] }, deletedAt: null },
+    });
+    if (contacts.length !== new Set(ids).size) {
+      throw new BadRequestException(
+        'One or more loan contacts do not belong to this family.',
+      );
+    }
+
+    const byId = new Map(contacts.map((contact) => [contact.id, contact]));
+    return {
+      borrowerContact: input.borrowerContactId
+        ? (byId.get(input.borrowerContactId) ?? null)
+        : null,
+      lenderContact: input.lenderContactId
+        ? (byId.get(input.lenderContactId) ?? null)
+        : null,
+    };
+  }
+
+  private assertRequiredCounterparty(
+    loanType: LoanType,
+    input: {
+      borrowerName?: string | null;
+      borrowerContact?: FamilyContact | null;
+      lenderName?: string | null;
+      lenderContact?: FamilyContact | null;
+    },
+  ) {
+    if (
+      loanType === LoanType.BORROWED &&
+      !input.lenderContact &&
+      !input.lenderName?.trim()
+    ) {
+      throw new BadRequestException(
+        'Borrowed loans require a lender contact or lender name.',
+      );
+    }
+
+    if (
+      loanType === LoanType.LENT &&
+      !input.borrowerContact &&
+      !input.borrowerName?.trim()
+    ) {
+      throw new BadRequestException(
+        'Lent loans require a borrower contact or borrower name.',
+      );
+    }
+  }
+
   private async assertReceiptBelongs(
     familyId: string,
     receiptId: string | null | undefined,
@@ -1208,24 +1353,42 @@ export class LoansService {
       currency: loan.currency,
       borrowerName: loan.borrowerName,
       borrowerMemberId: loan.borrowerMemberId,
+      borrowerContactId: loan.borrowerContactId,
       borrower: loan.borrowerMember
         ? {
             memberId: loan.borrowerMemberId,
             name: loan.borrowerMember.user.fullName,
           }
-        : loan.borrowerName
-          ? { memberId: null, name: loan.borrowerName }
-          : null,
+        : loan.borrowerContact
+          ? {
+              contactId: loan.borrowerContactId,
+              name: loan.borrowerName ?? loan.borrowerContact.fullName,
+              phoneNumber: loan.borrowerContact.phoneNumber,
+              relationshipToFamily: loan.borrowerContact.relationshipToFamily,
+              organization: loan.borrowerContact.organization,
+            }
+          : loan.borrowerName
+            ? { memberId: null, contactId: null, name: loan.borrowerName }
+            : null,
       lenderName: loan.lenderName,
       lenderMemberId: loan.lenderMemberId,
+      lenderContactId: loan.lenderContactId,
       lender: loan.lenderMember
         ? {
             memberId: loan.lenderMemberId,
             name: loan.lenderMember.user.fullName,
           }
-        : loan.lenderName
-          ? { memberId: null, name: loan.lenderName }
-          : null,
+        : loan.lenderContact
+          ? {
+              contactId: loan.lenderContactId,
+              name: loan.lenderName ?? loan.lenderContact.fullName,
+              phoneNumber: loan.lenderContact.phoneNumber,
+              relationshipToFamily: loan.lenderContact.relationshipToFamily,
+              organization: loan.lenderContact.organization,
+            }
+          : loan.lenderName
+            ? { memberId: null, contactId: null, name: loan.lenderName }
+            : null,
       category: loan.category,
       categoryId: loan.categoryId,
       startDate: loan.startDate.toISOString(),
@@ -1318,6 +1481,8 @@ export class LoansService {
       remainingBalanceMinorUnits: loan.remainingBalanceMinorUnits.toString(),
       status: loan.status,
       approvalStatus: loan.approvalStatus,
+      borrowerContactId: loan.borrowerContactId,
+      lenderContactId: loan.lenderContactId,
       dueDate: loan.dueDate.toISOString(),
     };
   }

@@ -3,6 +3,7 @@ export type FamilyAuthority = "HEAD" | "ADMIN" | "MEMBER";
 export type FamilyCapability =
   | "MANAGE_FAMILY_SETTINGS"
   | "MANAGE_MEMBERS"
+  | "MANAGE_CONTACTS"
   | "MANAGE_SAVINGS"
   | "MANAGE_CONTRIBUTIONS"
   | "RECORD_INCOME"
@@ -62,6 +63,7 @@ export const KINSHIP_LABELS: Record<FamilyKinship, string> = {
 export const CAPABILITY_LABELS: Record<FamilyCapability, string> = {
   MANAGE_FAMILY_SETTINGS: "Manage family settings",
   MANAGE_MEMBERS: "Manage members",
+  MANAGE_CONTACTS: "Manage contacts",
   MANAGE_SAVINGS: "Manage savings",
   MANAGE_CONTRIBUTIONS: "Manage contributions",
   RECORD_INCOME: "Record income",

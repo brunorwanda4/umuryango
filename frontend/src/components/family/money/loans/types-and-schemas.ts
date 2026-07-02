@@ -66,7 +66,9 @@ export type LoanRecord = {
   startDate: string;
   dueDate: string;
   borrower: string;
+  borrowerContactId?: string | null;
   lender: string;
+  lenderContactId?: string | null;
   category?: string | null;
   paymentMethod: string;
   repaymentFrequency: RepaymentFrequency;
@@ -168,8 +170,10 @@ export const loanFormSchema = z
       .or(z.literal("")),
     startDate: z.string().min(1, "Start date is required"),
     dueDate: z.string().min(1, "Due date is required"),
-    borrower: z.string().min(1, "Borrower is required"),
-    lender: z.string().min(1, "Lender is required"),
+    borrower: z.string().trim().optional().or(z.literal("")),
+    borrowerContactId: z.string().optional(),
+    lender: z.string().trim().optional().or(z.literal("")),
+    lenderContactId: z.string().optional(),
     category: z.string().optional(),
     paymentMethod: z.string().min(1, "Payment method is required"),
     repaymentFrequency: z.enum([
@@ -192,6 +196,24 @@ export const loanFormSchema = z
     ]),
     approvalStatus: z.enum(["NOT_REQUIRED", "PENDING", "APPROVED", "REJECTED"]),
   })
+  .refine(
+    (values) =>
+      values.type !== "MONEY_BORROWED" ||
+      Boolean(values.lender?.trim() || values.lenderContactId),
+    {
+      message: "Choose a lender contact or enter the lender name",
+      path: ["lender"],
+    },
+  )
+  .refine(
+    (values) =>
+      values.type !== "MONEY_LENT" ||
+      Boolean(values.borrower?.trim() || values.borrowerContactId),
+    {
+      message: "Choose a borrower contact or enter the borrower name",
+      path: ["borrower"],
+    },
+  )
   .refine((values) => new Date(values.dueDate) >= new Date(values.startDate), {
     message: "Due date cannot be before start date",
     path: ["dueDate"],

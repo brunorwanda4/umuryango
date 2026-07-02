@@ -93,6 +93,11 @@ export class CreateLoanDto {
   @IsString()
   borrowerMemberId?: string | null;
 
+  @ApiPropertyOptional({ example: 'clx0000000000000000000100' })
+  @IsOptional()
+  @IsString()
+  borrowerContactId?: string | null;
+
   @ApiPropertyOptional({ maxLength: 120 })
   @IsOptional()
   @IsString()
@@ -104,6 +109,11 @@ export class CreateLoanDto {
   @IsOptional()
   @IsString()
   lenderMemberId?: string | null;
+
+  @ApiPropertyOptional({ example: 'clx0000000000000000000101' })
+  @IsOptional()
+  @IsString()
+  lenderContactId?: string | null;
 
   @ApiPropertyOptional({ example: 'clx0000000000000000000010' })
   @IsOptional()

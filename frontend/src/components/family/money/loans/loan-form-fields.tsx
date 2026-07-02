@@ -1,5 +1,7 @@
-import type { Control } from "react-hook-form";
+import { type Control, useWatch } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
+import { Button } from "@/components/ui/button";
+import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import {
   type LoanFormValues,
@@ -11,12 +13,31 @@ import {
 } from "./types-and-schemas";
 
 export function LoanFormFields({
+  contacts = [],
   control,
   family,
 }: {
+  contacts?: FamilyContact[];
   control: Control<LoanFormValues>;
   family: FamilyDetail;
 }) {
+  const loanType = useWatch({ control, name: "type" });
+  const contactOptions = [
+    { label: "Manual entry", value: "__manual" },
+    ...contacts
+      .filter((contact) => contact.status === "ACTIVE")
+      .map((contact) => ({
+        label: [
+          contact.fullName,
+          contact.phoneNumber,
+          contact.relationshipToFamily,
+        ]
+          .filter(Boolean)
+          .join(" - "),
+        value: contact.id,
+      })),
+  ];
+
   return (
     <>
       <CommonFormField
@@ -69,21 +90,52 @@ export function LoanFormFields({
           required
         />
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <CommonFormField
-          control={control}
-          name="borrower"
-          label="Borrower"
-          placeholder="Family member, friend, relative, bank customer, or other borrower"
-          required
-        />
-        <CommonFormField
-          control={control}
-          name="lender"
-          label="Lender"
-          placeholder="Bank, SACCO, friend, relative, or family member"
-          required
-        />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+        {loanType === "MONEY_LENT" ? (
+          <>
+            <CommonFormField
+              control={control}
+              name="borrowerContactId"
+              label="Borrower"
+              fieldType="select"
+              selectOptions={contactOptions}
+              description="Choose a saved borrower from family contacts."
+            />
+            <CommonFormField
+              control={control}
+              name="borrower"
+              label="Manual borrower"
+              placeholder="Enter borrower if not saved"
+            />
+          </>
+        ) : (
+          <>
+            <CommonFormField
+              control={control}
+              name="lenderContactId"
+              label="Lender"
+              fieldType="select"
+              selectOptions={contactOptions}
+              description="Choose a saved lender from family contacts."
+            />
+            <CommonFormField
+              control={control}
+              name="lender"
+              label="Manual lender"
+              placeholder="Enter lender if not saved"
+            />
+          </>
+        )}
+        <div className="flex items-end">
+          <Button
+            href={`/family/${encodeURIComponent(family.slug)}/contacts?new=1`}
+            type="button"
+            variant="outline"
+            className="w-full"
+          >
+            Add new contact
+          </Button>
+        </div>
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <CommonFormField

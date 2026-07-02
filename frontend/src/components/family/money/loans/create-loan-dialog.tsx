@@ -12,9 +12,9 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import { LoanFormFields } from "./loan-form-fields";
-import { percentToBasisPoints } from "./loan-utils";
 import {
   type LoanFormValues,
   type LoanRecord,
@@ -30,7 +30,9 @@ function getDefaultValues(): LoanFormValues {
     startDate: new Date().toISOString().split("T")[0],
     dueDate: "",
     borrower: "",
+    borrowerContactId: "__manual",
     lender: "",
+    lenderContactId: "__manual",
     category: "",
     paymentMethod: "MOBILE_MONEY",
     repaymentFrequency: "MONTHLY",
@@ -43,11 +45,13 @@ function getDefaultValues(): LoanFormValues {
 
 export function CreateLoanDialog({
   family,
+  contacts,
   onOpenChange,
   onSuccess,
   open,
 }: {
   family: FamilyDetail;
+  contacts?: FamilyContact[];
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
   open: boolean;
@@ -60,21 +64,29 @@ export function CreateLoanDialog({
     formOptions: { defaultValues: getDefaultValues() },
     transform: (values) => ({
       title: values.title,
-      type: values.type,
-      originalAmountMinorUnits: values.amountMinorUnits,
+      description: values.notes || null,
+      loanType: values.type === "MONEY_BORROWED" ? "BORROWED" : "LENT",
+      principalAmountMinorUnits: String(values.amountMinorUnits),
       currency: family.defaultCurrency,
-      interestRateBasisPoints: percentToBasisPoints(values.interestRatePercent),
+      interestRate: values.interestRatePercent || "0",
+      interestType: values.interestRatePercent ? "PERCENTAGE" : "NONE",
       startDate: new Date(values.startDate).toISOString(),
       dueDate: new Date(values.dueDate).toISOString(),
-      borrower: values.borrower,
-      lender: values.lender,
-      category: values.category || null,
-      paymentMethod: values.paymentMethod,
-      repaymentFrequency: values.repaymentFrequency,
-      notes: values.notes,
-      documentFileName: values.documentFileName,
-      status: values.status,
-      approvalStatus: values.approvalStatus,
+      borrowerName: values.borrower || null,
+      borrowerContactId:
+        values.borrowerContactId && values.borrowerContactId !== "__manual"
+          ? values.borrowerContactId
+          : null,
+      lenderName: values.lender || null,
+      lenderContactId:
+        values.lenderContactId && values.lenderContactId !== "__manual"
+          ? values.lenderContactId
+          : null,
+      categoryId: values.category || null,
+      repaymentFrequency:
+        values.repaymentFrequency === "ONE_TIME"
+          ? "ONCE"
+          : values.repaymentFrequency,
       idempotencyKey: `create-loan-${Date.now()}-${Math.random()
         .toString(36)
         .slice(2, 11)}`,
@@ -123,7 +135,11 @@ export function CreateLoanDialog({
           {error ? (
             <div className="text-destructive text-sm font-medium">{error}</div>
           ) : null}
-          <LoanFormFields control={form.control} family={family} />
+          <LoanFormFields
+            contacts={contacts}
+            control={form.control}
+            family={family}
+          />
         </form>
         <DialogFooter>
           <Button

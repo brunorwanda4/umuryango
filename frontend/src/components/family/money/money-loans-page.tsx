@@ -8,6 +8,10 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import type {
+  ContactListResponse,
+  FamilyContact,
+} from "@/components/family/contacts/types-and-schemas";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +56,7 @@ import {
 export function MoneyLoansPage({ familyName }: { familyName: string }) {
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [loans, setLoans] = useState<LoanRecord[]>([]);
+  const [contacts, setContacts] = useState<FamilyContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loanMessage, setLoanMessage] = useState<string | null>(null);
@@ -94,6 +99,19 @@ export function MoneyLoansPage({ familyName }: { familyName: string }) {
           loansResponse.message ??
             "Loan records are not available from the API yet.",
         );
+      }
+
+      const contactsResponse = await apiRequest<undefined, ContactListResponse>(
+        "get",
+        `/families/${encodeURIComponent(
+          familyData.id,
+        )}/contacts?limit=100&loanOnly=false`,
+      );
+
+      if (contactsResponse.ok && contactsResponse.data) {
+        setContacts(contactsResponse.data.items);
+      } else {
+        setContacts([]);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred.");
@@ -148,7 +166,7 @@ export function MoneyLoansPage({ familyName }: { familyName: string }) {
         "post",
         `/families/${encodeURIComponent(
           family.id,
-        )}/money/loans/${encodeURIComponent(loan.id)}/send-for-approval`,
+        )}/money/loans/${encodeURIComponent(loan.id)}/submit-approval`,
       );
 
       if (response.ok) {
@@ -165,7 +183,7 @@ export function MoneyLoansPage({ familyName }: { familyName: string }) {
         "post",
         `/families/${encodeURIComponent(
           family.id,
-        )}/money/loans/${encodeURIComponent(loan.id)}/complete`,
+        )}/money/loans/${encodeURIComponent(loan.id)}/mark-completed`,
       );
 
       if (response.ok) {
@@ -239,6 +257,7 @@ export function MoneyLoansPage({ familyName }: { familyName: string }) {
           </div>
           {canManageLoans ? (
             <CreateLoanDialog
+              contacts={contacts}
               family={family}
               open={openCreate}
               onOpenChange={setOpenCreate}
@@ -327,6 +346,7 @@ export function MoneyLoansPage({ familyName }: { familyName: string }) {
       />
 
       <EditLoanDialog
+        contacts={contacts}
         family={family}
         loan={selectedLoan}
         open={openEdit}

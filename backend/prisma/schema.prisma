@@ -47,6 +47,7 @@ enum FamilyAuthority {
 enum FamilyCapability {
   MANAGE_FAMILY_SETTINGS
   MANAGE_MEMBERS
+  MANAGE_CONTACTS
   MANAGE_SAVINGS
   MANAGE_CONTRIBUTIONS
   RECORD_INCOME
@@ -87,6 +88,9 @@ enum FamilyAuditAction {
   CAPABILITIES_CHANGED
   HEAD_GRANTED
   SETTINGS_CHANGED
+  CONTACT_CREATED
+  CONTACT_UPDATED
+  CONTACT_DELETED
   CONTRIBUTION_PLAN_CREATED
   CONTRIBUTION_RECORDED
   CONTRIBUTION_VERIFIED
@@ -216,6 +220,27 @@ enum LoanAuditAction {
   STATUS_UPDATED
 }
 
+enum FamilyContactType {
+  RELATIVE
+  FAMILY_FRIEND
+  NEIGHBOR
+  EMERGENCY_CONTACT
+  DOCTOR
+  LAWYER
+  SCHOOL
+  CHURCH
+  BANK
+  SACCO
+  BUSINESS_PARTNER
+  LOAN_CONTACT
+  OTHER
+}
+
+enum FamilyContactStatus {
+  ACTIVE
+  INACTIVE
+}
+
 enum FamilyProjectCategory {
   HOUSE
   VEHICLE
@@ -282,6 +307,7 @@ model User {
   uploadedReceipts             FamilyReceipt[]             @relation("ReceiptsUploaded")
   createdBudgets               FamilyBudget[]              @relation("BudgetsCreated")
   createdCategories            FamilyTransactionCategory[] @relation("CategoryCreatedBy")
+  createdFamilyContacts        FamilyContact[]             @relation("FamilyContactsCreated")
   createdLoans                 FamilyLoan[]                @relation("LoansCreated")
   updatedLoans                 FamilyLoan[]                @relation("LoansUpdated")
   approvedLoans                FamilyLoan[]                @relation("LoansApproved")
@@ -364,6 +390,7 @@ model Family {
   transactions          FamilyTransaction[]
   receipts              FamilyReceipt[]
   budgets               FamilyBudget[]
+  contacts              FamilyContact[]
   loans                 FamilyLoan[]
   loanRepayments        FamilyLoanRepayment[]
 
@@ -628,6 +655,36 @@ model FamilyProjectUpdate {
   @@index([projectId, createdAt])
 }
 
+model FamilyContact {
+  id                   String              @id @default(cuid())
+  familyId             String
+  fullName             String
+  contactType          FamilyContactType
+  phoneNumber          String?
+  email                String?
+  address              String?
+  relationshipToFamily String?
+  organization         String?
+  notes                String?
+  isEmergencyContact   Boolean             @default(false)
+  isLoanContact        Boolean             @default(false)
+  status               FamilyContactStatus @default(ACTIVE)
+  createdById          String
+  deletedAt            DateTime?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  family               Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdBy            User                @relation("FamilyContactsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  borrowerLoans        FamilyLoan[]        @relation("LoanBorrowerContact")
+  lenderLoans          FamilyLoan[]        @relation("LoanLenderContact")
+
+  @@index([familyId, status])
+  @@index([familyId, contactType])
+  @@index([familyId, isEmergencyContact])
+  @@index([familyId, isLoanContact])
+  @@index([createdById])
+}
+
 model FamilyTransactionCategory {
   id           String              @id @default(cuid())
   familyId     String
@@ -737,8 +794,10 @@ model FamilyLoan {
   currency                      String
   borrowerName                  String?
   borrowerMemberId              String?
+  borrowerContactId             String?
   lenderName                    String?
   lenderMemberId                String?
+  lenderContactId               String?
   categoryId                    String?
   startDate                     DateTime
   dueDate                       DateTime
@@ -755,7 +814,9 @@ model FamilyLoan {
   updatedAt                     DateTime                   @updatedAt
   family                        Family                     @relation(fields: [familyId], references: [id], onDelete: Cascade)
   borrowerMember                FamilyMember?              @relation("LoanBorrowerMember", fields: [borrowerMemberId], references: [id], onDelete: SetNull)
+  borrowerContact               FamilyContact?             @relation("LoanBorrowerContact", fields: [borrowerContactId], references: [id], onDelete: SetNull)
   lenderMember                  FamilyMember?              @relation("LoanLenderMember", fields: [lenderMemberId], references: [id], onDelete: SetNull)
+  lenderContact                 FamilyContact?             @relation("LoanLenderContact", fields: [lenderContactId], references: [id], onDelete: SetNull)
   category                      FamilyTransactionCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   approvedBy                    User?                      @relation("LoansApproved", fields: [approvedById], references: [id], onDelete: SetNull)
   createdBy                     User                       @relation("LoansCreated", fields: [createdById], references: [id], onDelete: Cascade)
@@ -771,7 +832,9 @@ model FamilyLoan {
   @@index([familyId, loanType])
   @@index([familyId, categoryId])
   @@index([borrowerMemberId])
+  @@index([borrowerContactId])
   @@index([lenderMemberId])
+  @@index([lenderContactId])
   @@index([createdById])
 }
 

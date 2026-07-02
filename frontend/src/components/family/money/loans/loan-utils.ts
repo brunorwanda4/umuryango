@@ -4,8 +4,83 @@ import type {
   LoanStatus,
 } from "./types-and-schemas";
 
-export function normalizeLoanRecords(loans: LoanRecord[] | undefined) {
-  return Array.isArray(loans) ? loans : [];
+type BackendLoanRecord = Omit<
+  Partial<LoanRecord>,
+  "approvalStatus" | "borrower" | "lender" | "repaymentFrequency" | "type"
+> & {
+  loanType?: "BORROWED" | "LENT";
+  principalAmountMinorUnits?: string | number;
+  totalExpectedAmountMinorUnits?: string | number | null;
+  borrowerName?: string | null;
+  borrowerContactId?: string | null;
+  borrower?: { name?: string | null; contactId?: string | null } | string;
+  lenderName?: string | null;
+  lenderContactId?: string | null;
+  lender?: { name?: string | null; contactId?: string | null } | string;
+  repaymentFrequency?: string;
+  approvalStatus?: string;
+  interestRate?: string | null;
+};
+
+export function normalizeLoanRecords(loans: unknown) {
+  const rawLoans = Array.isArray(loans)
+    ? loans
+    : Array.isArray((loans as { items?: unknown[] } | undefined)?.items)
+      ? (loans as { items: LoanRecord[] }).items
+      : [];
+
+  return rawLoans.map((loan) => {
+    const backendLoan = loan as BackendLoanRecord;
+    const loanRecord = loan as LoanRecord;
+    const borrower =
+      typeof backendLoan.borrower === "object"
+        ? backendLoan.borrower?.name
+        : backendLoan.borrower;
+    const lender =
+      typeof backendLoan.lender === "object"
+        ? backendLoan.lender?.name
+        : backendLoan.lender;
+    const interestRate = backendLoan.interestRate
+      ? Math.round(Number(backendLoan.interestRate) * 100)
+      : loan.interestRateBasisPoints;
+
+    return {
+      ...loan,
+      type:
+        backendLoan.loanType === "BORROWED"
+          ? "MONEY_BORROWED"
+          : backendLoan.loanType === "LENT"
+            ? "MONEY_LENT"
+            : loanRecord.type,
+      originalAmountMinorUnits:
+        backendLoan.principalAmountMinorUnits ??
+        loanRecord.originalAmountMinorUnits,
+      totalExpectedPaymentMinorUnits:
+        backendLoan.totalExpectedAmountMinorUnits ??
+        loanRecord.totalExpectedPaymentMinorUnits,
+      borrower: borrower || backendLoan.borrowerName || "Family",
+      borrowerContactId:
+        backendLoan.borrowerContactId ??
+        (typeof backendLoan.borrower === "object"
+          ? backendLoan.borrower?.contactId
+          : null),
+      lender: lender || backendLoan.lenderName || "Family",
+      lenderContactId:
+        backendLoan.lenderContactId ??
+        (typeof backendLoan.lender === "object"
+          ? backendLoan.lender?.contactId
+          : null),
+      repaymentFrequency:
+        backendLoan.repaymentFrequency === "ONCE"
+          ? "ONE_TIME"
+          : (backendLoan.repaymentFrequency as LoanRecord["repaymentFrequency"]),
+      approvalStatus:
+        backendLoan.approvalStatus === "DRAFT"
+          ? "NOT_REQUIRED"
+          : (backendLoan.approvalStatus as LoanRecord["approvalStatus"]),
+      interestRateBasisPoints: interestRate,
+    };
+  });
 }
 
 export function isLoanOverdue(loan: LoanRecord, today = new Date()) {

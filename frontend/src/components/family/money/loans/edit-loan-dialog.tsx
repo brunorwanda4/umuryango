@@ -10,9 +10,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import { LoanFormFields } from "./loan-form-fields";
-import { basisPointsToPercentInput, percentToBasisPoints } from "./loan-utils";
+import { basisPointsToPercentInput } from "./loan-utils";
 import {
   type LoanFormValues,
   type LoanRecord,
@@ -34,7 +35,9 @@ function getDefaultValues(loan: LoanRecord | null): LoanFormValues {
       ? new Date(loan.dueDate).toISOString().split("T")[0]
       : "",
     borrower: loan?.borrower ?? "",
+    borrowerContactId: loan?.borrowerContactId ?? "__manual",
     lender: loan?.lender ?? "",
+    lenderContactId: loan?.lenderContactId ?? "__manual",
     category: loan?.category ?? "",
     paymentMethod: loan?.paymentMethod ?? "MOBILE_MONEY",
     repaymentFrequency: loan?.repaymentFrequency ?? "MONTHLY",
@@ -47,12 +50,14 @@ function getDefaultValues(loan: LoanRecord | null): LoanFormValues {
 
 export function EditLoanDialog({
   family,
+  contacts,
   loan,
   onOpenChange,
   onSuccess,
   open,
 }: {
   family: FamilyDetail;
+  contacts?: FamilyContact[];
   loan: LoanRecord | null;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
@@ -66,21 +71,29 @@ export function EditLoanDialog({
     formOptions: { defaultValues: getDefaultValues(loan) },
     transform: (values) => ({
       title: values.title,
-      type: values.type,
-      originalAmountMinorUnits: values.amountMinorUnits,
+      description: values.notes || null,
+      loanType: values.type === "MONEY_BORROWED" ? "BORROWED" : "LENT",
+      principalAmountMinorUnits: String(values.amountMinorUnits),
       currency: family.defaultCurrency,
-      interestRateBasisPoints: percentToBasisPoints(values.interestRatePercent),
+      interestRate: values.interestRatePercent || "0",
+      interestType: values.interestRatePercent ? "PERCENTAGE" : "NONE",
       startDate: new Date(values.startDate).toISOString(),
       dueDate: new Date(values.dueDate).toISOString(),
-      borrower: values.borrower,
-      lender: values.lender,
-      category: values.category || null,
-      paymentMethod: values.paymentMethod,
-      repaymentFrequency: values.repaymentFrequency,
-      notes: values.notes,
-      documentFileName: values.documentFileName,
-      status: values.status,
-      approvalStatus: values.approvalStatus,
+      borrowerName: values.borrower || null,
+      borrowerContactId:
+        values.borrowerContactId && values.borrowerContactId !== "__manual"
+          ? values.borrowerContactId
+          : null,
+      lenderName: values.lender || null,
+      lenderContactId:
+        values.lenderContactId && values.lenderContactId !== "__manual"
+          ? values.lenderContactId
+          : null,
+      categoryId: values.category || null,
+      repaymentFrequency:
+        values.repaymentFrequency === "ONE_TIME"
+          ? "ONCE"
+          : values.repaymentFrequency,
     }),
     request: {
       method: "patch",
@@ -121,7 +134,11 @@ export function EditLoanDialog({
           {error ? (
             <div className="text-destructive text-sm font-medium">{error}</div>
           ) : null}
-          <LoanFormFields control={form.control} family={family} />
+          <LoanFormFields
+            contacts={contacts}
+            control={form.control}
+            family={family}
+          />
         </form>
         <DialogFooter>
           <Button

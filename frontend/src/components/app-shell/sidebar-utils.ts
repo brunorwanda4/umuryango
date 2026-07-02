@@ -7,6 +7,7 @@ import {
   BookOpenCheckIcon,
   CalendarDaysIcon,
   ClipboardListIcon,
+  ContactRoundIcon,
   FileClockIcon,
   FileTextIcon,
   FolderKanbanIcon,
@@ -203,6 +204,11 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
           title: "Documents",
           href: `${familyHref}/documents`,
           icon: FileTextIcon,
+        },
+        {
+          title: "Contacts",
+          href: `${familyHref}/contacts`,
+          icon: ContactRoundIcon,
         },
         { title: "Members", href: `${familyHref}/members`, icon: UsersIcon },
         {
