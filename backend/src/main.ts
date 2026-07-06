@@ -2,14 +2,42 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
+import { networkInterfaces } from 'node:os';
 import { AppModule } from './app.module';
 import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from './auth/auth.constants';
+
+function getLanIpv4Addresses() {
+  return Object.values(networkInterfaces())
+    .flatMap((interfaces) => interfaces ?? [])
+    .filter((netInterface) => {
+      return netInterface.family === 'IPv4' && !netInterface.internal;
+    })
+    .map((netInterface) => netInterface.address);
+}
+
+function parseCorsOrigins() {
+  const configuredOrigins = process.env.CORS_ORIGINS;
+
+  if (configuredOrigins) {
+    return configuredOrigins
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean);
+  }
+
+  return [
+    process.env.FRONTEND_URL ?? 'http://localhost:4914',
+    'http://127.0.0.1:4914',
+    'http://localhost:4974',
+    'http://127.0.0.1:4974',
+  ];
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:4974',
+    origin: parseCorsOrigins(),
     credentials: true,
   });
   app.useGlobalPipes(
@@ -49,7 +77,12 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT ?? 4915;
-  await app.listen(port);
+  const host = process.env.HOST ?? '0.0.0.0';
+  await app.listen(port, host);
   console.log(`Swagger UI: http://localhost:${port}/`);
+
+  for (const lanIpAddress of getLanIpv4Addresses()) {
+    console.log(`Network API: http://${lanIpAddress}:${port}/`);
+  }
 }
 void bootstrap();
