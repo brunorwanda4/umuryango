@@ -289,14 +289,6 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
           >
             Expenses
           </Button>
-          <Button
-            href={`/family/${encodeURIComponent(family.slug)}/money/receipts`}
-            size="sm"
-            variant="outline"
-            className="shrink-0"
-          >
-            Receipts
-          </Button>
         </nav>
       </header>
 

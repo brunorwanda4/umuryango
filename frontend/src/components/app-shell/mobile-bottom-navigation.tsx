@@ -20,7 +20,7 @@ function getMobileNavigationItems(
       ? [
           items.find((item) => item.title === "Dashboard")?.href,
           items.find((item) => item.title === "Money")?.href,
-          items.find((item) => item.title === "Contributions")?.href,
+          items.find((item) => item.title === "Projects")?.href,
           items.find((item) => item.title === "Reports")?.href,
         ]
       : ["/me", "/me/money", "/me/plans", "/family"];
@@ -34,7 +34,6 @@ function getMobileNavigationItems(
 
 function getMobileNavigationLabel(title: string) {
   if (title === "Overview") return "Home";
-  if (title === "Contributions") return "Contribute";
   if (title === "Family workspaces") return "Families";
 
   return title;

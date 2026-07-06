@@ -28,7 +28,6 @@ const moneySectionLinks: {
   { section: "expenses", title: "Expenses", hrefPart: "expenses" },
   { section: "categories", title: "Categories", hrefPart: "categories" },
   { section: "approvals", title: "Approvals", hrefPart: "approvals" },
-  { section: "receipts", title: "Receipts", hrefPart: "receipts" },
   { section: "loans", title: "Loans", hrefPart: "loans" },
 ];
 

@@ -399,14 +399,6 @@ export function MoneyExpensesPage({ familyName }: { familyName: string }) {
           Categories
         </Button>
         <Button
-          href={`/family/${encodeURIComponent(family.slug)}/money/receipts`}
-          size="sm"
-          variant="outline"
-          className="shrink-0"
-        >
-          Receipts
-        </Button>
-        <Button
           href={`/family/${encodeURIComponent(family.slug)}/money/approvals`}
           size="sm"
           variant="outline"

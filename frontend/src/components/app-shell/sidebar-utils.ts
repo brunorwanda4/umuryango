@@ -12,7 +12,6 @@ import {
   FileTextIcon,
   FolderKanbanIcon,
   FolderTreeIcon,
-  HandCoinsIcon,
   HomeIcon,
   LandmarkIcon,
   LayoutDashboardIcon,
@@ -140,11 +139,6 @@ const getFamilyMoneyChildren = (familyHref: string): NavigationItem[] => [
     icon: FileClockIcon,
   },
   {
-    title: "Receipts",
-    href: `${familyHref}/money/receipts`,
-    icon: ReceiptTextIcon,
-  },
-  {
     title: "Loans",
     href: `${familyHref}/money/loans`,
     icon: LandmarkIcon,
@@ -164,11 +158,6 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
           href: `${familyHref}/money`,
           icon: BadgeDollarSignIcon,
           items: getFamilyMoneyChildren(familyHref),
-        },
-        {
-          title: "Contributions",
-          href: `${familyHref}/contributions`,
-          icon: HandCoinsIcon,
         },
         {
           title: "Projects",
