@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import type { CurrentUser } from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
 import type { FamilyDetail } from "../../dashboard/types";
@@ -40,18 +40,20 @@ export function CreateIncomeDialog({
   onOpenChange,
   family,
   categories,
+  currentUser,
   onSuccess,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   family: FamilyDetail;
   categories: Category[];
+  currentUser: CurrentUser | null;
   onSuccess: () => void;
 }) {
-  const { user } = useCurrentUser();
   const defaultReceivedBy =
-    family.members.find((member) => member.userId === user?.id)?.fullName ??
-    user?.fullName ??
+    family.members.find((member) => member.userId === currentUser?.id)
+      ?.fullName ??
+    currentUser?.fullName ??
     "";
 
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<

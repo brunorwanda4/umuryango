@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import type { CurrentUser } from "@/hooks/use-current-user";
 import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import type { FamilyDetail } from "../dashboard/types";
@@ -23,19 +24,36 @@ import { EditIncomeDialog } from "./income/edit-income-dialog";
 import { IncomeFilters } from "./income/income-filters";
 import { IncomeMetricCards } from "./income/income-metric-cards";
 import { IncomeTable } from "./income/income-table";
-import type {
-  Category,
-  IncomeTransaction,
-  Receipt,
-} from "./income/types-and-schemas";
+import type { Category, IncomeTransaction } from "./income/types-and-schemas";
 import { ViewDetailsDialog } from "./income/view-details-dialog";
 
-export function MoneyIncomePage({ familyName }: { familyName: string }) {
-  const [family, setFamily] = useState<FamilyDetail | null>(null);
-  const [transactions, setTransactions] = useState<IncomeTransaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export type MoneyIncomePageInitialData = {
+  family: FamilyDetail | null;
+  transactions: IncomeTransaction[];
+  categories: Category[];
+  currentUser: CurrentUser | null;
+  error: string | null;
+};
+
+export function MoneyIncomePage({
+  familyName,
+  initialData,
+}: {
+  familyName: string;
+  initialData?: MoneyIncomePageInitialData;
+}) {
+  const [family, setFamily] = useState<FamilyDetail | null>(
+    initialData?.family ?? null,
+  );
+  const [transactions, setTransactions] = useState<IncomeTransaction[]>(
+    initialData?.transactions ?? [],
+  );
+  const [categories, setCategories] = useState<Category[]>(
+    initialData?.categories ?? [],
+  );
+  const [loading, setLoading] = useState(!initialData);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(initialData?.error ?? null);
 
   // Modals state
   const [openCreate, setOpenCreate] = useState(false);
@@ -55,68 +73,87 @@ export function MoneyIncomePage({ familyName }: { familyName: string }) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchData = useCallback(
+    async ({ showSkeleton = true }: { showSkeleton?: boolean } = {}) => {
+      try {
+        if (showSkeleton) {
+          setLoading(true);
+        } else {
+          setIsRefreshing(true);
+        }
+        setError(null);
 
-      // Load Family Details
-      const familyResponse = await apiRequest<undefined, FamilyDetail>(
-        "get",
-        `/families/${encodeURIComponent(familyName)}`,
-      );
-      if (!familyResponse.ok || !familyResponse.data) {
-        throw new Error(familyResponse.message ?? "Failed to load family.");
+        const familyResponse = await apiRequest<undefined, FamilyDetail>(
+          "get",
+          `/families/${encodeURIComponent(familyName)}`,
+        );
+        if (!familyResponse.ok || !familyResponse.data) {
+          throw new Error(familyResponse.message ?? "Failed to load family.");
+        }
+        const familyData = familyResponse.data;
+        setFamily(familyData);
+
+        const [txResponse, categoriesResponse] = await Promise.all([
+          apiRequest<undefined, IncomeTransaction[]>(
+            "get",
+            `/families/${encodeURIComponent(
+              familyData.id,
+            )}/money/transactions?type=INCOME`,
+          ),
+          apiRequest<undefined, Category[]>(
+            "get",
+            `/families/${encodeURIComponent(familyData.id)}/money/categories`,
+          ),
+        ]);
+
+        setTransactions(txResponse.ok ? (txResponse.data ?? []) : []);
+        setCategories(
+          categoriesResponse.ok && categoriesResponse.data
+            ? categoriesResponse.data.filter((c) => c.type === "INCOME")
+            : [],
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred.");
+      } finally {
+        setLoading(false);
+        setIsRefreshing(false);
       }
-      const familyData = familyResponse.data;
-      setFamily(familyData);
+    },
+    [familyName],
+  );
 
-      // Load Transactions
+  const refreshTransactions = useCallback(async () => {
+    if (!family) {
+      await fetchData({ showSkeleton: false });
+      return;
+    }
+
+    try {
+      setIsRefreshing(true);
       const txResponse = await apiRequest<undefined, IncomeTransaction[]>(
         "get",
-        `/families/${encodeURIComponent(familyData.id)}/money/transactions?type=INCOME`,
+        `/families/${encodeURIComponent(
+          family.id,
+        )}/money/transactions?type=INCOME`,
       );
-      if (txResponse.ok && txResponse.data) {
-        // Also fetch receipt list for each transaction
-        const txsWithReceipts = await Promise.all(
-          txResponse.data.map(async (tx) => {
-            const receiptResponse = await apiRequest<undefined, Receipt[]>(
-              "get",
-              `/families/${encodeURIComponent(familyData.id)}/money/receipts/transaction/${tx.id}`,
-            );
-            return {
-              ...tx,
-              receipts: receiptResponse.ok ? receiptResponse.data : [],
-            };
-          }),
-        );
-        setTransactions(txsWithReceipts);
-      } else {
-        setTransactions([]);
-      }
 
-      // Load Categories
-      const categoriesResponse = await apiRequest<undefined, Category[]>(
-        "get",
-        `/families/${encodeURIComponent(familyData.id)}/money/categories`,
-      );
-      if (categoriesResponse.ok && categoriesResponse.data) {
-        setCategories(
-          categoriesResponse.data.filter((c) => c.type === "INCOME"),
-        );
+      if (txResponse.ok) {
+        setTransactions(txResponse.data ?? []);
       } else {
-        setCategories([]);
+        toast.error(txResponse.message ?? "Income records could not refresh.");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+    } catch {
+      toast.error("Income records could not refresh.");
     } finally {
-      setLoading(false);
+      setIsRefreshing(false);
     }
-  }, [familyName]);
+  }, [family, fetchData]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!initialData) {
+      fetchData();
+    }
+  }, [fetchData, initialData]);
 
   const isAdmin = useMemo(() => {
     if (!family) return false;
@@ -200,7 +237,7 @@ export function MoneyIncomePage({ familyName }: { familyName: string }) {
       );
       if (res.ok) {
         toast.success("Income approved successfully.");
-        fetchData();
+        await refreshTransactions();
       } else {
         toast.error(res.message ?? "Approval failed.");
       }
@@ -241,7 +278,10 @@ export function MoneyIncomePage({ familyName }: { familyName: string }) {
   const currency = family.defaultCurrency;
 
   return (
-    <div className="flex min-w-0 max-w-full flex-col gap-6">
+    <div
+      className="flex min-w-0 max-w-full flex-col gap-6"
+      aria-busy={isRefreshing}
+    >
       {/* Title Header */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex min-w-0 flex-col gap-2">
@@ -314,7 +354,8 @@ export function MoneyIncomePage({ familyName }: { familyName: string }) {
         onOpenChange={setOpenCreate}
         family={family}
         categories={categories}
-        onSuccess={fetchData}
+        currentUser={initialData?.currentUser ?? null}
+        onSuccess={refreshTransactions}
       />
 
       {/* --- EDIT INCOME MODAL --- */}
@@ -324,7 +365,7 @@ export function MoneyIncomePage({ familyName }: { familyName: string }) {
         family={family}
         categories={categories}
         transaction={selectedTx}
-        onSuccess={fetchData}
+        onSuccess={refreshTransactions}
       />
 
       {/* --- ATTACH RECEIPT MODAL --- */}
@@ -333,7 +374,7 @@ export function MoneyIncomePage({ familyName }: { familyName: string }) {
         onOpenChange={setOpenReceipt}
         family={family}
         transaction={selectedTx}
-        onSuccess={fetchData}
+        onSuccess={refreshTransactions}
       />
 
       {/* --- VIEW INCOME DETAILS MODAL --- */}
@@ -350,7 +391,7 @@ export function MoneyIncomePage({ familyName }: { familyName: string }) {
         onOpenChange={setOpenDelete}
         family={family}
         transaction={selectedTx}
-        onSuccess={fetchData}
+        onSuccess={refreshTransactions}
       />
     </div>
   );

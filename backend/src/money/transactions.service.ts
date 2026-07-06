@@ -5,8 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
-  FamilyCapability,
   FamilyAuthority,
+  FamilyCapability,
   TransactionStatus,
   TransactionType,
 } from '@prisma/client';
@@ -98,6 +98,16 @@ export class TransactionsService {
       include: {
         category: { select: { name: true } },
         createdBy: { select: { fullName: true } },
+        receipts: {
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            fileName: true,
+            fileType: true,
+            fileSizeBytes: true,
+            createdAt: true,
+          },
+        },
       },
     });
 
