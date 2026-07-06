@@ -53,12 +53,31 @@ import {
   type LoanRecord,
 } from "./loans/types-and-schemas";
 
-export function MoneyLoansPage({ familyName }: { familyName: string }) {
-  const [family, setFamily] = useState<FamilyDetail | null>(null);
-  const [loans, setLoans] = useState<LoanRecord[]>([]);
-  const [contacts, setContacts] = useState<FamilyContact[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export type MoneyLoansPageInitialData = {
+  family: FamilyDetail | null;
+  loans: LoanRecord[];
+  contacts: FamilyContact[];
+  error: string | null;
+};
+
+export function MoneyLoansPage({
+  familyName,
+  initialData,
+}: {
+  familyName: string;
+  initialData?: MoneyLoansPageInitialData;
+}) {
+  const [family, setFamily] = useState<FamilyDetail | null>(
+    initialData?.family ?? null,
+  );
+  const [loans, setLoans] = useState<LoanRecord[]>(
+    initialData?.loans ? normalizeLoanRecords(initialData.loans) : [],
+  );
+  const [contacts, setContacts] = useState<FamilyContact[]>(
+    initialData?.contacts ?? [],
+  );
+  const [loading, setLoading] = useState(!initialData);
+  const [error, setError] = useState<string | null>(initialData?.error ?? null);
   const [loanMessage, setLoanMessage] = useState<string | null>(null);
   const [filters, setFilters] = useState<LoanFiltersState>(EMPTY_LOAN_FILTERS);
   const [openCreate, setOpenCreate] = useState(false);
@@ -121,8 +140,10 @@ export function MoneyLoansPage({ familyName }: { familyName: string }) {
   }, [familyName]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!initialData) {
+      fetchData();
+    }
+  }, [fetchData, initialData]);
 
   const currency = family?.defaultCurrency ?? "RWF";
   const canManageLoans = family ? hasCapability(family, "MANAGE_DEBTS") : false;
