@@ -17,7 +17,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import { LinkLoadingIndicator } from "./link-loading-indicator";
 import { isActivePath, type NavigationGroup } from "./sidebar-utils";
 
 export function SidebarNavigationGroups({
@@ -29,6 +31,9 @@ export function SidebarNavigationGroups({
   pathname: string;
   currentHash: string;
 }) {
+  const { isMobile, state } = useSidebar();
+  const showLinkLabels = isMobile || state === "expanded";
+
   return (
     <>
       {groups.map((group) => (
@@ -76,8 +81,11 @@ export function SidebarNavigationGroups({
                                 )}
                               >
                                 <Link href={sub.href}>
-                                  <sub.icon aria-hidden="true" />
-                                  <span>{sub.title}</span>
+                                  <LinkLoadingIndicator
+                                    icon={sub.icon}
+                                    title={sub.title}
+                                    isOpen={showLinkLabels}
+                                  />
                                 </Link>
                               </SidebarMenuSubButton>
                             </SidebarMenuSubItem>
@@ -94,8 +102,11 @@ export function SidebarNavigationGroups({
                       tooltip={item.title}
                     >
                       <Link href={item.href}>
-                        <item.icon aria-hidden="true" />
-                        <span>{item.title}</span>
+                        <LinkLoadingIndicator
+                          icon={item.icon}
+                          title={item.title}
+                          isOpen={showLinkLabels}
+                        />
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
