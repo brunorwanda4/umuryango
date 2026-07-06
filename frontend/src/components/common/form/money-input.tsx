@@ -27,8 +27,8 @@ function getCurrencyFractionDigits(currency: string): number {
 	try {
 		return (
 			new Intl.NumberFormat(undefined, {
-				currency,
 				style: "currency",
+				currency,
 			}).resolvedOptions().maximumFractionDigits ?? 2
 		);
 	} catch {
@@ -38,6 +38,20 @@ function getCurrencyFractionDigits(currency: string): number {
 
 function groupDigits(value: string) {
 	return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatMoneyText(value: string, fractionDigits: number) {
+	if (!value) return "";
+
+	if (fractionDigits === 0) {
+		return groupDigits(value);
+	}
+
+	const [whole = "", fraction = ""] = value.split(".");
+
+	return fraction.length
+		? `${groupDigits(whole)}.${fraction}`
+		: groupDigits(whole);
 }
 
 function formatMinorUnits(
@@ -96,6 +110,7 @@ function parseMoneyTextToMinorUnits(value: string, fractionDigits: number) {
 	}
 
 	const scale = BigInt(10) ** BigInt(fractionDigits);
+
 	const fractionalUnits = BigInt(
 		fraction.padEnd(fractionDigits, "0").slice(0, fractionDigits) || "0",
 	);
@@ -121,16 +136,14 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
 			() => getCurrencyFractionDigits(currency),
 			[currency],
 		);
-		const [isFocused, setIsFocused] = useState(false);
+
 		const [displayValue, setDisplayValue] = useState(() =>
 			formatMinorUnits(value, fractionDigits),
 		);
 
 		useEffect(() => {
-			if (!isFocused) {
-				setDisplayValue(formatMinorUnits(value, fractionDigits));
-			}
-		}, [value, fractionDigits, isFocused]);
+			setDisplayValue(formatMinorUnits(value, fractionDigits));
+		}, [value, fractionDigits]);
 
 		return (
 			<InputGroup
@@ -138,6 +151,7 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
 				className={cn(disabled && "opacity-50", className)}
 			>
 				<InputGroupAddon align="inline-start">{currency}</InputGroupAddon>
+
 				<InputGroupInput
 					{...props}
 					ref={ref}
@@ -146,30 +160,22 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
 					disabled={disabled}
 					value={displayValue}
 					onChange={(event) => {
-						const nextValue = sanitizeMoneyText(
+						const sanitized = sanitizeMoneyText(
 							event.target.value,
 							fractionDigits,
 						);
-						setDisplayValue(nextValue);
+
+						setDisplayValue(formatMoneyText(sanitized, fractionDigits));
+
 						onValueChange(
-							parseMoneyTextToMinorUnits(nextValue, fractionDigits),
+							parseMoneyTextToMinorUnits(sanitized, fractionDigits),
 						);
 					}}
 					onBlur={(event) => {
-						setIsFocused(false);
-						setDisplayValue(
-							formatMinorUnits(
-								parseMoneyTextToMinorUnits(displayValue, fractionDigits),
-								fractionDigits,
-							),
-						);
+						setDisplayValue(formatMinorUnits(value, fractionDigits));
 						onBlur?.(event);
 					}}
 					onFocus={(event) => {
-						setIsFocused(true);
-						setDisplayValue(
-							formatMinorUnits(value, fractionDigits).replaceAll(",", ""),
-						);
 						onFocus?.(event);
 					}}
 				/>
@@ -177,3 +183,5 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
 		);
 	},
 );
+
+MoneyInput.displayName = "MoneyInput";

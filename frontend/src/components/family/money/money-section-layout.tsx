@@ -29,7 +29,6 @@ const moneySectionLinks: {
   { section: "categories", title: "Categories", hrefPart: "categories" },
   { section: "approvals", title: "Approvals", hrefPart: "approvals" },
   { section: "receipts", title: "Receipts", hrefPart: "receipts" },
-  { section: "budgets", title: "Budgets", hrefPart: "budgets" },
   { section: "loans", title: "Loans", hrefPart: "loans" },
 ];
 
