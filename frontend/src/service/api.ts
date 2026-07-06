@@ -45,7 +45,6 @@ export function getApiBaseUrl() {
 
 export function getApiUrl(path: string, baseUrl = getApiBaseUrl()) {
 	if (/^https?:\/\//.test(path)) {
-		b;
 		return path;
 	}
 
