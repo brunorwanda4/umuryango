@@ -1,4 +1,5 @@
 import { FolderKanbanIcon } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -16,6 +17,7 @@ import {
 import type { ProjectsOverview } from "./types";
 import {
   clampPercent,
+  createProjectSlug,
   formatDate,
   formatOptionalMoney,
   formatTitle,
@@ -23,9 +25,11 @@ import {
 
 export function ProjectList({
   currency,
+  familyName,
   projects,
 }: {
   currency: string;
+  familyName: string;
   projects: ProjectsOverview | null;
 }) {
   const rows = projects?.projects ?? [];
@@ -46,7 +50,16 @@ export function ProjectList({
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex min-w-0 flex-col gap-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-semibold text-base">{project.name}</h2>
+                    <h2 className="font-semibold text-base">
+                      <Link
+                        className="underline-offset-4 hover:underline"
+                        href={`/family/${encodeURIComponent(familyName)}/projects/${createProjectSlug(
+                          project.name,
+                        )}`}
+                      >
+                        {project.name}
+                      </Link>
+                    </h2>
                     <StatusBadge value={project.status ?? "planned"} />
                     {project.category ? (
                       <Badge variant="outline">

@@ -46,6 +46,7 @@ export type ProjectRow = {
 
 export type ProjectContributionRow = {
   id: string;
+  projectId?: string | null;
   projectName: string;
   contributorName: string;
   amountMinorUnits?: MoneyMinorValue | null;
@@ -55,6 +56,7 @@ export type ProjectContributionRow = {
 
 export type ProjectUpdateRow = {
   id: string;
+  projectId?: string | null;
   projectName: string;
   title: string;
   body?: string | null;

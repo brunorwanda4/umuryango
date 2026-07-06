@@ -109,6 +109,7 @@ export function FamilyProjectsWorkspace({
   return (
     <ProjectsWorkspaceContent
       family={state.family}
+      familyName={familyName}
       onProjectCreated={() => load({ silent: true })}
       onStatusChange={setStatus}
       projects={state.projects}
@@ -120,6 +121,7 @@ export function FamilyProjectsWorkspace({
 
 function ProjectsWorkspaceContent({
   family,
+  familyName,
   onProjectCreated,
   onStatusChange,
   projects,
@@ -127,6 +129,7 @@ function ProjectsWorkspaceContent({
   status,
 }: {
   family: FamilyDetail;
+  familyName: string;
   onProjectCreated: () => void;
   onStatusChange: (status: ProjectStatusFilter) => void;
   projects: ProjectsOverview | null;
@@ -179,7 +182,11 @@ function ProjectsWorkspaceContent({
           </TabsList>
         </div>
         <TabsContent value="projects">
-          <ProjectList currency={currency} projects={projects} />
+          <ProjectList
+            currency={currency}
+            familyName={familyName}
+            projects={projects}
+          />
         </TabsContent>
         <TabsContent value="contributions">
           <ProjectContributionTable currency={currency} projects={projects} />

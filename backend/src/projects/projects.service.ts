@@ -152,6 +152,7 @@ export class ProjectsService {
       ),
       contributions: contributions.slice(0, 25).map((contribution) => ({
         id: contribution.id,
+        projectId: contribution.projectId,
         projectName: contribution.project.name,
         contributorName: contribution.member.user.fullName,
         amountMinorUnits: contribution.amountMinorUnits.toString(),
@@ -160,6 +161,7 @@ export class ProjectsService {
       })),
       updates: updates.map((update) => ({
         id: update.id,
+        projectId: update.projectId,
         projectName: update.project.name,
         title: update.title,
         body: update.body,

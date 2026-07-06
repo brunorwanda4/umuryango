@@ -1,5 +1,6 @@
 import type {
   MoneyMinorValue,
+  ProjectRow,
   ProjectStatusFilter,
   ProjectsOverview,
 } from "./types";
@@ -134,4 +135,36 @@ export function formatDate(value: string | null | undefined) {
     month: "short",
     year: "numeric",
   }).format(date);
+}
+
+export function createProjectSlug(value: string) {
+  return (
+    value
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "project"
+  );
+}
+
+export function findProjectByRouteSlug(
+  projects: ProjectRow[],
+  routeSlug: string,
+) {
+  const normalizedRouteSlug = safeDecodeURIComponent(routeSlug).toLowerCase();
+
+  return projects.find(
+    (project) =>
+      project.id.toLowerCase() === normalizedRouteSlug ||
+      createProjectSlug(project.name) === normalizedRouteSlug,
+  );
+}
+
+function safeDecodeURIComponent(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
 }

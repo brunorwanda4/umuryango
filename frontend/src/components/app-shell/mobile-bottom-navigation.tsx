@@ -1,7 +1,7 @@
 "use client";
 
-import { MenuIcon } from "lucide-react";
-import Link from "next/link";
+import { Loader2Icon, type LucideIcon, MenuIcon } from "lucide-react";
+import Link, { useLinkStatus } from "next/link";
 import { cn } from "@/lib/utils";
 import {
   type AppSidebarMode,
@@ -37,6 +37,32 @@ function getMobileNavigationLabel(title: string) {
   if (title === "Family workspaces") return "Families";
 
   return title;
+}
+
+function MobileLinkLoadingIndicator({
+  icon: Icon,
+  label,
+}: {
+  icon: LucideIcon;
+  label: string;
+}) {
+  const { pending } = useLinkStatus();
+
+  return (
+    <>
+      {pending ? (
+        <Loader2Icon
+          aria-hidden="true"
+          className="size-5 shrink-0 animate-spin"
+        />
+      ) : (
+        <Icon aria-hidden="true" className="size-5 shrink-0" />
+      )}
+      <span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
+        {label}
+      </span>
+    </>
+  );
 }
 
 export function MobileBottomNavigation({
@@ -83,10 +109,7 @@ export function MobileBottomNavigation({
                   "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
               )}
             >
-              <item.icon aria-hidden="true" className="size-5 shrink-0" />
-              <span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
-                {label}
-              </span>
+              <MobileLinkLoadingIndicator icon={item.icon} label={label} />
             </Link>
           );
         })}
