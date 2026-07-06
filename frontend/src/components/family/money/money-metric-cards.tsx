@@ -1,11 +1,11 @@
 import {
   ArrowDownIcon,
   ArrowUpIcon,
-  HandCoinsIcon,
   LandmarkIcon,
   TargetIcon,
   WalletCardsIcon,
 } from "lucide-react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -19,35 +19,35 @@ import { formatOptionalMoney } from "./utils";
 export function MoneyMetricCards({
   currency,
   money,
+  familySlug,
 }: {
   currency: string;
   money: MoneyOverview | null;
+  familySlug: string;
 }) {
   const totals = money?.totals;
+  const moneyHref = `/family/${encodeURIComponent(familySlug)}/money`;
   const cards = [
     {
       title: "Cash balance",
       value: totals?.cashBalanceMinorUnits,
       description: "Server-approved family position",
       icon: WalletCardsIcon,
+      link: moneyHref,
     },
     {
       title: "Income",
       value: totals?.incomeMinorUnits,
       description: "Approved money received",
       icon: ArrowDownIcon,
+      link: `${moneyHref}/income`,
     },
     {
       title: "Expenses",
       value: totals?.expenseMinorUnits,
       description: "Approved money spent",
       icon: ArrowUpIcon,
-    },
-    {
-      title: "Contributions",
-      value: totals?.contributionsPaidMinorUnits,
-      description: "Paid family commitments",
-      icon: HandCoinsIcon,
+      link: `${moneyHref}/expenses`,
     },
     {
       title: "Savings",
@@ -60,18 +60,18 @@ export function MoneyMetricCards({
       value: totals?.debtOutstandingMinorUnits,
       description: "Outstanding borrowed or lent money",
       icon: LandmarkIcon,
+      link: `${moneyHref}/loans`,
     },
   ];
 
   return (
     <section
       aria-label="Family money summary"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6"
+      className="grid gap-4 grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6"
     >
       {cards.map((card) => {
         const Icon = card.icon;
-
-        return (
+        const cardContent = (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between gap-3">
               <div className="min-w-0">
@@ -89,6 +89,14 @@ export function MoneyMetricCards({
             </CardContent>
           </Card>
         );
+        if (card.link) {
+          return (
+            <Link key={card.title} href={card.link}>
+              {cardContent}
+            </Link>
+          );
+        }
+        return cardContent;
       })}
     </section>
   );

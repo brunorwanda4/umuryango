@@ -112,7 +112,11 @@ export function MoneySectionLayout({
         </Alert>
       ) : null}
       {showMoneyMetrics ? (
-        <MoneyMetricCards currency={currency} money={money} />
+        <MoneyMetricCards
+          currency={currency}
+          familySlug={family.slug}
+          money={money}
+        />
       ) : null}
       <MoneyWorkflowExamples description={exampleDescription} header={header} />
       {children}

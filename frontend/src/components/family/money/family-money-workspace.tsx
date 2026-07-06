@@ -3,6 +3,7 @@
 import { AlertCircleIcon, WalletCardsIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { PageTitle } from "@/components/common/pages/page-title";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -14,15 +15,11 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
-
 import { FamilyMoneySkeleton } from "./family-money-skeleton";
 import { MoneyApprovalTable } from "./money-approval-table";
-import { MoneyBudgetList } from "./money-budget-list";
 import { MoneyCharts } from "./money-charts";
 import { MoneyFilters } from "./money-filters";
-import { MoneyHeader } from "./money-header";
 import { MoneyMetricCards } from "./money-metric-cards";
 import { MoneyOperationsGrid } from "./money-operations-grid";
 import { MoneyRecordsTable } from "./money-records-table";
@@ -127,22 +124,11 @@ function MoneyWorkspaceContent({
   onPeriodChange: (period: MoneyPeriod) => void;
 }) {
   const currency = money?.currency ?? family.defaultCurrency;
-  const hasSourceRecords = Boolean(money && (money.sourceRecordCount ?? 0) > 0);
-  const canRecordIncome = hasCapability(family, "RECORD_INCOME");
-  const canRecordExpense = hasCapability(family, "RECORD_EXPENSE");
-  const canExportReports = hasCapability(family, "EXPORT_REPORTS");
   const periodLabel = money?.period?.label ?? periodLabels[period];
 
   return (
     <div className="flex flex-col gap-6">
-      <MoneyHeader
-        canExportReports={canExportReports}
-        canRecordExpense={canRecordExpense}
-        canRecordIncome={canRecordIncome}
-        currency={currency}
-        family={family}
-        hasSourceRecords={hasSourceRecords}
-      />
+      <PageTitle title="Money Workspace" />
       <Separator />
       <MoneyFilters
         period={period}
@@ -161,13 +147,16 @@ function MoneyWorkspaceContent({
           </AlertDescription>
         </Alert>
       ) : null}
-      <MoneyMetricCards currency={currency} money={money} />
+      <MoneyMetricCards
+        currency={currency}
+        familySlug={family.slug}
+        money={money}
+      />
       <Tabs defaultValue="overview" className="gap-4">
         <div className="overflow-x-auto">
           <TabsList className="min-w-max">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="approvals">Approvals</TabsTrigger>
-            <TabsTrigger value="budgets">Budgets</TabsTrigger>
             <TabsTrigger value="records">Records</TabsTrigger>
           </TabsList>
         </div>
@@ -182,9 +171,7 @@ function MoneyWorkspaceContent({
             familyId={family.id}
           />
         </TabsContent>
-        <TabsContent value="budgets">
-          <MoneyBudgetList currency={currency} money={money} />
-        </TabsContent>
+
         <TabsContent value="records">
           <MoneyRecordsTable currency={currency} money={money} />
         </TabsContent>
