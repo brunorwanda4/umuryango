@@ -24,7 +24,7 @@ export interface ApiRequestOptions
   idempotencyKey?: string;
   skipAuthRefresh?: boolean;
 }
-
+ 
 const DEFAULT_API_URL =
   process.env.NODE_ENV === "production" ? "" : "http://localhost:4915";
 
