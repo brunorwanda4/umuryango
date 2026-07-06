@@ -2,8 +2,8 @@
 
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { FormEvent } from "react";
-import { useState } from "react";
+import type { FormEvent, PointerEvent } from "react";
+import { useRef, useState } from "react";
 import { GoogleIcon } from "@/components/icons/google-icon";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,11 +52,45 @@ export const LoginForm = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const skipPasswordToggleClickRef = useRef(false);
 
   const passwordToggleLabel = isPasswordVisible
     ? copy.hidePasswordLabel
     : copy.showPasswordLabel;
   const PasswordIcon = isPasswordVisible ? EyeOffIcon : EyeIcon;
+  const togglePasswordVisibility = () => {
+    const nextIsPasswordVisible = !isPasswordVisible;
+    setIsPasswordVisible(nextIsPasswordVisible);
+
+    const passwordInput = document.getElementById("password");
+
+    if (passwordInput instanceof HTMLInputElement) {
+      passwordInput.type = nextIsPasswordVisible ? "text" : "password";
+      window.requestAnimationFrame(() => {
+        passwordInput.focus({ preventScroll: true });
+
+        const caretPosition = passwordInput.value.length;
+        passwordInput.setSelectionRange(caretPosition, caretPosition);
+      });
+    }
+  };
+  const handlePasswordTogglePointerDown = (
+    event: PointerEvent<HTMLButtonElement>,
+  ) => {
+    if (event.pointerType === "mouse") return;
+
+    event.preventDefault();
+    skipPasswordToggleClickRef.current = true;
+    togglePasswordVisibility();
+  };
+  const handlePasswordToggleClick = () => {
+    if (skipPasswordToggleClickRef.current) {
+      skipPasswordToggleClickRef.current = false;
+      return;
+    }
+
+    togglePasswordVisibility();
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -123,13 +157,26 @@ export const LoginForm = ({
                 size="icon-sm"
                 aria-label={passwordToggleLabel}
                 aria-pressed={isPasswordVisible}
-                onClick={() => setIsPasswordVisible((visible) => !visible)}
-                className="rounded-full text-muted-foreground hover:text-foreground"
+                onPointerDown={handlePasswordTogglePointerDown}
+                onClick={handlePasswordToggleClick}
+                className="hidden rounded-full text-muted-foreground hover:text-foreground sm:inline-flex"
               >
                 <PasswordIcon aria-hidden="true" />
               </Button>
             }
           />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-pressed={isPasswordVisible}
+            onPointerDown={handlePasswordTogglePointerDown}
+            onClick={handlePasswordToggleClick}
+            className="h-9 w-fit self-end rounded-full px-3 text-muted-foreground hover:text-foreground sm:hidden"
+          >
+            <PasswordIcon data-icon="inline-start" aria-hidden="true" />
+            {passwordToggleLabel}
+          </Button>
           <FieldError>{error}</FieldError>
         </div>
       </FieldGroup>
