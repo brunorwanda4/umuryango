@@ -42,14 +42,39 @@ import { AttachReceiptDialog } from "./income/attach-receipt-dialog";
 import type { MoneyOverview } from "./types";
 import { normalizeMoneyOverview, toChartNumber } from "./utils";
 
-export function MoneyExpensesPage({ familyName }: { familyName: string }) {
-  const [family, setFamily] = useState<FamilyDetail | null>(null);
-  const [money, setMoney] = useState<MoneyOverview | null>(null);
-  const [transactions, setTransactions] = useState<ExpenseTransaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [projects, setProjects] = useState<ProjectOption[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export type MoneyExpensesPageInitialData = {
+  family: FamilyDetail | null;
+  transactions: ExpenseTransaction[];
+  categories: Category[];
+  money: MoneyOverview | null;
+  projects: ProjectOption[];
+  error: string | null;
+};
+
+export function MoneyExpensesPage({
+  familyName,
+  initialData,
+}: {
+  familyName: string;
+  initialData?: MoneyExpensesPageInitialData;
+}) {
+  const [family, setFamily] = useState<FamilyDetail | null>(
+    initialData?.family ?? null,
+  );
+  const [money, setMoney] = useState<MoneyOverview | null>(
+    initialData?.money ? normalizeMoneyOverview(initialData.money) : null,
+  );
+  const [transactions, setTransactions] = useState<ExpenseTransaction[]>(
+    initialData?.transactions ?? [],
+  );
+  const [categories, setCategories] = useState<Category[]>(
+    initialData?.categories ?? [],
+  );
+  const [projects, setProjects] = useState<ProjectOption[]>(
+    initialData?.projects ?? [],
+  );
+  const [loading, setLoading] = useState(!initialData);
+  const [error, setError] = useState<string | null>(initialData?.error ?? null);
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
@@ -117,22 +142,7 @@ export function MoneyExpensesPage({ familyName }: { familyName: string }) {
       ]);
 
       if (transactionResponse.ok && transactionResponse.data) {
-        const withReceipts = await Promise.all(
-          transactionResponse.data.map(async (transaction) => {
-            const receiptResponse = await apiRequest<undefined, Receipt[]>(
-              "get",
-              `/families/${encodeURIComponent(
-                familyData.id,
-              )}/money/receipts/transaction/${transaction.id}`,
-            );
-
-            return {
-              ...transaction,
-              receipts: receiptResponse.ok ? receiptResponse.data : [],
-            };
-          }),
-        );
-        setTransactions(withReceipts);
+        setTransactions(transactionResponse.data);
       } else {
         setTransactions([]);
       }
@@ -164,8 +174,10 @@ export function MoneyExpensesPage({ familyName }: { familyName: string }) {
   }, [familyName]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!initialData) {
+      fetchData();
+    }
+  }, [fetchData, initialData]);
 
   const isAdmin = useMemo(() => {
     if (!family) return false;
