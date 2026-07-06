@@ -74,16 +74,34 @@ type ProjectDetailFetchState =
       projectsMessage?: string;
     };
 
+export type ProjectDetailWorkspaceInitialData = {
+  family: FamilyDetail | null;
+  projects: ProjectsOverview | null;
+  projectsMessage?: string;
+  error: string | null;
+};
+
 export function ProjectDetailWorkspace({
   familyName,
   projectName,
+  initialData,
 }: {
   familyName: string;
   projectName: string;
+  initialData?: ProjectDetailWorkspaceInitialData;
 }) {
-  const [state, setState] = useState<ProjectDetailFetchState>({
-    status: "loading",
-  });
+  const [state, setState] = useState<ProjectDetailFetchState>(
+    initialData && initialData.family
+      ? {
+          status: "success",
+          family: initialData.family,
+          projects: initialData.projects
+            ? normalizeProjectsOverview(initialData.projects)
+            : null,
+          projectsMessage: initialData.projectsMessage,
+        }
+      : { status: "loading" },
+  );
 
   const load = useCallback(async () => {
     setState({ status: "loading" });
@@ -122,8 +140,10 @@ export function ProjectDetailWorkspace({
   }, [familyName]);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    if (!initialData) {
+      load();
+    }
+  }, [load, initialData]);
 
   if (state.status === "loading") {
     return <FamilyProjectsSkeleton />;

@@ -32,13 +32,34 @@ import type {
 } from "./types";
 import { normalizeProjectsOverview, statusLabels } from "./utils";
 
+export type FamilyProjectsWorkspaceInitialData = {
+  family: FamilyDetail | null;
+  projects: ProjectsOverview | null;
+  projectsMessage?: string;
+  error: string | null;
+};
+
 export function FamilyProjectsWorkspace({
   familyName,
+  initialData,
 }: {
   familyName: string;
+  initialData?: FamilyProjectsWorkspaceInitialData;
 }) {
   const [status, setStatus] = useState<ProjectStatusFilter>("active");
-  const [state, setState] = useState<FetchState>({ status: "loading" });
+  const [state, setState] = useState<FetchState>(
+    initialData && initialData.family
+      ? {
+          status: "success",
+          family: initialData.family,
+          projects: initialData.projects
+            ? normalizeProjectsOverview(initialData.projects)
+            : null,
+          projectsMessage: initialData.projectsMessage,
+        }
+      : { status: "loading" },
+  );
+  const [isFirstMount, setIsFirstMount] = useState(true);
 
   const load = useCallback(
     async ({ silent = false }: { silent?: boolean } = {}) => {
@@ -82,8 +103,12 @@ export function FamilyProjectsWorkspace({
   );
 
   useEffect(() => {
+    if (initialData && isFirstMount && status === "active") {
+      setIsFirstMount(false);
+      return;
+    }
     load();
-  }, [load]);
+  }, [load, initialData]);
 
   if (state.status === "loading") {
     return <FamilyProjectsSkeleton />;
