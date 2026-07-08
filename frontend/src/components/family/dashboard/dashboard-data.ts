@@ -158,6 +158,58 @@ export function getMemberGrowth(family: FamilyDetail) {
   return Array.from(totals.values());
 }
 
+export function getMembersJoinedThisMonth(family: FamilyDetail) {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  return family.members.filter((member) => {
+    const joinedAt = new Date(member.joinedAt);
+
+    return (
+      !Number.isNaN(joinedAt.getTime()) &&
+      joinedAt.getMonth() === currentMonth &&
+      joinedAt.getFullYear() === currentYear
+    );
+  }).length;
+}
+
+export function getLatestFamilyActivityDate(family: FamilyDetail) {
+  const dates = [
+    new Date(family.createdAt),
+    ...family.members.map((member) => new Date(member.joinedAt)),
+  ].filter((date) => !Number.isNaN(date.getTime()));
+
+  if (!dates.length) {
+    return null;
+  }
+
+  return dates.reduce((latest, date) =>
+    date.getTime() > latest.getTime() ? date : latest,
+  );
+}
+
+export function formatRelativeTime(date: Date): string {
+  const now = new Date();
+  const diffMs = Math.max(0, now.getTime() - date.getTime());
+  const diffSeconds = Math.floor(diffMs / 1000);
+  const diffMinutes = Math.floor(diffSeconds / 60);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+  const diffWeeks = Math.floor(diffDays / 7);
+  const diffMonths = Math.floor(diffDays / 30);
+  const diffYears = Math.floor(diffDays / 365);
+
+  if (diffSeconds < 60) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffWeeks < 5) return `${diffWeeks}w ago`;
+  if (diffMonths < 12) return `${diffMonths}mo ago`;
+
+  return `${diffYears}y ago`;
+}
+
 export function getVisibleMembers(family: FamilyDetail) {
   return family.members
     .toSorted(
