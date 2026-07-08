@@ -1,4 +1,12 @@
-import { ActivityIcon, SparklesIcon, UserPlusIcon } from "lucide-react";
+import {
+  ActivityIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  LandmarkIcon,
+  SparklesIcon,
+  TargetIcon,
+  UserPlusIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +30,13 @@ const MAX_ENTRIES = 6;
 
 type ActivityEntry = {
   id: string;
-  type: "member_joined" | "family_created";
+  type:
+    | "member_joined"
+    | "family_created"
+    | "expense_recorded"
+    | "income_recorded"
+    | "goal_updated"
+    | "contribution_paid";
   name: string;
   avatarUrl: string | null;
   description: string;
@@ -65,6 +79,74 @@ function buildActivityEntries(family: FamilyDetail): ActivityEntry[] {
     });
   }
 
+  const isDemo = family.members.some((m) => m.id.startsWith("demo-"));
+  if (isDemo) {
+    const now = new Date();
+
+    // 1. Marie Claire recorded an expense for Food 2 days ago
+    const marieClaire = family.members.find((m) =>
+      m.fullName.includes("Marie Claire"),
+    );
+    if (marieClaire) {
+      const date = new Date(now);
+      date.setDate(now.getDate() - 2);
+      entries.push({
+        id: "demo-activity-1",
+        type: "expense_recorded",
+        name: marieClaire.fullName,
+        avatarUrl: marieClaire.avatarUrl,
+        description: "recorded an expense of RWF 45,000 for Food",
+        timestamp: date,
+      });
+    }
+
+    // 2. Jean Paul updated savings goal: Emergency Fund 4 days ago
+    const jeanPaul = family.members.find((m) =>
+      m.fullName.includes("Jean Paul"),
+    );
+    if (jeanPaul) {
+      const date = new Date(now);
+      date.setDate(now.getDate() - 4);
+      entries.push({
+        id: "demo-activity-2",
+        type: "goal_updated",
+        name: jeanPaul.fullName,
+        avatarUrl: jeanPaul.avatarUrl,
+        description: "updated savings goal: Emergency Fund to RWF 3,200,000",
+        timestamp: date,
+      });
+    }
+
+    // 3. Jean Paul recorded income: RWF 1,200,000 from Salary 6 days ago
+    if (jeanPaul) {
+      const date = new Date(now);
+      date.setDate(now.getDate() - 6);
+      entries.push({
+        id: "demo-activity-3",
+        type: "income_recorded",
+        name: jeanPaul.fullName,
+        avatarUrl: jeanPaul.avatarUrl,
+        description: "recorded income of RWF 1,200,000 from Salary",
+        timestamp: date,
+      });
+    }
+
+    // 4. Charles Mugisha paid contribution: RWF 50,000 10 days ago
+    const charles = family.members.find((m) => m.fullName.includes("Charles"));
+    if (charles) {
+      const date = new Date(now);
+      date.setDate(now.getDate() - 10);
+      entries.push({
+        id: "demo-activity-4",
+        type: "contribution_paid",
+        name: charles.fullName,
+        avatarUrl: charles.avatarUrl,
+        description: "contributed RWF 50,000 to Monthly Family Contribution",
+        timestamp: date,
+      });
+    }
+  }
+
   entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
   return entries;
@@ -90,8 +172,35 @@ export function FamilyActivityFeed({ family }: { family: FamilyDetail }) {
         <div className="relative flex flex-col gap-0">
           {visibleEntries.map((entry, index) => {
             const isLast = index === visibleEntries.length - 1;
-            const Icon =
-              entry.type === "family_created" ? SparklesIcon : UserPlusIcon;
+
+            let Icon = UserPlusIcon;
+            let badgeText = "Joined";
+            let badgeVariant:
+              | "default"
+              | "secondary"
+              | "destructive"
+              | "outline" = "outline";
+
+            if (entry.type === "family_created") {
+              Icon = SparklesIcon;
+              badgeText = "Created";
+            } else if (entry.type === "expense_recorded") {
+              Icon = ArrowUpIcon;
+              badgeText = "Expense";
+              badgeVariant = "destructive";
+            } else if (entry.type === "income_recorded") {
+              Icon = ArrowDownIcon;
+              badgeText = "Income";
+              badgeVariant = "default";
+            } else if (entry.type === "goal_updated") {
+              Icon = TargetIcon;
+              badgeText = "Savings";
+              badgeVariant = "secondary";
+            } else if (entry.type === "contribution_paid") {
+              Icon = LandmarkIcon;
+              badgeText = "Payment";
+              badgeVariant = "secondary";
+            }
 
             return (
               <div
@@ -132,8 +241,8 @@ export function FamilyActivityFeed({ family }: { family: FamilyDetail }) {
                     </p>
                   </div>
 
-                  <Badge variant="outline" className="shrink-0">
-                    {entry.type === "family_created" ? "Created" : "Joined"}
+                  <Badge variant={badgeVariant} className="shrink-0">
+                    {badgeText}
                   </Badge>
                 </div>
               </div>

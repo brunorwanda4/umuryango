@@ -5,11 +5,9 @@ import { Separator } from "@/components/ui/separator";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
 import { enrichWithDemoData } from "./dashboard-data";
 import { FamilyActivityFeed } from "./family-activity-feed";
-import { DashboardCharts } from "./family-dashboard-charts";
 import { FamilyDashboardSkeleton } from "./family-dashboard-skeleton";
 import { FamilyFinanceDashboard } from "./family-finance-dashboard";
 import { FamilyMembersOverview } from "./family-members-overview";
-import { FamilyWorkspaceGrid } from "./family-workspace-grid";
 import type { FamilyDetail } from "./types";
 
 export function FamilyDashboard({ family }: { family: FamilyDetail }) {
@@ -40,11 +38,9 @@ export function FamilyDashboard({ family }: { family: FamilyDetail }) {
 
       <FamilyFinanceDashboard family={displayFamily} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <DashboardCharts family={displayFamily} />
         <FamilyActivityFeed family={displayFamily} />
       </div>
       <FamilyMembersOverview family={displayFamily} />
-      <FamilyWorkspaceGrid family={displayFamily} />
     </div>
   );
 }
