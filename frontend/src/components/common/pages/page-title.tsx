@@ -3,17 +3,19 @@ import { Badge } from "@/components/ui/badge";
 interface PageTitleProps {
 	title: string;
   description?: string;
-	badge ?: string
+  badge?: string
+	actions?: React.ReactNode;
 }
 
-export function PageTitle({ title, description, badge }: PageTitleProps) {
+export function PageTitle({ title, description, badge, actions }: PageTitleProps) {
 	return (
-		<div>
-		<div className="flex flex-wrap items-center gap-2.5">
-        <h1 className=" font-bold text-3xl sm:text-4xl font-bricolage">{title}</h1>
-			{badge && <Badge variant="secondary">{badge}</Badge>}
+		<section>
+			<div className="flex flex-wrap items-center gap-2.5 lg:items-center ">
+				<h1 className="font-bold text-3xl sm:text-4xl font-bricolage">{title}</h1>
+				{badge && <Badge variant="secondary">{badge}</Badge>}
 			</div>
-			{description &&  <p className="max-w-3xl text-muted-foreground text-sm leading-6">{description}</p>}
-		</div>
+			{description && <p className="max-w-3xl text-muted-foreground text-sm leading-6">{description}</p>}
+			{actions && <div className="flex flex-wrap gap-2 lg:justify-end">{actions}</div>}
+		</section>
 	);
 }

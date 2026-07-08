@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircleIcon, FolderKanbanIcon } from "lucide-react";
+import { AlertCircleIcon, DownloadIcon, FolderKanbanIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
@@ -23,7 +23,6 @@ import { ProjectFilters } from "./project-filters";
 import { ProjectList } from "./project-list";
 import { ProjectMetricCards } from "./project-metric-cards";
 import { ProjectOperationsGrid } from "./project-operations-grid";
-import { ProjectUpdatesList } from "./project-updates-list";
 import type {
   FetchState,
   ProjectStatusFilter,
@@ -31,6 +30,8 @@ import type {
 } from "./types";
 import { normalizeProjectsOverview, statusLabels } from "./utils";
 import { PageTitle } from "@/components/common/pages/page-title";
+import { CreateProjectDialog } from "./create-project-dialog";
+import { Button } from "@/components/ui/button";
 
 export type FamilyProjectsWorkspaceInitialData = {
   family: FamilyDetail | null;
@@ -170,7 +171,21 @@ function ProjectsWorkspaceContent({
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle title="Family Projects" badge={AUTHORITY_LABELS[family.authority]}  />
+      <PageTitle title="Family Projects" badge={AUTHORITY_LABELS[family.authority]} actions={   <div className="flex flex-wrap gap-2 lg:justify-end">
+             {canManageProjects ? (
+               <CreateProjectDialog
+                 currency={currency}
+                 family={family}
+                 onProjectCreated={onProjectCreated}
+               />
+             ) : null}
+             {canExportReports ? (
+               <Button size="sm" variant="outline">
+                 <DownloadIcon aria-hidden="true" data-icon="inline-start" />
+                 Export
+               </Button>
+             ) : null}
+           </div>} />
 
       <Separator />
       <ProjectFilters
@@ -196,7 +211,6 @@ function ProjectsWorkspaceContent({
           <TabsList className="min-w-max">
             <TabsTrigger value="projects">Projects</TabsTrigger>
             <TabsTrigger value="contributions">Contributions</TabsTrigger>
-            <TabsTrigger value="updates">Updates</TabsTrigger>
             <TabsTrigger value="operations">Operations</TabsTrigger>
           </TabsList>
         </div>
@@ -209,9 +223,6 @@ function ProjectsWorkspaceContent({
         </TabsContent>
         <TabsContent value="contributions">
           <ProjectContributionTable currency={currency} projects={projects} />
-        </TabsContent>
-        <TabsContent value="updates">
-          <ProjectUpdatesList projects={projects} />
         </TabsContent>
         <TabsContent value="operations">
           <ProjectOperationsGrid family={family} projects={projects} />
