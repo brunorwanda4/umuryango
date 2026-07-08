@@ -23,6 +23,15 @@ import {
   TransactionStatus,
   TransactionType,
   UserStatus,
+  FamilyContactType,
+  FamilyContactStatus,
+  LoanType,
+  LoanInterestType,
+  LoanRepaymentFrequency,
+  LoanStatus,
+  LoanApprovalStatus,
+  LoanRepaymentMethod,
+  LoanAuditAction,
 } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
@@ -83,15 +92,18 @@ const ids = {
     salary: 'seed-cat-salary',
     businessIncome: 'seed-cat-business-income',
     otherExpense: 'seed-cat-other-expense',
+    loanRepayment: 'seed-cat-loan-repayment',
   },
   transactions: {
     salaryJune: 'seed-tx-salary-june',
     rentJune: 'seed-tx-rent-june',
     foodJune: 'seed-tx-food-june',
     schoolFeesJune: 'seed-tx-school-fees-june',
+    patrickRepayment: 'seed-tx-patrick-repayment',
   },
   receipts: {
     rentJuneReceipt: 'seed-receipt-rent-june',
+    loanRepaymentReceipt: 'seed-receipt-loan-repayment',
   },
   budgets: {
     foodBudgetJune: 'seed-budget-food-june',
@@ -105,6 +117,20 @@ const ids = {
   },
   authSessions: {
     head: 'seed-auth-session-head',
+  },
+  contacts: {
+    kcbBanker: 'seed-contact-kcb-banker',
+    emergencyRelative: 'seed-contact-emergency-relative',
+  },
+  loans: {
+    memberLent: 'seed-loan-member-lent',
+    contactBorrowed: 'seed-loan-contact-borrowed',
+  },
+  loanRepayments: {
+    memberRepayment: 'seed-loan-repayment-member',
+  },
+  loanDocuments: {
+    kcbAgreement: 'seed-loan-doc-kcb-agreement',
   },
 };
 
@@ -815,6 +841,16 @@ async function upsertCategories() {
       isDefault: true,
       status: CategoryStatus.ACTIVE,
     },
+    {
+      id: ids.categories.loanRepayment,
+      name: 'Loan Repayments',
+      type: TransactionType.INCOME,
+      description: 'Incoming repayments for family lent loans.',
+      icon: 'HandCoins',
+      color: 'var(--chart-5)',
+      isDefault: true,
+      status: CategoryStatus.ACTIVE,
+    },
   ];
 
   for (const cat of categories) {
@@ -908,6 +944,22 @@ async function upsertTransactionsAndReceipts() {
       idempotencyKey: 'seed-tx-school-fees-june',
       createdById: ids.users.admin,
       notes: 'Awaiting head verification and approval.',
+    },
+    {
+      id: ids.transactions.patrickRepayment,
+      categoryId: ids.categories.loanRepayment,
+      amountMinorUnits: 100_000n,
+      currency: 'RWF',
+      type: TransactionType.INCOME,
+      status: TransactionStatus.APPROVED,
+      date: utcDate(2026, 5, 10), // June 10, 2026
+      description: 'Patrick Loan Repayment - Installment 1',
+      paymentMethod: 'MOBILE_MONEY',
+      idempotencyKey: 'seed-tx-patrick-repayment',
+      createdById: ids.users.admin,
+      approvedById: ids.users.head,
+      approvedAt: utcDate(2026, 5, 10),
+      notes: 'Repayment for education support loan.',
     },
   ];
 
@@ -1087,16 +1139,364 @@ async function upsertAuthDetails() {
   });
 }
 
+async function upsertContacts() {
+  const contacts = [
+    {
+      id: ids.contacts.kcbBanker,
+      fullName: 'Jean Paul Nkurunziza',
+      contactType: FamilyContactType.BANK,
+      phoneNumber: '+250788000201',
+      email: 'jp.nkurunziza@kcb.co.rw',
+      address: 'KCB Bank Head Office, Kigali',
+      relationshipToFamily: 'Bank relationship manager for family business account',
+      organization: 'KCB Bank Rwanda',
+      notes: 'Key contact for credit and savings accounts.',
+      isEmergencyContact: false,
+      isLoanContact: true,
+      status: FamilyContactStatus.ACTIVE,
+      createdById: ids.users.admin,
+    },
+    {
+      id: ids.contacts.emergencyRelative,
+      fullName: 'Dr. Gasana Emmanuel',
+      contactType: FamilyContactType.DOCTOR,
+      phoneNumber: '+250788000202',
+      email: 'e.gasana@kglhealth.rw',
+      address: 'Kigali Heights, Clinic Suite 402',
+      relationshipToFamily: 'Family physician and trusted family friend',
+      organization: 'Kigali Health Clinic',
+      notes: 'Call for any medical emergency.',
+      isEmergencyContact: true,
+      isLoanContact: false,
+      status: FamilyContactStatus.ACTIVE,
+      createdById: ids.users.head,
+    },
+  ];
+
+  for (const c of contacts) {
+    await prisma.familyContact.upsert({
+      where: { id: c.id },
+      create: {
+        id: c.id,
+        familyId: ids.family,
+        fullName: c.fullName,
+        contactType: c.contactType,
+        phoneNumber: c.phoneNumber,
+        email: c.email,
+        address: c.address,
+        relationshipToFamily: c.relationshipToFamily,
+        organization: c.organization,
+        notes: c.notes,
+        isEmergencyContact: c.isEmergencyContact,
+        isLoanContact: c.isLoanContact,
+        status: c.status,
+        createdById: c.createdById,
+      },
+      update: {
+        fullName: c.fullName,
+        contactType: c.contactType,
+        phoneNumber: c.phoneNumber,
+        email: c.email,
+        address: c.address,
+        relationshipToFamily: c.relationshipToFamily,
+        organization: c.organization,
+        notes: c.notes,
+        isEmergencyContact: c.isEmergencyContact,
+        isLoanContact: c.isLoanContact,
+        status: c.status,
+        createdById: c.createdById,
+        deletedAt: null,
+      },
+    });
+  }
+}
+
+async function upsertLoans() {
+  // 1. Patrick's loan (LENT)
+  const lentLoanId = ids.loans.memberLent;
+  const lentPrincipal = 500_000n;
+  const lentInterestRate = '2.5'; // 2.5%
+  const lentInterest = (lentPrincipal * 25n) / 1000n; // 12,500 RWF interest
+  const lentTotalExpected = lentPrincipal + lentInterest;
+  const lentPaid = 100_000n;
+  const lentRemaining = lentTotalExpected - lentPaid;
+
+  await prisma.familyLoan.upsert({
+    where: { id: lentLoanId },
+    create: {
+      id: lentLoanId,
+      familyId: ids.family,
+      title: 'Education Support Loan for Patrick',
+      description: 'Internal family loan to support Patrick’s professional certification tuition.',
+      loanType: LoanType.LENT,
+      principalAmountMinorUnits: lentPrincipal,
+      interestRate: lentInterestRate,
+      interestType: LoanInterestType.PERCENTAGE,
+      totalExpectedAmountMinorUnits: lentTotalExpected,
+      paidAmountMinorUnits: lentPaid,
+      remainingBalanceMinorUnits: lentRemaining,
+      currency: 'RWF',
+      borrowerName: 'Patrick Uwimana',
+      borrowerMemberId: ids.members.admin,
+      lenderName: 'Mukamana Family Fund',
+      startDate: utcDate(2026, 4, 10), // May 10, 2026 (0-indexed month 4 is May)
+      dueDate: utcDate(2026, 10, 10),  // Nov 10, 2026
+      repaymentFrequency: LoanRepaymentFrequency.MONTHLY,
+      status: LoanStatus.ACTIVE,
+      approvalStatus: LoanApprovalStatus.APPROVED,
+      approvedById: ids.users.head,
+      approvedAt: utcDate(2026, 4, 10),
+      createdById: ids.users.head,
+      idempotencyKey: 'seed-loan-patrick-education',
+    },
+    update: {
+      title: 'Education Support Loan for Patrick',
+      description: 'Internal family loan to support Patrick’s professional certification tuition.',
+      loanType: LoanType.LENT,
+      principalAmountMinorUnits: lentPrincipal,
+      interestRate: lentInterestRate,
+      interestType: LoanInterestType.PERCENTAGE,
+      totalExpectedAmountMinorUnits: lentTotalExpected,
+      paidAmountMinorUnits: lentPaid,
+      remainingBalanceMinorUnits: lentRemaining,
+      currency: 'RWF',
+      borrowerName: 'Patrick Uwimana',
+      borrowerMemberId: ids.members.admin,
+      lenderName: 'Mukamana Family Fund',
+      startDate: utcDate(2026, 4, 10),
+      dueDate: utcDate(2026, 10, 10),
+      repaymentFrequency: LoanRepaymentFrequency.MONTHLY,
+      status: LoanStatus.ACTIVE,
+      approvalStatus: LoanApprovalStatus.APPROVED,
+      approvedById: ids.users.head,
+      approvedAt: utcDate(2026, 4, 10),
+      createdById: ids.users.head,
+      idempotencyKey: 'seed-loan-patrick-education',
+      deletedAt: null,
+    },
+  });
+
+  // 2. KCB Bank loan (BORROWED)
+  const borrowedLoanId = ids.loans.contactBorrowed;
+  const borrowedPrincipal = 2_000_000n;
+  const borrowedInterestRate = '14.5'; // 14.5%
+  // 14.5% of 2M RWF is 290,000 RWF
+  const borrowedInterest = (borrowedPrincipal * 145n) / 1000n;
+  const borrowedTotalExpected = borrowedPrincipal + borrowedInterest;
+  const borrowedPaid = 0n;
+  const borrowedRemaining = borrowedTotalExpected - borrowedPaid;
+
+  await prisma.familyLoan.upsert({
+    where: { id: borrowedLoanId },
+    create: {
+      id: borrowedLoanId,
+      familyId: ids.family,
+      title: 'Family Business Expansion Loan',
+      description: 'Micro-business loan from KCB Bank to expand family retail shop inventory.',
+      loanType: LoanType.BORROWED,
+      principalAmountMinorUnits: borrowedPrincipal,
+      interestRate: borrowedInterestRate,
+      interestType: LoanInterestType.PERCENTAGE,
+      totalExpectedAmountMinorUnits: borrowedTotalExpected,
+      paidAmountMinorUnits: borrowedPaid,
+      remainingBalanceMinorUnits: borrowedRemaining,
+      currency: 'RWF',
+      borrowerName: 'Mukamana Family',
+      lenderName: 'KCB Bank Rwanda',
+      lenderContactId: ids.contacts.kcbBanker,
+      startDate: utcDate(2026, 5, 1),  // June 1, 2026
+      dueDate: utcDate(2027, 5, 1),   // June 1, 2027
+      repaymentFrequency: LoanRepaymentFrequency.MONTHLY,
+      status: LoanStatus.ACTIVE,
+      approvalStatus: LoanApprovalStatus.APPROVED,
+      approvedById: ids.users.head,
+      approvedAt: utcDate(2026, 5, 1),
+      createdById: ids.users.admin,
+      idempotencyKey: 'seed-loan-kcb-business',
+    },
+    update: {
+      title: 'Family Business Expansion Loan',
+      description: 'Micro-business loan from KCB Bank to expand family retail shop inventory.',
+      loanType: LoanType.BORROWED,
+      principalAmountMinorUnits: borrowedPrincipal,
+      interestRate: borrowedInterestRate,
+      interestType: LoanInterestType.PERCENTAGE,
+      totalExpectedAmountMinorUnits: borrowedTotalExpected,
+      paidAmountMinorUnits: borrowedPaid,
+      remainingBalanceMinorUnits: borrowedRemaining,
+      currency: 'RWF',
+      borrowerName: 'Mukamana Family',
+      lenderName: 'KCB Bank Rwanda',
+      lenderContactId: ids.contacts.kcbBanker,
+      startDate: utcDate(2026, 5, 1),
+      dueDate: utcDate(2027, 5, 1),
+      repaymentFrequency: LoanRepaymentFrequency.MONTHLY,
+      status: LoanStatus.ACTIVE,
+      approvalStatus: LoanApprovalStatus.APPROVED,
+      approvedById: ids.users.head,
+      approvedAt: utcDate(2026, 5, 1),
+      createdById: ids.users.admin,
+      idempotencyKey: 'seed-loan-kcb-business',
+      deletedAt: null,
+    },
+  });
+
+  // 3. FamilyReceipt for loan repayment
+  await prisma.familyReceipt.upsert({
+    where: { id: ids.receipts.loanRepaymentReceipt },
+    create: {
+      id: ids.receipts.loanRepaymentReceipt,
+      familyId: ids.family,
+      transactionId: ids.transactions.patrickRepayment,
+      fileName: 'patrick_loan_repayment_june.pdf',
+      fileType: 'application/pdf',
+      fileSizeBytes: 1024 * 64,
+      storageKey: 'receipts/loan-repayment-patrick.pdf',
+      uploadedById: ids.users.admin,
+    },
+    update: {
+      fileName: 'patrick_loan_repayment_june.pdf',
+      fileType: 'application/pdf',
+      fileSizeBytes: 1024 * 64,
+      storageKey: 'receipts/loan-repayment-patrick.pdf',
+      uploadedById: ids.users.admin,
+    },
+  });
+
+  // 4. Patrick's loan repayment (FamilyLoanRepayment)
+  await prisma.familyLoanRepayment.upsert({
+    where: { id: ids.loanRepayments.memberRepayment },
+    create: {
+      id: ids.loanRepayments.memberRepayment,
+      loanId: lentLoanId,
+      familyId: ids.family,
+      amountMinorUnits: lentPaid,
+      paymentDate: utcDate(2026, 5, 10), // June 10, 2026
+      paymentMethod: LoanRepaymentMethod.MOBILE_MONEY,
+      paidByMemberId: ids.members.admin,
+      receivedByMemberId: ids.members.head,
+      receiptId: ids.receipts.loanRepaymentReceipt,
+      notes: 'First monthly installment for education support loan.',
+      createdById: ids.users.head,
+      idempotencyKey: 'seed-repayment-patrick-1',
+    },
+    update: {
+      loanId: lentLoanId,
+      amountMinorUnits: lentPaid,
+      paymentDate: utcDate(2026, 5, 10),
+      paymentMethod: LoanRepaymentMethod.MOBILE_MONEY,
+      paidByMemberId: ids.members.admin,
+      receivedByMemberId: ids.members.head,
+      receiptId: ids.receipts.loanRepaymentReceipt,
+      notes: 'First monthly installment for education support loan.',
+      createdById: ids.users.head,
+      idempotencyKey: 'seed-repayment-patrick-1',
+      deletedAt: null,
+    },
+  });
+
+  // 5. Loan Document for KCB Loan
+  await prisma.familyLoanDocument.upsert({
+    where: { id: ids.loanDocuments.kcbAgreement },
+    create: {
+      id: ids.loanDocuments.kcbAgreement,
+      loanId: borrowedLoanId,
+      fileName: 'kcb_loan_agreement.pdf',
+      fileUrl: 'https://bunny-storage.example.com/loans/kcb_loan_agreement.pdf',
+      fileType: 'application/pdf',
+      fileSizeBytes: 1024 * 512,
+      uploadedById: ids.users.admin,
+    },
+    update: {
+      loanId: borrowedLoanId,
+      fileName: 'kcb_loan_agreement.pdf',
+      fileUrl: 'https://bunny-storage.example.com/loans/kcb_loan_agreement.pdf',
+      fileType: 'application/pdf',
+      fileSizeBytes: 1024 * 512,
+      uploadedById: ids.users.admin,
+      deletedAt: null,
+    },
+  });
+
+  // 6. Loan Audit Logs
+  await prisma.familyLoanAuditLog.upsert({
+    where: { id: 'seed-loan-audit-lent-created' },
+    create: {
+      id: 'seed-loan-audit-lent-created',
+      loanId: lentLoanId,
+      action: LoanAuditAction.CREATED,
+      description: 'Lent loan application created by Head of Family',
+      performedById: ids.users.head,
+      createdAt: utcDate(2026, 4, 10),
+    },
+    update: {},
+  });
+
+  await prisma.familyLoanAuditLog.upsert({
+    where: { id: 'seed-loan-audit-lent-approved' },
+    create: {
+      id: 'seed-loan-audit-lent-approved',
+      loanId: lentLoanId,
+      action: LoanAuditAction.APPROVED,
+      description: 'Lent loan approved by Head of Family',
+      performedById: ids.users.head,
+      createdAt: utcDate(2026, 4, 10),
+    },
+    update: {},
+  });
+
+  await prisma.familyLoanAuditLog.upsert({
+    where: { id: 'seed-loan-audit-lent-repayment' },
+    create: {
+      id: 'seed-loan-audit-lent-repayment',
+      loanId: lentLoanId,
+      action: LoanAuditAction.REPAYMENT_CREATED,
+      description: 'Repayment of 100,000 RWF recorded by Patrick',
+      performedById: ids.users.admin,
+      createdAt: utcDate(2026, 5, 10),
+    },
+    update: {},
+  });
+
+  await prisma.familyLoanAuditLog.upsert({
+    where: { id: 'seed-loan-audit-borrowed-created' },
+    create: {
+      id: 'seed-loan-audit-borrowed-created',
+      loanId: borrowedLoanId,
+      action: LoanAuditAction.CREATED,
+      description: 'Borrowed loan from KCB Bank created',
+      performedById: ids.users.admin,
+      createdAt: utcDate(2026, 5, 1),
+    },
+    update: {},
+  });
+
+  await prisma.familyLoanAuditLog.upsert({
+    where: { id: 'seed-loan-audit-borrowed-doc' },
+    create: {
+      id: 'seed-loan-audit-borrowed-doc',
+      loanId: borrowedLoanId,
+      action: LoanAuditAction.DOCUMENT_UPLOADED,
+      description: 'Loan agreement document uploaded',
+      performedById: ids.users.admin,
+      createdAt: utcDate(2026, 5, 1),
+    },
+    update: {},
+  });
+}
+
 async function main() {
   const seedPasswordHash = await hash(seedPassword, 12);
 
   await upsertUsers(seedPasswordHash);
   await upsertFamily();
+  await upsertContacts();
   await upsertContributions();
   await upsertProjects();
   await upsertCategories();
   await upsertTransactionsAndReceipts();
   await upsertBudgets();
+  await upsertLoans();
   await upsertAuthDetails();
 
   console.info('Seed complete.');
