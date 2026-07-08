@@ -20,6 +20,147 @@ import type {
   FamilyMemberSummary,
 } from "./types";
 
+export const MOCK_MEMBERS: FamilyMemberSummary[] = [
+  {
+    id: "demo-member-1",
+    userId: "demo-user-1",
+    fullName: "Jean Paul Nsanzimana",
+    avatarUrl: null,
+    authority: "HEAD",
+    kinshipLabel: "FATHER",
+    kinshipCustom: null,
+    capabilities: [
+      "MANAGE_FAMILY_SETTINGS",
+      "MANAGE_MEMBERS",
+      "MANAGE_CONTACTS",
+      "MANAGE_SAVINGS",
+      "MANAGE_CONTRIBUTIONS",
+      "RECORD_INCOME",
+      "RECORD_EXPENSE",
+      "APPROVE_EXPENSE",
+      "MANAGE_DEBTS",
+      "MANAGE_PROJECTS",
+      "MANAGE_EVENTS",
+      "MANAGE_ANNOUNCEMENTS",
+      "MANAGE_DOCUMENTS",
+      "VIEW_REPORTS",
+      "EXPORT_REPORTS",
+    ],
+    joinedAt: "2026-01-15T08:00:00.000Z",
+  },
+  {
+    id: "demo-member-2",
+    userId: "demo-user-2",
+    fullName: "Marie Claire Uwera",
+    avatarUrl: null,
+    authority: "ADMIN",
+    kinshipLabel: "MOTHER",
+    kinshipCustom: null,
+    capabilities: [
+      "MANAGE_CONTACTS",
+      "MANAGE_SAVINGS",
+      "MANAGE_CONTRIBUTIONS",
+      "RECORD_INCOME",
+      "RECORD_EXPENSE",
+      "APPROVE_EXPENSE",
+      "MANAGE_DEBTS",
+      "MANAGE_PROJECTS",
+      "MANAGE_EVENTS",
+      "MANAGE_ANNOUNCEMENTS",
+      "MANAGE_DOCUMENTS",
+      "VIEW_REPORTS",
+    ],
+    joinedAt: "2026-02-18T09:30:00.000Z",
+  },
+  {
+    id: "demo-member-3",
+    userId: "demo-user-3",
+    fullName: "Charles Mugisha",
+    avatarUrl: null,
+    authority: "MEMBER",
+    kinshipLabel: "UNCLE",
+    kinshipCustom: null,
+    capabilities: ["RECORD_INCOME", "RECORD_EXPENSE"],
+    joinedAt: "2026-03-10T14:15:00.000Z",
+  },
+  {
+    id: "demo-member-4",
+    userId: "demo-user-4",
+    fullName: "Alice Umutoni",
+    avatarUrl: null,
+    authority: "MEMBER",
+    kinshipLabel: "AUNT",
+    kinshipCustom: null,
+    capabilities: [],
+    joinedAt: "2026-04-22T11:00:00.000Z",
+  },
+  {
+    id: "demo-member-5",
+    userId: "demo-user-5",
+    fullName: "Eric Rutayisire",
+    avatarUrl: null,
+    authority: "MEMBER",
+    kinshipLabel: "BROTHER",
+    kinshipCustom: null,
+    capabilities: [],
+    joinedAt: "2026-05-05T16:45:00.000Z",
+  },
+  {
+    id: "demo-member-6",
+    userId: "demo-user-6",
+    fullName: "Kevine Mutoni",
+    avatarUrl: null,
+    authority: "MEMBER",
+    kinshipLabel: "SISTER",
+    kinshipCustom: null,
+    capabilities: [],
+    joinedAt: "2026-06-12T13:20:00.000Z",
+  },
+];
+
+export function enrichWithDemoData(family: FamilyDetail): FamilyDetail {
+  if (family.members.length > 1) {
+    return family;
+  }
+
+  const now = new Date();
+
+  // Generate dates in the past relative to today
+  const mockMembersWithDates = MOCK_MEMBERS.map((m, idx) => {
+    const monthsAgo = 6 - idx;
+    const date = new Date(now);
+    date.setMonth(now.getMonth() - monthsAgo);
+    return {
+      ...m,
+      joinedAt: date.toISOString(),
+    };
+  });
+
+  const oldestMockJoinedAt = new Date(now);
+  oldestMockJoinedAt.setMonth(now.getMonth() - 6);
+  oldestMockJoinedAt.setDate(oldestMockJoinedAt.getDate() - 1);
+
+  return {
+    ...family,
+    createdAt: oldestMockJoinedAt.toISOString(),
+    memberCount: family.members.length + mockMembersWithDates.length,
+    members: [...family.members, ...mockMembersWithDates],
+  };
+}
+
+export function getVisibleMembers(family: FamilyDetail) {
+  const sorted = family.members.toSorted(
+    (first, second) =>
+      new Date(first.joinedAt).getTime() - new Date(second.joinedAt).getTime(),
+  );
+
+  const realMembers = sorted.filter((m) => !m.id.startsWith("demo-"));
+  const demoMembers = sorted.filter((m) => m.id.startsWith("demo-"));
+
+  const combined = [...realMembers, ...demoMembers];
+  return combined.slice(0, 6);
+}
+
 export const DASHBOARD_MODULES: DashboardModule[] = [
   {
     title: "Money",
@@ -208,16 +349,6 @@ export function formatRelativeTime(date: Date): string {
   if (diffMonths < 12) return `${diffMonths}mo ago`;
 
   return `${diffYears}y ago`;
-}
-
-export function getVisibleMembers(family: FamilyDetail) {
-  return family.members
-    .toSorted(
-      (first, second) =>
-        new Date(first.joinedAt).getTime() -
-        new Date(second.joinedAt).getTime(),
-    )
-    .slice(0, 6);
 }
 
 export function canOpenModule(family: FamilyDetail, module: DashboardModule) {
