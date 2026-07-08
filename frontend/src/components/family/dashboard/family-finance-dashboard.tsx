@@ -86,23 +86,7 @@ export function FamilyFinanceDashboard({ family }: { family: FamilyDetail }) {
 
   return (
     <section className="flex flex-col gap-4" aria-label="Finance dashboard">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h2 className="font-semibold text-lg tracking-tight">
-            Family finance overview
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Money, cash flow, savings, debts, contributions, and recent records
-            for {family.name}.
-          </p>
-        </div>
-        {isDemo ? (
-          <Badge variant="secondary" className="w-fit gap-1.5">
-            <InfoIcon className="size-4" aria-hidden="true" />
-            Demo data mode
-          </Badge>
-        ) : null}
-      </div>
+
 
       {state.message ? (
         <Alert>
