@@ -13,8 +13,38 @@ import {
   CardDescription,
   CardHeader,
 } from "@/components/ui/card";
-import { formatMinorUnits } from "../utils";
+import { formatMinorUnits, normalizeMinorUnitString } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
+
+function formatDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function getRecordDateKey(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  const dateMatch = value.match(/^\d{4}-\d{2}-\d{2}/);
+  if (dateMatch) {
+    return dateMatch[0];
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return formatDateKey(date);
+}
+
+function getMinorUnits(value: unknown) {
+  return BigInt(normalizeMinorUnitString(value) ?? "0");
+}
 
 export function IncomeMetricCards({
   transactions,
@@ -24,72 +54,67 @@ export function IncomeMetricCards({
   currency: string;
 }) {
   const summary = useMemo(() => {
-    const todayStr = new Date().toISOString().split("T")[0];
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+    const todayKey = formatDateKey(new Date());
+    const currentMonthKey = todayKey.slice(0, 7);
 
-    let totalApproved = BigInt(0);
-    let monthApproved = BigInt(0);
-    let todayApproved = BigInt(0);
+    let totalRecorded = BigInt(0);
+    let monthRecorded = BigInt(0);
+    let todayRecorded = BigInt(0);
     let pendingAmount = BigInt(0);
     let approvedAmount = BigInt(0);
     let rentBalance = BigInt(0);
     let overdueRentCount = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    let activeRecordCount = 0;
 
     for (const tx of transactions) {
-      const amount = BigInt(tx.amountMinorUnits);
-      const txDate = new Date(tx.date);
+      if (tx.status === "REJECTED" || tx.status === "REVERSED") {
+        continue;
+      }
+
+      activeRecordCount += 1;
+
+      const amount = getMinorUnits(tx.amountMinorUnits);
+      const txDateKey = getRecordDateKey(tx.date);
+      totalRecorded += amount;
 
       if (tx.incomeRecurrence === "MONTHLY" && tx.expectedAmountMinorUnits) {
-        const expectedAmount = BigInt(tx.expectedAmountMinorUnits);
+        const expectedAmount = getMinorUnits(tx.expectedAmountMinorUnits);
         const remaining = expectedAmount - amount;
 
         if (remaining > BigInt(0)) {
           rentBalance += remaining;
         }
 
-        if (
-          tx.dueDate &&
-          remaining > BigInt(0) &&
-          new Date(tx.dueDate).getTime() < today.getTime()
-        ) {
+        const dueDateKey = getRecordDateKey(tx.dueDate);
+        if (dueDateKey && remaining > BigInt(0) && dueDateKey < todayKey) {
           overdueRentCount += 1;
         }
       }
 
+      if (txDateKey?.startsWith(currentMonthKey)) {
+        monthRecorded += amount;
+      }
+
+      if (txDateKey === todayKey) {
+        todayRecorded += amount;
+      }
+
       if (tx.status === "APPROVED") {
-        totalApproved += amount;
         approvedAmount += amount;
-
-        // Month check
-        if (
-          txDate.getMonth() === currentMonth &&
-          txDate.getFullYear() === currentYear
-        ) {
-          monthApproved += amount;
-        }
-
-        // Today check
-        const txDateStr = tx.date.split("T")[0];
-        if (txDateStr === todayStr) {
-          todayApproved += amount;
-        }
       } else if (tx.status === "PENDING") {
         pendingAmount += amount;
       }
     }
 
     return {
-      totalApproved: totalApproved.toString(),
-      monthApproved: monthApproved.toString(),
-      todayApproved: todayApproved.toString(),
+      totalRecorded: totalRecorded.toString(),
+      monthRecorded: monthRecorded.toString(),
+      todayRecorded: todayRecorded.toString(),
       pendingAmount: pendingAmount.toString(),
       approvedAmount: approvedAmount.toString(),
       rentBalance: rentBalance.toString(),
       overdueRentCount,
-      recordCount: transactions.length,
+      recordCount: activeRecordCount,
     };
   }, [transactions]);
 
@@ -107,10 +132,10 @@ export function IncomeMetricCards({
         </CardHeader>
         <CardContent>
           <div className="text-xl font-bold truncate">
-            {formatMinorUnits(summary.totalApproved, currency)}
+            {formatMinorUnits(summary.totalRecorded, currency)}
           </div>
           <p className="text-[10px] text-muted-foreground mt-1">
-            Sum of all approved records
+            Approved and pending records
           </p>
         </CardContent>
       </Card>
@@ -124,10 +149,10 @@ export function IncomeMetricCards({
         </CardHeader>
         <CardContent>
           <div className="text-xl font-bold truncate">
-            {formatMinorUnits(summary.monthApproved, currency)}
+            {formatMinorUnits(summary.monthRecorded, currency)}
           </div>
           <p className="text-[10px] text-muted-foreground mt-1">
-            Approved this month
+            Recorded this month
           </p>
         </CardContent>
       </Card>
@@ -141,10 +166,10 @@ export function IncomeMetricCards({
         </CardHeader>
         <CardContent>
           <div className="text-xl font-bold truncate">
-            {formatMinorUnits(summary.todayApproved, currency)}
+            {formatMinorUnits(summary.todayRecorded, currency)}
           </div>
           <p className="text-[10px] text-muted-foreground mt-1">
-            Approved today
+            Recorded today
           </p>
         </CardContent>
       </Card>
@@ -229,7 +254,7 @@ export function IncomeMetricCards({
             {summary.recordCount}
           </div>
           <p className="text-[10px] text-muted-foreground mt-1">
-            Total records logged
+            Active records logged
           </p>
         </CardContent>
       </Card>
