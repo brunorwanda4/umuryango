@@ -43,7 +43,6 @@ import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import { FamilyProjectsSkeleton } from "./family-projects-skeleton";
 import { ProjectContributionTable } from "./project-contribution-table";
-import { ProjectUpdatesList } from "./project-updates-list";
 import {
   ProjectFact,
   StatusBadge,
@@ -257,7 +256,6 @@ function ProjectDetailContent({
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="contributions">Contributions</TabsTrigger>
             <TabsTrigger value="plan">Plan</TabsTrigger>
-            <TabsTrigger value="updates">Updates</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="overview">
@@ -277,9 +275,6 @@ function ProjectDetailContent({
         </TabsContent>
         <TabsContent value="plan">
           <ProjectPlanSection family={family} project={project} />
-        </TabsContent>
-        <TabsContent value="updates">
-          <ProjectUpdatesList projects={scopedProjects} />
         </TabsContent>
       </Tabs>
     </div>
