@@ -7,11 +7,86 @@ const LANGUAGE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 const ACCESS_COOKIE = "rf_access_token";
 const REFRESH_COOKIE = "rf_refresh_token";
 const PROTECTED_PREFIXES = ["/me", "/family"];
+const API_PROXY_URL = (
+  process.env.API_PROXY_URL ??
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://localhost:4915"
+).replace(/\/$/, "");
 
 function isProtectedPath(pathname: string) {
   return PROTECTED_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
+}
+
+function splitSetCookieHeader(header: string) {
+  return header.split(/,(?=\s*[^;,]+=)/).map((cookie) => cookie.trim());
+}
+
+function getSetCookieHeaders(headers: Headers) {
+  const withGetSetCookie = headers as Headers & {
+    getSetCookie?: () => string[];
+  };
+
+  if (typeof withGetSetCookie.getSetCookie === "function") {
+    return withGetSetCookie.getSetCookie();
+  }
+
+  const setCookie = headers.get("set-cookie");
+  return setCookie ? splitSetCookieHeader(setCookie) : [];
+}
+
+function mergeCookies(cookieHeader: string, setCookieHeaders: string[]) {
+  const cookies = new Map<string, string>();
+
+  for (const cookie of cookieHeader.split(";")) {
+    const [name, ...valueParts] = cookie.trim().split("=");
+    if (name && valueParts.length > 0) {
+      cookies.set(name, valueParts.join("="));
+    }
+  }
+
+  for (const setCookie of setCookieHeaders) {
+    const [cookiePair] = setCookie.split(";");
+    const [name, ...valueParts] = cookiePair.trim().split("=");
+    if (name && valueParts.length > 0) {
+      cookies.set(name, valueParts.join("="));
+    }
+  }
+
+  return Array.from(cookies, ([name, value]) => `${name}=${value}`).join("; ");
+}
+
+async function refreshSessionCookies(request: NextRequest) {
+  const cookieHeader = request.headers.get("cookie") ?? "";
+
+  if (!cookieHeader) {
+    return null;
+  }
+
+  const response = await fetch(`${API_PROXY_URL}/api/v1/auth/refresh`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      Cookie: cookieHeader,
+    },
+    cache: "no-store",
+  }).catch(() => null);
+
+  if (!response?.ok) {
+    return null;
+  }
+
+  const setCookieHeaders = getSetCookieHeaders(response.headers);
+  if (setCookieHeaders.length === 0) {
+    return null;
+  }
+
+  return {
+    cookieHeader: mergeCookies(cookieHeader, setCookieHeaders),
+    setCookieHeaders,
+  };
 }
 
 function redirectToLogin(request: NextRequest, locale: string) {
@@ -63,7 +138,7 @@ function redirectWithLocale(
   return response;
 }
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const requestedLocale = normalizeLocale(
     request.nextUrl.searchParams.get("lang"),
   );
@@ -81,8 +156,9 @@ export function proxy(request: NextRequest) {
   const hasAccessCookie = Boolean(request.cookies.get(ACCESS_COOKIE)?.value);
   const hasRefreshCookie = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
   const canEnterProtectedRoute = hasAccessCookie || hasRefreshCookie;
+  const isProtectedRoute = isProtectedPath(request.nextUrl.pathname);
 
-  if (isProtectedPath(request.nextUrl.pathname) && !canEnterProtectedRoute) {
+  if (isProtectedRoute && !canEnterProtectedRoute) {
     return redirectToLogin(request, locale);
   }
 
@@ -96,12 +172,32 @@ export function proxy(request: NextRequest) {
     request.nextUrl.pathname + request.nextUrl.search,
   );
 
+  const refreshedSession =
+    isProtectedRoute && !hasAccessCookie && hasRefreshCookie
+      ? await refreshSessionCookies(request)
+      : null;
+
+  if (isProtectedRoute && !hasAccessCookie && hasRefreshCookie) {
+    if (!refreshedSession) {
+      return redirectToLogin(request, locale);
+    }
+
+    requestHeaders.set("cookie", refreshedSession.cookieHeader);
+  }
+
   const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
   setLanguageCookie(response, locale);
+
+  if (refreshedSession) {
+    for (const setCookieHeader of refreshedSession.setCookieHeaders) {
+      response.headers.append("Set-Cookie", setCookieHeader);
+    }
+  }
+
   return response;
 }
 

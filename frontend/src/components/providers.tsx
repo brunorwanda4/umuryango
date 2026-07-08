@@ -3,6 +3,7 @@
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import type * as React from "react";
 import { PwaRegistration } from "@/components/pwa-registration";
+import { SessionRefresh } from "@/components/session-refresh";
 import { ThemeShortcut } from "@/components/theme-shortcut";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -20,7 +21,10 @@ export function Providers({ children }: ProvidersProps) {
     >
       <ThemeShortcut />
       <PwaRegistration />
-      <TooltipProvider>{children}</TooltipProvider>
+      <TooltipProvider>
+        <SessionRefresh />
+        {children}
+      </TooltipProvider>
     </NextThemesProvider>
   );
 }
