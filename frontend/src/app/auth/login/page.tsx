@@ -28,15 +28,38 @@ export const metadata: Metadata = {
 };
 
 type LoginPageProps = {
-  searchParams?: Promise<LocaleSearchParams>;
+  searchParams?: Promise<LocaleSearchParams & { redirect?: string | string[] }>;
 };
 
+function resolvePostLoginHref(
+  searchParams:
+    | (LocaleSearchParams & { redirect?: string | string[] })
+    | undefined,
+  locale: Parameters<typeof getLocalizedHref>[1],
+) {
+  const redirect = Array.isArray(searchParams?.redirect)
+    ? searchParams?.redirect[0]
+    : searchParams?.redirect;
+
+  if (
+    redirect?.startsWith("/") &&
+    !redirect.startsWith("//") &&
+    !redirect.startsWith("/auth/login")
+  ) {
+    return redirect;
+  }
+
+  return getLocalizedHref("/me", locale);
+}
+
 const LoginPage = async ({ searchParams }: LoginPageProps) => {
-  const locale = resolveLocaleFromSearchParams(await searchParams);
+  const resolvedSearchParams = await searchParams;
+  const locale = resolveLocaleFromSearchParams(resolvedSearchParams);
   const messages = getMessages(locale);
   const login = createTranslator(messages, "LoginPage");
   const shared = createTranslator(messages, "Shared");
   const form = messages.LoginForm;
+  const postLoginHref = resolvePostLoginHref(resolvedSearchParams, locale);
 
   return (
     <main className="grid min-h-dvh bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_minmax(28rem,1fr)]">
@@ -167,7 +190,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
               "/auth/forgot-password",
               locale,
             )}
-            postLoginHref={getLocalizedHref("/me", locale)}
+            postLoginHref={postLoginHref}
           />
 
           <Button

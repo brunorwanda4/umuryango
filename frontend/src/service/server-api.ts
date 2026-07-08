@@ -1,4 +1,5 @@
-import { cookies } from "next/headers";
+import { cookies, headers as nextHeaders } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   type APIResponse,
   type ApiRequestOptions,
@@ -52,6 +53,27 @@ async function parseJson<T>(response: Response) {
   }
 }
 
+async function redirectToLogin() {
+  const [cookieStore, headerStore] = await Promise.all([
+    cookies(),
+    nextHeaders(),
+  ]);
+  const currentPath = headerStore.get("x-pathname") ?? "/";
+  const savedLocale = cookieStore.get("rf_language")?.value;
+  const params = new URLSearchParams();
+
+  if (currentPath !== "/") {
+    params.set("redirect", currentPath);
+  }
+
+  if (savedLocale && savedLocale !== "en") {
+    params.set("lang", savedLocale);
+  }
+
+  const query = params.toString();
+  redirect(query ? `/auth/login?${query}` : "/auth/login");
+}
+
 export async function serverApiRequest<TRequest = unknown, TResponse = unknown>(
   method: HttpMethod,
   url: string,
@@ -86,8 +108,10 @@ export async function serverApiRequest<TRequest = unknown, TResponse = unknown>(
     headers.set("Idempotency-Key", idempotencyKey);
   }
 
+  let response: Response;
+
   try {
-    const response = await fetch(getApiUrl(url, baseUrl), {
+    response = await fetch(getApiUrl(url, baseUrl), {
       ...requestOptions,
       method: method.toUpperCase(),
       headers,
@@ -98,27 +122,6 @@ export async function serverApiRequest<TRequest = unknown, TResponse = unknown>(
             ? data
             : JSON.stringify(data),
     });
-    const payload = await parseJson<TResponse>(response);
-
-    if (!response.ok) {
-      const message = getMessage(payload, response.statusText);
-
-      return {
-        ok: false,
-        error: message,
-        message,
-        statusCode: payload?.statusCode ?? response.status,
-        isLoading: false,
-      };
-    }
-
-    return {
-      ok: true,
-      data: payload?.data,
-      message: getMessage(payload, "Request successful"),
-      statusCode: payload?.statusCode ?? response.status,
-      isLoading: false,
-    };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to reach the API.";
@@ -131,4 +134,30 @@ export async function serverApiRequest<TRequest = unknown, TResponse = unknown>(
       isLoading: false,
     };
   }
+
+  const payload = await parseJson<TResponse>(response);
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      await redirectToLogin();
+    }
+
+    const message = getMessage(payload, response.statusText);
+
+    return {
+      ok: false,
+      error: message,
+      message,
+      statusCode: payload?.statusCode ?? response.status,
+      isLoading: false,
+    };
+  }
+
+  return {
+    ok: true,
+    data: payload?.data,
+    message: getMessage(payload, "Request successful"),
+    statusCode: payload?.statusCode ?? response.status,
+    isLoading: false,
+  };
 }

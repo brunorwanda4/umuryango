@@ -91,12 +91,10 @@ export function proxy(request: NextRequest) {
   }
 
   const requestHeaders = new Headers(request.headers);
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
-    requestHeaders.set(
-      "x-pathname",
-      request.nextUrl.pathname + request.nextUrl.search,
-    );
-  }
+  requestHeaders.set(
+    "x-pathname",
+    request.nextUrl.pathname + request.nextUrl.search,
+  );
 
   const response = NextResponse.next({
     request: {
