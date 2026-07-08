@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
@@ -156,9 +156,7 @@ export function IncomeFormFields({
       : []),
   ];
 
-  const handleCreatePayer = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleCreatePayer = async () => {
     const fullName = payerName.trim();
     if (!fullName) {
       setPayerCreateError("Payer name is required.");
@@ -563,11 +561,7 @@ export function IncomeFormFields({
                       </DialogDescription>
                     </DialogHeader>
 
-                    <form
-                      id="create-payer-contact-form"
-                      onSubmit={handleCreatePayer}
-                      className="flex flex-col gap-4 py-4"
-                    >
+                    <div className="flex flex-col gap-4 py-4">
                       {payerCreateError ? (
                         <div className="text-sm font-medium text-destructive">
                           {payerCreateError}
@@ -585,6 +579,12 @@ export function IncomeFormFields({
                           id="payer-contact-name"
                           value={payerName}
                           onChange={(event) => setPayerName(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              handleCreatePayer();
+                            }
+                          }}
                           placeholder="e.g. Jean Tenant"
                         />
                       </div>
@@ -602,15 +602,21 @@ export function IncomeFormFields({
                           onChange={(event) =>
                             setPayerPhone(event.target.value)
                           }
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              event.preventDefault();
+                              handleCreatePayer();
+                            }
+                          }}
                           placeholder="+250 788 000 000"
                         />
                       </div>
-                    </form>
+                    </div>
 
                     <DialogFooter>
                       <Button
-                        type="submit"
-                        form="create-payer-contact-form"
+                        type="button"
+                        onClick={handleCreatePayer}
                         disabled={isCreatingPayer}
                         className="w-full"
                       >
