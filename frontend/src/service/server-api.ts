@@ -15,6 +15,36 @@ type ApiEnvelope<T> = {
   statusCode?: number;
 };
 
+function normalizeBaseUrl(value?: string | null) {
+  const normalized = value?.trim().replace(/\/$/, "");
+  return normalized || undefined;
+}
+
+function getAppUrl() {
+  const configuredAppUrl = normalizeBaseUrl(process.env.NEXT_PUBLIC_APP_URL);
+  if (configuredAppUrl) {
+    return configuredAppUrl;
+  }
+
+  const vercelUrl = normalizeBaseUrl(process.env.VERCEL_URL);
+  if (!vercelUrl) {
+    return undefined;
+  }
+
+  return /^https?:\/\//.test(vercelUrl) ? vercelUrl : `https://${vercelUrl}`;
+}
+
+function getServerApiBaseUrl(explicitBaseUrl?: string) {
+  return (
+    normalizeBaseUrl(explicitBaseUrl) ??
+    normalizeBaseUrl(process.env.API_PROXY_URL) ??
+    normalizeBaseUrl(process.env.NEXT_PUBLIC_DIRECT_API_URL) ??
+    normalizeBaseUrl(process.env.NEXT_PUBLIC_API_URL) ??
+    normalizeBaseUrl(process.env.NEXT_PUBLIC_API_BASE_URL) ??
+    (process.env.NODE_ENV === "production" ? getAppUrl() : undefined)
+  );
+}
+
 function getMessage(payload: ApiEnvelope<unknown> | null, fallback: string) {
   if (!payload) {
     return fallback;
@@ -111,7 +141,7 @@ export async function serverApiRequest<TRequest = unknown, TResponse = unknown>(
   let response: Response;
 
   try {
-    response = await fetch(getApiUrl(url, baseUrl), {
+    response = await fetch(getApiUrl(url, getServerApiBaseUrl(baseUrl)), {
       ...requestOptions,
       method: method.toUpperCase(),
       headers,
