@@ -29,7 +29,6 @@ import {
   getRecentTransactions,
 } from "./family-finance-helpers";
 import {
-  FinanceMetricCards,
   PersistedFinanceCards,
 } from "./family-finance-metrics";
 import { FamilyFinanceDashboardSkeleton } from "./family-finance-skeleton";
@@ -39,6 +38,7 @@ import {
   RecentTransactionsTable,
 } from "./family-finance-tables";
 import type { FamilyDetail } from "./types";
+import { MoneyMetricCards } from "../money/money-metric-cards";
 
 type DashboardMoneyState =
   | { status: "loading" }
@@ -203,10 +203,10 @@ function FamilyFinanceDashboardContent({
 
   return (
     <div className="grid gap-6">
-      <FinanceMetricCards
+
+      <MoneyMetricCards
         currency={displayCurrency}
-        formatAmount={formatAmount}
-        isDemo={isDemo}
+        familySlug=""
         money={money}
       />
 

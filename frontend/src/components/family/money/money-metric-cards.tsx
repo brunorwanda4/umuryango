@@ -67,7 +67,7 @@ export function MoneyMetricCards({
   return (
     <section
       aria-label="Family money summary"
-      className="grid gap-4 grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6"
+      className="grid gap-3 grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6"
     >
       {cards.map((card) => {
         const Icon = card.icon;
@@ -76,7 +76,7 @@ export function MoneyMetricCards({
             <CardHeader className="flex flex-row items-center justify-between gap-3">
               <div className="min-w-0">
                 <CardDescription>{card.title}</CardDescription>
-                <CardTitle className="mt-1 truncate text-xl">
+                <CardTitle className="mt-1 truncate text-2xl font-bold ">
                   {formatOptionalMoney(card.value, currency)}
                 </CardTitle>
               </div>
