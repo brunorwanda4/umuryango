@@ -8,6 +8,7 @@ export const transactionSchema = z
     date: z.string().min(1, "Date is required"),
     paymentMethod: z.string().min(1, "Payment method is required"),
     receivedFrom: z.string().optional(),
+    receivedFromContactId: z.string().optional(),
     receivedBy: z.string().optional(),
     notes: z.string().optional(),
     status: z.string().min(1, "Status is required"),
@@ -84,6 +85,12 @@ export type IncomeTransaction = {
   paymentMethod: string | null;
   notes: string | null;
   receivedFrom: string | null;
+  receivedFromContactId: string | null;
+  receivedFromContact?: {
+    id: string;
+    fullName: string;
+    phoneNumber: string | null;
+  } | null;
   receivedBy: string | null;
   expectedAmountMinorUnits: string | null;
   dueDate: string | null;

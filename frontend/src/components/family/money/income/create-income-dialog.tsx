@@ -11,6 +11,7 @@ import {
 import type { CurrentUser } from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
+import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import { IncomeFormFields } from "./income-form-fields";
 import {
@@ -28,6 +29,7 @@ function getDefaultValues(receivedBy: string): TransactionFormValues {
     date: new Date().toISOString().split("T")[0],
     paymentMethod: "CASH",
     receivedFrom: "",
+    receivedFromContactId: "",
     receivedBy,
     notes: "",
     status: "PENDING",
@@ -46,16 +48,20 @@ export function CreateIncomeDialog({
   onOpenChange,
   family,
   categories,
+  contacts,
   currentUser,
   onCategoriesChanged,
+  onContactsChanged,
   onSuccess,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   family: FamilyDetail;
   categories: Category[];
+  contacts: FamilyContact[];
   currentUser: CurrentUser | null;
   onCategoriesChanged: (category?: Category) => void | Promise<void>;
+  onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
   onSuccess: () => void;
 }) {
   const defaultReceivedBy =
@@ -82,6 +88,7 @@ export function CreateIncomeDialog({
       paymentMethod: values.paymentMethod,
       notes: values.notes,
       receivedFrom: values.receivedFrom,
+      receivedFromContactId: values.receivedFromContactId || undefined,
       receivedBy: values.receivedBy,
       incomeRecurrence: values.incomeRecurrence,
       expectedAmountMinorUnits:
@@ -169,7 +176,10 @@ export function CreateIncomeDialog({
             control={form.control}
             family={family}
             categories={categories}
+            contacts={contacts}
+            setValue={form.setValue}
             onCategoriesChanged={onCategoriesChanged}
+            onContactsChanged={onContactsChanged}
             showReceiptUpload
           />
         </form>

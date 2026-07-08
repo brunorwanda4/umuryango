@@ -9,6 +9,7 @@ import {
   FamilyAuditAction,
   FamilyAuthority,
   FamilyCapability,
+  FamilyContactStatus,
   IncomePaymentStatus,
   IncomeRecurrence,
   TransactionStatus,
@@ -27,6 +28,9 @@ export class TransactionsService {
     const membership = await this.requireMembership(userId, familyId);
     this.requireRecordCapability(membership, dto.type);
     await this.requireCategory(familyId, dto.categoryId, dto.type);
+    const receivedFromContact = dto.receivedFromContactId
+      ? await this.requireContact(familyId, dto.receivedFromContactId)
+      : null;
 
     if (dto.idempotencyKey) {
       const existing = await this.prisma.familyTransaction.findUnique({
@@ -59,8 +63,11 @@ export class TransactionsService {
           idempotencyKey: dto.idempotencyKey,
           status: TransactionStatus.PENDING, // Always pending initially, requiring approval
           notes: this.nullableString(dto.notes),
-          receivedFrom: this.nullableString(dto.receivedFrom),
+          receivedFrom:
+            this.nullableString(dto.receivedFrom) ??
+            receivedFromContact?.fullName,
           receivedBy: this.nullableString(dto.receivedBy),
+          receivedFromContactId: receivedFromContact?.id,
           ...trackingData,
         },
       });
@@ -95,6 +102,9 @@ export class TransactionsService {
       include: {
         category: { select: { name: true } },
         createdBy: { select: { fullName: true } },
+        receivedFromContact: {
+          select: { id: true, fullName: true, phoneNumber: true },
+        },
         receipts: {
           orderBy: { createdAt: 'desc' },
           select: {
@@ -120,6 +130,9 @@ export class TransactionsService {
         category: { select: { name: true } },
         createdBy: { select: { fullName: true } },
         approvedBy: { select: { fullName: true } },
+        receivedFromContact: {
+          select: { id: true, fullName: true, phoneNumber: true },
+        },
       },
     });
 
@@ -188,6 +201,16 @@ export class TransactionsService {
     }
     if (dto.receivedFrom !== undefined) {
       data.receivedFrom = this.nullableString(dto.receivedFrom);
+    }
+    if (dto.receivedFromContactId !== undefined) {
+      const receivedFromContact = this.nullableString(dto.receivedFromContactId)
+        ? await this.requireContact(familyId, dto.receivedFromContactId)
+        : null;
+
+      data.receivedFromContactId = receivedFromContact?.id ?? null;
+      if (receivedFromContact && dto.receivedFrom === undefined) {
+        data.receivedFrom = receivedFromContact.fullName;
+      }
     }
     if (dto.receivedBy !== undefined) {
       data.receivedBy = this.nullableString(dto.receivedBy);
@@ -379,6 +402,26 @@ export class TransactionsService {
     }
   }
 
+  private async requireContact(familyId: string, contactId: string) {
+    const contact = await this.prisma.familyContact.findFirst({
+      where: {
+        id: contactId,
+        familyId,
+        deletedAt: null,
+        status: FamilyContactStatus.ACTIVE,
+      },
+      select: { id: true, fullName: true },
+    });
+
+    if (!contact) {
+      throw new BadRequestException(
+        'Select an active payer contact that belongs to this family',
+      );
+    }
+
+    return contact;
+  }
+
   private buildTrackingData(
     dto: CreateTransactionDto | UpdateTransactionDto,
     current?: {
@@ -526,6 +569,7 @@ export class TransactionsService {
       paymentMethod: transaction.paymentMethod,
       notes: transaction.notes,
       receivedFrom: transaction.receivedFrom,
+      receivedFromContactId: transaction.receivedFromContactId,
       receivedBy: transaction.receivedBy,
     };
   }

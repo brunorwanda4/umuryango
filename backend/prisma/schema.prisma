@@ -690,6 +690,7 @@ model FamilyContact {
   createdBy            User                @relation("FamilyContactsCreated", fields: [createdById], references: [id], onDelete: Cascade)
   borrowerLoans        FamilyLoan[]        @relation("LoanBorrowerContact")
   lenderLoans          FamilyLoan[]        @relation("LoanLenderContact")
+  paidTransactions     FamilyTransaction[] @relation("TransactionReceivedFromContact")
 
   @@index([familyId, status])
   @@index([familyId, contactType])
@@ -741,6 +742,7 @@ model FamilyTransaction {
   reversedAt               DateTime?
   notes                    String?
   receivedFrom             String?
+  receivedFromContactId    String?
   receivedBy               String?
   expectedAmountMinorUnits BigInt?
   dueDate                  DateTime?
@@ -753,6 +755,7 @@ model FamilyTransaction {
   category                 FamilyTransactionCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   createdBy                User                      @relation("TransactionsCreated", fields: [createdById], references: [id], onDelete: Cascade)
   approvedBy               User?                     @relation("TransactionsApproved", fields: [approvedById], references: [id], onDelete: SetNull)
+  receivedFromContact      FamilyContact?            @relation("TransactionReceivedFromContact", fields: [receivedFromContactId], references: [id], onDelete: SetNull)
   receipts                 FamilyReceipt[]
 
   @@unique([familyId, idempotencyKey])
@@ -760,6 +763,7 @@ model FamilyTransaction {
   @@index([familyId, incomeRecurrence, dueDate])
   @@index([familyId, paymentStatus])
   @@index([familyId, status])
+  @@index([familyId, receivedFromContactId])
   @@index([categoryId])
 }
 

@@ -1,11 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { type Control, useWatch } from "react-hook-form";
+import { type FormEvent, useState } from "react";
+import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import { CreateCategoryForm } from "@/components/family/money/forms/create-category-form";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -14,15 +24,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import apiRequest from "@/service/api";
+import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { Category, TransactionFormValues } from "./types-and-schemas";
 
 const CREATE_INCOME_CATEGORY_VALUE = "__create_income_category__";
+const CREATE_PAYER_CONTACT_VALUE = "__create_payer_contact__";
 
 type IncomeFormFieldsProps = {
   control: Control<TransactionFormValues>;
   family: FamilyDetail;
   categories: Category[];
+  contacts: FamilyContact[];
+  setValue: UseFormSetValue<TransactionFormValues>;
   onCategoriesChanged?: (category?: Category) => void | Promise<void>;
+  onContactsChanged?: (contact?: FamilyContact) => void | Promise<void>;
   /** Show the mock receipt/proof upload field. Only needed on the create dialog. */
   showReceiptUpload?: boolean;
 };
@@ -39,15 +55,27 @@ export function IncomeFormFields({
   control,
   family,
   categories,
+  contacts,
+  setValue,
   onCategoriesChanged,
+  onContactsChanged,
   showReceiptUpload = false,
 }: IncomeFormFieldsProps) {
   const [openCreateCategory, setOpenCreateCategory] = useState(false);
+  const [openCreatePayer, setOpenCreatePayer] = useState(false);
+  const [payerName, setPayerName] = useState("");
+  const [payerPhone, setPayerPhone] = useState("");
+  const [isCreatingPayer, setIsCreatingPayer] = useState(false);
+  const [payerCreateError, setPayerCreateError] = useState<string | null>(null);
   const incomeRecurrence = useWatch({
     control,
     name: "incomeRecurrence",
   });
   const canCreateCategoryInline = Boolean(onCategoriesChanged);
+  const canCreatePayerInline = Boolean(onContactsChanged);
+  const activeContacts = contacts.filter(
+    (contact) => contact.status === "ACTIVE",
+  );
   const categoryOptions = [
     ...categories.map((category) => ({
       label: category.name,
@@ -65,6 +93,84 @@ export function IncomeFormFields({
         ]
       : []),
   ];
+  const payerOptions = [
+    ...activeContacts.map((contact) => ({
+      label: contact.phoneNumber
+        ? `${contact.fullName} (${contact.phoneNumber})`
+        : contact.fullName,
+      name: contact.fullName,
+      value: contact.id,
+    })),
+    ...(canCreatePayerInline
+      ? [
+          {
+            label:
+              activeContacts.length === 0
+                ? "Create payer contact"
+                : "Create another payer contact",
+            name: "",
+            value: CREATE_PAYER_CONTACT_VALUE,
+          },
+        ]
+      : []),
+  ];
+
+  const handleCreatePayer = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const fullName = payerName.trim();
+    if (!fullName) {
+      setPayerCreateError("Payer name is required.");
+      return;
+    }
+
+    try {
+      setIsCreatingPayer(true);
+      setPayerCreateError(null);
+
+      const response = await apiRequest<unknown, FamilyContact>(
+        "post",
+        `/families/${encodeURIComponent(family.id)}/contacts`,
+        {
+          fullName,
+          contactType: "OTHER",
+          phoneNumber: payerPhone.trim() || null,
+          relationshipToFamily: "Income payer",
+          notes:
+            incomeRecurrence === "MONTHLY"
+              ? "Created from monthly income rent payer field."
+              : "Created from income payer field.",
+          status: "ACTIVE",
+          isEmergencyContact: false,
+          isLoanContact: false,
+        },
+      );
+
+      if (!response.ok || !response.data) {
+        setPayerCreateError(
+          response.message ?? "Could not create payer contact.",
+        );
+        return;
+      }
+
+      await onContactsChanged?.(response.data);
+      setValue("receivedFromContactId", response.data.id, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setValue("receivedFrom", response.data.fullName, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setPayerName("");
+      setPayerPhone("");
+      setOpenCreatePayer(false);
+    } catch {
+      setPayerCreateError("Could not create payer contact.");
+    } finally {
+      setIsCreatingPayer(false);
+    }
+  };
 
   return (
     <>
@@ -303,9 +409,139 @@ export function IncomeFormFields({
       <div className="grid grid-cols-2 gap-4">
         <CommonFormField
           control={control}
-          name="receivedFrom"
-          label="Received from"
-          placeholder="e.g. MTN Rwanda"
+          name="receivedFromContactId"
+          label={incomeRecurrence === "MONTHLY" ? "Tenant / payer" : "Paid by"}
+          fieldType="custom"
+          placeholder={
+            activeContacts.length === 0
+              ? "Create payer contact"
+              : "Select payer contact"
+          }
+          render={({ field, id, invalid, disabled }) => (
+            <>
+              <Select
+                value={field.value?.toString() ?? ""}
+                onValueChange={(value) => {
+                  if (value === CREATE_PAYER_CONTACT_VALUE) {
+                    setOpenCreatePayer(true);
+                    return;
+                  }
+
+                  const selectedContact = activeContacts.find(
+                    (contact) => contact.id === value,
+                  );
+
+                  field.onChange(value);
+                  setValue("receivedFrom", selectedContact?.fullName ?? "", {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  });
+                }}
+                disabled={disabled}
+                name={field.name}
+              >
+                <SelectTrigger
+                  id={id}
+                  className="w-full"
+                  aria-invalid={invalid}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                >
+                  <SelectValue
+                    placeholder={
+                      activeContacts.length === 0
+                        ? "Create payer contact"
+                        : "Select payer contact"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {payerOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              {canCreatePayerInline ? (
+                <Dialog
+                  open={openCreatePayer}
+                  onOpenChange={(open) => {
+                    setOpenCreatePayer(open);
+                    if (!open) setPayerCreateError(null);
+                  }}
+                >
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Create payer contact</DialogTitle>
+                      <DialogDescription>
+                        Save the tenant or person who pays this income, then use
+                        them on the income record.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <form
+                      id="create-payer-contact-form"
+                      onSubmit={handleCreatePayer}
+                      className="flex flex-col gap-4 py-4"
+                    >
+                      {payerCreateError ? (
+                        <div className="text-sm font-medium text-destructive">
+                          {payerCreateError}
+                        </div>
+                      ) : null}
+
+                      <div className="flex flex-col gap-2">
+                        <label
+                          htmlFor="payer-contact-name"
+                          className="text-sm font-medium"
+                        >
+                          Payer name
+                        </label>
+                        <Input
+                          id="payer-contact-name"
+                          value={payerName}
+                          onChange={(event) => setPayerName(event.target.value)}
+                          placeholder="e.g. Jean Tenant"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <label
+                          htmlFor="payer-contact-phone"
+                          className="text-sm font-medium"
+                        >
+                          Phone number
+                        </label>
+                        <Input
+                          id="payer-contact-phone"
+                          value={payerPhone}
+                          onChange={(event) =>
+                            setPayerPhone(event.target.value)
+                          }
+                          placeholder="+250 788 000 000"
+                        />
+                      </div>
+                    </form>
+
+                    <DialogFooter>
+                      <Button
+                        type="submit"
+                        form="create-payer-contact-form"
+                        disabled={isCreatingPayer}
+                        className="w-full"
+                      >
+                        {isCreatingPayer ? "Saving..." : "Save payer contact"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              ) : null}
+            </>
+          )}
         />
 
         <CommonFormField

@@ -48,6 +48,7 @@ function makeTransaction(overrides: Record<string, unknown> = {}) {
     reversedAt: null,
     notes: null,
     receivedFrom: 'Jean Tenant',
+    receivedFromContactId: 'contact-1',
     receivedBy: 'Family Treasurer',
     expectedAmountMinorUnits: 300000n,
     dueDate: new Date('2026-07-05T00:00:00.000Z'),
@@ -75,6 +76,7 @@ describe('TransactionsService', () => {
         create: jest.fn(),
         update: jest.fn(),
       },
+      familyContact: { findFirst: jest.fn() },
       familyAuditEvent: { create: jest.fn() },
       $transaction: jest.fn((callback) => callback(prisma)),
     };
@@ -95,6 +97,10 @@ describe('TransactionsService', () => {
     prisma.familyTransactionCategory.findFirst.mockResolvedValue({
       id: 'category-rent',
     });
+    prisma.familyContact.findFirst.mockResolvedValue({
+      id: 'contact-1',
+      fullName: 'Jean Tenant',
+    });
     prisma.familyTransaction.findUnique.mockResolvedValue(null);
     prisma.familyTransaction.create.mockResolvedValue(created);
     prisma.familyAuditEvent.create.mockResolvedValue({ id: 'audit-1' });
@@ -109,6 +115,7 @@ describe('TransactionsService', () => {
       paymentMethod: 'BANK_TRANSFER',
       idempotencyKey: 'idem-1',
       receivedFrom: 'Jean Tenant',
+      receivedFromContactId: 'contact-1',
       receivedBy: 'Family Treasurer',
       incomeRecurrence: IncomeRecurrence.MONTHLY,
       expectedAmountMinorUnits: '300000',
@@ -130,6 +137,7 @@ describe('TransactionsService', () => {
           paymentStatus: IncomePaymentStatus.PARTIAL,
           dueDate: new Date('2026-07-05T00:00:00.000Z'),
           propertyName: 'Kigali house',
+          receivedFromContactId: 'contact-1',
         }),
       }),
     );
@@ -140,6 +148,7 @@ describe('TransactionsService', () => {
           after: expect.objectContaining({
             expectedAmountMinorUnits: '300000',
             paymentStatus: IncomePaymentStatus.PARTIAL,
+            receivedFromContactId: 'contact-1',
           }),
         }),
       }),

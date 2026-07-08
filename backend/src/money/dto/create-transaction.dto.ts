@@ -102,6 +102,15 @@ export class CreateTransactionDto {
   @Transform(({ value }) => trim(value))
   receivedFrom?: string;
 
+  @ApiPropertyOptional({
+    description: 'Family contact ID for the person or organization who paid.',
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(120)
+  @Transform(({ value }) => trim(value))
+  receivedFromContactId?: string;
+
   @ApiPropertyOptional({ description: 'Member who received the money' })
   @IsString()
   @IsOptional()

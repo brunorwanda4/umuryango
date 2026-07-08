@@ -1,3 +1,7 @@
+import type {
+  ContactListResponse,
+  FamilyContact,
+} from "@/components/family/contacts/types-and-schemas";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import type {
   Category,
@@ -28,28 +32,36 @@ async function getIncomePageData(familyName: string) {
       family: null,
       transactions: [],
       categories: [],
+      contacts: [],
       currentUser: currentUserResponse.data?.user ?? null,
       error: familyResponse.message ?? "Failed to load family.",
     };
   }
 
   const family = familyResponse.data;
-  const [transactionsResponse, categoriesResponse] = await Promise.all([
-    serverApiRequest<undefined, IncomeTransaction[]>(
-      "get",
-      `/families/${encodeURIComponent(
-        family.id,
-      )}/money/transactions?type=INCOME`,
-      undefined,
-      { cache: "no-store" },
-    ),
-    serverApiRequest<undefined, Category[]>(
-      "get",
-      `/families/${encodeURIComponent(family.id)}/money/categories`,
-      undefined,
-      { cache: "no-store" },
-    ),
-  ]);
+  const [transactionsResponse, categoriesResponse, contactsResponse] =
+    await Promise.all([
+      serverApiRequest<undefined, IncomeTransaction[]>(
+        "get",
+        `/families/${encodeURIComponent(
+          family.id,
+        )}/money/transactions?type=INCOME`,
+        undefined,
+        { cache: "no-store" },
+      ),
+      serverApiRequest<undefined, Category[]>(
+        "get",
+        `/families/${encodeURIComponent(family.id)}/money/categories`,
+        undefined,
+        { cache: "no-store" },
+      ),
+      serverApiRequest<undefined, ContactListResponse>(
+        "get",
+        `/families/${encodeURIComponent(family.id)}/contacts?limit=100&status=ACTIVE`,
+        undefined,
+        { cache: "no-store" },
+      ),
+    ]);
 
   return {
     family,
@@ -62,6 +74,10 @@ async function getIncomePageData(familyName: string) {
             (category) => category.type === "INCOME",
           )
         : [],
+    contacts:
+      contactsResponse.ok && contactsResponse.data
+        ? (contactsResponse.data.items ?? [])
+        : ([] satisfies FamilyContact[]),
     currentUser: currentUserResponse.data?.user ?? null,
     error: null,
   };

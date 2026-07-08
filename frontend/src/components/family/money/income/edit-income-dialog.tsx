@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import { IncomeFormFields } from "./income-form-fields";
 import {
@@ -23,14 +24,20 @@ export function EditIncomeDialog({
   onOpenChange,
   family,
   categories,
+  contacts,
   transaction,
+  onCategoriesChanged,
+  onContactsChanged,
   onSuccess,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   family: FamilyDetail;
   categories: Category[];
+  contacts: FamilyContact[];
   transaction: IncomeTransaction | null;
+  onCategoriesChanged: (category?: Category) => void | Promise<void>;
+  onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
   onSuccess: () => void;
 }) {
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
@@ -48,6 +55,7 @@ export function EditIncomeDialog({
           : "",
         paymentMethod: transaction?.paymentMethod || "CASH",
         receivedFrom: transaction?.receivedFrom || "",
+        receivedFromContactId: transaction?.receivedFromContactId || "",
         receivedBy: transaction?.receivedBy || "",
         notes: transaction?.notes || "",
         status: transaction?.status || "PENDING",
@@ -77,6 +85,7 @@ export function EditIncomeDialog({
       paymentMethod: values.paymentMethod,
       notes: values.notes,
       receivedFrom: values.receivedFrom,
+      receivedFromContactId: values.receivedFromContactId || undefined,
       receivedBy: values.receivedBy,
       incomeRecurrence: values.incomeRecurrence,
       expectedAmountMinorUnits:
@@ -121,6 +130,7 @@ export function EditIncomeDialog({
         date: new Date(transaction.date).toISOString().split("T")[0],
         paymentMethod: transaction.paymentMethod || "CASH",
         receivedFrom: transaction.receivedFrom || "",
+        receivedFromContactId: transaction.receivedFromContactId || "",
         receivedBy: transaction.receivedBy || "",
         notes: transaction.notes || "",
         status: transaction.status,
@@ -172,6 +182,10 @@ export function EditIncomeDialog({
             control={form.control}
             family={family}
             categories={categories}
+            contacts={contacts}
+            setValue={form.setValue}
+            onCategoriesChanged={onCategoriesChanged}
+            onContactsChanged={onContactsChanged}
           />
         </form>
 

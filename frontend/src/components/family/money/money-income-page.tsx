@@ -15,6 +15,10 @@ import { Separator } from "@/components/ui/separator";
 import type { CurrentUser } from "@/hooks/use-current-user";
 import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
+import type {
+  ContactListResponse,
+  FamilyContact,
+} from "../contacts/types-and-schemas";
 import type { FamilyDetail } from "../dashboard/types";
 import { FamilyMoneySkeleton } from "./family-money-skeleton";
 import { AttachReceiptDialog } from "./income/attach-receipt-dialog";
@@ -31,6 +35,7 @@ export type MoneyIncomePageInitialData = {
   family: FamilyDetail | null;
   transactions: IncomeTransaction[];
   categories: Category[];
+  contacts: FamilyContact[];
   currentUser: CurrentUser | null;
   error: string | null;
 };
@@ -50,6 +55,9 @@ export function MoneyIncomePage({
   );
   const [categories, setCategories] = useState<Category[]>(
     initialData?.categories ?? [],
+  );
+  const [contacts, setContacts] = useState<FamilyContact[]>(
+    initialData?.contacts ?? [],
   );
   const [loading, setLoading] = useState(!initialData);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -93,23 +101,35 @@ export function MoneyIncomePage({
         const familyData = familyResponse.data;
         setFamily(familyData);
 
-        const [txResponse, categoriesResponse] = await Promise.all([
-          apiRequest<undefined, IncomeTransaction[]>(
-            "get",
-            `/families/${encodeURIComponent(
-              familyData.id,
-            )}/money/transactions?type=INCOME`,
-          ),
-          apiRequest<undefined, Category[]>(
-            "get",
-            `/families/${encodeURIComponent(familyData.id)}/money/categories`,
-          ),
-        ]);
+        const [txResponse, categoriesResponse, contactsResponse] =
+          await Promise.all([
+            apiRequest<undefined, IncomeTransaction[]>(
+              "get",
+              `/families/${encodeURIComponent(
+                familyData.id,
+              )}/money/transactions?type=INCOME`,
+            ),
+            apiRequest<undefined, Category[]>(
+              "get",
+              `/families/${encodeURIComponent(familyData.id)}/money/categories`,
+            ),
+            apiRequest<undefined, ContactListResponse>(
+              "get",
+              `/families/${encodeURIComponent(
+                familyData.id,
+              )}/contacts?limit=100&status=ACTIVE`,
+            ),
+          ]);
 
         setTransactions(txResponse.ok ? (txResponse.data ?? []) : []);
         setCategories(
           categoriesResponse.ok && categoriesResponse.data
             ? categoriesResponse.data.filter((c) => c.type === "INCOME")
+            : [],
+        );
+        setContacts(
+          contactsResponse.ok && contactsResponse.data
+            ? (contactsResponse.data.items ?? [])
             : [],
         );
       } catch (err) {
@@ -187,6 +207,50 @@ export function MoneyIncomePage({
         }
       } catch {
         toast.error("Income categories could not refresh.");
+      } finally {
+        setIsRefreshing(false);
+      }
+    },
+    [family, fetchData],
+  );
+
+  const refreshContacts = useCallback(
+    async (createdContact?: FamilyContact) => {
+      if (!family) {
+        await fetchData({ showSkeleton: false });
+        return;
+      }
+
+      try {
+        setIsRefreshing(true);
+        if (createdContact) {
+          setContacts((currentContacts) =>
+            currentContacts.some((contact) => contact.id === createdContact.id)
+              ? currentContacts
+              : [createdContact, ...currentContacts],
+          );
+        }
+
+        const contactsResponse = await apiRequest<
+          undefined,
+          ContactListResponse
+        >(
+          "get",
+          `/families/${encodeURIComponent(
+            family.id,
+          )}/contacts?limit=100&status=ACTIVE`,
+        );
+
+        if (contactsResponse.ok) {
+          setContacts(contactsResponse.data?.items ?? []);
+        } else {
+          toast.error(
+            contactsResponse.message ??
+              "Income payer contacts could not refresh.",
+          );
+        }
+      } catch {
+        toast.error("Income payer contacts could not refresh.");
       } finally {
         setIsRefreshing(false);
       }
@@ -384,8 +448,10 @@ export function MoneyIncomePage({
         onOpenChange={setOpenCreate}
         family={family}
         categories={categories}
+        contacts={contacts}
         currentUser={initialData?.currentUser ?? null}
         onCategoriesChanged={refreshCategories}
+        onContactsChanged={refreshContacts}
         onSuccess={refreshTransactions}
       />
 
@@ -395,7 +461,10 @@ export function MoneyIncomePage({
         onOpenChange={setOpenEdit}
         family={family}
         categories={categories}
+        contacts={contacts}
         transaction={selectedTx}
+        onCategoriesChanged={refreshCategories}
+        onContactsChanged={refreshContacts}
         onSuccess={refreshTransactions}
       />
 
