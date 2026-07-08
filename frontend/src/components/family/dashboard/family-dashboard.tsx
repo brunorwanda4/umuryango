@@ -1,3 +1,4 @@
+import { PageTitle } from "@/components/common/pages/page-title";
 import { Separator } from "@/components/ui/separator";
 import { FamilyActivityFeed } from "./family-activity-feed";
 import { DashboardCharts } from "./family-dashboard-charts";
@@ -11,21 +12,22 @@ import { QuickActionsBar } from "./next-steps-card";
 import type { FamilyDetail } from "./types";
 
 export function FamilyDashboard({ family }: { family: FamilyDetail }) {
-  return (
-    <div className="flex flex-col gap-6">
-      <FamilyDashboardHeader family={family} />
-      <Separator />
-      <FamilyOverviewCards family={family} />
-      <QuickActionsBar family={family} />
-      <FamilyFinanceDashboard family={family} />
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <DashboardCharts family={family} />
-        <FamilyActivityFeed family={family} />
-      </div>
-      <FamilyMembersOverview family={family} />
-      <FamilyWorkspaceGrid family={family} />
-    </div>
-  );
+	return (
+		<div className="flex flex-col gap-6">
+			<PageTitle title={`Welcome to ${family.name}`} />
+			<FamilyDashboardHeader family={family} />
+			<Separator />
+			<FamilyOverviewCards family={family} />
+			<QuickActionsBar family={family} />
+			<FamilyFinanceDashboard family={family} />
+			<div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+				<DashboardCharts family={family} />
+				<FamilyActivityFeed family={family} />
+			</div>
+			<FamilyMembersOverview family={family} />
+			<FamilyWorkspaceGrid family={family} />
+		</div>
+	);
 }
 
 export { FamilyDashboardSkeleton };
