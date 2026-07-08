@@ -21,7 +21,6 @@ import {
   toChartNumber,
 } from "../money/utils";
 import { FamilyFinanceCharts } from "./family-finance-charts";
-import { DemoGoalCards } from "./family-finance-goals";
 import {
   type AmountValue,
   getDemoTransactions,
@@ -29,7 +28,6 @@ import {
   getIncomeSources,
   getRecentTransactions,
 } from "./family-finance-helpers";
-import { PersistedFinanceCards } from "./family-finance-metrics";
 import { FamilyFinanceDashboardSkeleton } from "./family-finance-skeleton";
 import {
   ExpenseCategoriesTable,
@@ -245,16 +243,6 @@ function FamilyFinanceDashboardContent({
           formatAmount={formatAmount}
         />
       </div>
-
-      {isDemo ? (
-        <DemoGoalCards formatAmount={formatAmount} />
-      ) : (
-        <PersistedFinanceCards
-          currency={displayCurrency}
-          formatAmount={formatAmount}
-          money={money}
-        />
-      )}
 
       <RecentTransactionsTable
         data={transactionRows}
