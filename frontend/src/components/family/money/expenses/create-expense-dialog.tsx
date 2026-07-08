@@ -28,6 +28,7 @@ export function CreateExpenseDialog({
   categories,
   linkOptions,
   duplicateValues,
+  onCategoriesChanged,
   onSuccess,
 }: {
   open: boolean;
@@ -36,6 +37,7 @@ export function CreateExpenseDialog({
   categories: Category[];
   linkOptions: ExpenseLinkOptions;
   duplicateValues?: Partial<ExpenseFormValues> | null;
+  onCategoriesChanged: (category?: Category) => void | Promise<void>;
   onSuccess: () => void;
 }) {
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
@@ -150,6 +152,7 @@ export function CreateExpenseDialog({
             family={family}
             categories={categories}
             linkOptions={linkOptions}
+            onCategoriesChanged={onCategoriesChanged}
             showReceiptUpload
           />
         </form>

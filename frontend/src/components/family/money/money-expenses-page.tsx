@@ -35,7 +35,6 @@ import type {
   ExpenseLinkOptions,
   ExpenseTransaction,
   ProjectOption,
-  Receipt,
 } from "./expenses/types-and-schemas";
 import { FamilyMoneySkeleton } from "./family-money-skeleton";
 import { AttachReceiptDialog } from "./income/attach-receipt-dialog";
@@ -178,6 +177,48 @@ export function MoneyExpensesPage({
       fetchData();
     }
   }, [fetchData, initialData]);
+
+  const refreshCategories = useCallback(
+    async (createdCategory?: Category) => {
+      if (!family) {
+        await fetchData();
+        return;
+      }
+
+      if (createdCategory?.type === "EXPENSE") {
+        setCategories((currentCategories) =>
+          currentCategories.some(
+            (category) => category.id === createdCategory.id,
+          )
+            ? currentCategories
+            : [createdCategory, ...currentCategories],
+        );
+      }
+
+      try {
+        const categoriesResponse = await apiRequest<undefined, Category[]>(
+          "get",
+          `/families/${encodeURIComponent(family.id)}/money/categories`,
+        );
+
+        if (categoriesResponse.ok) {
+          setCategories(
+            (categoriesResponse.data ?? []).filter(
+              (category) => category.type === "EXPENSE",
+            ),
+          );
+        } else {
+          toast.error(
+            categoriesResponse.message ??
+              "Expense categories could not refresh.",
+          );
+        }
+      } catch {
+        toast.error("Expense categories could not refresh.");
+      }
+    },
+    [family, fetchData],
+  );
 
   const isAdmin = useMemo(() => {
     if (!family) return false;
@@ -472,6 +513,7 @@ export function MoneyExpensesPage({
         categories={categories}
         linkOptions={linkOptions}
         duplicateValues={duplicateValues}
+        onCategoriesChanged={refreshCategories}
         onSuccess={fetchData}
       />
       <EditExpenseDialog

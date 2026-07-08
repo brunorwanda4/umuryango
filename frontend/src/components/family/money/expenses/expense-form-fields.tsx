@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import type { Control } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
+import { CreateCategoryForm } from "@/components/family/money/forms/create-category-form";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   type Category,
   type ExpenseFormValues,
@@ -12,11 +22,14 @@ import {
   paymentMethods,
 } from "./types-and-schemas";
 
+const CREATE_EXPENSE_CATEGORY_VALUE = "__create_expense_category__";
+
 type ExpenseFormFieldsProps = {
   control: Control<ExpenseFormValues>;
   family: FamilyDetail;
   categories: Category[];
   linkOptions: ExpenseLinkOptions;
+  onCategoriesChanged?: (category?: Category) => void | Promise<void>;
   showReceiptUpload?: boolean;
 };
 
@@ -25,8 +38,29 @@ export function ExpenseFormFields({
   family,
   categories,
   linkOptions,
+  onCategoriesChanged,
   showReceiptUpload = false,
 }: ExpenseFormFieldsProps) {
+  const [openCreateCategory, setOpenCreateCategory] = useState(false);
+  const canCreateCategoryInline = Boolean(onCategoriesChanged);
+  const categoryOptions = [
+    ...categories.map((category) => ({
+      label: category.name,
+      value: category.id,
+    })),
+    ...(canCreateCategoryInline
+      ? [
+          {
+            label:
+              categories.length === 0
+                ? "Other / create expense category"
+                : "Create another expense category",
+            value: CREATE_EXPENSE_CATEGORY_VALUE,
+          },
+        ]
+      : []),
+  ];
+
   return (
     <>
       <CommonFormField
@@ -61,29 +95,111 @@ export function ExpenseFormFields({
           control={control}
           name="categoryId"
           label="Expense category"
-          fieldType="select"
-          disabled={categories.length === 0}
-          selectOptions={categories.map((category) => ({
-            label: category.name,
-            value: category.id,
-          }))}
+          fieldType="custom"
+          disabled={categories.length === 0 && !canCreateCategoryInline}
           placeholder={
             categories.length === 0
-              ? "No expense categories available"
+              ? "Select other category"
               : "Select expense category"
           }
           required
+          render={({ field, id, invalid, disabled }) => (
+            <>
+              <Select
+                value={field.value?.toString() ?? ""}
+                onValueChange={(value) => {
+                  if (value === CREATE_EXPENSE_CATEGORY_VALUE) {
+                    setOpenCreateCategory(true);
+                    field.onChange("");
+                    return;
+                  }
+
+                  field.onChange(value);
+                }}
+                disabled={disabled}
+                name={field.name}
+              >
+                <SelectTrigger
+                  id={id}
+                  className="w-full"
+                  aria-invalid={invalid}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                >
+                  <SelectValue
+                    placeholder={
+                      categories.length === 0
+                        ? "Select other category"
+                        : "Select expense category"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              {canCreateCategoryInline ? (
+                <CreateCategoryForm
+                  defaultType="EXPENSE"
+                  existingCategories={categories.map((category) => ({
+                    id: category.id,
+                    name: category.name,
+                    type: "EXPENSE" as const,
+                  }))}
+                  familyId={family.id}
+                  open={openCreateCategory}
+                  onOpenChange={setOpenCreateCategory}
+                  onSuccess={async (category) => {
+                    await onCategoriesChanged?.(category);
+
+                    if (category?.id && category.type === "EXPENSE") {
+                      field.onChange(category.id);
+                    }
+                  }}
+                  trigger={null}
+                />
+              ) : null}
+            </>
+          )}
           description={
             categories.length === 0 ? (
-              <span className="mt-1 block font-medium text-destructive text-xs">
-                Please{" "}
-                <Link
-                  href={`/family/${family.slug}/money/categories`}
-                  className="font-semibold underline hover:opacity-80"
-                >
-                  create an expense category
-                </Link>{" "}
-                first.
+              <span
+                className={
+                  canCreateCategoryInline
+                    ? "mt-1 block text-muted-foreground text-xs"
+                    : "mt-1 block font-medium text-destructive text-xs"
+                }
+              >
+                {canCreateCategoryInline ? (
+                  <>
+                    Select "Other / create expense category" to add one here, or{" "}
+                    <Link
+                      href={`/family/${family.slug}/money/categories`}
+                      className="font-semibold underline hover:opacity-80"
+                    >
+                      manage categories
+                    </Link>{" "}
+                    on the categories page.
+                  </>
+                ) : (
+                  <>
+                    Please{" "}
+                    <Link
+                      href={`/family/${family.slug}/money/categories`}
+                      className="font-semibold underline hover:opacity-80"
+                    >
+                      create an expense category
+                    </Link>{" "}
+                    first.
+                  </>
+                )}
               </span>
             ) : undefined
           }
