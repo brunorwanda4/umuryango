@@ -31,11 +31,10 @@ const PERIOD_LABELS: Record<MoneyPeriod, string> = {
 /**
  * Aggregates the family money overview from persisted records only.
  *
- * Income, expense, savings, debt, and budget ledgers are not modelled yet, so
- * their totals are returned as `null` and their lists as empty arrays. The only
- * persisted money records today are contribution payments and cycles, so those
- * drive the contributions total, allocation, approvals, and recent records.
- * Never invent totals for ledgers that do not exist.
+ * Income, expenses, contribution payments, cycles, and budgets are persisted
+ * today, so this endpoint derives totals and charts from those source records.
+ * Savings and debt ledgers are not modelled here yet, so their totals remain
+ * `null`. Never invent totals for ledgers that do not exist.
  */
 @Injectable()
 export class MoneyService {
@@ -219,7 +218,7 @@ export class MoneyService {
 
     const transactionRecords = txRecords.map((tx) => ({
       id: tx.id,
-      type: 'transaction',
+      type: tx.type.toLowerCase(),
       title: `${tx.category.name} — ${tx.description || tx.type}`,
       category: tx.category.name,
       amountMinorUnits: tx.amountMinorUnits.toString(),
@@ -245,6 +244,26 @@ export class MoneyService {
         amountMinorUnits: totalIncome.toString(),
       });
     }
+
+    const cashFlow = this.buildCashFlow(
+      range,
+      period,
+      verifiedPayments.map((payment) => ({
+        date: payment.paidAt,
+        income: payment.amountMinorUnits,
+        expense: 0n,
+      })),
+      incomes.map((tx) => ({
+        date: tx.date,
+        income: tx.amountMinorUnits,
+        expense: 0n,
+      })),
+      expenses.map((tx) => ({
+        date: tx.date,
+        income: 0n,
+        expense: tx.amountMinorUnits,
+      })),
+    );
 
     const budgets = budgetsData.map((b) => ({
       id: b.id,
@@ -274,7 +293,7 @@ export class MoneyService {
           pendingPaymentApprovalCount + pendingTxApprovalCount,
         overdueCount,
       },
-      cashFlow: [],
+      cashFlow,
       allocation,
       budgets,
       approvals,
@@ -320,5 +339,61 @@ export class MoneyService {
     }
 
     return { start, end, label: PERIOD_LABELS[period] };
+  }
+
+  private buildCashFlow(
+    range: DateRange,
+    period: MoneyPeriod,
+    ...groups: {
+      date: Date;
+      income: bigint;
+      expense: bigint;
+    }[][]
+  ): { label: string; incomeMinorUnits: string; expenseMinorUnits: string }[] {
+    const bucketFormat = new Intl.DateTimeFormat('en', {
+      month: 'short',
+      ...(period === 'month' ? { day: 'numeric' } : {}),
+    });
+    const bucketCount = period === 'month' ? 4 : period === 'quarter' ? 3 : 12;
+    const rangeMs = Math.max(1, range.end.getTime() - range.start.getTime());
+    const buckets = Array.from({ length: bucketCount }, (_, index) => {
+      const start = new Date(
+        range.start.getTime() + Math.floor((rangeMs * index) / bucketCount),
+      );
+      const end = new Date(
+        index === bucketCount - 1
+          ? range.end.getTime()
+          : range.start.getTime() +
+              Math.floor((rangeMs * (index + 1)) / bucketCount),
+      );
+
+      return {
+        start,
+        end,
+        label: bucketFormat.format(start),
+        incomeMinorUnits: 0n,
+        expenseMinorUnits: 0n,
+      };
+    });
+
+    for (const record of groups.flat()) {
+      const bucket = buckets.find(
+        (candidate) =>
+          record.date >= candidate.start && record.date < candidate.end,
+      );
+
+      if (!bucket) {
+        continue;
+      }
+
+      bucket.incomeMinorUnits += record.income;
+      bucket.expenseMinorUnits += record.expense;
+    }
+
+    return buckets.map((bucket) => ({
+      label: bucket.label,
+      incomeMinorUnits: bucket.incomeMinorUnits.toString(),
+      expenseMinorUnits: bucket.expenseMinorUnits.toString(),
+    }));
   }
 }

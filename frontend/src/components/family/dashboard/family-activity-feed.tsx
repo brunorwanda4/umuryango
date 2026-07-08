@@ -19,6 +19,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
+import type { MoneyOverview } from "../money/types";
+import { formatMinorUnits, formatTitle } from "../money/utils";
 import {
   formatRelativeTime,
   getInitials,
@@ -43,7 +45,10 @@ type ActivityEntry = {
   timestamp: Date;
 };
 
-function buildActivityEntries(family: FamilyDetail): ActivityEntry[] {
+function buildActivityEntries(
+  family: FamilyDetail,
+  money: MoneyOverview | null,
+): ActivityEntry[] {
   const entries: ActivityEntry[] = [];
 
   for (const member of family.members) {
@@ -79,72 +84,37 @@ function buildActivityEntries(family: FamilyDetail): ActivityEntry[] {
     });
   }
 
-  const isDemo = family.members.some((m) => m.id.startsWith("demo-"));
-  if (isDemo) {
-    const now = new Date();
+  const currency = money?.currency ?? family.defaultCurrency;
 
-    // 1. Marie Claire recorded an expense for Food 2 days ago
-    const marieClaire = family.members.find((m) =>
-      m.fullName.includes("Marie Claire"),
-    );
-    if (marieClaire) {
-      const date = new Date(now);
-      date.setDate(now.getDate() - 2);
-      entries.push({
-        id: "demo-activity-1",
-        type: "expense_recorded",
-        name: marieClaire.fullName,
-        avatarUrl: marieClaire.avatarUrl,
-        description: "recorded an expense of RWF 45,000 for Food",
-        timestamp: date,
-      });
+  for (const record of money?.records ?? []) {
+    const timestamp = new Date(record.date ?? "");
+
+    if (Number.isNaN(timestamp.getTime())) {
+      continue;
     }
 
-    // 2. Jean Paul updated savings goal: Emergency Fund 4 days ago
-    const jeanPaul = family.members.find((m) =>
-      m.fullName.includes("Jean Paul"),
-    );
-    if (jeanPaul) {
-      const date = new Date(now);
-      date.setDate(now.getDate() - 4);
-      entries.push({
-        id: "demo-activity-2",
-        type: "goal_updated",
-        name: jeanPaul.fullName,
-        avatarUrl: jeanPaul.avatarUrl,
-        description: "updated savings goal: Emergency Fund to RWF 3,200,000",
-        timestamp: date,
-      });
-    }
+    const recordType = record.type.toLowerCase();
+    const isIncome = recordType.includes("income");
+    const isExpense = recordType.includes("expense");
+    const amount = formatMinorUnits(record.amountMinorUnits, currency);
+    const category = record.category ?? formatTitle(record.title);
 
-    // 3. Jean Paul recorded income: RWF 1,200,000 from Salary 6 days ago
-    if (jeanPaul) {
-      const date = new Date(now);
-      date.setDate(now.getDate() - 6);
-      entries.push({
-        id: "demo-activity-3",
-        type: "income_recorded",
-        name: jeanPaul.fullName,
-        avatarUrl: jeanPaul.avatarUrl,
-        description: "recorded income of RWF 1,200,000 from Salary",
-        timestamp: date,
-      });
-    }
-
-    // 4. Charles Mugisha paid contribution: RWF 50,000 10 days ago
-    const charles = family.members.find((m) => m.fullName.includes("Charles"));
-    if (charles) {
-      const date = new Date(now);
-      date.setDate(now.getDate() - 10);
-      entries.push({
-        id: "demo-activity-4",
-        type: "contribution_paid",
-        name: charles.fullName,
-        avatarUrl: charles.avatarUrl,
-        description: "contributed RWF 50,000 to Monthly Family Contribution",
-        timestamp: date,
-      });
-    }
+    entries.push({
+      id: `money-${record.id}`,
+      type: isIncome
+        ? "income_recorded"
+        : isExpense
+          ? "expense_recorded"
+          : "contribution_paid",
+      name: record.createdBy ?? "Family",
+      avatarUrl: null,
+      description: isIncome
+        ? `recorded income of ${amount} from ${category}`
+        : isExpense
+          ? `recorded an expense of ${amount} for ${category}`
+          : `recorded ${amount} for ${category}`,
+      timestamp,
+    });
   }
 
   entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -152,8 +122,14 @@ function buildActivityEntries(family: FamilyDetail): ActivityEntry[] {
   return entries;
 }
 
-export function FamilyActivityFeed({ family }: { family: FamilyDetail }) {
-  const allEntries = buildActivityEntries(family);
+export function FamilyActivityFeed({
+  family,
+  money,
+}: {
+  family: FamilyDetail;
+  money: MoneyOverview | null;
+}) {
+  const allEntries = buildActivityEntries(family, money);
   const visibleEntries = allEntries.slice(0, MAX_ENTRIES);
   const remainingCount = allEntries.length - visibleEntries.length;
 

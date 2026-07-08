@@ -29,8 +29,8 @@ const makePayment = ({
   id,
   amountMinorUnits: amount,
   status,
-  paidAt: new Date('2026-06-10T00:00:00.000Z'),
-  createdAt: new Date('2026-06-10T00:00:00.000Z'),
+  paidAt: new Date(),
+  createdAt: new Date(),
   member: { user: { fullName: 'Claudine Mutesi' } },
   plan: { name: 'Monthly dues' },
 });
@@ -125,7 +125,15 @@ describe('MoneyService', () => {
     // The pending payment surfaces as an approval item.
     expect(result.approvals).toHaveLength(1);
     expect(result.records).toHaveLength(2);
-    expect(result.cashFlow).toEqual([]);
+    expect(result.cashFlow).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          expenseMinorUnits: '0',
+          incomeMinorUnits: expect.any(String),
+          label: expect.any(String),
+        }),
+      ]),
+    );
     expect(result.budgets).toEqual([]);
   });
 

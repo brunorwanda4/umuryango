@@ -3,44 +3,47 @@ import { PageTitle } from "@/components/common/pages/page-title";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
-import { enrichWithDemoData } from "./dashboard-data";
+import type { MoneyOverview } from "../money/types";
 import { FamilyActivityFeed } from "./family-activity-feed";
 import { FamilyDashboardSkeleton } from "./family-dashboard-skeleton";
 import { FamilyFinanceDashboard } from "./family-finance-dashboard";
 import { FamilyMembersOverview } from "./family-members-overview";
 import type { FamilyDetail } from "./types";
 
-export function FamilyDashboard({ family }: { family: FamilyDetail }) {
-  const isDemo = family.members.length <= 1;
-  const displayFamily = isDemo ? enrichWithDemoData(family) : family;
-
+export function FamilyDashboard({
+  family,
+  money,
+  moneyMessage,
+}: {
+  family: FamilyDetail;
+  money: MoneyOverview | null;
+  moneyMessage?: string;
+}) {
   return (
     <div className="flex flex-col gap-6">
       <PageTitle
-        title={`Welcome to ${displayFamily.name}`}
+        title={`Welcome to ${family.name}`}
         description="Extended family fund for monthly welfare support, ceremonies, education, and shared projects."
-        badge={AUTHORITY_LABELS[displayFamily.authority]}
+        badge={AUTHORITY_LABELS[family.authority]}
       />
       <Separator />
 
-      {isDemo && (
+      {moneyMessage ? (
         <Alert>
           <InfoIcon className="size-4" aria-hidden="true" />
-          <AlertTitle>Welcome to your Rwanda Family Dashboard Demo</AlertTitle>
+          <AlertTitle>Money records could not load</AlertTitle>
           <AlertDescription>
-            We've populated this dashboard with demo members, charts, and
-            activities to show you how a fully active family workspace looks. As
-            you invite your real family members and record transactions, this
-            demo data will automatically be replaced with your own.
+            Family profile and member data loaded, but the financial dashboard
+            could not read persisted money records. Detail: {moneyMessage}
           </AlertDescription>
         </Alert>
-      )}
+      ) : null}
 
-      <FamilyFinanceDashboard family={displayFamily} />
+      <FamilyFinanceDashboard family={family} money={money} />
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <FamilyActivityFeed family={displayFamily} />
+        <FamilyActivityFeed family={family} money={money} />
       </div>
-      <FamilyMembersOverview family={displayFamily} />
+      <FamilyMembersOverview family={family} />
     </div>
   );
 }

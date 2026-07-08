@@ -1,13 +1,8 @@
-"use client";
-
 import { UsersIcon } from "lucide-react";
 import Link from "next/link";
-import { use, useEffect, useState } from "react";
-import {
-  FamilyDashboard,
-  FamilyDashboardSkeleton,
-} from "@/components/family/dashboard/family-dashboard";
+import { FamilyDashboard } from "@/components/family/dashboard/family-dashboard";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
+import type { MoneyOverview } from "@/components/family/money/types";
 import {
   Empty,
   EmptyDescription,
@@ -15,53 +10,53 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import apiRequest from "@/service/api";
+import { serverApiRequest } from "@/service/server-api";
 
-type FetchState =
-  | { status: "loading" }
-  | { status: "error"; message: string }
-  | { status: "success"; family: FamilyDetail };
+async function getDashboardPageData(familyName: string) {
+  const familyResponse = await serverApiRequest<undefined, FamilyDetail>(
+    "get",
+    `/families/${encodeURIComponent(familyName)}`,
+    undefined,
+    { cache: "no-store" },
+  );
 
-export default function FamilyDashboardPage({
+  if (!familyResponse.ok || !familyResponse.data) {
+    return {
+      family: null,
+      money: null,
+      moneyMessage: undefined,
+      error: familyResponse.message ?? "Unable to load this family.",
+    };
+  }
+
+  const family = familyResponse.data;
+  const moneyResponse = await serverApiRequest<undefined, MoneyOverview>(
+    "get",
+    `/families/${encodeURIComponent(family.id)}/money/overview?period=month`,
+    undefined,
+    { cache: "no-store" },
+  );
+
+  return {
+    family,
+    money: moneyResponse.ok ? (moneyResponse.data ?? null) : null,
+    moneyMessage: moneyResponse.ok
+      ? undefined
+      : (moneyResponse.message ??
+        "Money records are not available from the API yet."),
+    error: null,
+  };
+}
+
+export default async function FamilyDashboardPage({
   params,
 }: {
   params: Promise<{ familyName: string }>;
 }) {
-  const { familyName } = use(params);
-  const [state, setState] = useState<FetchState>({ status: "loading" });
+  const { familyName } = await params;
+  const data = await getDashboardPageData(familyName);
 
-  useEffect(() => {
-    let active = true;
-    setState({ status: "loading" });
-
-    (async () => {
-      const response = await apiRequest<undefined, FamilyDetail>(
-        "get",
-        `/families/${encodeURIComponent(familyName)}`,
-      );
-
-      if (!active) return;
-
-      if (response.ok && response.data) {
-        setState({ status: "success", family: response.data });
-      } else {
-        setState({
-          status: "error",
-          message: response.message ?? "Unable to load this family.",
-        });
-      }
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [familyName]);
-
-  if (state.status === "loading") {
-    return <FamilyDashboardSkeleton />;
-  }
-
-  if (state.status === "error") {
+  if (!data.family) {
     return (
       <Empty>
         <EmptyHeader>
@@ -70,7 +65,7 @@ export default function FamilyDashboardPage({
           </EmptyMedia>
           <EmptyTitle>Family not found</EmptyTitle>
           <EmptyDescription>
-            {state.message} You may not have access, or it no longer exists.{" "}
+            {data.error} You may not have access, or it no longer exists.{" "}
             <Link href="/family">Back to your families</Link>
           </EmptyDescription>
         </EmptyHeader>
@@ -78,5 +73,11 @@ export default function FamilyDashboardPage({
     );
   }
 
-  return <FamilyDashboard family={state.family} />;
+  return (
+    <FamilyDashboard
+      family={data.family}
+      money={data.money}
+      moneyMessage={data.moneyMessage}
+    />
+  );
 }
