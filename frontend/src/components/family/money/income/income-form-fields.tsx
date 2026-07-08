@@ -1,15 +1,28 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import type { Control } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
+import { CreateCategoryForm } from "@/components/family/money/forms/create-category-form";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Category, TransactionFormValues } from "./types-and-schemas";
+
+const CREATE_INCOME_CATEGORY_VALUE = "__create_income_category__";
 
 type IncomeFormFieldsProps = {
   control: Control<TransactionFormValues>;
   family: FamilyDetail;
   categories: Category[];
+  onCategoriesChanged?: () => void | Promise<void>;
   /** Show the mock receipt/proof upload field. Only needed on the create dialog. */
   showReceiptUpload?: boolean;
 };
@@ -26,8 +39,29 @@ export function IncomeFormFields({
   control,
   family,
   categories,
+  onCategoriesChanged,
   showReceiptUpload = false,
 }: IncomeFormFieldsProps) {
+  const [openCreateCategory, setOpenCreateCategory] = useState(false);
+  const canCreateCategoryInline = Boolean(onCategoriesChanged);
+  const categoryOptions = [
+    ...categories.map((category) => ({
+      label: category.name,
+      value: category.id,
+    })),
+    ...(canCreateCategoryInline
+      ? [
+          {
+            label:
+              categories.length === 0
+                ? "Other / create income category"
+                : "Create another income category",
+            value: CREATE_INCOME_CATEGORY_VALUE,
+          },
+        ]
+      : []),
+  ];
+
   return (
     <>
       <CommonFormField
@@ -63,29 +97,87 @@ export function IncomeFormFields({
           control={control}
           name="categoryId"
           label="Category"
-          fieldType="select"
-          disabled={categories.length === 0}
-          selectOptions={categories.map((c) => ({
-            label: c.name,
-            value: c.id,
-          }))}
+          fieldType="custom"
+          disabled={categories.length === 0 && !canCreateCategoryInline}
           placeholder={
             categories.length === 0
-              ? "No categories available"
+              ? "Select other category"
               : "Select Category"
           }
           required
+          render={({ field, id, invalid, disabled }) => (
+            <Select
+              value={field.value?.toString() ?? ""}
+              onValueChange={(value) => {
+                if (value === CREATE_INCOME_CATEGORY_VALUE) {
+                  setOpenCreateCategory(true);
+                  field.onChange("");
+                  return;
+                }
+
+                field.onChange(value);
+              }}
+              disabled={disabled}
+              name={field.name}
+            >
+              <SelectTrigger
+                id={id}
+                className="w-full"
+                aria-invalid={invalid}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              >
+                <SelectValue
+                  placeholder={
+                    categories.length === 0
+                      ? "Select other category"
+                      : "Select Category"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {categoryOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          )}
           description={
             categories.length === 0 ? (
-              <span className="text-destructive font-medium text-xs mt-1 block">
-                Please{" "}
-                <Link
-                  href={`/family/${family.slug}/money/categories`}
-                  className="underline hover:opacity-80 font-semibold"
-                >
-                  create a category of income
-                </Link>{" "}
-                first.
+              <span
+                className={
+                  canCreateCategoryInline
+                    ? "text-muted-foreground text-xs mt-1 block"
+                    : "text-destructive font-medium text-xs mt-1 block"
+                }
+              >
+                {canCreateCategoryInline ? (
+                  <>
+                    Select "Other / create income category" to add one here, or{" "}
+                    <Link
+                      href={`/family/${family.slug}/money/categories`}
+                      className="underline hover:opacity-80 font-semibold"
+                    >
+                      manage categories
+                    </Link>{" "}
+                    on the categories page.
+                  </>
+                ) : (
+                  <>
+                    Please{" "}
+                    <Link
+                      href={`/family/${family.slug}/money/categories`}
+                      className="underline hover:opacity-80 font-semibold"
+                    >
+                      create a category of income
+                    </Link>{" "}
+                    first.
+                  </>
+                )}
               </span>
             ) : undefined
           }
@@ -175,6 +267,22 @@ export function IncomeFormFields({
           required
         />
       )}
+
+      {canCreateCategoryInline ? (
+        <CreateCategoryForm
+          defaultType="INCOME"
+          existingCategories={categories.map((category) => ({
+            id: category.id,
+            name: category.name,
+            type: "INCOME" as const,
+          }))}
+          familyId={family.id}
+          open={openCreateCategory}
+          onOpenChange={setOpenCreateCategory}
+          onSuccess={onCategoriesChanged}
+          trigger={null}
+        />
+      ) : null}
     </>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import { AlertCircleIcon, CoinsIcon, PlusIcon } from "lucide-react";
+import { AlertCircleIcon, PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
+import { PageTitle } from "@/components/common/pages/page-title";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,7 +26,6 @@ import { IncomeMetricCards } from "./income/income-metric-cards";
 import { IncomeTable } from "./income/income-table";
 import type { Category, IncomeTransaction } from "./income/types-and-schemas";
 import { ViewDetailsDialog } from "./income/view-details-dialog";
-import { PageTitle } from "@/components/common/pages/page-title";
 
 export type MoneyIncomePageInitialData = {
   family: FamilyDetail | null;
@@ -145,6 +144,37 @@ export function MoneyIncomePage({
       }
     } catch {
       toast.error("Income records could not refresh.");
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [family, fetchData]);
+
+  const refreshCategories = useCallback(async () => {
+    if (!family) {
+      await fetchData({ showSkeleton: false });
+      return;
+    }
+
+    try {
+      setIsRefreshing(true);
+      const categoriesResponse = await apiRequest<undefined, Category[]>(
+        "get",
+        `/families/${encodeURIComponent(family.id)}/money/categories`,
+      );
+
+      if (categoriesResponse.ok) {
+        setCategories(
+          (categoriesResponse.data ?? []).filter(
+            (category) => category.type === "INCOME",
+          ),
+        );
+      } else {
+        toast.error(
+          categoriesResponse.message ?? "Income categories could not refresh.",
+        );
+      }
+    } catch {
+      toast.error("Income categories could not refresh.");
     } finally {
       setIsRefreshing(false);
     }
@@ -283,12 +313,18 @@ export function MoneyIncomePage({
       className="flex min-w-0 max-w-full flex-col gap-6"
       aria-busy={isRefreshing}
     >
-      <PageTitle title="Income" description="Manage all money coming into the family, including salary, business income, farming income, gifts, donations, rent income, and family contributions." actions={hasCapability(family, "RECORD_INCOME") && (
-        <Button size="sm" onClick={() => setOpenCreate(true)}>
-          <PlusIcon aria-hidden="true" data-icon="inline-start" />
-          Add Income
-        </Button>
-      )}/>
+      <PageTitle
+        title="Income"
+        description="Manage all money coming into the family, including salary, business income, farming income, gifts, donations, rent income, and family contributions."
+        actions={
+          hasCapability(family, "RECORD_INCOME") && (
+            <Button size="sm" onClick={() => setOpenCreate(true)}>
+              <PlusIcon aria-hidden="true" data-icon="inline-start" />
+              Add Income
+            </Button>
+          )
+        }
+      />
 
       <Separator />
 
@@ -334,6 +370,7 @@ export function MoneyIncomePage({
         family={family}
         categories={categories}
         currentUser={initialData?.currentUser ?? null}
+        onCategoriesChanged={refreshCategories}
         onSuccess={refreshTransactions}
       />
 

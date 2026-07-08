@@ -41,6 +41,7 @@ export function CreateIncomeDialog({
   family,
   categories,
   currentUser,
+  onCategoriesChanged,
   onSuccess,
 }: {
   open: boolean;
@@ -48,6 +49,7 @@ export function CreateIncomeDialog({
   family: FamilyDetail;
   categories: Category[];
   currentUser: CurrentUser | null;
+  onCategoriesChanged: () => void | Promise<void>;
   onSuccess: () => void;
 }) {
   const defaultReceivedBy =
@@ -142,6 +144,7 @@ export function CreateIncomeDialog({
             control={form.control}
             family={family}
             categories={categories}
+            onCategoriesChanged={onCategoriesChanged}
             showReceiptUpload
           />
         </form>
