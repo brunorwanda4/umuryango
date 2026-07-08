@@ -21,12 +21,29 @@ import {
   transactionSchema,
 } from "./types-and-schemas";
 
+function formatDateInput(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function addYears(date: Date, years: number) {
+  const nextDate = new Date(date);
+  nextDate.setFullYear(nextDate.getFullYear() + years);
+  return nextDate;
+}
+
 function getDefaultValues(receivedBy: string): TransactionFormValues {
+  const today = new Date();
+  const todayInput = formatDateInput(today);
+
   return {
     title: "",
     amountMinorUnits: 0,
     categoryId: "",
-    date: new Date().toISOString().split("T")[0],
+    date: todayInput,
     paymentMethod: "CASH",
     receivedFrom: "",
     receivedFromContactId: "",
@@ -36,9 +53,9 @@ function getDefaultValues(receivedBy: string): TransactionFormValues {
     fileName: "",
     incomeRecurrence: "ONE_TIME",
     expectedAmountMinorUnits: undefined,
-    dueDate: "",
-    periodStart: "",
-    periodEnd: "",
+    dueDate: todayInput,
+    periodStart: todayInput,
+    periodEnd: formatDateInput(addYears(today, 2)),
     propertyName: "",
   };
 }

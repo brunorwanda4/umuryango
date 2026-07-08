@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
@@ -30,6 +30,7 @@ import type { Category, TransactionFormValues } from "./types-and-schemas";
 
 const CREATE_INCOME_CATEGORY_VALUE = "__create_income_category__";
 const CREATE_PAYER_CONTACT_VALUE = "__create_payer_contact__";
+const DEFAULT_RENT_PERIOD_YEARS = 2;
 
 type IncomeFormFieldsProps = {
   control: Control<TransactionFormValues>;
@@ -42,6 +43,30 @@ type IncomeFormFieldsProps = {
   /** Show the mock receipt/proof upload field. Only needed on the create dialog. */
   showReceiptUpload?: boolean;
 };
+
+function formatDateInput(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateInput(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return new Date();
+  }
+
+  return new Date(year, month - 1, day);
+}
+
+function addYears(date: Date, years: number) {
+  const nextDate = new Date(date);
+  nextDate.setFullYear(nextDate.getFullYear() + years);
+  return nextDate;
+}
 
 /**
  * Shared field layout for both Create and Edit income dialogs.
@@ -70,6 +95,22 @@ export function IncomeFormFields({
   const incomeRecurrence = useWatch({
     control,
     name: "incomeRecurrence",
+  });
+  const receivedDate = useWatch({
+    control,
+    name: "date",
+  });
+  const dueDate = useWatch({
+    control,
+    name: "dueDate",
+  });
+  const periodStart = useWatch({
+    control,
+    name: "periodStart",
+  });
+  const periodEnd = useWatch({
+    control,
+    name: "periodEnd",
   });
   const canCreateCategoryInline = Boolean(onCategoriesChanged);
   const canCreatePayerInline = Boolean(onContactsChanged);
@@ -172,6 +213,44 @@ export function IncomeFormFields({
     }
   };
 
+  useEffect(() => {
+    if (incomeRecurrence !== "MONTHLY") return;
+
+    const todayInput = formatDateInput(new Date());
+    const startInput = periodStart || receivedDate || todayInput;
+    const endInput = formatDateInput(
+      addYears(parseDateInput(startInput), DEFAULT_RENT_PERIOD_YEARS),
+    );
+
+    if (!dueDate) {
+      setValue("dueDate", startInput, {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+    }
+
+    if (!periodStart) {
+      setValue("periodStart", startInput, {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+    }
+
+    if (!periodEnd) {
+      setValue("periodEnd", endInput, {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+    }
+  }, [
+    dueDate,
+    incomeRecurrence,
+    periodEnd,
+    periodStart,
+    receivedDate,
+    setValue,
+  ]);
+
   return (
     <>
       <CommonFormField
@@ -225,7 +304,8 @@ export function IncomeFormFields({
             <h3 className="text-sm font-medium">Monthly rent tracking</h3>
             <p className="text-xs text-muted-foreground">
               Track what was expected, what was paid, what remains, and when it
-              was due.
+              was due. New records default to a 2-year payment period starting
+              today.
             </p>
           </div>
 
