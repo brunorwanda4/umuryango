@@ -26,6 +26,7 @@ import { IncomeMetricCards } from "./income/income-metric-cards";
 import { IncomeTable } from "./income/income-table";
 import type { Category, IncomeTransaction } from "./income/types-and-schemas";
 import { ViewDetailsDialog } from "./income/view-details-dialog";
+import { PageTitle } from "@/components/common/pages/page-title";
 
 export type MoneyIncomePageInitialData = {
   family: FamilyDetail | null;
@@ -282,34 +283,12 @@ export function MoneyIncomePage({
       className="flex min-w-0 max-w-full flex-col gap-6"
       aria-busy={isRefreshing}
     >
-      {/* Title Header */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex min-w-0 flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">Money received</Badge>
-            <Badge variant="secondary">{currency}</Badge>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background">
-              <CoinsIcon className="size-5 text-muted-foreground" />
-            </span>
-            <h1 className="font-bold text-2xl tracking-tight sm:text-3xl">
-              Income
-            </h1>
-          </div>
-          <p className="max-w-4xl text-muted-foreground text-sm leading-6">
-            Manage all money coming into the family, including salary, business
-            income, farming income, gifts, donations, rent income, and family
-            contributions.
-          </p>
-        </div>
-        {hasCapability(family, "RECORD_INCOME") && (
-          <Button size="sm" onClick={() => setOpenCreate(true)}>
-            <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            Add Income
-          </Button>
-        )}
-      </div>
+      <PageTitle title="Income" description="Manage all money coming into the family, including salary, business income, farming income, gifts, donations, rent income, and family contributions." actions={hasCapability(family, "RECORD_INCOME") && (
+        <Button size="sm" onClick={() => setOpenCreate(true)}>
+          <PlusIcon aria-hidden="true" data-icon="inline-start" />
+          Add Income
+        </Button>
+      )}/>
 
       <Separator />
 

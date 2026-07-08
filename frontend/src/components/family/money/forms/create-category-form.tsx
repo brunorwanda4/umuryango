@@ -1,7 +1,7 @@
 "use client";
 
 import { FolderPlusIcon } from "lucide-react";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
   CategoryFormFields,
   colorOptions,
@@ -48,13 +48,25 @@ function getCategorySchema(existingCategories: CategoryNameSource[]) {
 }
 
 export function CreateCategoryForm({
+  defaultType = "EXPENSE",
   existingCategories = [],
   familyId,
+  onSuccess,
+  open: controlledOpen,
+  onOpenChange,
+  trigger,
 }: {
+  defaultType?: "INCOME" | "EXPENSE";
   existingCategories?: CategoryNameSource[];
   familyId: string;
+  onSuccess?: () => void | Promise<void>;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const categorySchema = getCategorySchema(existingCategories);
 
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
@@ -66,7 +78,7 @@ export function CreateCategoryForm({
       defaultValues: {
         name: "",
         description: "",
-        type: "EXPENSE",
+        type: defaultType,
         icon: "Circle",
         color: colorOptions[0].value,
         status: "ACTIVE",
@@ -86,10 +98,21 @@ export function CreateCategoryForm({
     },
     onSuccessMessage: "Category created successfully",
     toastOnSuccess: true,
-    onSuccess: () => {
+    onSuccess: async () => {
       setOpen(false);
-      form.reset();
-      window.location.reload(); // Quick refresh to update the overview
+      form.reset({
+        name: "",
+        description: "",
+        type: defaultType,
+        icon: "Circle",
+        color: colorOptions[0].value,
+        status: "ACTIVE",
+      });
+      if (onSuccess) {
+        await onSuccess();
+      } else {
+        window.location.reload(); // Keep the existing categories page refresh behavior.
+      }
     },
   });
 
@@ -101,12 +124,16 @@ export function CreateCategoryForm({
         if (!isOpen) resetMessages();
       }}
     >
-      <DialogTrigger asChild>
-        <Button size="sm">
-          <FolderPlusIcon aria-hidden="true" data-icon="inline-start" />
-          Create category
-        </Button>
-      </DialogTrigger>
+      {trigger === null ? null : (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button size="sm">
+              <FolderPlusIcon aria-hidden="true" data-icon="inline-start" />
+              Create category
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-2xl md:max-w-xl overflow-y-auto max-h-[96vh]">
         <DialogHeader>
           <DialogTitle>Create Category</DialogTitle>
