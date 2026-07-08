@@ -722,38 +722,38 @@ model FamilyTransactionCategory {
 }
 
 model FamilyTransaction {
-  id               String                    @id @default(cuid())
-  familyId         String
-  categoryId       String
-  amountMinorUnits BigInt
-  currency         String
-  type             TransactionType
-  status           TransactionStatus         @default(PENDING)
-  incomeRecurrence IncomeRecurrence          @default(ONE_TIME)
-  paymentStatus    IncomePaymentStatus       @default(NOT_EXPECTED)
-  date             DateTime
-  description      String?
-  paymentMethod    String?
-  idempotencyKey   String?
-  createdById      String
-  approvedById     String?
-  approvedAt       DateTime?
-  reversedAt       DateTime?
-  notes            String?
-  receivedFrom     String?
-  receivedBy       String?
+  id                       String                    @id @default(cuid())
+  familyId                 String
+  categoryId               String
+  amountMinorUnits         BigInt
+  currency                 String
+  type                     TransactionType
+  status                   TransactionStatus         @default(PENDING)
+  incomeRecurrence         IncomeRecurrence          @default(ONE_TIME)
+  paymentStatus            IncomePaymentStatus       @default(NOT_EXPECTED)
+  date                     DateTime
+  description              String?
+  paymentMethod            String?
+  idempotencyKey           String?
+  createdById              String
+  approvedById             String?
+  approvedAt               DateTime?
+  reversedAt               DateTime?
+  notes                    String?
+  receivedFrom             String?
+  receivedBy               String?
   expectedAmountMinorUnits BigInt?
-  dueDate          DateTime?
-  periodStart      DateTime?
-  periodEnd        DateTime?
-  propertyName     String?
-  createdAt        DateTime                  @default(now())
-  updatedAt        DateTime                  @updatedAt
-  family           Family                    @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  category         FamilyTransactionCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  createdBy        User                      @relation("TransactionsCreated", fields: [createdById], references: [id], onDelete: Cascade)
-  approvedBy       User?                     @relation("TransactionsApproved", fields: [approvedById], references: [id], onDelete: SetNull)
-  receipts         FamilyReceipt[]
+  dueDate                  DateTime?
+  periodStart              DateTime?
+  periodEnd                DateTime?
+  propertyName             String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  family                   Family                    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  category                 FamilyTransactionCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdBy                User                      @relation("TransactionsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  approvedBy               User?                     @relation("TransactionsApproved", fields: [approvedById], references: [id], onDelete: SetNull)
+  receipts                 FamilyReceipt[]
 
   @@unique([familyId, idempotencyKey])
   @@index([familyId, type, date])

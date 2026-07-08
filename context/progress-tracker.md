@@ -15,7 +15,7 @@ Keep this file short. Update it only for meaningful product or engineering progr
 | --- | --- | --- |
 | Authentication | Planned | Register, login, verification, reset, MFA, sessions. |
 | Family Management | In progress | Create family exists; authority/capability member permissions, invites, settings, soft removal, and audit endpoints are implemented for the family module. |
-| Finance | In progress | Family money overview UI plus income, expenses, categories, approvals, receipts, and budgets pages/navigation exist. Backend Loans API, Prisma models, repayment balance logic, loan documents metadata, audit logs, contact-aware borrower/lender selection, and loan tests are implemented. Broader finance write-flow hardening remains. |
+| Finance | In progress | Family money overview UI plus income, expenses, categories, approvals, receipts, and budgets pages/navigation exist. Income now supports monthly rent/recurring tracking with expected amount, due date, paid amount, remaining balance, payment status, property/unit metadata, backend validation, audit snapshots, and focused tests. Backend Loans API, Prisma models, repayment balance logic, loan documents metadata, audit logs, contact-aware borrower/lender selection, and loan tests are implemented. Broader finance write-flow hardening remains. |
 | Contributions/Savings | Planned | Campaigns, member status, payments, goals, progress. |
 | Debts | Planned | Borrowed/lent direction, schedules, repayments, reminders. |
 | Projects/Documents | In progress | Project persistence, overview aggregation, and create-project API are implemented; documents and project contribution/update write flows remain. |
