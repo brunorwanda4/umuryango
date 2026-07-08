@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { hasCapability } from "@/lib/family-access";
+import { AUTHORITY_LABELS, hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 
 import { FamilyProjectsSkeleton } from "./family-projects-skeleton";
@@ -24,13 +24,13 @@ import { ProjectList } from "./project-list";
 import { ProjectMetricCards } from "./project-metric-cards";
 import { ProjectOperationsGrid } from "./project-operations-grid";
 import { ProjectUpdatesList } from "./project-updates-list";
-import { ProjectsHeader } from "./projects-header";
 import type {
   FetchState,
   ProjectStatusFilter,
   ProjectsOverview,
 } from "./types";
 import { normalizeProjectsOverview, statusLabels } from "./utils";
+import { PageTitle } from "@/components/common/pages/page-title";
 
 export type FamilyProjectsWorkspaceInitialData = {
   family: FamilyDetail | null;
@@ -170,14 +170,8 @@ function ProjectsWorkspaceContent({
 
   return (
     <div className="flex flex-col gap-6">
-      <ProjectsHeader
-        canExportReports={canExportReports}
-        canManageProjects={canManageProjects}
-        currency={currency}
-        family={family}
-        hasSourceRecords={hasSourceRecords}
-        onProjectCreated={onProjectCreated}
-      />
+      <PageTitle title="Family Projects" badge={AUTHORITY_LABELS[family.authority]}  />
+
       <Separator />
       <ProjectFilters
         onStatusChange={onStatusChange}
