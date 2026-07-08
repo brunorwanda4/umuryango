@@ -52,6 +52,7 @@ import {
   type LoanFiltersState,
   type LoanRecord,
 } from "./loans/types-and-schemas";
+import { PageTitle } from "@/components/common/pages/page-title";
 
 export type MoneyLoansPageInitialData = {
   family: FamilyDetail | null;
@@ -253,62 +254,19 @@ export function MoneyLoansPage({
 
   return (
     <div className="flex min-w-0 flex-col gap-6">
-      <header className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex min-w-0 flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">Loan records</Badge>
-              <Badge variant="secondary">{currency}</Badge>
-              <Badge variant={canManageLoans ? "default" : "outline"}>
-                {canManageLoans ? "Manager access" : "View access"}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background">
-                <LandmarkIcon className="size-5 text-muted-foreground" />
-              </span>
-              <h1 className="font-bold text-2xl tracking-tight sm:text-3xl">
-                Loans
-              </h1>
-            </div>
-            <p className="max-w-4xl text-muted-foreground text-sm leading-6">
-              Manage family loans, borrowed money, lent money, repayments, due
-              dates, and loan records in one secure place.
-            </p>
-          </div>
-          {canManageLoans ? (
-            <CreateLoanDialog
-              contacts={contacts}
-              family={family}
-              open={openCreate}
-              onOpenChange={setOpenCreate}
-              onSuccess={fetchData}
-            />
-          ) : null}
-        </div>
-        <nav
-          aria-label="Loan integrations"
-          className="flex gap-2 overflow-x-auto"
-        >
-          <Button
-            href={`/family/${encodeURIComponent(family.slug)}/money/approvals`}
-            size="sm"
-            variant="outline"
-            className="shrink-0"
-          >
-            <FileClockIcon aria-hidden="true" data-icon="inline-start" />
-            Approvals
-          </Button>
-          <Button
-            href={`/family/${encodeURIComponent(family.slug)}/money`}
-            size="sm"
-            variant="outline"
-            className="shrink-0"
-          >
-            Money Overview
-          </Button>
-        </nav>
-      </header>
+      <PageTitle icon={ <span className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background">
+        <LandmarkIcon className="size-5 text-muted-foreground" />
+      </span>} actions={canManageLoans ? (
+        <CreateLoanDialog
+          contacts={contacts}
+          family={family}
+          open={openCreate}
+          onOpenChange={setOpenCreate}
+          onSuccess={fetchData}
+        />
+      ) : null}
+        badge={canManageLoans ? "Manager access" : "View access"} title="Loans" description="     Manage family loans, borrowed money, lent money, repayments, due dates, and loan records in one secure place." />
+
 
       <Separator />
 

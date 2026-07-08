@@ -12,7 +12,11 @@ import {
 import { Input } from "@/components/ui/input";
 import apiRequest from "@/service/api";
 import type { FamilyDetail } from "../../dashboard/types";
-import type { IncomeTransaction } from "./types-and-schemas";
+
+type ReceiptableTransaction = {
+  id: string;
+  description: string | null;
+};
 
 export function AttachReceiptDialog({
   open,
@@ -24,7 +28,7 @@ export function AttachReceiptDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
   family: FamilyDetail;
-  transaction: IncomeTransaction | null;
+  transaction: ReceiptableTransaction | null;
   onSuccess: () => void;
 }) {
   const [fileName, setFileName] = useState("");

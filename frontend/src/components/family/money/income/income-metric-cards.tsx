@@ -33,10 +33,31 @@ export function IncomeMetricCards({
     let todayApproved = BigInt(0);
     let pendingAmount = BigInt(0);
     let approvedAmount = BigInt(0);
+    let rentBalance = BigInt(0);
+    let overdueRentCount = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     for (const tx of transactions) {
       const amount = BigInt(tx.amountMinorUnits);
       const txDate = new Date(tx.date);
+
+      if (tx.incomeRecurrence === "MONTHLY" && tx.expectedAmountMinorUnits) {
+        const expectedAmount = BigInt(tx.expectedAmountMinorUnits);
+        const remaining = expectedAmount - amount;
+
+        if (remaining > BigInt(0)) {
+          rentBalance += remaining;
+        }
+
+        if (
+          tx.dueDate &&
+          remaining > BigInt(0) &&
+          new Date(tx.dueDate).getTime() < today.getTime()
+        ) {
+          overdueRentCount += 1;
+        }
+      }
 
       if (tx.status === "APPROVED") {
         totalApproved += amount;
@@ -66,6 +87,8 @@ export function IncomeMetricCards({
       todayApproved: todayApproved.toString(),
       pendingAmount: pendingAmount.toString(),
       approvedAmount: approvedAmount.toString(),
+      rentBalance: rentBalance.toString(),
+      overdueRentCount,
       recordCount: transactions.length,
     };
   }, [transactions]);
@@ -73,7 +96,7 @@ export function IncomeMetricCards({
   return (
     <section
       aria-label="Income metrics"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
     >
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
@@ -156,6 +179,40 @@ export function IncomeMetricCards({
           </div>
           <p className="text-[10px] text-muted-foreground mt-1">
             Verified & completed
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
+          <CardDescription className="text-xs font-medium uppercase tracking-wider">
+            Rent Balance
+          </CardDescription>
+          <AlertCircleIcon className="size-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-xl font-bold truncate">
+            {formatMinorUnits(summary.rentBalance, currency)}
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Remaining monthly rent
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
+          <CardDescription className="text-xs font-medium uppercase tracking-wider">
+            Overdue Rent
+          </CardDescription>
+          <FileTextIcon className="size-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-xl font-bold truncate">
+            {summary.overdueRentCount}
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Monthly records past due
           </p>
         </CardContent>
       </Card>

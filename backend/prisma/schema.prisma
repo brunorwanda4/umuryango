@@ -159,6 +159,19 @@ enum TransactionStatus {
   REVERSED
 }
 
+enum IncomeRecurrence {
+  ONE_TIME
+  MONTHLY
+}
+
+enum IncomePaymentStatus {
+  NOT_EXPECTED
+  UNPAID
+  PARTIAL
+  PAID
+  OVERPAID
+}
+
 enum LoanType {
   BORROWED
   LENT
@@ -716,6 +729,8 @@ model FamilyTransaction {
   currency         String
   type             TransactionType
   status           TransactionStatus         @default(PENDING)
+  incomeRecurrence IncomeRecurrence          @default(ONE_TIME)
+  paymentStatus    IncomePaymentStatus       @default(NOT_EXPECTED)
   date             DateTime
   description      String?
   paymentMethod    String?
@@ -727,6 +742,11 @@ model FamilyTransaction {
   notes            String?
   receivedFrom     String?
   receivedBy       String?
+  expectedAmountMinorUnits BigInt?
+  dueDate          DateTime?
+  periodStart      DateTime?
+  periodEnd        DateTime?
+  propertyName     String?
   createdAt        DateTime                  @default(now())
   updatedAt        DateTime                  @updatedAt
   family           Family                    @relation(fields: [familyId], references: [id], onDelete: Cascade)
@@ -737,6 +757,8 @@ model FamilyTransaction {
 
   @@unique([familyId, idempotencyKey])
   @@index([familyId, type, date])
+  @@index([familyId, incomeRecurrence, dueDate])
+  @@index([familyId, paymentStatus])
   @@index([familyId, status])
   @@index([categoryId])
 }

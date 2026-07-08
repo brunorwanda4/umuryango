@@ -212,7 +212,8 @@ export function MoneyIncomePage({
       const searchMatch =
         !search ||
         tx.description?.toLowerCase().includes(search.toLowerCase()) ||
-        tx.receivedFrom?.toLowerCase().includes(search.toLowerCase());
+        tx.receivedFrom?.toLowerCase().includes(search.toLowerCase()) ||
+        tx.propertyName?.toLowerCase().includes(search.toLowerCase());
 
       // Category
       const categoryMatch =

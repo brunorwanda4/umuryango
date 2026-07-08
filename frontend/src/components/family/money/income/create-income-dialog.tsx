@@ -32,6 +32,12 @@ function getDefaultValues(receivedBy: string): TransactionFormValues {
     notes: "",
     status: "PENDING",
     fileName: "",
+    incomeRecurrence: "ONE_TIME",
+    expectedAmountMinorUnits: undefined,
+    dueDate: "",
+    periodStart: "",
+    periodEnd: "",
+    propertyName: "",
   };
 }
 
@@ -68,7 +74,7 @@ export function CreateIncomeDialog({
     },
     transform: (values) => ({
       categoryId: values.categoryId,
-      amountMinorUnits: values.amountMinorUnits,
+      amountMinorUnits: String(values.amountMinorUnits),
       currency: family.defaultCurrency,
       type: "INCOME",
       date: new Date(values.date).toISOString(),
@@ -77,6 +83,25 @@ export function CreateIncomeDialog({
       notes: values.notes,
       receivedFrom: values.receivedFrom,
       receivedBy: values.receivedBy,
+      incomeRecurrence: values.incomeRecurrence,
+      expectedAmountMinorUnits:
+        values.incomeRecurrence === "MONTHLY"
+          ? String(values.expectedAmountMinorUnits ?? 0)
+          : undefined,
+      dueDate:
+        values.incomeRecurrence === "MONTHLY" && values.dueDate
+          ? new Date(values.dueDate).toISOString()
+          : undefined,
+      periodStart:
+        values.incomeRecurrence === "MONTHLY" && values.periodStart
+          ? new Date(values.periodStart).toISOString()
+          : undefined,
+      periodEnd:
+        values.incomeRecurrence === "MONTHLY" && values.periodEnd
+          ? new Date(values.periodEnd).toISOString()
+          : undefined,
+      propertyName:
+        values.incomeRecurrence === "MONTHLY" ? values.propertyName : undefined,
       idempotencyKey: `create-income-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
     }),
     request: {

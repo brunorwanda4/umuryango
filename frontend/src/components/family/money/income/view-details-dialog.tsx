@@ -9,6 +9,16 @@ import {
 import { formatDate, formatMinorUnits } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
 
+function getRemainingMinorUnits(transaction: IncomeTransaction) {
+  if (!transaction.expectedAmountMinorUnits) return null;
+
+  const remaining =
+    BigInt(transaction.expectedAmountMinorUnits) -
+    BigInt(transaction.amountMinorUnits);
+
+  return remaining > BigInt(0) ? remaining.toString() : "0";
+}
+
 export function ViewDetailsDialog({
   open,
   onOpenChange,
@@ -21,6 +31,8 @@ export function ViewDetailsDialog({
   currency: string;
 }) {
   if (!transaction) return null;
+
+  const remainingMinorUnits = getRemainingMinorUnits(transaction);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,6 +58,79 @@ export function ViewDetailsDialog({
               {formatMinorUnits(transaction.amountMinorUnits, currency)}
             </span>
           </div>
+
+          {transaction.incomeRecurrence === "MONTHLY" && (
+            <>
+              <div className="grid grid-cols-2 border-b pb-2">
+                <span className="text-muted-foreground font-medium">
+                  Expected Amount
+                </span>
+                <span className="font-mono text-right">
+                  {transaction.expectedAmountMinorUnits
+                    ? formatMinorUnits(
+                        transaction.expectedAmountMinorUnits,
+                        currency,
+                      )
+                    : "-"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 border-b pb-2">
+                <span className="text-muted-foreground font-medium">
+                  Amount Left
+                </span>
+                <span className="font-mono text-right">
+                  {remainingMinorUnits === null
+                    ? "-"
+                    : formatMinorUnits(remainingMinorUnits, currency)}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 border-b pb-2">
+                <span className="text-muted-foreground font-medium">
+                  Payment Status
+                </span>
+                <span className="text-right">
+                  {transaction.paymentStatus.replace("_", " ")}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 border-b pb-2">
+                <span className="text-muted-foreground font-medium">
+                  Due Date
+                </span>
+                <span className="text-right">
+                  {transaction.dueDate ? formatDate(transaction.dueDate) : "-"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 border-b pb-2">
+                <span className="text-muted-foreground font-medium">
+                  House or Unit
+                </span>
+                <span className="text-right">
+                  {transaction.propertyName || "-"}
+                </span>
+              </div>
+
+              {(transaction.periodStart || transaction.periodEnd) && (
+                <div className="grid grid-cols-2 border-b pb-2">
+                  <span className="text-muted-foreground font-medium">
+                    Rent Period
+                  </span>
+                  <span className="text-right">
+                    {transaction.periodStart
+                      ? formatDate(transaction.periodStart)
+                      : "-"}{" "}
+                    to{" "}
+                    {transaction.periodEnd
+                      ? formatDate(transaction.periodEnd)
+                      : "-"}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">Category</span>
@@ -73,7 +158,7 @@ export function ViewDetailsDialog({
               Received From
             </span>
             <span className="text-right">
-              {transaction.receivedFrom || "—"}
+              {transaction.receivedFrom || "-"}
             </span>
           </div>
 
@@ -81,7 +166,7 @@ export function ViewDetailsDialog({
             <span className="text-muted-foreground font-medium">
               Received By
             </span>
-            <span className="text-right">{transaction.receivedBy || "—"}</span>
+            <span className="text-right">{transaction.receivedBy || "-"}</span>
           </div>
 
           <div className="grid grid-cols-2 border-b pb-2">

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { Control } from "react-hook-form";
+import { type Control, useWatch } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import { CreateCategoryForm } from "@/components/family/money/forms/create-category-form";
@@ -43,6 +43,10 @@ export function IncomeFormFields({
   showReceiptUpload = false,
 }: IncomeFormFieldsProps) {
   const [openCreateCategory, setOpenCreateCategory] = useState(false);
+  const incomeRecurrence = useWatch({
+    control,
+    name: "incomeRecurrence",
+  });
   const canCreateCategoryInline = Boolean(onCategoriesChanged);
   const categoryOptions = [
     ...categories.map((category) => ({
@@ -76,7 +80,11 @@ export function IncomeFormFields({
         <CommonFormField
           control={control}
           name="amountMinorUnits"
-          label={`Amount (${family.defaultCurrency})`}
+          label={
+            incomeRecurrence === "MONTHLY"
+              ? `Amount paid (${family.defaultCurrency})`
+              : `Amount (${family.defaultCurrency})`
+          }
           fieldType="money"
           currency={family.defaultCurrency}
           placeholder="e.g. 500,000"
@@ -91,6 +99,73 @@ export function IncomeFormFields({
           required
         />
       </div>
+
+      <CommonFormField
+        control={control}
+        name="incomeRecurrence"
+        label="Income schedule"
+        fieldType="select"
+        selectOptions={[
+          { label: "One-time income", value: "ONE_TIME" },
+          { label: "Monthly rent or recurring income", value: "MONTHLY" },
+        ]}
+        placeholder="Select income schedule"
+        required
+      />
+
+      {incomeRecurrence === "MONTHLY" ? (
+        <div className="rounded-md border bg-muted/30 p-4">
+          <div className="mb-4">
+            <h3 className="text-sm font-medium">Monthly rent tracking</h3>
+            <p className="text-xs text-muted-foreground">
+              Track what was expected, what was paid, what remains, and when it
+              was due.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <CommonFormField
+              control={control}
+              name="expectedAmountMinorUnits"
+              label={`Expected amount (${family.defaultCurrency})`}
+              fieldType="money"
+              currency={family.defaultCurrency}
+              placeholder="e.g. 300,000"
+              required
+            />
+
+            <CommonFormField
+              control={control}
+              name="dueDate"
+              label="Due date"
+              fieldType="date"
+              required
+            />
+
+            <CommonFormField
+              control={control}
+              name="periodStart"
+              label="Period start"
+              fieldType="date"
+            />
+
+            <CommonFormField
+              control={control}
+              name="periodEnd"
+              label="Period end"
+              fieldType="date"
+            />
+          </div>
+
+          <CommonFormField
+            control={control}
+            name="propertyName"
+            label="House or unit"
+            placeholder="e.g. Kigali house, Room 2"
+            fieldClassName="mt-4"
+          />
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-4">
         <CommonFormField

@@ -1,17 +1,57 @@
 import { z } from "zod";
 
-export const transactionSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  amountMinorUnits: z.coerce.number().min(1, "Amount must be greater than 0"),
-  categoryId: z.string().min(1, "Category is required"),
-  date: z.string().min(1, "Date is required"),
-  paymentMethod: z.string().min(1, "Payment method is required"),
-  receivedFrom: z.string().optional(),
-  receivedBy: z.string().optional(),
-  notes: z.string().optional(),
-  status: z.string().min(1, "Status is required"),
-  fileName: z.string().optional(), // Mock receipt upload filename
-});
+export const transactionSchema = z
+  .object({
+    title: z.string().min(1, "Title is required"),
+    amountMinorUnits: z.coerce.number().min(0, "Amount cannot be negative"),
+    categoryId: z.string().min(1, "Category is required"),
+    date: z.string().min(1, "Date is required"),
+    paymentMethod: z.string().min(1, "Payment method is required"),
+    receivedFrom: z.string().optional(),
+    receivedBy: z.string().optional(),
+    notes: z.string().optional(),
+    status: z.string().min(1, "Status is required"),
+    fileName: z.string().optional(), // Mock receipt upload filename
+    incomeRecurrence: z.enum(["ONE_TIME", "MONTHLY"]).default("ONE_TIME"),
+    expectedAmountMinorUnits: z.coerce.number().optional(),
+    dueDate: z.string().optional(),
+    periodStart: z.string().optional(),
+    periodEnd: z.string().optional(),
+    propertyName: z.string().optional(),
+  })
+  .superRefine((values, ctx) => {
+    if (
+      values.incomeRecurrence === "ONE_TIME" &&
+      values.amountMinorUnits <= 0
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Amount must be greater than 0",
+        path: ["amountMinorUnits"],
+      });
+    }
+
+    if (values.incomeRecurrence === "MONTHLY") {
+      if (
+        !values.expectedAmountMinorUnits ||
+        values.expectedAmountMinorUnits <= 0
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Expected monthly amount is required",
+          path: ["expectedAmountMinorUnits"],
+        });
+      }
+
+      if (!values.dueDate) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Due date is required",
+          path: ["dueDate"],
+        });
+      }
+    }
+  });
 
 export type TransactionFormValues = z.infer<typeof transactionSchema>;
 
@@ -37,12 +77,19 @@ export type IncomeTransaction = {
   currency: string;
   type: "INCOME" | "EXPENSE";
   status: "PENDING" | "APPROVED" | "REJECTED" | "REVERSED";
+  incomeRecurrence: "ONE_TIME" | "MONTHLY";
+  paymentStatus: "NOT_EXPECTED" | "UNPAID" | "PARTIAL" | "PAID" | "OVERPAID";
   date: string;
   description: string | null;
   paymentMethod: string | null;
   notes: string | null;
   receivedFrom: string | null;
   receivedBy: string | null;
+  expectedAmountMinorUnits: string | null;
+  dueDate: string | null;
+  periodStart: string | null;
+  periodEnd: string | null;
+  propertyName: string | null;
   createdById: string;
   approvedById: string | null;
   approvedAt: string | null;

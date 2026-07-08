@@ -1,29 +1,29 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiTags,
   ApiQuery,
+  ApiTags,
 } from '@nestjs/swagger';
-import { TransactionType, TransactionStatus } from '@prisma/client';
+import { TransactionStatus, TransactionType } from '@prisma/client';
 import { ACCESS_COOKIE_NAME } from '../auth/auth.constants';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { TransactionsService } from './transactions.service';
 
 @ApiTags('money-transactions')
 @ApiCookieAuth(ACCESS_COOKIE_NAME)
@@ -58,11 +58,12 @@ export class TransactionsController {
   @ApiQuery({ name: 'status', enum: TransactionStatus, required: false })
   @ApiOkResponse({ description: 'Transactions retrieved successfully.' })
   async findAll(
+    @CurrentUserId() userId: string,
     @Param('familyId') familyId: string,
     @Query('type') type?: TransactionType,
     @Query('status') status?: TransactionStatus,
   ) {
-    const data = await this.transactionsService.findAll(familyId, {
+    const data = await this.transactionsService.findAll(userId, familyId, {
       type,
       status,
     });
@@ -72,8 +73,12 @@ export class TransactionsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific transaction by ID' })
   @ApiOkResponse({ description: 'Transaction retrieved successfully.' })
-  async findOne(@Param('familyId') familyId: string, @Param('id') id: string) {
-    const data = await this.transactionsService.findOne(familyId, id);
+  async findOne(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Param('id') id: string,
+  ) {
+    const data = await this.transactionsService.findOne(userId, familyId, id);
     return { data, message: 'Transaction retrieved successfully.' };
   }
 

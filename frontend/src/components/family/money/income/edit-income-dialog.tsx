@@ -51,11 +51,25 @@ export function EditIncomeDialog({
         receivedBy: transaction?.receivedBy || "",
         notes: transaction?.notes || "",
         status: transaction?.status || "PENDING",
+        incomeRecurrence: transaction?.incomeRecurrence || "ONE_TIME",
+        expectedAmountMinorUnits: transaction?.expectedAmountMinorUnits
+          ? Number(transaction.expectedAmountMinorUnits)
+          : undefined,
+        dueDate: transaction?.dueDate
+          ? new Date(transaction.dueDate).toISOString().split("T")[0]
+          : "",
+        periodStart: transaction?.periodStart
+          ? new Date(transaction.periodStart).toISOString().split("T")[0]
+          : "",
+        periodEnd: transaction?.periodEnd
+          ? new Date(transaction.periodEnd).toISOString().split("T")[0]
+          : "",
+        propertyName: transaction?.propertyName || "",
       },
     },
     transform: (values) => ({
       categoryId: values.categoryId,
-      amountMinorUnits: values.amountMinorUnits,
+      amountMinorUnits: String(values.amountMinorUnits),
       currency: family.defaultCurrency,
       type: "INCOME",
       date: new Date(values.date).toISOString(),
@@ -64,6 +78,25 @@ export function EditIncomeDialog({
       notes: values.notes,
       receivedFrom: values.receivedFrom,
       receivedBy: values.receivedBy,
+      incomeRecurrence: values.incomeRecurrence,
+      expectedAmountMinorUnits:
+        values.incomeRecurrence === "MONTHLY"
+          ? String(values.expectedAmountMinorUnits ?? 0)
+          : undefined,
+      dueDate:
+        values.incomeRecurrence === "MONTHLY" && values.dueDate
+          ? new Date(values.dueDate).toISOString()
+          : undefined,
+      periodStart:
+        values.incomeRecurrence === "MONTHLY" && values.periodStart
+          ? new Date(values.periodStart).toISOString()
+          : undefined,
+      periodEnd:
+        values.incomeRecurrence === "MONTHLY" && values.periodEnd
+          ? new Date(values.periodEnd).toISOString()
+          : undefined,
+      propertyName:
+        values.incomeRecurrence === "MONTHLY" ? values.propertyName : undefined,
       status: values.status,
     }),
     request: {
@@ -91,6 +124,20 @@ export function EditIncomeDialog({
         receivedBy: transaction.receivedBy || "",
         notes: transaction.notes || "",
         status: transaction.status,
+        incomeRecurrence: transaction.incomeRecurrence,
+        expectedAmountMinorUnits: transaction.expectedAmountMinorUnits
+          ? Number(transaction.expectedAmountMinorUnits)
+          : undefined,
+        dueDate: transaction.dueDate
+          ? new Date(transaction.dueDate).toISOString().split("T")[0]
+          : "",
+        periodStart: transaction.periodStart
+          ? new Date(transaction.periodStart).toISOString().split("T")[0]
+          : "",
+        periodEnd: transaction.periodEnd
+          ? new Date(transaction.periodEnd).toISOString().split("T")[0]
+          : "",
+        propertyName: transaction.propertyName || "",
       });
     }
   }, [transaction, form]);
