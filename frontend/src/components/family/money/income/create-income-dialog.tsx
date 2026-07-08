@@ -49,7 +49,7 @@ export function CreateIncomeDialog({
   family: FamilyDetail;
   categories: Category[];
   currentUser: CurrentUser | null;
-  onCategoriesChanged: () => void | Promise<void>;
+  onCategoriesChanged: (category?: Category) => void | Promise<void>;
   onSuccess: () => void;
 }) {
   const defaultReceivedBy =

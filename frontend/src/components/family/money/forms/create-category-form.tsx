@@ -29,6 +29,12 @@ type CategoryNameSource = {
   type: "INCOME" | "EXPENSE";
 };
 
+type CreatedCategory = {
+  id: string;
+  name: string;
+  type: "INCOME" | "EXPENSE";
+};
+
 function getCategorySchema(existingCategories: CategoryNameSource[]) {
   return editCategorySchema.superRefine((values, context) => {
     const duplicate = existingCategories.some(
@@ -59,7 +65,7 @@ export function CreateCategoryForm({
   defaultType?: "INCOME" | "EXPENSE";
   existingCategories?: CategoryNameSource[];
   familyId: string;
-  onSuccess?: () => void | Promise<void>;
+  onSuccess?: (category: CreatedCategory | undefined) => void | Promise<void>;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
@@ -71,7 +77,7 @@ export function CreateCategoryForm({
 
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     EditCategoryFormValues,
-    unknown
+    CreatedCategory
   >({
     schema: categorySchema,
     formOptions: {
@@ -98,7 +104,7 @@ export function CreateCategoryForm({
     },
     onSuccessMessage: "Category created successfully",
     toastOnSuccess: true,
-    onSuccess: async () => {
+    onSuccess: async (category) => {
       setOpen(false);
       form.reset({
         name: "",
@@ -109,7 +115,7 @@ export function CreateCategoryForm({
         status: "ACTIVE",
       });
       if (onSuccess) {
-        await onSuccess();
+        await onSuccess(category);
       } else {
         window.location.reload(); // Keep the existing categories page refresh behavior.
       }

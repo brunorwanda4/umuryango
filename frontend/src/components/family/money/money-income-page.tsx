@@ -149,36 +149,50 @@ export function MoneyIncomePage({
     }
   }, [family, fetchData]);
 
-  const refreshCategories = useCallback(async () => {
-    if (!family) {
-      await fetchData({ showSkeleton: false });
-      return;
-    }
-
-    try {
-      setIsRefreshing(true);
-      const categoriesResponse = await apiRequest<undefined, Category[]>(
-        "get",
-        `/families/${encodeURIComponent(family.id)}/money/categories`,
-      );
-
-      if (categoriesResponse.ok) {
-        setCategories(
-          (categoriesResponse.data ?? []).filter(
-            (category) => category.type === "INCOME",
-          ),
-        );
-      } else {
-        toast.error(
-          categoriesResponse.message ?? "Income categories could not refresh.",
-        );
+  const refreshCategories = useCallback(
+    async (createdCategory?: Category) => {
+      if (!family) {
+        await fetchData({ showSkeleton: false });
+        return;
       }
-    } catch {
-      toast.error("Income categories could not refresh.");
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [family, fetchData]);
+
+      try {
+        setIsRefreshing(true);
+        if (createdCategory?.type === "INCOME") {
+          setCategories((currentCategories) =>
+            currentCategories.some(
+              (category) => category.id === createdCategory.id,
+            )
+              ? currentCategories
+              : [createdCategory, ...currentCategories],
+          );
+        }
+
+        const categoriesResponse = await apiRequest<undefined, Category[]>(
+          "get",
+          `/families/${encodeURIComponent(family.id)}/money/categories`,
+        );
+
+        if (categoriesResponse.ok) {
+          setCategories(
+            (categoriesResponse.data ?? []).filter(
+              (category) => category.type === "INCOME",
+            ),
+          );
+        } else {
+          toast.error(
+            categoriesResponse.message ??
+              "Income categories could not refresh.",
+          );
+        }
+      } catch {
+        toast.error("Income categories could not refresh.");
+      } finally {
+        setIsRefreshing(false);
+      }
+    },
+    [family, fetchData],
+  );
 
   useEffect(() => {
     if (!initialData) {

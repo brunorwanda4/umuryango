@@ -22,7 +22,7 @@ type IncomeFormFieldsProps = {
   control: Control<TransactionFormValues>;
   family: FamilyDetail;
   categories: Category[];
-  onCategoriesChanged?: () => void | Promise<void>;
+  onCategoriesChanged?: (category?: Category) => void | Promise<void>;
   /** Show the mock receipt/proof upload field. Only needed on the create dialog. */
   showReceiptUpload?: boolean;
 };
@@ -106,45 +106,69 @@ export function IncomeFormFields({
           }
           required
           render={({ field, id, invalid, disabled }) => (
-            <Select
-              value={field.value?.toString() ?? ""}
-              onValueChange={(value) => {
-                if (value === CREATE_INCOME_CATEGORY_VALUE) {
-                  setOpenCreateCategory(true);
-                  field.onChange("");
-                  return;
-                }
-
-                field.onChange(value);
-              }}
-              disabled={disabled}
-              name={field.name}
-            >
-              <SelectTrigger
-                id={id}
-                className="w-full"
-                aria-invalid={invalid}
-                onBlur={field.onBlur}
-                ref={field.ref}
-              >
-                <SelectValue
-                  placeholder={
-                    categories.length === 0
-                      ? "Select other category"
-                      : "Select Category"
+            <>
+              <Select
+                value={field.value?.toString() ?? ""}
+                onValueChange={(value) => {
+                  if (value === CREATE_INCOME_CATEGORY_VALUE) {
+                    setOpenCreateCategory(true);
+                    field.onChange("");
+                    return;
                   }
+
+                  field.onChange(value);
+                }}
+                disabled={disabled}
+                name={field.name}
+              >
+                <SelectTrigger
+                  id={id}
+                  className="w-full"
+                  aria-invalid={invalid}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                >
+                  <SelectValue
+                    placeholder={
+                      categories.length === 0
+                        ? "Select other category"
+                        : "Select Category"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
+              {canCreateCategoryInline ? (
+                <CreateCategoryForm
+                  defaultType="INCOME"
+                  existingCategories={categories.map((category) => ({
+                    id: category.id,
+                    name: category.name,
+                    type: "INCOME" as const,
+                  }))}
+                  familyId={family.id}
+                  open={openCreateCategory}
+                  onOpenChange={setOpenCreateCategory}
+                  onSuccess={async (category) => {
+                    await onCategoriesChanged?.(category);
+
+                    if (category?.id && category.type === "INCOME") {
+                      field.onChange(category.id);
+                    }
+                  }}
+                  trigger={null}
                 />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {categoryOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+              ) : null}
+            </>
           )}
           description={
             categories.length === 0 ? (
@@ -267,22 +291,6 @@ export function IncomeFormFields({
           required
         />
       )}
-
-      {canCreateCategoryInline ? (
-        <CreateCategoryForm
-          defaultType="INCOME"
-          existingCategories={categories.map((category) => ({
-            id: category.id,
-            name: category.name,
-            type: "INCOME" as const,
-          }))}
-          familyId={family.id}
-          open={openCreateCategory}
-          onOpenChange={setOpenCreateCategory}
-          onSuccess={onCategoriesChanged}
-          trigger={null}
-        />
-      ) : null}
     </>
   );
 }
