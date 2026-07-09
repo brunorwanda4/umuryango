@@ -12,6 +12,7 @@ import {
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,14 +29,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { hasCapability } from "@/lib/family-access";
 import type { FamilyDetail } from "../../dashboard/types";
 import { formatDate, formatMinorUnits } from "../utils";
@@ -66,6 +60,170 @@ export function ExpenseTable({
   handleDownloadReceipt: (transaction: ExpenseTransaction) => void;
   setOpenCreate: (open: boolean) => void;
 }) {
+  const columns: ColumnDef<ExpenseTransaction>[] = [
+    {
+      accessorKey: "date",
+      header: "Date",
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap">{formatDate(row.original.date)}</span>
+      ),
+    },
+    {
+      accessorKey: "description",
+      header: "Title",
+      cell: ({ row }) => (
+        <span className="block max-w-[220px] truncate font-medium">
+          {row.original.description || "Expense Transaction"}
+        </span>
+      ),
+    },
+    {
+      id: "category",
+      header: "Category",
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap">{row.original.category.name}</span>
+      ),
+    },
+    {
+      accessorKey: "amountMinorUnits",
+      header: "Amount",
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap font-mono">
+          {formatMinorUnits(row.original.amountMinorUnits, currency)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "receivedFrom",
+      header: "Paid To",
+      cell: ({ row }) => (
+        <span className="block max-w-[160px] truncate">
+          {row.original.receivedFrom || "Not recorded"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "receivedBy",
+      header: "Paid By",
+      cell: ({ row }) => (
+        <span className="block max-w-[160px] truncate">
+          {row.original.receivedBy || "Not recorded"}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "paymentMethod",
+      header: "Payment Method",
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap">
+          {formatPaymentMethod(row.original.paymentMethod)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => <ExpenseStatusBadge status={row.original.status} />,
+    },
+    {
+      id: "receipt",
+      header: "Receipt",
+      cell: ({ row }) => {
+        const firstReceipt = row.original.receipts?.[0];
+        return firstReceipt ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleDownloadReceipt(row.original)}
+            className="max-w-[150px]"
+          >
+            <ReceiptTextIcon aria-hidden="true" data-icon="inline-start" />
+            <span className="truncate">{firstReceipt.fileName}</span>
+          </Button>
+        ) : (
+          <Badge variant="outline">No receipt</Badge>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: () => <span className="flex justify-end">Actions</span>,
+      cell: ({ row }) => {
+        const transaction = row.original;
+        const isApproved = transaction.status === "APPROVED";
+        const canEdit = !isApproved || isAdmin;
+        const firstReceipt = transaction.receipts?.[0];
+
+        return (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreVerticalIcon className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="md:min-w-60 min-w-40">
+                <DropdownMenuItem
+                  onClick={() => handleActionClick(transaction, "view")}
+                >
+                  <EyeIcon className="mr-2 size-4" />
+                  View
+                </DropdownMenuItem>
+                {canEdit ? (
+                  <DropdownMenuItem
+                    onClick={() => handleActionClick(transaction, "edit")}
+                  >
+                    <PencilIcon className="mr-2 size-4" />
+                    Edit
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem disabled>
+                    <LockIcon className="mr-2 size-4" />
+                    Locked
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onClick={() => handleActionClick(transaction, "delete")}
+                >
+                  <Trash2Icon className="mr-2 size-4" />
+                  Delete
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => handleActionClick(transaction, "receipt")}
+                >
+                  <UploadIcon className="mr-2 size-4" />
+                  Upload Receipt
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={!firstReceipt}
+                  onClick={() => handleDownloadReceipt(transaction)}
+                >
+                  <DownloadIcon className="mr-2 size-4" />
+                  Download Receipt
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleSendApproval(transaction)}
+                >
+                  {transaction.status === "PENDING" ? (
+                    <CheckCircleIcon className="mr-2 size-4" />
+                  ) : (
+                    <SendIcon className="mr-2 size-4" />
+                  )}
+                  Send for Approval
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDuplicate(transaction)}>
+                  <CopyIcon className="mr-2 size-4" />
+                  Duplicate
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -76,157 +234,7 @@ export function ExpenseTable({
       </CardHeader>
       <CardContent>
         {filteredTransactions.length ? (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Paid To</TableHead>
-                  <TableHead>Paid By</TableHead>
-                  <TableHead>Payment Method</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Receipt</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTransactions.map((transaction) => {
-                  const isApproved = transaction.status === "APPROVED";
-                  const canEdit = !isApproved || isAdmin;
-                  const firstReceipt = transaction.receipts?.[0];
-
-                  return (
-                    <TableRow key={transaction.id}>
-                      <TableCell className="whitespace-nowrap">
-                        {formatDate(transaction.date)}
-                      </TableCell>
-                      <TableCell className="max-w-[220px] truncate font-medium">
-                        {transaction.description || "Expense Transaction"}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {transaction.category.name}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap font-mono">
-                        {formatMinorUnits(
-                          transaction.amountMinorUnits,
-                          currency,
-                        )}
-                      </TableCell>
-                      <TableCell className="max-w-[160px] truncate">
-                        {transaction.receivedFrom || "Not recorded"}
-                      </TableCell>
-                      <TableCell className="max-w-[160px] truncate">
-                        {transaction.receivedBy || "Not recorded"}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {formatPaymentMethod(transaction.paymentMethod)}
-                      </TableCell>
-                      <TableCell>
-                        <ExpenseStatusBadge status={transaction.status} />
-                      </TableCell>
-                      <TableCell>
-                        {firstReceipt ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDownloadReceipt(transaction)}
-                            className="max-w-[150px]"
-                          >
-                            <ReceiptTextIcon
-                              aria-hidden="true"
-                              data-icon="inline-start"
-                            />
-                            <span className="truncate">
-                              {firstReceipt.fileName}
-                            </span>
-                          </Button>
-                        ) : (
-                          <Badge variant="outline">No receipt</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVerticalIcon className="size-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleActionClick(transaction, "view")
-                              }
-                            >
-                              <EyeIcon className="mr-2 size-4" />
-                              View
-                            </DropdownMenuItem>
-                            {canEdit ? (
-                              <DropdownMenuItem
-                                onClick={() =>
-                                  handleActionClick(transaction, "edit")
-                                }
-                              >
-                                <PencilIcon className="mr-2 size-4" />
-                                Edit
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem disabled>
-                                <LockIcon className="mr-2 size-4" />
-                                Locked
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleActionClick(transaction, "delete")
-                              }
-                            >
-                              <Trash2Icon className="mr-2 size-4" />
-                              Delete
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleActionClick(transaction, "receipt")
-                              }
-                            >
-                              <UploadIcon className="mr-2 size-4" />
-                              Upload Receipt
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              disabled={!firstReceipt}
-                              onClick={() => handleDownloadReceipt(transaction)}
-                            >
-                              <DownloadIcon className="mr-2 size-4" />
-                              Download Receipt
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleSendApproval(transaction)}
-                            >
-                              {transaction.status === "PENDING" ? (
-                                <CheckCircleIcon className="mr-2 size-4" />
-                              ) : (
-                                <SendIcon className="mr-2 size-4" />
-                              )}
-                              Send for Approval
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDuplicate(transaction)}
-                            >
-                              <CopyIcon className="mr-2 size-4" />
-                              Duplicate
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+          <CommonDataTable columns={columns} data={filteredTransactions} />
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
