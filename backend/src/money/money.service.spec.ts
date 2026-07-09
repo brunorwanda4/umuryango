@@ -4,6 +4,8 @@ import {
   ContributionCycleStatus,
   ContributionPaymentStatus,
   FamilyAuthority,
+  TransactionStatus,
+  TransactionType,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MoneyService } from './money.service';
@@ -33,6 +35,28 @@ const makePayment = ({
   createdAt: new Date(),
   member: { user: { fullName: 'Claudine Mutesi' } },
   plan: { name: 'Monthly dues' },
+});
+
+const makeTransaction = ({
+  id,
+  amount,
+  type,
+  status = TransactionStatus.PENDING,
+}: {
+  id: string;
+  amount: bigint;
+  type: TransactionType;
+  status?: TransactionStatus;
+}) => ({
+  id,
+  amountMinorUnits: amount,
+  type,
+  status,
+  date: new Date(),
+  createdAt: new Date(),
+  description: null,
+  category: { name: type === TransactionType.INCOME ? 'Salary' : 'Food' },
+  createdBy: { fullName: 'Claudine Mutesi' },
 });
 
 describe('MoneyService', () => {
@@ -151,5 +175,45 @@ describe('MoneyService', () => {
     };
 
     expect(result.period.label).toBe('This month');
+  });
+
+  it('includes pending saved transactions in dashboard totals', async () => {
+    const income = makeTransaction({
+      id: 'tx-income',
+      amount: 2000n,
+      type: TransactionType.INCOME,
+    });
+    const expense = makeTransaction({
+      id: 'tx-expense',
+      amount: 500n,
+      type: TransactionType.EXPENSE,
+    });
+
+    prisma.familyMember.findFirst.mockResolvedValue(membership);
+    prisma.familyContributionPayment.findMany.mockResolvedValue([]);
+    prisma.familyContributionCycle.findMany.mockResolvedValue([]);
+    prisma.familyContributionPayment.count.mockResolvedValue(0);
+    prisma.familyTransaction.findMany
+      .mockResolvedValueOnce([income])
+      .mockResolvedValueOnce([expense])
+      .mockResolvedValueOnce([income, expense])
+      .mockResolvedValueOnce([income, expense]);
+    prisma.familyTransaction.count.mockResolvedValue(2);
+    prisma.familyBudget.findMany.mockResolvedValue([]);
+
+    const result = (await service.getOverview('u-1', 'fam-1')) as {
+      sourceRecordCount: number;
+      totals: Record<string, unknown>;
+      approvals: unknown[];
+      records: unknown[];
+    };
+
+    expect(result.totals.incomeMinorUnits).toBe('2000');
+    expect(result.totals.expenseMinorUnits).toBe('500');
+    expect(result.totals.cashBalanceMinorUnits).toBe('1500');
+    expect(result.totals.pendingApprovalCount).toBe(2);
+    expect(result.sourceRecordCount).toBe(2);
+    expect(result.approvals).toHaveLength(2);
+    expect(result.records).toHaveLength(2);
   });
 });

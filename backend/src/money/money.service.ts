@@ -28,11 +28,18 @@ const PERIOD_LABELS: Record<MoneyPeriod, string> = {
   year: 'This year',
 };
 
+const COUNTED_TRANSACTION_STATUSES = [
+  TransactionStatus.APPROVED,
+  TransactionStatus.PENDING,
+];
+
 /**
  * Aggregates the family money overview from persisted records only.
  *
  * Income, expenses, contribution payments, cycles, and budgets are persisted
- * today, so this endpoint derives totals and charts from those source records.
+ * today, so this endpoint derives totals and charts from saved, non-reversed
+ * source records. Pending transactions remain visible in approvals, but still
+ * count in the family dashboard because they are recorded money movements.
  * Savings and debt ledgers are not modelled here yet, so their totals remain
  * `null`. Never invent totals for ledgers that do not exist.
  */
@@ -93,7 +100,7 @@ export class MoneyService {
         where: {
           familyId,
           type: TransactionType.INCOME,
-          status: TransactionStatus.APPROVED,
+          status: { in: COUNTED_TRANSACTION_STATUSES },
           date: { gte: range.start, lt: range.end },
           reversedAt: null,
         },
@@ -102,7 +109,7 @@ export class MoneyService {
         where: {
           familyId,
           type: TransactionType.EXPENSE,
-          status: TransactionStatus.APPROVED,
+          status: { in: COUNTED_TRANSACTION_STATUSES },
           date: { gte: range.start, lt: range.end },
           reversedAt: null,
         },
@@ -133,6 +140,7 @@ export class MoneyService {
           familyId,
           date: { gte: range.start, lt: range.end },
           reversedAt: null,
+          status: { in: COUNTED_TRANSACTION_STATUSES },
         },
         include: {
           category: { select: { name: true } },

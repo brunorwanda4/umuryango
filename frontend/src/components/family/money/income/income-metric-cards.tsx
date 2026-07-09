@@ -134,9 +134,7 @@ export function IncomeMetricCards({
           <div className="text-xl font-bold truncate">
             {formatMinorUnits(summary.totalRecorded, currency)}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Approved and pending records
-          </p>
+
         </CardContent>
       </Card>
 
@@ -151,9 +149,7 @@ export function IncomeMetricCards({
           <div className="text-xl font-bold truncate">
             {formatMinorUnits(summary.monthRecorded, currency)}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Recorded this month
-          </p>
+
         </CardContent>
       </Card>
 
@@ -168,9 +164,6 @@ export function IncomeMetricCards({
           <div className="text-xl font-bold truncate">
             {formatMinorUnits(summary.todayRecorded, currency)}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Recorded today
-          </p>
         </CardContent>
       </Card>
 
@@ -185,9 +178,6 @@ export function IncomeMetricCards({
           <div className="text-xl font-bold truncate">
             {formatMinorUnits(summary.pendingAmount, currency)}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Requires validation
-          </p>
         </CardContent>
       </Card>
 
@@ -202,9 +192,6 @@ export function IncomeMetricCards({
           <div className="text-xl font-bold truncate">
             {formatMinorUnits(summary.approvedAmount, currency)}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Verified & completed
-          </p>
         </CardContent>
       </Card>
 
@@ -219,9 +206,6 @@ export function IncomeMetricCards({
           <div className="text-xl font-bold truncate">
             {formatMinorUnits(summary.rentBalance, currency)}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Remaining monthly rent
-          </p>
         </CardContent>
       </Card>
 
@@ -236,9 +220,6 @@ export function IncomeMetricCards({
           <div className="text-xl font-bold truncate">
             {summary.overdueRentCount}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Monthly records past due
-          </p>
         </CardContent>
       </Card>
 
@@ -253,9 +234,6 @@ export function IncomeMetricCards({
           <div className="text-xl font-bold truncate">
             {summary.recordCount}
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Active records logged
-          </p>
         </CardContent>
       </Card>
     </section>

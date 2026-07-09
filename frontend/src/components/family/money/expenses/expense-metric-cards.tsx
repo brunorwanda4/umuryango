@@ -76,43 +76,36 @@ export function ExpenseMetricCards({
     {
       title: "Total Expenses",
       value: formatMinorUnits(summary.totalExpenses, currency),
-      helper: "Approved money out",
       icon: WalletCardsIcon,
     },
     {
       title: "Expenses This Month",
       value: formatMinorUnits(summary.monthExpenses, currency),
-      helper: "Approved in current month",
       icon: TrendingDownIcon,
     },
     {
       title: "Expenses Today",
       value: formatMinorUnits(summary.todayExpenses, currency),
-      helper: "Approved today",
       icon: ReceiptTextIcon,
     },
     {
       title: "Pending Approval",
       value: formatMinorUnits(summary.pendingApproval, currency),
-      helper: "Waiting for review",
       icon: AlertCircleIcon,
     },
     {
       title: "Approved Expenses",
       value: formatMinorUnits(summary.approvedExpenses, currency),
-      helper: "Verified records",
       icon: CheckCircleIcon,
     },
     {
       title: "Expense Records",
       value: summary.recordCount.toString(),
-      helper: "Total rows logged",
       icon: FileTextIcon,
     },
     {
       title: "Largest This Month",
       value: formatMinorUnits(summary.largestThisMonth, currency),
-      helper: "Biggest approved spend",
       icon: TrendingDownIcon,
     },
   ];
@@ -134,10 +127,8 @@ export function ExpenseMetricCards({
               <Icon className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="truncate font-bold text-lg">{card.value}</div>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                {card.helper}
-              </p>
+              <div  className="text-xl font-bold truncate">{card.value}</div>
+
             </CardContent>
           </Card>
         );
