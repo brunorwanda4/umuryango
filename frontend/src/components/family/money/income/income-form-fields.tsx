@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import apiRequest from "@/service/api";
 import type { FamilyContact } from "../../contacts/types-and-schemas";
+import { formatMinorUnits } from "../utils";
 import type { Category, TransactionFormValues } from "./types-and-schemas";
 
 const CREATE_INCOME_CATEGORY_VALUE = "__create_income_category__";
@@ -40,6 +41,8 @@ type IncomeFormFieldsProps = {
   setValue: UseFormSetValue<TransactionFormValues>;
   onCategoriesChanged?: (category?: Category) => void | Promise<void>;
   onContactsChanged?: (contact?: FamilyContact) => void | Promise<void>;
+  isPaymentMode?: boolean;
+  paymentAmountMinorUnits?: string | null;
   /** Show the mock receipt/proof upload field. Only needed on the create dialog. */
   showReceiptUpload?: boolean;
 };
@@ -84,6 +87,8 @@ export function IncomeFormFields({
   setValue,
   onCategoriesChanged,
   onContactsChanged,
+  isPaymentMode = false,
+  paymentAmountMinorUnits,
   showReceiptUpload = false,
 }: IncomeFormFieldsProps) {
   const [openCreateCategory, setOpenCreateCategory] = useState(false);
@@ -254,8 +259,10 @@ export function IncomeFormFields({
       <CommonFormField
         control={control}
         name="title"
-        label="Income title"
-        placeholder="e.g. June Salary"
+        label={isPaymentMode ? "Payment title" : "Income title"}
+        placeholder={
+          isPaymentMode ? "e.g. July house rent" : "e.g. June Salary"
+        }
         required
       />
 
@@ -264,13 +271,23 @@ export function IncomeFormFields({
           control={control}
           name="amountMinorUnits"
           label={
-            incomeRecurrence === "MONTHLY"
-              ? `Amount paid (${family.defaultCurrency})`
-              : `Amount (${family.defaultCurrency})`
+            isPaymentMode
+              ? `Amount paid now (${family.defaultCurrency})`
+              : incomeRecurrence === "MONTHLY"
+                ? `Amount paid (${family.defaultCurrency})`
+                : `Amount (${family.defaultCurrency})`
           }
           fieldType="money"
           currency={family.defaultCurrency}
-          placeholder="e.g. 500,000"
+          placeholder={isPaymentMode ? "e.g. 200,000" : "e.g. 500,000"}
+          description={
+            isPaymentMode && paymentAmountMinorUnits
+              ? `Default is the amount left: ${formatMinorUnits(
+                  paymentAmountMinorUnits,
+                  family.defaultCurrency,
+                )}. Change it if the payer paid a different amount.`
+              : undefined
+          }
           required
         />
 
@@ -301,9 +318,9 @@ export function IncomeFormFields({
           <div className="mb-4">
             <h3 className="text-sm font-medium">Monthly rent tracking</h3>
             <p className="text-xs text-muted-foreground">
-              Track what was expected, what was paid, what remains, and when it
-              was due. New records default to a 2-year payment period starting
-              today.
+              {isPaymentMode
+                ? "This payment is connected to the monthly income. Keep the expected amount and due date for the month being paid."
+                : "Track what was expected, what was paid, what remains, and when it was due. New records default to a 2-year payment period starting today."}
             </p>
           </div>
 

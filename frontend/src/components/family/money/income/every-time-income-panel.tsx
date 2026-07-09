@@ -27,7 +27,7 @@ type EveryTimeIncomePanelProps = {
     tx: IncomeTransaction,
     action: "view" | "edit" | "delete" | "receipt",
   ) => void;
-  onAddPayment: (tx: IncomeTransaction) => void;
+  onAddPayment: (tx: IncomeTransaction, amountDueMinorUnits: string) => void;
   handleSendApproval: (tx: IncomeTransaction) => void;
   setOpenCreate: (open: boolean) => void;
 };
@@ -44,6 +44,14 @@ type SourceSummary = {
   nextDueDate: string | null;
   statuses: Set<IncomeTransaction["paymentStatus"]>;
   managedTransaction: IncomeTransaction;
+  periods: Map<
+    string,
+    {
+      expectedMinorUnits: bigint;
+      paidMinorUnits: bigint;
+      dueDate: string | null;
+    }
+  >;
 };
 
 function toBigInt(value: string | null | undefined) {
@@ -77,6 +85,15 @@ function getSourceTitle(transaction: IncomeTransaction) {
     transaction.description ||
     transaction.category.name ||
     "Recurring income"
+  );
+}
+
+function getPeriodKey(transaction: IncomeTransaction) {
+  return (
+    transaction.dueDate ||
+    transaction.periodStart ||
+    transaction.date ||
+    transaction.id
   );
 }
 
@@ -122,36 +139,37 @@ export function EveryTimeIncomePanel({
   setOpenCreate,
 }: EveryTimeIncomePanelProps) {
   const summary = useMemo(() => {
-    let expectedMinorUnits = BigInt(0);
-    let paidMinorUnits = BigInt(0);
-    let leftMinorUnits = BigInt(0);
-    let overdueCount = 0;
     const sources = new Map<string, SourceSummary>();
 
     for (const transaction of transactions) {
       const expected = toBigInt(transaction.expectedAmountMinorUnits);
       const paid = toBigInt(transaction.amountMinorUnits);
-      const left = getLeftMinorUnits(transaction);
-
-      expectedMinorUnits += expected;
-      paidMinorUnits += paid;
-      leftMinorUnits += left;
-
-      if (left > BigInt(0) && isBeforeToday(transaction.dueDate)) {
-        overdueCount += 1;
-      }
-
       const key = getSourceKey(transaction) || transaction.id;
+      const periodKey = getPeriodKey(transaction);
       const existing = sources.get(key);
 
       if (existing) {
         existing.recordCount += 1;
-        existing.expectedMinorUnits += expected;
         existing.paidMinorUnits += paid;
-        existing.leftMinorUnits += left;
         existing.statuses.add(transaction.paymentStatus);
         if (shouldManageCandidate(existing.managedTransaction, transaction)) {
           existing.managedTransaction = transaction;
+        }
+
+        const period = existing.periods.get(periodKey);
+        if (period) {
+          period.expectedMinorUnits =
+            expected > period.expectedMinorUnits
+              ? expected
+              : period.expectedMinorUnits;
+          period.paidMinorUnits += paid;
+          period.dueDate = period.dueDate || transaction.dueDate;
+        } else {
+          existing.periods.set(periodKey, {
+            expectedMinorUnits: expected,
+            paidMinorUnits: paid,
+            dueDate: transaction.dueDate,
+          });
         }
 
         if (
@@ -170,12 +188,48 @@ export function EveryTimeIncomePanel({
           recordCount: 1,
           expectedMinorUnits: expected,
           paidMinorUnits: paid,
-          leftMinorUnits: left,
+          leftMinorUnits: BigInt(0),
           nextDueDate: transaction.dueDate,
           statuses: new Set([transaction.paymentStatus]),
           managedTransaction: transaction,
+          periods: new Map([
+            [
+              periodKey,
+              {
+                expectedMinorUnits: expected,
+                paidMinorUnits: paid,
+                dueDate: transaction.dueDate,
+              },
+            ],
+          ]),
         });
       }
+    }
+
+    let expectedMinorUnits = BigInt(0);
+    let paidMinorUnits = BigInt(0);
+    let leftMinorUnits = BigInt(0);
+    let overdueCount = 0;
+
+    for (const source of sources.values()) {
+      source.expectedMinorUnits = BigInt(0);
+      source.leftMinorUnits = BigInt(0);
+
+      for (const period of source.periods.values()) {
+        const periodLeft = period.expectedMinorUnits - period.paidMinorUnits;
+        const left = periodLeft > BigInt(0) ? periodLeft : BigInt(0);
+
+        source.expectedMinorUnits += period.expectedMinorUnits;
+        source.leftMinorUnits += left;
+
+        if (left > BigInt(0) && isBeforeToday(period.dueDate)) {
+          overdueCount += 1;
+        }
+      }
+
+      expectedMinorUnits += source.expectedMinorUnits;
+      paidMinorUnits += source.paidMinorUnits;
+      leftMinorUnits += source.leftMinorUnits;
     }
 
     return {
@@ -383,7 +437,10 @@ export function EveryTimeIncomePanel({
                       type="button"
                       size="sm"
                       onClick={() => {
-                        onAddPayment(source.managedTransaction);
+                        onAddPayment(
+                          source.managedTransaction,
+                          source.leftMinorUnits.toString(),
+                        );
                       }}
                     >
                       <PlusIcon aria-hidden="true" data-icon="inline-start" />

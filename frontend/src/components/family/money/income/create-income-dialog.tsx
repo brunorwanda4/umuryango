@@ -35,7 +35,17 @@ function addYears(date: Date, years: number) {
   return nextDate;
 }
 
-function getPaymentAmount(source: IncomeTransaction) {
+function getPaymentAmount(
+  source: IncomeTransaction,
+  amountDueMinorUnits?: string | null,
+) {
+  if (amountDueMinorUnits) {
+    const amountDue = BigInt(amountDueMinorUnits);
+    if (amountDue > BigInt(0)) {
+      return Number(amountDue);
+    }
+  }
+
   if (!source.expectedAmountMinorUnits) {
     return Number(source.amountMinorUnits || 0);
   }
@@ -50,6 +60,7 @@ function getPaymentAmount(source: IncomeTransaction) {
 function getDefaultValues(
   receivedBy: string,
   paymentSource?: IncomeTransaction | null,
+  paymentAmountMinorUnits?: string | null,
 ): TransactionFormValues {
   const today = new Date();
   const todayInput = formatDateInput(today);
@@ -57,7 +68,10 @@ function getDefaultValues(
   if (paymentSource) {
     return {
       title: paymentSource.description || paymentSource.category.name,
-      amountMinorUnits: getPaymentAmount(paymentSource),
+      amountMinorUnits: getPaymentAmount(
+        paymentSource,
+        paymentAmountMinorUnits,
+      ),
       categoryId: paymentSource.categoryId,
       date: todayInput,
       paymentMethod: paymentSource.paymentMethod || "CASH",
@@ -113,6 +127,7 @@ export function CreateIncomeDialog({
   contacts,
   currentUser,
   paymentSource,
+  paymentAmountMinorUnits,
   onCategoriesChanged,
   onContactsChanged,
   onSuccess,
@@ -124,6 +139,7 @@ export function CreateIncomeDialog({
   contacts: FamilyContact[];
   currentUser: CurrentUser | null;
   paymentSource?: IncomeTransaction | null;
+  paymentAmountMinorUnits?: string | null;
   onCategoriesChanged: (category?: Category) => void | Promise<void>;
   onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
   onSuccess: () => void;
@@ -140,7 +156,11 @@ export function CreateIncomeDialog({
   >({
     schema: transactionSchema,
     formOptions: {
-      defaultValues: getDefaultValues(defaultReceivedBy, paymentSource),
+      defaultValues: getDefaultValues(
+        defaultReceivedBy,
+        paymentSource,
+        paymentAmountMinorUnits,
+      ),
     },
     transform: (values) => ({
       categoryId: values.categoryId,
@@ -205,8 +225,14 @@ export function CreateIncomeDialog({
   useEffect(() => {
     if (!open) return;
 
-    form.reset(getDefaultValues(defaultReceivedBy, paymentSource));
-  }, [defaultReceivedBy, form, open, paymentSource]);
+    form.reset(
+      getDefaultValues(
+        defaultReceivedBy,
+        paymentSource,
+        paymentAmountMinorUnits,
+      ),
+    );
+  }, [defaultReceivedBy, form, open, paymentAmountMinorUnits, paymentSource]);
 
   useEffect(() => {
     if (!open || !defaultReceivedBy || form.getValues("receivedBy")) return;
@@ -256,6 +282,8 @@ export function CreateIncomeDialog({
             setValue={form.setValue}
             onCategoriesChanged={onCategoriesChanged}
             onContactsChanged={onContactsChanged}
+            isPaymentMode={isPaymentMode}
+            paymentAmountMinorUnits={paymentAmountMinorUnits}
             showReceiptUpload
           />
         </form>

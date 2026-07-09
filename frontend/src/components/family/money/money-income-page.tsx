@@ -76,6 +76,9 @@ export function MoneyIncomePage({
   const [selectedTx, setSelectedTx] = useState<IncomeTransaction | null>(null);
   const [paymentSourceTx, setPaymentSourceTx] =
     useState<IncomeTransaction | null>(null);
+  const [paymentAmountMinorUnits, setPaymentAmountMinorUnits] = useState<
+    string | null
+  >(null);
 
   // Filters state
   const [search, setSearch] = useState("");
@@ -360,6 +363,7 @@ export function MoneyIncomePage({
   const openGenericCreate = useCallback((open: boolean) => {
     if (open) {
       setPaymentSourceTx(null);
+      setPaymentAmountMinorUnits(null);
     }
     setOpenCreate(open);
   }, []);
@@ -368,13 +372,18 @@ export function MoneyIncomePage({
     setOpenCreate(open);
     if (!open) {
       setPaymentSourceTx(null);
+      setPaymentAmountMinorUnits(null);
     }
   }, []);
 
-  const handleAddPayment = useCallback((tx: IncomeTransaction) => {
-    setPaymentSourceTx(tx);
-    setOpenCreate(true);
-  }, []);
+  const handleAddPayment = useCallback(
+    (tx: IncomeTransaction, amountDueMinorUnits: string) => {
+      setPaymentAmountMinorUnits(amountDueMinorUnits);
+      setPaymentSourceTx(tx);
+      setOpenCreate(true);
+    },
+    [],
+  );
 
   const handleSendApproval = async (tx: IncomeTransaction) => {
     if (!family) return;
@@ -521,6 +530,7 @@ export function MoneyIncomePage({
         contacts={contacts}
         currentUser={initialData?.currentUser ?? null}
         paymentSource={paymentSourceTx}
+        paymentAmountMinorUnits={paymentAmountMinorUnits}
         onCategoriesChanged={refreshCategories}
         onContactsChanged={refreshContacts}
         onSuccess={refreshTransactions}
