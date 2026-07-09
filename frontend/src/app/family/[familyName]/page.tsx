@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FamilyDashboard } from "@/components/family/dashboard/family-dashboard";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import type { MoneyOverview } from "@/components/family/money/types";
+import { normalizeMoneyOverview } from "@/components/family/money/utils";
 import {
   Empty,
   EmptyDescription,
@@ -39,7 +40,7 @@ async function getDashboardPageData(familyName: string) {
 
   return {
     family,
-    money: moneyResponse.ok ? (moneyResponse.data ?? null) : null,
+    money: moneyResponse.ok ? normalizeMoneyOverview(moneyResponse.data) : null,
     moneyMessage: moneyResponse.ok
       ? undefined
       : (moneyResponse.message ??

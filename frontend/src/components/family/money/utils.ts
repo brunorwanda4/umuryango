@@ -34,20 +34,184 @@ export const summarySkeletonKeys = [
   "debts",
 ];
 
-export function normalizeMoneyOverview(
-  money?: MoneyOverview,
-): MoneyOverview | null {
-  if (!money) {
+type MoneyAmountTotalKey = Exclude<
+  keyof NonNullable<MoneyOverview["totals"]>,
+  "pendingApprovalCount" | "overdueCount"
+>;
+
+const moneyTotalAliases = {
+  cashBalanceMinorUnits: [
+    "cashBalanceMinorUnits",
+    "balanceMinorUnits",
+    "cashBalance",
+    "balance",
+  ],
+  incomeMinorUnits: [
+    "incomeMinorUnits",
+    "totalIncomeMinorUnits",
+    "income",
+    "totalIncome",
+  ],
+  expenseMinorUnits: [
+    "expenseMinorUnits",
+    "expensesMinorUnits",
+    "totalExpenseMinorUnits",
+    "totalExpensesMinorUnits",
+    "expense",
+    "expenses",
+    "totalExpense",
+    "totalExpenses",
+  ],
+  contributionsPaidMinorUnits: [
+    "contributionsPaidMinorUnits",
+    "contributionPaidMinorUnits",
+    "totalContributionsPaidMinorUnits",
+    "contributionsPaid",
+    "totalContributionsPaid",
+  ],
+  savingsMinorUnits: [
+    "savingsMinorUnits",
+    "totalSavingsMinorUnits",
+    "savings",
+    "totalSavings",
+  ],
+  debtOutstandingMinorUnits: [
+    "debtOutstandingMinorUnits",
+    "debtsMinorUnits",
+    "totalDebtOutstandingMinorUnits",
+    "debtOutstanding",
+    "debts",
+    "totalDebts",
+  ],
+} satisfies Record<MoneyAmountTotalKey, string[]>;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function hasMoneyOverviewShape(value: Record<string, unknown>) {
+  return (
+    "totals" in value ||
+    "currency" in value ||
+    "cashFlow" in value ||
+    "allocation" in value ||
+    "records" in value
+  );
+}
+
+function unwrapMoneyOverview(value: unknown) {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (isRecord(value.data) && hasMoneyOverviewShape(value.data)) {
+    return value.data;
+  }
+
+  return value;
+}
+
+function readMinorValue(
+  source: Record<string, unknown> | undefined,
+  aliases: string[],
+) {
+  if (!source) {
+    return undefined;
+  }
+
+  for (const key of aliases) {
+    const value = source[key];
+
+    if (
+      value === null ||
+      typeof value === "string" ||
+      (typeof value === "number" && Number.isFinite(value))
+    ) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
+function readNumberValue(
+  source: Record<string, unknown> | undefined,
+  aliases: string[],
+) {
+  if (!source) {
+    return undefined;
+  }
+
+  for (const key of aliases) {
+    const value = source[key];
+
+    if (
+      value === null ||
+      (typeof value === "number" && Number.isFinite(value))
+    ) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
+function normalizeMoneyTotals(
+  money: Record<string, unknown>,
+): MoneyOverview["totals"] {
+  const totals = isRecord(money.totals) ? money.totals : undefined;
+  const fallbackSource = money;
+  const normalizedTotals: MoneyOverview["totals"] = {
+    ...(totals as MoneyOverview["totals"] | undefined),
+  };
+
+  for (const key of Object.keys(moneyTotalAliases) as Array<
+    keyof typeof moneyTotalAliases
+  >) {
+    const value =
+      readMinorValue(totals, moneyTotalAliases[key]) ??
+      readMinorValue(fallbackSource, moneyTotalAliases[key]);
+
+    if (value !== undefined) {
+      normalizedTotals[key] = value;
+    }
+  }
+
+  const pendingApprovalCount =
+    readNumberValue(totals, ["pendingApprovalCount"]) ??
+    readNumberValue(fallbackSource, ["pendingApprovalCount"]);
+  const overdueCount =
+    readNumberValue(totals, ["overdueCount"]) ??
+    readNumberValue(fallbackSource, ["overdueCount"]);
+
+  if (pendingApprovalCount !== undefined) {
+    normalizedTotals.pendingApprovalCount = pendingApprovalCount;
+  }
+
+  if (overdueCount !== undefined) {
+    normalizedTotals.overdueCount = overdueCount;
+  }
+
+  return Object.values(normalizedTotals).some((value) => value !== undefined)
+    ? normalizedTotals
+    : undefined;
+}
+
+export function normalizeMoneyOverview(money?: unknown): MoneyOverview | null {
+  const overview = unwrapMoneyOverview(money);
+
+  if (!overview) {
     return null;
   }
 
   return {
-    ...money,
-    allocation: Array.isArray(money.allocation) ? money.allocation : [],
-    approvals: Array.isArray(money.approvals) ? money.approvals : [],
-    budgets: Array.isArray(money.budgets) ? money.budgets : [],
-    cashFlow: Array.isArray(money.cashFlow) ? money.cashFlow : [],
-    records: Array.isArray(money.records) ? money.records : [],
+    ...(overview as MoneyOverview),
+    totals: normalizeMoneyTotals(overview),
+    allocation: Array.isArray(overview.allocation) ? overview.allocation : [],
+    approvals: Array.isArray(overview.approvals) ? overview.approvals : [],
+    budgets: Array.isArray(overview.budgets) ? overview.budgets : [],
+    cashFlow: Array.isArray(overview.cashFlow) ? overview.cashFlow : [],
+    records: Array.isArray(overview.records) ? overview.records : [],
   };
 }
 
