@@ -9,9 +9,9 @@ import {
 import { useMemo } from "react";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { formatMinorUnits } from "../utils";
 import type { ExpenseTransaction } from "./types-and-schemas";
@@ -132,16 +132,18 @@ export function ExpenseMetricCards({
         const Icon = card.icon;
 
         return (
-          <Card key={card.title} className="overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-              <CardDescription className="font-medium text-[11px] uppercase tracking-wider">
-                {card.title}
-              </CardDescription>
-              <Icon className="size-4 text-muted-foreground" />
+          <Card key={card.title}>
+            <CardHeader className="flex sm:flex-row flex-row-reverse items-center justify-end sm:justify-between gap-3">
+              <div className="min-w-0 max-sm:flex-row max-sm:flex max-sm:items-center max-sm:gap-4">
+                <CardDescription className="max-sm:font-semibold max-sm:text-lg max-sm:flex">
+                  <span>{card.title}</span> <span className="block sm:hidden">:</span>
+                </CardDescription>
+                <CardTitle className="mt-1 truncate text-xl sm:text-2xl font-bold">
+                  {card.value}
+                </CardTitle>
+              </div>
+              <Icon className="size-5 shrink-0 text-muted-foreground sm:block hidden" />
             </CardHeader>
-            <CardContent>
-              <div className="truncate text-xl font-bold">{card.value}</div>
-            </CardContent>
           </Card>
         );
       })}
