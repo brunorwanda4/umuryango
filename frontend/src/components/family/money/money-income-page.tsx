@@ -545,6 +545,7 @@ export function MoneyIncomePage({
         contacts={contacts}
         paymentSource={paymentSourceTx}
         paymentAmountMinorUnits={paymentAmountMinorUnits}
+        onContactsChanged={refreshContacts}
         onSuccess={refreshTransactions}
       />
 

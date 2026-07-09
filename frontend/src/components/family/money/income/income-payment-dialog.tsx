@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,15 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import type { CurrentUser } from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
@@ -19,6 +28,8 @@ import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import { formatDate, formatMinorUnits } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
+
+const CREATE_PAYER_CONTACT_VALUE = "__create_payer_contact__";
 
 const incomePaymentSchema = z.object({
 	amountMinorUnits: z.coerce
@@ -65,6 +76,7 @@ export function IncomePaymentDialog({
 	contacts,
 	paymentSource,
 	paymentAmountMinorUnits,
+	onContactsChanged,
 	onSuccess,
 }: {
 	open: boolean;
@@ -74,8 +86,14 @@ export function IncomePaymentDialog({
 	contacts: FamilyContact[];
 	paymentSource: IncomeTransaction | null;
 	paymentAmountMinorUnits: string | null;
+	onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
 	onSuccess: () => void;
 }) {
+	const [openCreatePayer, setOpenCreatePayer] = useState(false);
+	const [payerName, setPayerName] = useState("");
+	const [payerPhone, setPayerPhone] = useState("");
+	const [isCreatingPayer, setIsCreatingPayer] = useState(false);
+	const [payerCreateError, setPayerCreateError] = useState<string | null>(null);
 	const defaultReceivedBy =
 		family.members.find((member) => member.userId === currentUser?.id)
 			?.fullName ??
@@ -141,6 +159,54 @@ export function IncomePaymentDialog({
 			onSuccess();
 		},
 	});
+
+	const handleCreatePayer = async () => {
+		const fullName = payerName.trim();
+		if (!fullName) {
+			setPayerCreateError("Payer name is required.");
+			return;
+		}
+
+		try {
+			setIsCreatingPayer(true);
+			setPayerCreateError(null);
+
+			const response = await apiRequest<unknown, FamilyContact>(
+				"post",
+				`/families/${encodeURIComponent(family.id)}/contacts`,
+				{
+					fullName,
+					contactType: "OTHER",
+					phoneNumber: payerPhone.trim() || null,
+					relationshipToFamily: "Income payer",
+					notes: "Created from recurring income payment payer field.",
+					status: "ACTIVE",
+					isEmergencyContact: false,
+					isLoanContact: false,
+				},
+			);
+
+			if (!response.ok || !response.data) {
+				setPayerCreateError(
+					response.message ?? "Could not create payer contact.",
+				);
+				return;
+			}
+
+			await onContactsChanged(response.data);
+			form.setValue("receivedFromContactId", response.data.id, {
+				shouldDirty: true,
+				shouldValidate: true,
+			});
+			setPayerName("");
+			setPayerPhone("");
+			setOpenCreatePayer(false);
+		} catch {
+			setPayerCreateError("Could not create payer contact.");
+		} finally {
+			setIsCreatingPayer(false);
+		}
+	};
 
 	useEffect(() => {
 		if (!open) return;
@@ -289,15 +355,140 @@ export function IncomePaymentDialog({
 						control={form.control}
 						name="receivedFromContactId"
 						label="Person who paid"
-						fieldType="select"
-						selectOptions={payerOptions}
+						fieldType="custom"
 						placeholder={
 							activeContacts.length === 0
-								? "No active contacts"
+								? "Create payer contact"
 								: "Select payer contact"
 						}
 						description="Defaults to the last payer saved on this recurring income."
-						disabled={activeContacts.length === 0}
+						render={({ field, id, invalid, disabled }) => (
+							<>
+								<Select
+									value={field.value?.toString() ?? ""}
+									onValueChange={(value) => {
+										if (value === CREATE_PAYER_CONTACT_VALUE) {
+											setOpenCreatePayer(true);
+											return;
+										}
+
+										field.onChange(value);
+									}}
+									disabled={disabled}
+									name={field.name}
+								>
+									<SelectTrigger
+										id={id}
+										className="w-full"
+										aria-invalid={invalid}
+										onBlur={field.onBlur}
+										ref={field.ref}
+									>
+										<SelectValue
+											placeholder={
+												activeContacts.length === 0
+													? "Create payer contact"
+													: "Select payer contact"
+											}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										<SelectGroup>
+											{payerOptions.map((option) => (
+												<SelectItem key={option.value} value={option.value}>
+													{option.label}
+												</SelectItem>
+											))}
+											<SelectItem value={CREATE_PAYER_CONTACT_VALUE}>
+												{activeContacts.length === 0
+													? "Create payer contact"
+													: "Create another payer contact"}
+											</SelectItem>
+										</SelectGroup>
+									</SelectContent>
+								</Select>
+
+								<Dialog
+									open={openCreatePayer}
+									onOpenChange={(isOpen) => {
+										setOpenCreatePayer(isOpen);
+										if (!isOpen) setPayerCreateError(null);
+									}}
+								>
+									<DialogContent className="sm:max-w-md">
+										<DialogHeader>
+											<DialogTitle>Create payer contact</DialogTitle>
+											<DialogDescription>
+												Save the person who paid, then use them on this payment.
+											</DialogDescription>
+										</DialogHeader>
+
+										<div className="flex flex-col gap-4 py-4">
+											{payerCreateError ? (
+												<div className="font-medium text-destructive text-sm">
+													{payerCreateError}
+												</div>
+											) : null}
+
+											<div className="flex flex-col gap-2">
+												<label
+													htmlFor="payment-payer-contact-name"
+													className="font-medium text-sm"
+												>
+													Payer name
+												</label>
+												<Input
+													id="payment-payer-contact-name"
+													value={payerName}
+													onChange={(event) => setPayerName(event.target.value)}
+													onKeyDown={(event) => {
+														if (event.key === "Enter") {
+															event.preventDefault();
+															handleCreatePayer();
+														}
+													}}
+													placeholder="e.g. Jean Tenant"
+												/>
+											</div>
+
+											<div className="flex flex-col gap-2">
+												<label
+													htmlFor="payment-payer-contact-phone"
+													className="font-medium text-sm"
+												>
+													Phone number
+												</label>
+												<Input
+													id="payment-payer-contact-phone"
+													value={payerPhone}
+													onChange={(event) =>
+														setPayerPhone(event.target.value)
+													}
+													onKeyDown={(event) => {
+														if (event.key === "Enter") {
+															event.preventDefault();
+															handleCreatePayer();
+														}
+													}}
+													placeholder="+250 788 000 000"
+												/>
+											</div>
+										</div>
+
+										<DialogFooter>
+											<Button
+												type="button"
+												onClick={handleCreatePayer}
+												disabled={isCreatingPayer}
+												className="w-full"
+											>
+												{isCreatingPayer ? "Saving..." : "Save payer contact"}
+											</Button>
+										</DialogFooter>
+									</DialogContent>
+								</Dialog>
+							</>
+						)}
 					/>
 
 					<CommonFormField
