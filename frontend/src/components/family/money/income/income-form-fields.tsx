@@ -259,12 +259,23 @@ export function IncomeFormFields({
       <CommonFormField
         control={control}
         name="title"
-        label={isPaymentMode ? "Payment title" : "Income title"}
+        label={isPaymentMode ? "Payment for" : "Income title"}
         placeholder={
           isPaymentMode ? "e.g. July house rent" : "e.g. June Salary"
         }
         required
       />
+
+      {isPaymentMode && paymentAmountMinorUnits ? (
+        <div className="rounded-md border bg-muted/30 p-4">
+          <h3 className="text-sm font-medium">Record money received now</h3>
+          <p className="mt-1 text-muted-foreground text-xs">
+            Enter only the amount the payer gave you today. Current unpaid
+            balance before this payment is{" "}
+            {formatMinorUnits(paymentAmountMinorUnits, family.defaultCurrency)}.
+          </p>
+        </div>
+      ) : null}
 
       <div className="grid sm:grid-cols-2 grid-cols-1 gap-4">
         <CommonFormField
@@ -279,13 +290,10 @@ export function IncomeFormFields({
           }
           fieldType="money"
           currency={family.defaultCurrency}
-          placeholder={isPaymentMode ? "e.g. 200,000" : "e.g. 500,000"}
+          placeholder={isPaymentMode ? "e.g. 150,000" : "e.g. 500,000"}
           description={
             isPaymentMode && paymentAmountMinorUnits
-              ? `Default is the amount left: ${formatMinorUnits(
-                  paymentAmountMinorUnits,
-                  family.defaultCurrency,
-                )}. Change it if the payer paid a different amount.`
+              ? "Write only the money received now, not the full monthly amount and not the remaining balance."
               : undefined
           }
           required
@@ -294,24 +302,26 @@ export function IncomeFormFields({
         <CommonFormField
           control={control}
           name="date"
-          label="Date received"
+          label={isPaymentMode ? "Payment date" : "Date received"}
           fieldType="date"
           required
         />
       </div>
 
-      <CommonFormField
-        control={control}
-        name="incomeRecurrence"
-        label="Income schedule"
-        fieldType="select"
-        selectOptions={[
-          { label: "One-time income", value: "ONE_TIME" },
-          { label: "Monthly rent or recurring income", value: "MONTHLY" },
-        ]}
-        placeholder="Select income schedule"
-        required
-      />
+      {isPaymentMode ? null : (
+        <CommonFormField
+          control={control}
+          name="incomeRecurrence"
+          label="Income schedule"
+          fieldType="select"
+          selectOptions={[
+            { label: "One-time income", value: "ONE_TIME" },
+            { label: "Monthly rent or recurring income", value: "MONTHLY" },
+          ]}
+          placeholder="Select income schedule"
+          required
+        />
+      )}
 
       {incomeRecurrence === "MONTHLY" ? (
         <div className="rounded-md border bg-muted/30 p-4">
@@ -319,169 +329,192 @@ export function IncomeFormFields({
             <h3 className="text-sm font-medium">Monthly rent tracking</h3>
             <p className="text-xs text-muted-foreground">
               {isPaymentMode
-                ? "This payment is connected to the monthly income. Keep the expected amount and due date for the month being paid."
+                ? "Use this date for when the payer says the remaining balance will be paid."
                 : "Track what was expected, what was paid, what remains, and when it was due. New records default to a 2-year payment period starting today."}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CommonFormField
-              control={control}
-              name="expectedAmountMinorUnits"
-              label={`Expected amount (${family.defaultCurrency})`}
-              fieldType="money"
-              currency={family.defaultCurrency}
-              placeholder="e.g. 300,000"
-              required
-            />
+          <div
+            className={
+              isPaymentMode
+                ? "grid grid-cols-1 gap-4"
+                : "grid grid-cols-1 gap-4 sm:grid-cols-2"
+            }
+          >
+            {isPaymentMode ? null : (
+              <CommonFormField
+                control={control}
+                name="expectedAmountMinorUnits"
+                label={`Expected amount (${family.defaultCurrency})`}
+                fieldType="money"
+                currency={family.defaultCurrency}
+                placeholder="e.g. 300,000"
+                required
+              />
+            )}
 
             <CommonFormField
               control={control}
               name="dueDate"
-              label="Due date"
+              label={
+                isPaymentMode ? "Date to pay remaining balance" : "Due date"
+              }
               fieldType="date"
               required
             />
 
-            <CommonFormField
-              control={control}
-              name="periodStart"
-              label="Period start"
-              fieldType="date"
-            />
+            {isPaymentMode ? null : (
+              <>
+                <CommonFormField
+                  control={control}
+                  name="periodStart"
+                  label="Period start"
+                  fieldType="date"
+                />
 
-            <CommonFormField
-              control={control}
-              name="periodEnd"
-              label="Period end"
-              fieldType="date"
-            />
+                <CommonFormField
+                  control={control}
+                  name="periodEnd"
+                  label="Period end"
+                  fieldType="date"
+                />
+              </>
+            )}
           </div>
 
-          <CommonFormField
-            control={control}
-            name="propertyName"
-            label="House or unit"
-            placeholder="e.g. Kigali house, Room 2"
-            fieldClassName="mt-4"
-          />
+          {isPaymentMode ? null : (
+            <CommonFormField
+              control={control}
+              name="propertyName"
+              label="House or unit"
+              placeholder="e.g. Kigali house, Room 2"
+              fieldClassName="mt-4"
+            />
+          )}
         </div>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-4">
-        <CommonFormField
-          control={control}
-          name="categoryId"
-          label="Category"
-          fieldType="custom"
-          disabled={categories.length === 0 && !canCreateCategoryInline}
-          placeholder={
-            categories.length === 0
-              ? "Select other category"
-              : "Select Category"
-          }
-          required
-          render={({ field, id, invalid, disabled }) => (
-            <>
-              <Select
-                value={field.value?.toString() ?? ""}
-                onValueChange={(value) => {
-                  if (value === CREATE_INCOME_CATEGORY_VALUE) {
-                    setOpenCreateCategory(true);
-                    field.onChange("");
-                    return;
-                  }
-
-                  field.onChange(value);
-                }}
-                disabled={disabled}
-                name={field.name}
-              >
-                <SelectTrigger
-                  id={id}
-                  className="w-full"
-                  aria-invalid={invalid}
-                  onBlur={field.onBlur}
-                  ref={field.ref}
-                >
-                  <SelectValue
-                    placeholder={
-                      categories.length === 0
-                        ? "Select other category"
-                        : "Select Category"
+      <div
+        className={
+          isPaymentMode ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4"
+        }
+      >
+        {isPaymentMode ? null : (
+          <CommonFormField
+            control={control}
+            name="categoryId"
+            label="Category"
+            fieldType="custom"
+            disabled={categories.length === 0 && !canCreateCategoryInline}
+            placeholder={
+              categories.length === 0
+                ? "Select other category"
+                : "Select Category"
+            }
+            required
+            render={({ field, id, invalid, disabled }) => (
+              <>
+                <Select
+                  value={field.value?.toString() ?? ""}
+                  onValueChange={(value) => {
+                    if (value === CREATE_INCOME_CATEGORY_VALUE) {
+                      setOpenCreateCategory(true);
+                      field.onChange("");
+                      return;
                     }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {categoryOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
 
-              {canCreateCategoryInline ? (
-                <CreateCategoryForm
-                  defaultType="INCOME"
-                  existingCategories={categories.map((category) => ({
-                    id: category.id,
-                    name: category.name,
-                    type: "INCOME" as const,
-                  }))}
-                  familyId={family.id}
-                  open={openCreateCategory}
-                  onOpenChange={setOpenCreateCategory}
-                  onSuccess={async (category) => {
-                    await onCategoriesChanged?.(category);
-
-                    if (category?.id && category.type === "INCOME") {
-                      field.onChange(category.id);
-                    }
+                    field.onChange(value);
                   }}
-                  trigger={null}
-                />
-              ) : null}
-            </>
-          )}
-          description={
-            categories.length === 0 ? (
-              <span
-                className={
-                  canCreateCategoryInline
-                    ? "text-muted-foreground text-xs mt-1 block"
-                    : "text-destructive font-medium text-xs mt-1 block"
-                }
-              >
+                  disabled={disabled}
+                  name={field.name}
+                >
+                  <SelectTrigger
+                    id={id}
+                    className="w-full"
+                    aria-invalid={invalid}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                  >
+                    <SelectValue
+                      placeholder={
+                        categories.length === 0
+                          ? "Select other category"
+                          : "Select Category"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {categoryOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+
                 {canCreateCategoryInline ? (
-                  <>
-                    Select "Other / create income category" to add one here, or{" "}
-                    <Link
-                      href={`/family/${family.slug}/money/categories`}
-                      className="underline hover:opacity-80 font-semibold"
-                    >
-                      manage categories
-                    </Link>{" "}
-                    on the categories page.
-                  </>
-                ) : (
-                  <>
-                    Please{" "}
-                    <Link
-                      href={`/family/${family.slug}/money/categories`}
-                      className="underline hover:opacity-80 font-semibold"
-                    >
-                      create a category of income
-                    </Link>{" "}
-                    first.
-                  </>
-                )}
-              </span>
-            ) : undefined
-          }
-        />
+                  <CreateCategoryForm
+                    defaultType="INCOME"
+                    existingCategories={categories.map((category) => ({
+                      id: category.id,
+                      name: category.name,
+                      type: "INCOME" as const,
+                    }))}
+                    familyId={family.id}
+                    open={openCreateCategory}
+                    onOpenChange={setOpenCreateCategory}
+                    onSuccess={async (category) => {
+                      await onCategoriesChanged?.(category);
+
+                      if (category?.id && category.type === "INCOME") {
+                        field.onChange(category.id);
+                      }
+                    }}
+                    trigger={null}
+                  />
+                ) : null}
+              </>
+            )}
+            description={
+              categories.length === 0 ? (
+                <span
+                  className={
+                    canCreateCategoryInline
+                      ? "text-muted-foreground text-xs mt-1 block"
+                      : "text-destructive font-medium text-xs mt-1 block"
+                  }
+                >
+                  {canCreateCategoryInline ? (
+                    <>
+                      Select "Other / create income category" to add one here,
+                      or{" "}
+                      <Link
+                        href={`/family/${family.slug}/money/categories`}
+                        className="underline hover:opacity-80 font-semibold"
+                      >
+                        manage categories
+                      </Link>{" "}
+                      on the categories page.
+                    </>
+                  ) : (
+                    <>
+                      Please{" "}
+                      <Link
+                        href={`/family/${family.slug}/money/categories`}
+                        className="underline hover:opacity-80 font-semibold"
+                      >
+                        create a category of income
+                      </Link>{" "}
+                      first.
+                    </>
+                  )}
+                </span>
+              ) : undefined
+            }
+          />
+        )}
 
         <CommonFormField
           control={control}

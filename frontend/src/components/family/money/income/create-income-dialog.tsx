@@ -35,32 +35,9 @@ function addYears(date: Date, years: number) {
   return nextDate;
 }
 
-function getPaymentAmount(
-  source: IncomeTransaction,
-  amountDueMinorUnits?: string | null,
-) {
-  if (amountDueMinorUnits) {
-    const amountDue = BigInt(amountDueMinorUnits);
-    if (amountDue > BigInt(0)) {
-      return Number(amountDue);
-    }
-  }
-
-  if (!source.expectedAmountMinorUnits) {
-    return Number(source.amountMinorUnits || 0);
-  }
-
-  const expected = BigInt(source.expectedAmountMinorUnits);
-  const paid = BigInt(source.amountMinorUnits || 0);
-  const left = expected - paid;
-
-  return Number(left > BigInt(0) ? left : expected);
-}
-
 function getDefaultValues(
   receivedBy: string,
   paymentSource?: IncomeTransaction | null,
-  paymentAmountMinorUnits?: string | null,
 ): TransactionFormValues {
   const today = new Date();
   const todayInput = formatDateInput(today);
@@ -68,10 +45,7 @@ function getDefaultValues(
   if (paymentSource) {
     return {
       title: paymentSource.description || paymentSource.category.name,
-      amountMinorUnits: getPaymentAmount(
-        paymentSource,
-        paymentAmountMinorUnits,
-      ),
+      amountMinorUnits: 0,
       categoryId: paymentSource.categoryId,
       date: todayInput,
       paymentMethod: paymentSource.paymentMethod || "CASH",
@@ -156,11 +130,7 @@ export function CreateIncomeDialog({
   >({
     schema: transactionSchema,
     formOptions: {
-      defaultValues: getDefaultValues(
-        defaultReceivedBy,
-        paymentSource,
-        paymentAmountMinorUnits,
-      ),
+      defaultValues: getDefaultValues(defaultReceivedBy, paymentSource),
     },
     transform: (values) => ({
       categoryId: values.categoryId,
@@ -225,14 +195,8 @@ export function CreateIncomeDialog({
   useEffect(() => {
     if (!open) return;
 
-    form.reset(
-      getDefaultValues(
-        defaultReceivedBy,
-        paymentSource,
-        paymentAmountMinorUnits,
-      ),
-    );
-  }, [defaultReceivedBy, form, open, paymentAmountMinorUnits, paymentSource]);
+    form.reset(getDefaultValues(defaultReceivedBy, paymentSource));
+  }, [defaultReceivedBy, form, open, paymentSource]);
 
   useEffect(() => {
     if (!open || !defaultReceivedBy || form.getValues("receivedBy")) return;
@@ -260,7 +224,7 @@ export function CreateIncomeDialog({
           </DialogTitle>
           <DialogDescription>
             {isPaymentMode
-              ? "Record the amount paid, payment date, remaining amount, and due date for this monthly income."
+              ? "Record only the money received now. The unpaid balance stays visible on the monthly income card."
               : "Record new family income details."}
           </DialogDescription>
         </DialogHeader>
