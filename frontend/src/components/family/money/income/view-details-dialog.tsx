@@ -36,7 +36,7 @@ export function ViewDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[calc(100vh-2rem)] overflow-y-scroll">
         <DialogHeader>
           <DialogTitle>Income Details</DialogTitle>
           <DialogDescription>
@@ -45,12 +45,7 @@ export function ViewDetailsDialog({
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-4 text-sm">
-          <div className="grid grid-cols-2 border-b pb-2">
-            <span className="text-muted-foreground font-medium">Title</span>
-            <span className="font-semibold text-right">
-              {transaction.description || "Income Transaction"}
-            </span>
-          </div>
+          <h2 className="text-2xl font-bold text-center mb-6">{transaction.description || "Income Transaction"}</h2>
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">Amount</span>
