@@ -26,9 +26,11 @@ import { AttachReceiptDialog } from "./income/attach-receipt-dialog";
 import { CreateIncomeDialog } from "./income/create-income-dialog";
 import { DeleteTransactionDialog } from "./income/delete-transaction-dialog";
 import { EditIncomeDialog } from "./income/edit-income-dialog";
+import { EveryTimeIncomePanel } from "./income/every-time-income-panel";
 import { IncomeFilters } from "./income/income-filters";
 import { IncomeMetricCards } from "./income/income-metric-cards";
 import { IncomeTable } from "./income/income-table";
+import { OneTimeIncomePanel } from "./income/one-time-income-panel";
 import type { Category, IncomeTransaction } from "./income/types-and-schemas";
 import { ViewDetailsDialog } from "./income/view-details-dialog";
 
@@ -327,6 +329,20 @@ export function MoneyIncomePage({
 		startDate,
 		endDate,
 	]);
+	const everyTimeTransactions = useMemo(
+		() =>
+			filteredTransactions.filter(
+				(transaction) => transaction.incomeRecurrence === "MONTHLY",
+			),
+		[filteredTransactions],
+	);
+	const oneTimeTransactions = useMemo(
+		() =>
+			filteredTransactions.filter(
+				(transaction) => transaction.incomeRecurrence === "ONE_TIME",
+			),
+		[filteredTransactions],
+	);
 
 	const handleActionClick = (
 		tx: IncomeTransaction,
@@ -440,7 +456,6 @@ export function MoneyIncomePage({
 					<TabsTrigger value="one-time">One Time</TabsTrigger>
 				</TabsList>
 				<TabsContent value="all">
-					{" "}
 					<IncomeTable
 						filteredTransactions={filteredTransactions}
 						currency={currency}
@@ -452,7 +467,26 @@ export function MoneyIncomePage({
 					/>
 				</TabsContent>
 				<TabsContent value="every-time">
-				{/*CODEX add here where every-time income are displayed also make it where he can managing them easy example house rent,salary and others family money get every time*/}
+					<EveryTimeIncomePanel
+						transactions={everyTimeTransactions}
+						currency={currency}
+						isAdmin={isAdmin}
+						family={family}
+						handleActionClick={handleActionClick}
+						handleSendApproval={handleSendApproval}
+						setOpenCreate={setOpenCreate}
+					/>
+				</TabsContent>
+				<TabsContent value="one-time">
+					<OneTimeIncomePanel
+						transactions={oneTimeTransactions}
+						currency={currency}
+						isAdmin={isAdmin}
+						family={family}
+						handleActionClick={handleActionClick}
+						handleSendApproval={handleSendApproval}
+						setOpenCreate={setOpenCreate}
+					/>
 				</TabsContent>
 			</Tabs>
 
