@@ -123,6 +123,7 @@ export function IncomeMetricCards({
       aria-label="Income metrics"
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
     >
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
           <CardDescription className="text-xs font-medium uppercase tracking-wider">
