@@ -73,14 +73,11 @@ export function MoneyIncomePage({
   const [openView, setOpenView] = useState(false);
   const [openReceipt, setOpenReceipt] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-  const [openPayment, setOpenPayment] = useState(false);
-
   const [selectedTx, setSelectedTx] = useState<IncomeTransaction | null>(null);
-  const [paymentSourceTx, setPaymentSourceTx] =
-    useState<IncomeTransaction | null>(null);
-  const [paymentAmountMinorUnits, setPaymentAmountMinorUnits] = useState<
-    string | null
-  >(null);
+  const [paymentTarget, setPaymentTarget] = useState<{
+    transaction: IncomeTransaction;
+    amountMinorUnits: string;
+  } | null>(null);
 
   // Filters state
   const [search, setSearch] = useState("");
@@ -372,20 +369,18 @@ export function MoneyIncomePage({
 
   const handlePaymentOpenChange = useCallback(
     (open: boolean) => {
-      if (open && !paymentSourceTx) {
+      if (open && !paymentTarget) {
         toast.error(
           "Choose an every-time income record before recording payment.",
         );
         return;
       }
 
-      setOpenPayment(open);
       if (!open) {
-        setPaymentSourceTx(null);
-        setPaymentAmountMinorUnits(null);
+        setPaymentTarget(null);
       }
     },
-    [paymentSourceTx],
+    [paymentTarget],
   );
 
   const handleAddPayment = useCallback(
@@ -401,9 +396,10 @@ export function MoneyIncomePage({
       }
 
       setSelectedTx(tx);
-      setPaymentAmountMinorUnits(amountDueMinorUnits);
-      setPaymentSourceTx(tx);
-      setOpenPayment(true);
+      setPaymentTarget({
+        transaction: tx,
+        amountMinorUnits: amountDueMinorUnits,
+      });
     },
     [],
   );
@@ -559,13 +555,13 @@ export function MoneyIncomePage({
 
       {/* --- RECORD RECURRING INCOME PAYMENT MODAL --- */}
       <IncomePaymentDialog
-        open={openPayment}
+        open={Boolean(paymentTarget)}
         onOpenChange={handlePaymentOpenChange}
         family={family}
         currentUser={initialData?.currentUser ?? null}
         contacts={contacts}
-        paymentSource={paymentSourceTx}
-        paymentAmountMinorUnits={paymentAmountMinorUnits}
+        paymentSource={paymentTarget?.transaction ?? null}
+        paymentAmountMinorUnits={paymentTarget?.amountMinorUnits ?? null}
         onContactsChanged={refreshContacts}
         onSuccess={refreshTransactions}
       />
