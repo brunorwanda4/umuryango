@@ -35,46 +35,11 @@ function addYears(date: Date, years: number) {
   return nextDate;
 }
 
-function getDefaultValues(
-  receivedBy: string,
-  paymentSource?: IncomeTransaction | null,
-): TransactionFormValues {
+function getDefaultValues(receivedBy: string): TransactionFormValues {
   const today = new Date();
   const todayInput = formatDateInput(today);
 
-  if (paymentSource) {
-    return {
-      isPaymentMode: true,
-      title: paymentSource.description || paymentSource.category.name,
-      amountMinorUnits: 0,
-      categoryId: paymentSource.categoryId,
-      date: todayInput,
-      paymentMethod: paymentSource.paymentMethod || "CASH",
-      receivedFrom: paymentSource.receivedFrom || "",
-      receivedFromContactId: paymentSource.receivedFromContactId || "",
-      receivedBy,
-      notes: "",
-      status: "PENDING",
-      fileName: "",
-      incomeRecurrence: "MONTHLY",
-      expectedAmountMinorUnits: paymentSource.expectedAmountMinorUnits
-        ? Number(paymentSource.expectedAmountMinorUnits)
-        : undefined,
-      dueDate: paymentSource.dueDate
-        ? new Date(paymentSource.dueDate).toISOString().split("T")[0]
-        : todayInput,
-      periodStart: paymentSource.periodStart
-        ? new Date(paymentSource.periodStart).toISOString().split("T")[0]
-        : todayInput,
-      periodEnd: paymentSource.periodEnd
-        ? new Date(paymentSource.periodEnd).toISOString().split("T")[0]
-        : formatDateInput(addYears(today, 2)),
-      propertyName: paymentSource.propertyName || "",
-    };
-  }
-
   return {
-    isPaymentMode: false,
     title: "",
     amountMinorUnits: 0,
     categoryId: "",
@@ -102,8 +67,6 @@ export function CreateIncomeDialog({
   categories,
   contacts,
   currentUser,
-  paymentSource,
-  paymentAmountMinorUnits,
   onCategoriesChanged,
   onContactsChanged,
   onSuccess,
@@ -114,13 +77,10 @@ export function CreateIncomeDialog({
   categories: Category[];
   contacts: FamilyContact[];
   currentUser: CurrentUser | null;
-  paymentSource?: IncomeTransaction | null;
-  paymentAmountMinorUnits?: string | null;
   onCategoriesChanged: (category?: Category) => void | Promise<void>;
   onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
   onSuccess: () => void;
 }) {
-  const isPaymentMode = Boolean(paymentSource);
   const defaultReceivedBy =
     family.members.find((member) => member.userId === currentUser?.id)
       ?.fullName ??
@@ -133,70 +93,46 @@ export function CreateIncomeDialog({
   >({
     schema: transactionSchema,
     formOptions: {
-      defaultValues: getDefaultValues(defaultReceivedBy, paymentSource),
+      defaultValues: getDefaultValues(defaultReceivedBy),
     },
-    transform: (values) => {
-      const idempotencyKey = `${isPaymentMode ? "record-income-payment" : "create-income"}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-
-      if (isPaymentMode) {
-        return {
-          amountMinorUnits: String(values.amountMinorUnits),
-          date: new Date(values.date).toISOString(),
-          paymentMethod: values.paymentMethod,
-          notes: values.notes,
-          receivedBy: values.receivedBy,
-          idempotencyKey,
-        };
-      }
-
-      return {
-        categoryId: values.categoryId,
-        amountMinorUnits: String(values.amountMinorUnits),
-        currency: family.defaultCurrency,
-        type: "INCOME",
-        date: new Date(values.date).toISOString(),
-        description: values.title,
-        paymentMethod: values.paymentMethod,
-        notes: values.notes,
-        receivedFrom: values.receivedFrom,
-        receivedFromContactId: values.receivedFromContactId || undefined,
-        receivedBy: values.receivedBy,
-        incomeRecurrence: values.incomeRecurrence,
-        expectedAmountMinorUnits:
-          values.incomeRecurrence === "MONTHLY"
-            ? String(values.expectedAmountMinorUnits ?? 0)
-            : undefined,
-        dueDate:
-          values.incomeRecurrence === "MONTHLY" && values.dueDate
-            ? new Date(values.dueDate).toISOString()
-            : undefined,
-        periodStart:
-          values.incomeRecurrence === "MONTHLY" && values.periodStart
-            ? new Date(values.periodStart).toISOString()
-            : undefined,
-        periodEnd:
-          values.incomeRecurrence === "MONTHLY" && values.periodEnd
-            ? new Date(values.periodEnd).toISOString()
-            : undefined,
-        propertyName:
-          values.incomeRecurrence === "MONTHLY"
-            ? values.propertyName
-            : undefined,
-        idempotencyKey,
-      };
-    },
+    transform: (values) => ({
+      categoryId: values.categoryId,
+      amountMinorUnits: String(values.amountMinorUnits),
+      currency: family.defaultCurrency,
+      type: "INCOME",
+      date: new Date(values.date).toISOString(),
+      description: values.title,
+      paymentMethod: values.paymentMethod,
+      notes: values.notes,
+      receivedFrom: values.receivedFrom,
+      receivedFromContactId: values.receivedFromContactId || undefined,
+      receivedBy: values.receivedBy,
+      incomeRecurrence: values.incomeRecurrence,
+      expectedAmountMinorUnits:
+        values.incomeRecurrence === "MONTHLY"
+          ? String(values.expectedAmountMinorUnits ?? 0)
+          : undefined,
+      dueDate:
+        values.incomeRecurrence === "MONTHLY" && values.dueDate
+          ? new Date(values.dueDate).toISOString()
+          : undefined,
+      periodStart:
+        values.incomeRecurrence === "MONTHLY" && values.periodStart
+          ? new Date(values.periodStart).toISOString()
+          : undefined,
+      periodEnd:
+        values.incomeRecurrence === "MONTHLY" && values.periodEnd
+          ? new Date(values.periodEnd).toISOString()
+          : undefined,
+      propertyName:
+        values.incomeRecurrence === "MONTHLY" ? values.propertyName : undefined,
+      idempotencyKey: `create-income-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+    }),
     request: {
       method: "post",
-      url: () =>
-        isPaymentMode && paymentSource
-          ? `/families/${encodeURIComponent(
-              family.id,
-            )}/money/transactions/${encodeURIComponent(paymentSource.id)}/payments`
-          : `/families/${encodeURIComponent(family.id)}/money/transactions`,
+      url: `/families/${encodeURIComponent(family.id)}/money/transactions`,
     },
-    onSuccessMessage: isPaymentMode
-      ? "Income payment recorded successfully"
-      : "Income transaction recorded successfully",
+    onSuccessMessage: "Income transaction recorded successfully",
     toastOnSuccess: true,
     onSuccess: async (data, values) => {
       // If mock file upload was requested
@@ -222,8 +158,8 @@ export function CreateIncomeDialog({
   useEffect(() => {
     if (!open) return;
 
-    form.reset(getDefaultValues(defaultReceivedBy, paymentSource));
-  }, [defaultReceivedBy, form, open, paymentSource]);
+    form.reset(getDefaultValues(defaultReceivedBy));
+  }, [defaultReceivedBy, form, open]);
 
   useEffect(() => {
     if (!open || !defaultReceivedBy || form.getValues("receivedBy")) return;
@@ -244,13 +180,9 @@ export function CreateIncomeDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>
-            {isPaymentMode ? "Record Income Payment" : "Add Income"}
-          </DialogTitle>
+          <DialogTitle>Add Income</DialogTitle>
           <DialogDescription>
-            {isPaymentMode
-              ? "Record only the money received now. The unpaid balance stays visible on the monthly income card."
-              : "Record new family income details."}
+            Record new family income details.
           </DialogDescription>
         </DialogHeader>
 
@@ -271,9 +203,6 @@ export function CreateIncomeDialog({
             setValue={form.setValue}
             onCategoriesChanged={onCategoriesChanged}
             onContactsChanged={onContactsChanged}
-            isPaymentMode={isPaymentMode}
-            paymentSource={paymentSource}
-            paymentAmountMinorUnits={paymentAmountMinorUnits}
             showReceiptUpload
           />
         </form>
@@ -285,11 +214,7 @@ export function CreateIncomeDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending
-              ? "Recording..."
-              : isPaymentMode
-                ? "Record payment"
-                : "Add Income"}
+            {isPending ? "Recording..." : "Add Income"}
           </Button>
         </DialogFooter>
       </DialogContent>

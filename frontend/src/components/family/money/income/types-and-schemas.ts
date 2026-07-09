@@ -19,7 +19,6 @@ export const transactionSchema = z
     periodStart: z.string().optional(),
     periodEnd: z.string().optional(),
     propertyName: z.string().optional(),
-    isPaymentMode: z.boolean().optional(),
   })
   .superRefine((values, ctx) => {
     if (
@@ -34,14 +33,6 @@ export const transactionSchema = z
     }
 
     if (values.incomeRecurrence === "MONTHLY") {
-      if (values.isPaymentMode && values.amountMinorUnits <= 0) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Payment amount must be greater than 0",
-          path: ["amountMinorUnits"],
-        });
-      }
-
       if (
         !values.expectedAmountMinorUnits ||
         values.expectedAmountMinorUnits <= 0

@@ -29,6 +29,7 @@ import { EditIncomeDialog } from "./income/edit-income-dialog";
 import { EveryTimeIncomePanel } from "./income/every-time-income-panel";
 import { IncomeFilters } from "./income/income-filters";
 import { IncomeMetricCards } from "./income/income-metric-cards";
+import { IncomePaymentDialog } from "./income/income-payment-dialog";
 import { IncomeTable } from "./income/income-table";
 import { OneTimeIncomePanel } from "./income/one-time-income-panel";
 import type { Category, IncomeTransaction } from "./income/types-and-schemas";
@@ -72,6 +73,7 @@ export function MoneyIncomePage({
   const [openView, setOpenView] = useState(false);
   const [openReceipt, setOpenReceipt] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openPayment, setOpenPayment] = useState(false);
 
   const [selectedTx, setSelectedTx] = useState<IncomeTransaction | null>(null);
   const [paymentSourceTx, setPaymentSourceTx] =
@@ -361,15 +363,15 @@ export function MoneyIncomePage({
   };
 
   const openGenericCreate = useCallback((open: boolean) => {
-    if (open) {
-      setPaymentSourceTx(null);
-      setPaymentAmountMinorUnits(null);
-    }
     setOpenCreate(open);
   }, []);
 
   const handleCreateOpenChange = useCallback((open: boolean) => {
     setOpenCreate(open);
+  }, []);
+
+  const handlePaymentOpenChange = useCallback((open: boolean) => {
+    setOpenPayment(open);
     if (!open) {
       setPaymentSourceTx(null);
       setPaymentAmountMinorUnits(null);
@@ -380,7 +382,7 @@ export function MoneyIncomePage({
     (tx: IncomeTransaction, amountDueMinorUnits: string) => {
       setPaymentAmountMinorUnits(amountDueMinorUnits);
       setPaymentSourceTx(tx);
-      setOpenCreate(true);
+      setOpenPayment(true);
     },
     [],
   );
@@ -529,10 +531,19 @@ export function MoneyIncomePage({
         categories={categories}
         contacts={contacts}
         currentUser={initialData?.currentUser ?? null}
-        paymentSource={paymentSourceTx}
-        paymentAmountMinorUnits={paymentAmountMinorUnits}
         onCategoriesChanged={refreshCategories}
         onContactsChanged={refreshContacts}
+        onSuccess={refreshTransactions}
+      />
+
+      {/* --- RECORD RECURRING INCOME PAYMENT MODAL --- */}
+      <IncomePaymentDialog
+        open={openPayment}
+        onOpenChange={handlePaymentOpenChange}
+        family={family}
+        currentUser={initialData?.currentUser ?? null}
+        paymentSource={paymentSourceTx}
+        paymentAmountMinorUnits={paymentAmountMinorUnits}
         onSuccess={refreshTransactions}
       />
 
