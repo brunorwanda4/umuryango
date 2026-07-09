@@ -469,7 +469,7 @@ export function MoneyExpensesPage({
 					<TabsTrigger value="data">Data</TabsTrigger>
 					<TabsTrigger value="overview">Overview</TabsTrigger>
 				</TabsList>
-				<TabsContent value="data">
+				<TabsContent value="data" className=" space-y-8">
 					<ExpenseFilters
 						search={search}
 						setSearch={setSearch}

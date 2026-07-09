@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,6 +41,13 @@ export function CreateExpenseDialog({
   onCategoriesChanged: (category?: Category) => void | Promise<void>;
   onSuccess: () => void;
 }) {
+  const { user: currentUser } = useCurrentUser();
+  const defaultPaidBy =
+    family.members.find((member) => member.userId === currentUser?.id)
+      ?.fullName ??
+    currentUser?.fullName ??
+    "";
+
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     ExpenseFormValues,
     ExpenseTransaction
@@ -52,7 +60,7 @@ export function CreateExpenseDialog({
         categoryId: "",
         date: new Date().toISOString().split("T")[0],
         paidTo: "",
-        paidBy: "",
+        paidBy: defaultPaidBy,
         paymentMethod: "CASH",
         budgetId: "none",
         projectId: "none",
@@ -121,6 +129,14 @@ export function CreateExpenseDialog({
       });
     }
   }, [duplicateValues, form, open]);
+
+  // Backfill paidBy once the async user data resolves and the field is still empty
+  useEffect(() => {
+    if (defaultPaidBy && !form.getValues("paidBy")) {
+      form.setValue("paidBy", defaultPaidBy, { shouldValidate: false });
+    }
+  }, [defaultPaidBy, form]);
+
 
   return (
     <Dialog
