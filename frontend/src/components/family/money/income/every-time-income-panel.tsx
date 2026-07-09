@@ -5,6 +5,7 @@ import {
   CalendarClockIcon,
   CoinsIcon,
   HomeIcon,
+  PencilIcon,
   PlusIcon,
   WalletIcon,
 } from "lucide-react";
@@ -41,6 +42,7 @@ type SourceSummary = {
   leftMinorUnits: bigint;
   nextDueDate: string | null;
   statuses: Set<IncomeTransaction["paymentStatus"]>;
+  managedTransaction: IncomeTransaction;
 };
 
 function toBigInt(value: string | null | undefined) {
@@ -88,6 +90,26 @@ function isBeforeToday(dateValue: string | null) {
   return date < today;
 }
 
+function shouldManageCandidate(
+  current: IncomeTransaction,
+  candidate: IncomeTransaction,
+) {
+  const currentLeft = getLeftMinorUnits(current);
+  const candidateLeft = getLeftMinorUnits(candidate);
+
+  if (currentLeft === BigInt(0) && candidateLeft > BigInt(0)) return true;
+  if (currentLeft > BigInt(0) && candidateLeft === BigInt(0)) return false;
+
+  if (candidate.dueDate && current.dueDate) {
+    return new Date(candidate.dueDate) < new Date(current.dueDate);
+  }
+
+  if (candidate.dueDate) return true;
+  if (current.dueDate) return false;
+
+  return new Date(candidate.updatedAt) > new Date(current.updatedAt);
+}
+
 export function EveryTimeIncomePanel({
   transactions,
   currency,
@@ -126,6 +148,9 @@ export function EveryTimeIncomePanel({
         existing.paidMinorUnits += paid;
         existing.leftMinorUnits += left;
         existing.statuses.add(transaction.paymentStatus);
+        if (shouldManageCandidate(existing.managedTransaction, transaction)) {
+          existing.managedTransaction = transaction;
+        }
 
         if (
           transaction.dueDate &&
@@ -146,6 +171,7 @@ export function EveryTimeIncomePanel({
           leftMinorUnits: left,
           nextDueDate: transaction.dueDate,
           statuses: new Set([transaction.paymentStatus]),
+          managedTransaction: transaction,
         });
       }
     }
@@ -246,70 +272,127 @@ export function EveryTimeIncomePanel({
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {summary.sources.map((source) => (
-          <Card key={source.key}>
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <CardTitle className="truncate text-base">
-                    {source.title}
-                  </CardTitle>
-                  <p className="mt-1 text-muted-foreground text-sm">
-                    {source.category} - {source.payer}
-                  </p>
-                </div>
-                <HomeIcon className="size-4 shrink-0 text-muted-foreground" />
-              </div>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm">
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <div className="text-muted-foreground text-xs">Expected</div>
-                  <div className="font-mono">
-                    {formatMinorUnits(
-                      source.expectedMinorUnits.toString(),
-                      currency,
-                    )}
+        {summary.sources.map((source) => {
+          const canEditManagedTransaction =
+            source.managedTransaction.status !== "APPROVED" || isAdmin;
+
+          return (
+            <Card key={source.key}>
+              <button
+                type="button"
+                className="w-full cursor-pointer rounded-t-lg text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={() =>
+                  handleActionClick(
+                    source.managedTransaction,
+                    canEditManagedTransaction ? "edit" : "view",
+                  )
+                }
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <CardTitle className="truncate text-base">
+                        {source.title}
+                      </CardTitle>
+                      <p className="mt-1 text-muted-foreground text-sm">
+                        {source.category} - {source.payer}
+                      </p>
+                    </div>
+                    <HomeIcon className="size-4 shrink-0 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent className="grid gap-3 text-sm">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <div className="text-muted-foreground text-xs">
+                        Expected
+                      </div>
+                      <div className="font-mono">
+                        {formatMinorUnits(
+                          source.expectedMinorUnits.toString(),
+                          currency,
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground text-xs">Paid</div>
+                      <div className="font-mono">
+                        {formatMinorUnits(
+                          source.paidMinorUnits.toString(),
+                          currency,
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted-foreground text-xs">
+                        Must pay left
+                      </div>
+                      <div className="font-mono font-semibold">
+                        {formatMinorUnits(
+                          source.leftMinorUnits.toString(),
+                          currency,
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-muted-foreground text-xs">
+                      {source.recordCount} record
+                      {source.recordCount === 1 ? "" : "s"}
+                      {source.nextDueDate
+                        ? ` - next due ${formatDate(source.nextDueDate)}`
+                        : ""}
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[...source.statuses].map((status) => (
+                        <Badge key={status} variant="secondary">
+                          {status.replace("_", " ")}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </button>
+              <CardContent className="pt-0">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+                  <span className="text-muted-foreground text-xs">
+                    Click card to{" "}
+                    {canEditManagedTransaction
+                      ? "change payment"
+                      : "view record"}
+                    , paid date, amount, or due date.
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        handleActionClick(
+                          source.managedTransaction,
+                          canEditManagedTransaction ? "edit" : "view",
+                        );
+                      }}
+                    >
+                      <PencilIcon aria-hidden="true" data-icon="inline-start" />
+                      Manage
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        setOpenCreate(true);
+                      }}
+                    >
+                      <PlusIcon aria-hidden="true" data-icon="inline-start" />
+                      Add payment
+                    </Button>
                   </div>
                 </div>
-                <div>
-                  <div className="text-muted-foreground text-xs">Paid</div>
-                  <div className="font-mono">
-                    {formatMinorUnits(
-                      source.paidMinorUnits.toString(),
-                      currency,
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground text-xs">Left</div>
-                  <div className="font-mono">
-                    {formatMinorUnits(
-                      source.leftMinorUnits.toString(),
-                      currency,
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-muted-foreground text-xs">
-                  {source.recordCount} record
-                  {source.recordCount === 1 ? "" : "s"}
-                  {source.nextDueDate
-                    ? ` - next due ${formatDate(source.nextDueDate)}`
-                    : ""}
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {[...source.statuses].map((status) => (
-                    <Badge key={status} variant="secondary">
-                      {status.replace("_", " ")}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </section>
 
       <IncomeTable
