@@ -44,6 +44,7 @@ function getDefaultValues(
 
   if (paymentSource) {
     return {
+      isPaymentMode: true,
       title: paymentSource.description || paymentSource.category.name,
       amountMinorUnits: 0,
       categoryId: paymentSource.categoryId,
@@ -73,6 +74,7 @@ function getDefaultValues(
   }
 
   return {
+    isPaymentMode: false,
     title: "",
     amountMinorUnits: 0,
     categoryId: "",
@@ -118,6 +120,7 @@ export function CreateIncomeDialog({
   onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
   onSuccess: () => void;
 }) {
+  const isPaymentMode = Boolean(paymentSource);
   const defaultReceivedBy =
     family.members.find((member) => member.userId === currentUser?.id)
       ?.fullName ??
@@ -132,44 +135,68 @@ export function CreateIncomeDialog({
     formOptions: {
       defaultValues: getDefaultValues(defaultReceivedBy, paymentSource),
     },
-    transform: (values) => ({
-      categoryId: values.categoryId,
-      amountMinorUnits: String(values.amountMinorUnits),
-      currency: family.defaultCurrency,
-      type: "INCOME",
-      date: new Date(values.date).toISOString(),
-      description: values.title,
-      paymentMethod: values.paymentMethod,
-      notes: values.notes,
-      receivedFrom: values.receivedFrom,
-      receivedFromContactId: values.receivedFromContactId || undefined,
-      receivedBy: values.receivedBy,
-      incomeRecurrence: values.incomeRecurrence,
-      expectedAmountMinorUnits:
-        values.incomeRecurrence === "MONTHLY"
-          ? String(values.expectedAmountMinorUnits ?? 0)
-          : undefined,
-      dueDate:
-        values.incomeRecurrence === "MONTHLY" && values.dueDate
-          ? new Date(values.dueDate).toISOString()
-          : undefined,
-      periodStart:
-        values.incomeRecurrence === "MONTHLY" && values.periodStart
-          ? new Date(values.periodStart).toISOString()
-          : undefined,
-      periodEnd:
-        values.incomeRecurrence === "MONTHLY" && values.periodEnd
-          ? new Date(values.periodEnd).toISOString()
-          : undefined,
-      propertyName:
-        values.incomeRecurrence === "MONTHLY" ? values.propertyName : undefined,
-      idempotencyKey: `create-income-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
-    }),
+    transform: (values) => {
+      const idempotencyKey = `${isPaymentMode ? "record-income-payment" : "create-income"}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+
+      if (isPaymentMode) {
+        return {
+          amountMinorUnits: String(values.amountMinorUnits),
+          date: new Date(values.date).toISOString(),
+          paymentMethod: values.paymentMethod,
+          notes: values.notes,
+          receivedBy: values.receivedBy,
+          idempotencyKey,
+        };
+      }
+
+      return {
+        categoryId: values.categoryId,
+        amountMinorUnits: String(values.amountMinorUnits),
+        currency: family.defaultCurrency,
+        type: "INCOME",
+        date: new Date(values.date).toISOString(),
+        description: values.title,
+        paymentMethod: values.paymentMethod,
+        notes: values.notes,
+        receivedFrom: values.receivedFrom,
+        receivedFromContactId: values.receivedFromContactId || undefined,
+        receivedBy: values.receivedBy,
+        incomeRecurrence: values.incomeRecurrence,
+        expectedAmountMinorUnits:
+          values.incomeRecurrence === "MONTHLY"
+            ? String(values.expectedAmountMinorUnits ?? 0)
+            : undefined,
+        dueDate:
+          values.incomeRecurrence === "MONTHLY" && values.dueDate
+            ? new Date(values.dueDate).toISOString()
+            : undefined,
+        periodStart:
+          values.incomeRecurrence === "MONTHLY" && values.periodStart
+            ? new Date(values.periodStart).toISOString()
+            : undefined,
+        periodEnd:
+          values.incomeRecurrence === "MONTHLY" && values.periodEnd
+            ? new Date(values.periodEnd).toISOString()
+            : undefined,
+        propertyName:
+          values.incomeRecurrence === "MONTHLY"
+            ? values.propertyName
+            : undefined,
+        idempotencyKey,
+      };
+    },
     request: {
       method: "post",
-      url: `/families/${encodeURIComponent(family.id)}/money/transactions`,
+      url: () =>
+        isPaymentMode && paymentSource
+          ? `/families/${encodeURIComponent(
+              family.id,
+            )}/money/transactions/${encodeURIComponent(paymentSource.id)}/payments`
+          : `/families/${encodeURIComponent(family.id)}/money/transactions`,
     },
-    onSuccessMessage: "Income transaction recorded successfully",
+    onSuccessMessage: isPaymentMode
+      ? "Income payment recorded successfully"
+      : "Income transaction recorded successfully",
     toastOnSuccess: true,
     onSuccess: async (data, values) => {
       // If mock file upload was requested
@@ -206,8 +233,6 @@ export function CreateIncomeDialog({
       shouldValidate: true,
     });
   }, [defaultReceivedBy, form, open]);
-
-  const isPaymentMode = Boolean(paymentSource);
 
   return (
     <Dialog
@@ -247,6 +272,7 @@ export function CreateIncomeDialog({
             onCategoriesChanged={onCategoriesChanged}
             onContactsChanged={onContactsChanged}
             isPaymentMode={isPaymentMode}
+            paymentSource={paymentSource}
             paymentAmountMinorUnits={paymentAmountMinorUnits}
             showReceiptUpload
           />

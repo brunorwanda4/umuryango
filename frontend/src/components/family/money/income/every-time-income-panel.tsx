@@ -90,8 +90,8 @@ function getSourceTitle(transaction: IncomeTransaction) {
 
 function getPeriodKey(transaction: IncomeTransaction) {
   return (
-    transaction.dueDate ||
     transaction.periodStart ||
+    transaction.dueDate ||
     transaction.date ||
     transaction.id
   );
@@ -439,7 +439,9 @@ export function EveryTimeIncomePanel({
                       onClick={() => {
                         onAddPayment(
                           source.managedTransaction,
-                          source.leftMinorUnits.toString(),
+                          getLeftMinorUnits(
+                            source.managedTransaction,
+                          ).toString(),
                         );
                       }}
                     >

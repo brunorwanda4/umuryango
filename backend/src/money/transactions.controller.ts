@@ -22,6 +22,7 @@ import { ACCESS_COOKIE_NAME } from '../auth/auth.constants';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { RecordIncomePaymentDto } from './dto/record-income-payment.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransactionsService } from './transactions.service';
 
@@ -80,6 +81,26 @@ export class TransactionsController {
   ) {
     const data = await this.transactionsService.findOne(userId, familyId, id);
     return { data, message: 'Transaction retrieved successfully.' };
+  }
+
+  @Post(':id/payments')
+  @ApiOperation({
+    summary: 'Record a payment against a monthly income transaction',
+  })
+  @ApiCreatedResponse({ description: 'Income payment recorded successfully.' })
+  async recordIncomePayment(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Param('id') id: string,
+    @Body() dto: RecordIncomePaymentDto,
+  ) {
+    const data = await this.transactionsService.recordIncomePayment(
+      userId,
+      familyId,
+      id,
+      dto,
+    );
+    return { data, message: 'Income payment recorded successfully.' };
   }
 
   @Patch(':id')

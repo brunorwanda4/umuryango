@@ -18,6 +18,7 @@ import {
 import { can } from '../families/family-access';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { RecordIncomePaymentDto } from './dto/record-income-payment.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 @Injectable()
@@ -78,6 +79,112 @@ export class TransactionsService {
           actorId: userId,
           action: FamilyAuditAction.TRANSACTION_CREATED,
           after: this.auditSnapshot(created),
+        },
+      });
+
+      return this.serializeTransaction(created);
+    });
+  }
+
+  async recordIncomePayment(
+    userId: string,
+    familyId: string,
+    sourceTransactionId: string,
+    dto: RecordIncomePaymentDto,
+  ) {
+    const membership = await this.requireMembership(userId, familyId);
+    this.requireRecordCapability(membership, TransactionType.INCOME);
+
+    const source = await this.prisma.familyTransaction.findFirst({
+      where: {
+        id: sourceTransactionId,
+        familyId,
+        type: TransactionType.INCOME,
+      },
+    });
+
+    if (!source) {
+      throw new NotFoundException('Income transaction not found');
+    }
+
+    if (source.incomeRecurrence !== IncomeRecurrence.MONTHLY) {
+      throw new BadRequestException(
+        'Payments can only be recorded against monthly income',
+      );
+    }
+
+    if (source.status === TransactionStatus.REVERSED) {
+      throw new BadRequestException(
+        'Payments cannot be recorded against a reversed income transaction',
+      );
+    }
+
+    const expectedAmountMinorUnits = source.expectedAmountMinorUnits;
+    const dueDate = source.dueDate;
+
+    if (!expectedAmountMinorUnits || !dueDate) {
+      throw new BadRequestException(
+        'Monthly income source is missing expected amount or due date',
+      );
+    }
+
+    if (dto.idempotencyKey) {
+      const existing = await this.prisma.familyTransaction.findUnique({
+        where: {
+          familyId_idempotencyKey: {
+            familyId,
+            idempotencyKey: dto.idempotencyKey,
+          },
+        },
+      });
+      if (existing) {
+        return this.serializeTransaction(existing);
+      }
+    }
+
+    const amountMinorUnits = BigInt(dto.amountMinorUnits);
+
+    return this.prisma.$transaction(async (tx) => {
+      const created = await tx.familyTransaction.create({
+        data: {
+          familyId,
+          createdById: userId,
+          categoryId: source.categoryId,
+          amountMinorUnits,
+          currency: source.currency,
+          type: TransactionType.INCOME,
+          date: new Date(dto.date),
+          description: source.description,
+          paymentMethod:
+            this.nullableString(dto.paymentMethod) ?? source.paymentMethod,
+          idempotencyKey: dto.idempotencyKey,
+          status: TransactionStatus.PENDING,
+          notes: this.nullableString(dto.notes),
+          receivedFrom: source.receivedFrom,
+          receivedBy: this.nullableString(dto.receivedBy) ?? source.receivedBy,
+          receivedFromContactId: source.receivedFromContactId,
+          incomeRecurrence: IncomeRecurrence.MONTHLY,
+          expectedAmountMinorUnits,
+          dueDate,
+          periodStart: source.periodStart,
+          periodEnd: source.periodEnd,
+          propertyName: source.propertyName,
+          paymentStatus: this.resolvePaymentStatus(
+            amountMinorUnits,
+            expectedAmountMinorUnits,
+          ),
+        },
+      });
+
+      await tx.familyAuditEvent.create({
+        data: {
+          familyId,
+          actorId: userId,
+          action: FamilyAuditAction.TRANSACTION_CREATED,
+          after: {
+            ...this.auditSnapshot(created),
+            sourceTransactionId: source.id,
+          },
         },
       });
 

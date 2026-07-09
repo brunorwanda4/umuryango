@@ -155,6 +155,83 @@ describe('TransactionsService', () => {
     );
   });
 
+  it('records a partial payment against monthly income without changing the source schedule', async () => {
+    const source = makeTransaction({
+      id: 'source-rent-july',
+      amountMinorUnits: 0n,
+      expectedAmountMinorUnits: 350000n,
+      paymentStatus: IncomePaymentStatus.UNPAID,
+      dueDate: new Date('2026-07-20T00:00:00.000Z'),
+      periodStart: new Date('2026-07-01T00:00:00.000Z'),
+      periodEnd: new Date('2026-07-31T00:00:00.000Z'),
+    });
+    const created = makeTransaction({
+      id: 'payment-rent-july-1',
+      amountMinorUnits: 150000n,
+      expectedAmountMinorUnits: 350000n,
+      paymentStatus: IncomePaymentStatus.PARTIAL,
+      date: new Date('2026-07-15T00:00:00.000Z'),
+      dueDate: source.dueDate,
+      periodStart: source.periodStart,
+      periodEnd: source.periodEnd,
+    });
+    prisma.familyMember.findFirst.mockResolvedValue(managerMembership);
+    prisma.familyTransaction.findFirst.mockResolvedValue(source);
+    prisma.familyTransaction.findUnique.mockResolvedValue(null);
+    prisma.familyTransaction.create.mockResolvedValue(created);
+    prisma.familyAuditEvent.create.mockResolvedValue({ id: 'audit-payment-1' });
+
+    const result = await service.recordIncomePayment(
+      'user-1',
+      'family-1',
+      'source-rent-july',
+      {
+        amountMinorUnits: '150000',
+        date: '2026-07-15T00:00:00.000Z',
+        paymentMethod: 'MOBILE_MONEY',
+        receivedBy: 'Family Treasurer',
+        notes: 'Tenant paid before due date.',
+        idempotencyKey: 'rent-july-payment-1',
+      },
+    );
+
+    expect(result.amountMinorUnits).toBe('150000');
+    expect(result.expectedAmountMinorUnits).toBe('350000');
+    expect(result.paymentStatus).toBe(IncomePaymentStatus.PARTIAL);
+    expect(prisma.familyTransaction.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          categoryId: source.categoryId,
+          amountMinorUnits: 150000n,
+          currency: source.currency,
+          type: TransactionType.INCOME,
+          description: source.description,
+          receivedFrom: source.receivedFrom,
+          receivedFromContactId: source.receivedFromContactId,
+          incomeRecurrence: IncomeRecurrence.MONTHLY,
+          expectedAmountMinorUnits: 350000n,
+          dueDate: new Date('2026-07-20T00:00:00.000Z'),
+          periodStart: new Date('2026-07-01T00:00:00.000Z'),
+          periodEnd: new Date('2026-07-31T00:00:00.000Z'),
+          propertyName: source.propertyName,
+          paymentStatus: IncomePaymentStatus.PARTIAL,
+        }),
+      }),
+    );
+    expect(prisma.familyAuditEvent.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          action: FamilyAuditAction.TRANSACTION_CREATED,
+          after: expect.objectContaining({
+            sourceTransactionId: 'source-rent-july',
+            amountMinorUnits: '150000',
+            expectedAmountMinorUnits: '350000',
+          }),
+        }),
+      }),
+    );
+  });
+
   it('blocks income creation without RECORD_INCOME capability', async () => {
     prisma.familyMember.findFirst.mockResolvedValue(plainMembership);
 

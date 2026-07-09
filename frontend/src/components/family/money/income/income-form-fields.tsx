@@ -26,8 +26,12 @@ import {
 } from "@/components/ui/select";
 import apiRequest from "@/service/api";
 import type { FamilyContact } from "../../contacts/types-and-schemas";
-import { formatMinorUnits } from "../utils";
-import type { Category, TransactionFormValues } from "./types-and-schemas";
+import { formatDate, formatMinorUnits } from "../utils";
+import type {
+  Category,
+  IncomeTransaction,
+  TransactionFormValues,
+} from "./types-and-schemas";
 
 const CREATE_INCOME_CATEGORY_VALUE = "__create_income_category__";
 const CREATE_PAYER_CONTACT_VALUE = "__create_payer_contact__";
@@ -42,6 +46,7 @@ type IncomeFormFieldsProps = {
   onCategoriesChanged?: (category?: Category) => void | Promise<void>;
   onContactsChanged?: (contact?: FamilyContact) => void | Promise<void>;
   isPaymentMode?: boolean;
+  paymentSource?: IncomeTransaction | null;
   paymentAmountMinorUnits?: string | null;
   /** Show the mock receipt/proof upload field. Only needed on the create dialog. */
   showReceiptUpload?: boolean;
@@ -88,6 +93,7 @@ export function IncomeFormFields({
   onCategoriesChanged,
   onContactsChanged,
   isPaymentMode = false,
+  paymentSource,
   paymentAmountMinorUnits,
   showReceiptUpload = false,
 }: IncomeFormFieldsProps) {
@@ -256,24 +262,61 @@ export function IncomeFormFields({
 
   return (
     <>
-      <CommonFormField
-        control={control}
-        name="title"
-        label={isPaymentMode ? "Payment for" : "Income title"}
-        placeholder={
-          isPaymentMode ? "e.g. July house rent" : "e.g. June Salary"
-        }
-        required
-      />
+      {isPaymentMode ? null : (
+        <CommonFormField
+          control={control}
+          name="title"
+          label="Income title"
+          placeholder="e.g. June Salary"
+          required
+        />
+      )}
 
       {isPaymentMode && paymentAmountMinorUnits ? (
         <div className="rounded-md border bg-muted/30 p-4">
-          <h3 className="text-sm font-medium">Record money received now</h3>
+          <h3 className="text-sm font-medium">
+            Record money received for{" "}
+            {paymentSource?.propertyName ||
+              paymentSource?.description ||
+              paymentSource?.category.name ||
+              "monthly income"}
+          </h3>
           <p className="mt-1 text-muted-foreground text-xs">
             Enter only the amount the payer gave you today. Current unpaid
             balance before this payment is{" "}
             {formatMinorUnits(paymentAmountMinorUnits, family.defaultCurrency)}.
           </p>
+          <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+            <div>
+              <span className="text-muted-foreground">Category: </span>
+              <span className="font-medium">
+                {paymentSource?.category.name ?? "Recurring income"}
+              </span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Payer: </span>
+              <span className="font-medium">
+                {paymentSource?.receivedFrom ?? "Not recorded"}
+              </span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Expected: </span>
+              <span className="font-medium">
+                {formatMinorUnits(
+                  paymentSource?.expectedAmountMinorUnits ?? "0",
+                  family.defaultCurrency,
+                )}
+              </span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Due date: </span>
+              <span className="font-medium">
+                {paymentSource?.dueDate
+                  ? formatDate(paymentSource.dueDate)
+                  : "-"}
+              </span>
+            </div>
+          </div>
         </div>
       ) : null}
 
@@ -323,74 +366,58 @@ export function IncomeFormFields({
         />
       )}
 
-      {incomeRecurrence === "MONTHLY" ? (
+      {incomeRecurrence === "MONTHLY" && !isPaymentMode ? (
         <div className="rounded-md border bg-muted/30 p-4">
           <div className="mb-4">
             <h3 className="text-sm font-medium">Monthly rent tracking</h3>
             <p className="text-xs text-muted-foreground">
-              {isPaymentMode
-                ? "Use this date for when the payer says the remaining balance will be paid."
-                : "Track what was expected, what was paid, what remains, and when it was due. New records default to a 2-year payment period starting today."}
+              Track what was expected, what was paid, what remains, and when it
+              was due. New records default to a 2-year payment period starting
+              today.
             </p>
           </div>
 
-          <div
-            className={
-              isPaymentMode
-                ? "grid grid-cols-1 gap-4"
-                : "grid grid-cols-1 gap-4 sm:grid-cols-2"
-            }
-          >
-            {isPaymentMode ? null : (
-              <CommonFormField
-                control={control}
-                name="expectedAmountMinorUnits"
-                label={`Expected amount (${family.defaultCurrency})`}
-                fieldType="money"
-                currency={family.defaultCurrency}
-                placeholder="e.g. 300,000"
-                required
-              />
-            )}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <CommonFormField
+              control={control}
+              name="expectedAmountMinorUnits"
+              label={`Expected amount (${family.defaultCurrency})`}
+              fieldType="money"
+              currency={family.defaultCurrency}
+              placeholder="e.g. 300,000"
+              required
+            />
 
             <CommonFormField
               control={control}
               name="dueDate"
-              label={
-                isPaymentMode ? "Date to pay remaining balance" : "Due date"
-              }
+              label="Due date"
               fieldType="date"
               required
             />
 
-            {isPaymentMode ? null : (
-              <>
-                <CommonFormField
-                  control={control}
-                  name="periodStart"
-                  label="Period start"
-                  fieldType="date"
-                />
-
-                <CommonFormField
-                  control={control}
-                  name="periodEnd"
-                  label="Period end"
-                  fieldType="date"
-                />
-              </>
-            )}
-          </div>
-
-          {isPaymentMode ? null : (
             <CommonFormField
               control={control}
-              name="propertyName"
-              label="House or unit"
-              placeholder="e.g. Kigali house, Room 2"
-              fieldClassName="mt-4"
+              name="periodStart"
+              label="Period start"
+              fieldType="date"
             />
-          )}
+
+            <CommonFormField
+              control={control}
+              name="periodEnd"
+              label="Period end"
+              fieldType="date"
+            />
+          </div>
+
+          <CommonFormField
+            control={control}
+            name="propertyName"
+            label="House or unit"
+            placeholder="e.g. Kigali house, Room 2"
+            fieldClassName="mt-4"
+          />
         </div>
       ) : null}
 
@@ -534,151 +561,161 @@ export function IncomeFormFields({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <CommonFormField
-          control={control}
-          name="receivedFromContactId"
-          label={incomeRecurrence === "MONTHLY" ? "Tenant / payer" : "Paid by"}
-          fieldType="custom"
-          placeholder={
-            activeContacts.length === 0
-              ? "Create payer contact"
-              : "Select payer contact"
-          }
-          render={({ field, id, invalid, disabled }) => (
-            <>
-              <Select
-                value={field.value?.toString() ?? ""}
-                onValueChange={(value) => {
-                  if (value === CREATE_PAYER_CONTACT_VALUE) {
-                    setOpenCreatePayer(true);
-                    return;
-                  }
-
-                  const selectedContact = activeContacts.find(
-                    (contact) => contact.id === value,
-                  );
-
-                  field.onChange(value);
-                  setValue("receivedFrom", selectedContact?.fullName ?? "", {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  });
-                }}
-                disabled={disabled}
-                name={field.name}
-              >
-                <SelectTrigger
-                  id={id}
-                  className="w-full"
-                  aria-invalid={invalid}
-                  onBlur={field.onBlur}
-                  ref={field.ref}
-                >
-                  <SelectValue
-                    placeholder={
-                      activeContacts.length === 0
-                        ? "Create payer contact"
-                        : "Select payer contact"
+      <div
+        className={
+          isPaymentMode ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4"
+        }
+      >
+        {isPaymentMode ? null : (
+          <CommonFormField
+            control={control}
+            name="receivedFromContactId"
+            label={
+              incomeRecurrence === "MONTHLY" ? "Tenant / payer" : "Paid by"
+            }
+            fieldType="custom"
+            placeholder={
+              activeContacts.length === 0
+                ? "Create payer contact"
+                : "Select payer contact"
+            }
+            render={({ field, id, invalid, disabled }) => (
+              <>
+                <Select
+                  value={field.value?.toString() ?? ""}
+                  onValueChange={(value) => {
+                    if (value === CREATE_PAYER_CONTACT_VALUE) {
+                      setOpenCreatePayer(true);
+                      return;
                     }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {payerOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
 
-              {canCreatePayerInline ? (
-                <Dialog
-                  open={openCreatePayer}
-                  onOpenChange={(open) => {
-                    setOpenCreatePayer(open);
-                    if (!open) setPayerCreateError(null);
+                    const selectedContact = activeContacts.find(
+                      (contact) => contact.id === value,
+                    );
+
+                    field.onChange(value);
+                    setValue("receivedFrom", selectedContact?.fullName ?? "", {
+                      shouldDirty: true,
+                      shouldValidate: true,
+                    });
                   }}
+                  disabled={disabled}
+                  name={field.name}
                 >
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                      <DialogTitle>Create payer contact</DialogTitle>
-                      <DialogDescription>
-                        Save the tenant or person who pays this income, then use
-                        them on the income record.
-                      </DialogDescription>
-                    </DialogHeader>
+                  <SelectTrigger
+                    id={id}
+                    className="w-full"
+                    aria-invalid={invalid}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                  >
+                    <SelectValue
+                      placeholder={
+                        activeContacts.length === 0
+                          ? "Create payer contact"
+                          : "Select payer contact"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {payerOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
 
-                    <div className="flex flex-col gap-4 py-4">
-                      {payerCreateError ? (
-                        <div className="text-sm font-medium text-destructive">
-                          {payerCreateError}
+                {canCreatePayerInline ? (
+                  <Dialog
+                    open={openCreatePayer}
+                    onOpenChange={(open) => {
+                      setOpenCreatePayer(open);
+                      if (!open) setPayerCreateError(null);
+                    }}
+                  >
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Create payer contact</DialogTitle>
+                        <DialogDescription>
+                          Save the tenant or person who pays this income, then
+                          use them on the income record.
+                        </DialogDescription>
+                      </DialogHeader>
+
+                      <div className="flex flex-col gap-4 py-4">
+                        {payerCreateError ? (
+                          <div className="text-sm font-medium text-destructive">
+                            {payerCreateError}
+                          </div>
+                        ) : null}
+
+                        <div className="flex flex-col gap-2">
+                          <label
+                            htmlFor="payer-contact-name"
+                            className="text-sm font-medium"
+                          >
+                            Payer name
+                          </label>
+                          <Input
+                            id="payer-contact-name"
+                            value={payerName}
+                            onChange={(event) =>
+                              setPayerName(event.target.value)
+                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                handleCreatePayer();
+                              }
+                            }}
+                            placeholder="e.g. Jean Tenant"
+                          />
                         </div>
-                      ) : null}
 
-                      <div className="flex flex-col gap-2">
-                        <label
-                          htmlFor="payer-contact-name"
-                          className="text-sm font-medium"
-                        >
-                          Payer name
-                        </label>
-                        <Input
-                          id="payer-contact-name"
-                          value={payerName}
-                          onChange={(event) => setPayerName(event.target.value)}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter") {
-                              event.preventDefault();
-                              handleCreatePayer();
+                        <div className="flex flex-col gap-2">
+                          <label
+                            htmlFor="payer-contact-phone"
+                            className="text-sm font-medium"
+                          >
+                            Phone number
+                          </label>
+                          <Input
+                            id="payer-contact-phone"
+                            value={payerPhone}
+                            onChange={(event) =>
+                              setPayerPhone(event.target.value)
                             }
-                          }}
-                          placeholder="e.g. Jean Tenant"
-                        />
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter") {
+                                event.preventDefault();
+                                handleCreatePayer();
+                              }
+                            }}
+                            placeholder="+250 788 000 000"
+                          />
+                        </div>
                       </div>
 
-                      <div className="flex flex-col gap-2">
-                        <label
-                          htmlFor="payer-contact-phone"
-                          className="text-sm font-medium"
+                      <DialogFooter>
+                        <Button
+                          type="button"
+                          onClick={handleCreatePayer}
+                          disabled={isCreatingPayer}
+                          className="w-full"
                         >
-                          Phone number
-                        </label>
-                        <Input
-                          id="payer-contact-phone"
-                          value={payerPhone}
-                          onChange={(event) =>
-                            setPayerPhone(event.target.value)
-                          }
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter") {
-                              event.preventDefault();
-                              handleCreatePayer();
-                            }
-                          }}
-                          placeholder="+250 788 000 000"
-                        />
-                      </div>
-                    </div>
-
-                    <DialogFooter>
-                      <Button
-                        type="button"
-                        onClick={handleCreatePayer}
-                        disabled={isCreatingPayer}
-                        className="w-full"
-                      >
-                        {isCreatingPayer ? "Saving..." : "Save payer contact"}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              ) : null}
-            </>
-          )}
-        />
+                          {isCreatingPayer ? "Saving..." : "Save payer contact"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                ) : null}
+              </>
+            )}
+          />
+        )}
 
         <CommonFormField
           control={control}
@@ -701,7 +738,15 @@ export function IncomeFormFields({
         placeholder="Optional additional notes"
       />
 
-      {showReceiptUpload ? (
+      {showReceiptUpload && isPaymentMode ? (
+        <CommonFormField
+          control={control}
+          name="fileName"
+          label="Receipt/Proof (Mock Upload)"
+          type="file"
+          description="Upload proof of payment"
+        />
+      ) : showReceiptUpload ? (
         <div className="grid grid-cols-2 gap-4">
           <CommonFormField
             control={control}
