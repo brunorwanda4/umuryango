@@ -423,7 +423,8 @@ export function EveryTimeIncomePanel({
                       type="button"
                       size="sm"
                       variant="outline"
-                      onClick={() => {
+                      onClick={(event) => {
+                        event.stopPropagation();
                         handleActionClick(
                           source.managedTransaction,
                           canEditManagedTransaction ? "edit" : "view",
@@ -436,7 +437,8 @@ export function EveryTimeIncomePanel({
                     <Button
                       type="button"
                       size="sm"
-                      onClick={() => {
+                      onClick={(event) => {
+                        event.stopPropagation();
                         onAddPayment(
                           source.managedTransaction,
                           getLeftMinorUnits(

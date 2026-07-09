@@ -396,6 +396,11 @@ export function MoneyIncomePage({
       }
 
       setSelectedTx(tx);
+      setOpenCreate(false);
+      setOpenEdit(false);
+      setOpenView(false);
+      setOpenReceipt(false);
+      setOpenDelete(false);
       setPaymentTarget({
         transaction: tx,
         amountMinorUnits: amountDueMinorUnits,
