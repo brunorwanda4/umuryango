@@ -15,6 +15,7 @@ import {
 import type { CurrentUser } from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
+import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import { formatDate, formatMinorUnits } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
@@ -25,6 +26,7 @@ const incomePaymentSchema = z.object({
     .min(1, "Payment amount must be greater than 0"),
   date: z.string().min(1, "Payment date is required"),
   paymentMethod: z.string().min(1, "Payment method is required"),
+  receivedFromContactId: z.string().optional(),
   receivedBy: z.string().optional(),
   notes: z.string().optional(),
   fileName: z.string().optional(),
@@ -48,6 +50,7 @@ function getDefaultValues(
     amountMinorUnits: 0,
     date: formatDateInput(new Date()),
     paymentMethod: paymentSource?.paymentMethod || "CASH",
+    receivedFromContactId: paymentSource?.receivedFromContactId || "",
     receivedBy,
     notes: "",
     fileName: "",
@@ -59,6 +62,7 @@ export function IncomePaymentDialog({
   onOpenChange,
   family,
   currentUser,
+  contacts,
   paymentSource,
   paymentAmountMinorUnits,
   onSuccess,
@@ -67,6 +71,7 @@ export function IncomePaymentDialog({
   onOpenChange: (open: boolean) => void;
   family: FamilyDetail;
   currentUser: CurrentUser | null;
+  contacts: FamilyContact[];
   paymentSource: IncomeTransaction | null;
   paymentAmountMinorUnits: string | null;
   onSuccess: () => void;
@@ -76,6 +81,15 @@ export function IncomePaymentDialog({
       ?.fullName ??
     currentUser?.fullName ??
     "";
+  const activeContacts = contacts.filter(
+    (contact) => contact.status === "ACTIVE",
+  );
+  const payerOptions = activeContacts.map((contact) => ({
+    label: contact.phoneNumber
+      ? `${contact.fullName} (${contact.phoneNumber})`
+      : contact.fullName,
+    value: contact.id,
+  }));
 
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     IncomePaymentFormValues,
@@ -89,6 +103,7 @@ export function IncomePaymentDialog({
       amountMinorUnits: String(values.amountMinorUnits),
       date: new Date(values.date).toISOString(),
       paymentMethod: values.paymentMethod,
+      receivedFromContactId: values.receivedFromContactId || undefined,
       receivedBy: values.receivedBy,
       notes: values.notes,
       idempotencyKey: `record-income-payment-${Date.now()}-${Math.random()
@@ -254,6 +269,21 @@ export function IncomePaymentDialog({
             ]}
             placeholder="Select payment method"
             required
+          />
+
+          <CommonFormField
+            control={form.control}
+            name="receivedFromContactId"
+            label="Person who paid"
+            fieldType="select"
+            selectOptions={payerOptions}
+            placeholder={
+              activeContacts.length === 0
+                ? "No active contacts"
+                : "Select payer contact"
+            }
+            description="Defaults to the last payer saved on this recurring income."
+            disabled={activeContacts.length === 0}
           />
 
           <CommonFormField

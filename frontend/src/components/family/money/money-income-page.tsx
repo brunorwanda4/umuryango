@@ -542,6 +542,7 @@ export function MoneyIncomePage({
         onOpenChange={handlePaymentOpenChange}
         family={family}
         currentUser={initialData?.currentUser ?? null}
+        contacts={contacts}
         paymentSource={paymentSourceTx}
         paymentAmountMinorUnits={paymentAmountMinorUnits}
         onSuccess={refreshTransactions}

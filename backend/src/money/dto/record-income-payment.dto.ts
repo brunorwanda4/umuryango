@@ -56,6 +56,15 @@ export class RecordIncomePaymentDto {
   @Transform(({ value }) => trim(value))
   receivedBy?: string;
 
+  @ApiPropertyOptional({
+    description: 'Family contact ID for the person or organization who paid.',
+  })
+  @IsString()
+  @IsOptional()
+  @MaxLength(120)
+  @Transform(({ value }) => trim(value))
+  receivedFromContactId?: string;
+
   @ApiPropertyOptional({ description: 'Optional payment notes.' })
   @IsString()
   @IsOptional()

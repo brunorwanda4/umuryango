@@ -177,6 +177,10 @@ describe('TransactionsService', () => {
     });
     prisma.familyMember.findFirst.mockResolvedValue(managerMembership);
     prisma.familyTransaction.findFirst.mockResolvedValue(source);
+    prisma.familyContact.findFirst.mockResolvedValue({
+      id: 'contact-2',
+      fullName: 'Aline Tenant',
+    });
     prisma.familyTransaction.findUnique.mockResolvedValue(null);
     prisma.familyTransaction.create.mockResolvedValue(created);
     prisma.familyAuditEvent.create.mockResolvedValue({ id: 'audit-payment-1' });
@@ -189,6 +193,7 @@ describe('TransactionsService', () => {
         amountMinorUnits: '150000',
         date: '2026-07-15T00:00:00.000Z',
         paymentMethod: 'MOBILE_MONEY',
+        receivedFromContactId: 'contact-2',
         receivedBy: 'Family Treasurer',
         notes: 'Tenant paid before due date.',
         idempotencyKey: 'rent-july-payment-1',
@@ -206,8 +211,8 @@ describe('TransactionsService', () => {
           currency: source.currency,
           type: TransactionType.INCOME,
           description: source.description,
-          receivedFrom: source.receivedFrom,
-          receivedFromContactId: source.receivedFromContactId,
+          receivedFrom: 'Aline Tenant',
+          receivedFromContactId: 'contact-2',
           incomeRecurrence: IncomeRecurrence.MONTHLY,
           expectedAmountMinorUnits: 350000n,
           dueDate: new Date('2026-07-20T00:00:00.000Z'),

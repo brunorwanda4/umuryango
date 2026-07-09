@@ -143,6 +143,9 @@ export class TransactionsService {
     }
 
     const amountMinorUnits = BigInt(dto.amountMinorUnits);
+    const receivedFromContact = dto.receivedFromContactId
+      ? await this.requireContact(familyId, dto.receivedFromContactId)
+      : null;
 
     return this.prisma.$transaction(async (tx) => {
       const created = await tx.familyTransaction.create({
@@ -160,9 +163,10 @@ export class TransactionsService {
           idempotencyKey: dto.idempotencyKey,
           status: TransactionStatus.PENDING,
           notes: this.nullableString(dto.notes),
-          receivedFrom: source.receivedFrom,
+          receivedFrom: receivedFromContact?.fullName ?? source.receivedFrom,
           receivedBy: this.nullableString(dto.receivedBy) ?? source.receivedBy,
-          receivedFromContactId: source.receivedFromContactId,
+          receivedFromContactId:
+            receivedFromContact?.id ?? source.receivedFromContactId,
           incomeRecurrence: IncomeRecurrence.MONTHLY,
           expectedAmountMinorUnits,
           dueDate,
