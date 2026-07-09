@@ -40,6 +40,7 @@ import { FamilyMoneySkeleton } from "./family-money-skeleton";
 import { AttachReceiptDialog } from "./income/attach-receipt-dialog";
 import type { MoneyOverview } from "./types";
 import { normalizeMoneyOverview, toChartNumber } from "./utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type MoneyExpensesPageInitialData = {
   family: FamilyDetail | null;
@@ -463,45 +464,53 @@ export function MoneyExpensesPage({
 
       <Separator />
       <ExpenseMetricCards transactions={transactions} currency={currency} />
-      <ExpenseFilters
-        search={search}
-        setSearch={setSearch}
-        filterCategory={filterCategory}
-        setFilterCategory={setFilterCategory}
-        filterPaymentMethod={filterPaymentMethod}
-        setFilterPaymentMethod={setFilterPaymentMethod}
-        filterStatus={filterStatus}
-        setFilterStatus={setFilterStatus}
-        filterMember={filterMember}
-        setFilterMember={setFilterMember}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
-        minAmount={minAmount}
-        setMinAmount={setMinAmount}
-        maxAmount={maxAmount}
-        setMaxAmount={setMaxAmount}
-        resetFilters={resetFilters}
-        categories={categories}
-        family={family}
-      />
-      <ExpenseTable
-        filteredTransactions={filteredTransactions}
-        currency={currency}
-        isAdmin={isAdmin}
-        family={family}
-        handleActionClick={handleActionClick}
-        handleSendApproval={handleSendApproval}
-        handleDuplicate={handleDuplicate}
-        handleDownloadReceipt={handleDownloadReceipt}
-        setOpenCreate={setOpenCreate}
-      />
-      <ExpenseAnalytics
-        transactions={transactions}
-        budgets={money?.budgets ?? []}
-        currency={currency}
-      />
+      <Tabs>
+        <TabsList>
+         <TabsTrigger value="data">Data</TabsTrigger>
+         <TabsTrigger value="overview">Overview</TabsTrigger>
+        </TabsList>
+        <TabsContent value="data"><ExpenseFilters
+          search={search}
+          setSearch={setSearch}
+          filterCategory={filterCategory}
+          setFilterCategory={setFilterCategory}
+          filterPaymentMethod={filterPaymentMethod}
+          setFilterPaymentMethod={setFilterPaymentMethod}
+          filterStatus={filterStatus}
+          setFilterStatus={setFilterStatus}
+          filterMember={filterMember}
+          setFilterMember={setFilterMember}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          minAmount={minAmount}
+          setMinAmount={setMinAmount}
+          maxAmount={maxAmount}
+          setMaxAmount={setMaxAmount}
+          resetFilters={resetFilters}
+          categories={categories}
+          family={family}
+        />
+        <ExpenseTable
+          filteredTransactions={filteredTransactions}
+          currency={currency}
+          isAdmin={isAdmin}
+          family={family}
+          handleActionClick={handleActionClick}
+          handleSendApproval={handleSendApproval}
+          handleDuplicate={handleDuplicate}
+          handleDownloadReceipt={handleDownloadReceipt}
+          setOpenCreate={setOpenCreate}
+          /></TabsContent>
+         <TabsContent value="overview"> <ExpenseAnalytics
+           transactions={transactions}
+           budgets={money?.budgets ?? []}
+           currency={currency}
+         /></TabsContent>
+      </Tabs>
+
+
 
       <CreateExpenseDialog
         open={openCreate}
