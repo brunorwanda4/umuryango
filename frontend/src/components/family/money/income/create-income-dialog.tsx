@@ -35,9 +35,54 @@ function addYears(date: Date, years: number) {
   return nextDate;
 }
 
-function getDefaultValues(receivedBy: string): TransactionFormValues {
+function getPaymentAmount(source: IncomeTransaction) {
+  if (!source.expectedAmountMinorUnits) {
+    return Number(source.amountMinorUnits || 0);
+  }
+
+  const expected = BigInt(source.expectedAmountMinorUnits);
+  const paid = BigInt(source.amountMinorUnits || 0);
+  const left = expected - paid;
+
+  return Number(left > BigInt(0) ? left : expected);
+}
+
+function getDefaultValues(
+  receivedBy: string,
+  paymentSource?: IncomeTransaction | null,
+): TransactionFormValues {
   const today = new Date();
   const todayInput = formatDateInput(today);
+
+  if (paymentSource) {
+    return {
+      title: paymentSource.description || paymentSource.category.name,
+      amountMinorUnits: getPaymentAmount(paymentSource),
+      categoryId: paymentSource.categoryId,
+      date: todayInput,
+      paymentMethod: paymentSource.paymentMethod || "CASH",
+      receivedFrom: paymentSource.receivedFrom || "",
+      receivedFromContactId: paymentSource.receivedFromContactId || "",
+      receivedBy,
+      notes: "",
+      status: "PENDING",
+      fileName: "",
+      incomeRecurrence: "MONTHLY",
+      expectedAmountMinorUnits: paymentSource.expectedAmountMinorUnits
+        ? Number(paymentSource.expectedAmountMinorUnits)
+        : undefined,
+      dueDate: paymentSource.dueDate
+        ? new Date(paymentSource.dueDate).toISOString().split("T")[0]
+        : todayInput,
+      periodStart: paymentSource.periodStart
+        ? new Date(paymentSource.periodStart).toISOString().split("T")[0]
+        : todayInput,
+      periodEnd: paymentSource.periodEnd
+        ? new Date(paymentSource.periodEnd).toISOString().split("T")[0]
+        : formatDateInput(addYears(today, 2)),
+      propertyName: paymentSource.propertyName || "",
+    };
+  }
 
   return {
     title: "",
@@ -67,6 +112,7 @@ export function CreateIncomeDialog({
   categories,
   contacts,
   currentUser,
+  paymentSource,
   onCategoriesChanged,
   onContactsChanged,
   onSuccess,
@@ -77,6 +123,7 @@ export function CreateIncomeDialog({
   categories: Category[];
   contacts: FamilyContact[];
   currentUser: CurrentUser | null;
+  paymentSource?: IncomeTransaction | null;
   onCategoriesChanged: (category?: Category) => void | Promise<void>;
   onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
   onSuccess: () => void;
@@ -93,7 +140,7 @@ export function CreateIncomeDialog({
   >({
     schema: transactionSchema,
     formOptions: {
-      defaultValues: getDefaultValues(defaultReceivedBy),
+      defaultValues: getDefaultValues(defaultReceivedBy, paymentSource),
     },
     transform: (values) => ({
       categoryId: values.categoryId,
@@ -156,6 +203,12 @@ export function CreateIncomeDialog({
   });
 
   useEffect(() => {
+    if (!open) return;
+
+    form.reset(getDefaultValues(defaultReceivedBy, paymentSource));
+  }, [defaultReceivedBy, form, open, paymentSource]);
+
+  useEffect(() => {
     if (!open || !defaultReceivedBy || form.getValues("receivedBy")) return;
 
     form.setValue("receivedBy", defaultReceivedBy, {
@@ -163,6 +216,8 @@ export function CreateIncomeDialog({
       shouldValidate: true,
     });
   }, [defaultReceivedBy, form, open]);
+
+  const isPaymentMode = Boolean(paymentSource);
 
   return (
     <Dialog
@@ -174,9 +229,13 @@ export function CreateIncomeDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Add Income</DialogTitle>
+          <DialogTitle>
+            {isPaymentMode ? "Record Income Payment" : "Add Income"}
+          </DialogTitle>
           <DialogDescription>
-            Record new family income details.
+            {isPaymentMode
+              ? "Record the amount paid, payment date, remaining amount, and due date for this monthly income."
+              : "Record new family income details."}
           </DialogDescription>
         </DialogHeader>
 
@@ -208,7 +267,11 @@ export function CreateIncomeDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending ? "Recording..." : "Add Income"}
+            {isPending
+              ? "Recording..."
+              : isPaymentMode
+                ? "Record payment"
+                : "Add Income"}
           </Button>
         </DialogFooter>
       </DialogContent>

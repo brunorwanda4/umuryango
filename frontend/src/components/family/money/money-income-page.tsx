@@ -74,6 +74,8 @@ export function MoneyIncomePage({
   const [openDelete, setOpenDelete] = useState(false);
 
   const [selectedTx, setSelectedTx] = useState<IncomeTransaction | null>(null);
+  const [paymentSourceTx, setPaymentSourceTx] =
+    useState<IncomeTransaction | null>(null);
 
   // Filters state
   const [search, setSearch] = useState("");
@@ -355,6 +357,25 @@ export function MoneyIncomePage({
     else if (action === "receipt") setOpenReceipt(true);
   };
 
+  const openGenericCreate = useCallback((open: boolean) => {
+    if (open) {
+      setPaymentSourceTx(null);
+    }
+    setOpenCreate(open);
+  }, []);
+
+  const handleCreateOpenChange = useCallback((open: boolean) => {
+    setOpenCreate(open);
+    if (!open) {
+      setPaymentSourceTx(null);
+    }
+  }, []);
+
+  const handleAddPayment = useCallback((tx: IncomeTransaction) => {
+    setPaymentSourceTx(tx);
+    setOpenCreate(true);
+  }, []);
+
   const handleSendApproval = async (tx: IncomeTransaction) => {
     if (!family) return;
     try {
@@ -414,7 +435,7 @@ export function MoneyIncomePage({
         description="Manage all money coming into the family, including salary, business income, farming income, gifts, donations, rent income, and family contributions."
         actions={
           hasCapability(family, "RECORD_INCOME") && (
-            <Button size="sm" onClick={() => setOpenCreate(true)}>
+            <Button size="sm" onClick={() => openGenericCreate(true)}>
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
               Add Income
             </Button>
@@ -463,7 +484,7 @@ export function MoneyIncomePage({
             family={family}
             handleActionClick={handleActionClick}
             handleSendApproval={handleSendApproval}
-            setOpenCreate={setOpenCreate}
+            setOpenCreate={openGenericCreate}
           />
         </TabsContent>
         <TabsContent value="every-time">
@@ -473,8 +494,9 @@ export function MoneyIncomePage({
             isAdmin={isAdmin}
             family={family}
             handleActionClick={handleActionClick}
+            onAddPayment={handleAddPayment}
             handleSendApproval={handleSendApproval}
-            setOpenCreate={setOpenCreate}
+            setOpenCreate={openGenericCreate}
           />
         </TabsContent>
         <TabsContent value="one-time">
@@ -485,7 +507,7 @@ export function MoneyIncomePage({
             family={family}
             handleActionClick={handleActionClick}
             handleSendApproval={handleSendApproval}
-            setOpenCreate={setOpenCreate}
+            setOpenCreate={openGenericCreate}
           />
         </TabsContent>
       </Tabs>
@@ -493,11 +515,12 @@ export function MoneyIncomePage({
       {/* --- ADD INCOME MODAL --- */}
       <CreateIncomeDialog
         open={openCreate}
-        onOpenChange={setOpenCreate}
+        onOpenChange={handleCreateOpenChange}
         family={family}
         categories={categories}
         contacts={contacts}
         currentUser={initialData?.currentUser ?? null}
+        paymentSource={paymentSourceTx}
         onCategoriesChanged={refreshCategories}
         onContactsChanged={refreshContacts}
         onSuccess={refreshTransactions}

@@ -27,6 +27,7 @@ type EveryTimeIncomePanelProps = {
     tx: IncomeTransaction,
     action: "view" | "edit" | "delete" | "receipt",
   ) => void;
+  onAddPayment: (tx: IncomeTransaction) => void;
   handleSendApproval: (tx: IncomeTransaction) => void;
   setOpenCreate: (open: boolean) => void;
 };
@@ -116,6 +117,7 @@ export function EveryTimeIncomePanel({
   isAdmin,
   family,
   handleActionClick,
+  onAddPayment,
   handleSendApproval,
   setOpenCreate,
 }: EveryTimeIncomePanelProps) {
@@ -381,7 +383,7 @@ export function EveryTimeIncomePanel({
                       type="button"
                       size="sm"
                       onClick={() => {
-                        setOpenCreate(true);
+                        onAddPayment(source.managedTransaction);
                       }}
                     >
                       <PlusIcon aria-hidden="true" data-icon="inline-start" />
