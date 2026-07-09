@@ -25,6 +25,7 @@ import { FamilyMoneyPageData } from "./family-money-page-data";
 import { CreateCategoryForm } from "./forms/create-category-form";
 import { MoneySectionLayout } from "./money-section-layout";
 import type { MoneyOverview } from "./types";
+import { PageTitle } from "@/components/common/pages/page-title";
 
 export function MoneyCategoriesPage({ familyName }: { familyName: string }) {
   return (
@@ -162,20 +163,11 @@ function MoneyCategoriesWorkspace({
   };
 
   return (
-    <MoneySectionLayout
-      currency={currency}
-      exampleDescription="Keep this master data clean so income and expense records stay consistent across reports, budgets, receipts, and approvals."
-      family={family}
-      header={categoryHeader}
-      money={money}
-      showMoneyMetrics={false}
-      actionDialog={
-        <CreateCategoryForm
-          existingCategories={categories}
-          familyId={familyId}
-        />
-      }
-    >
+    <div className="flex flex-col gap-6">
+      <PageTitle title="Categories" description="Manage your family's money categories." actions={    <CreateCategoryForm
+        existingCategories={categories}
+        familyId={familyId}
+      />} />
       <CategoryStatsCards stats={stats} />
       <CategoryFilters
         search={search}
@@ -219,6 +211,6 @@ function MoneyCategoriesWorkspace({
           if (!open) setDeleteCategory(null);
         }}
       />
-    </MoneySectionLayout>
+   </div>
   );
 }

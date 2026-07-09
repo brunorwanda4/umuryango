@@ -93,6 +93,15 @@ function FamilyFinanceDashboardContent({
     [expenseCategoryRows],
   );
 
+  const incomePieChartData = useMemo(
+    () =>
+      incomeSourceRows.map((row) => ({
+        name: row.name,
+        amount: toChartNumber(row.amount),
+      })),
+    [incomeSourceRows],
+  );
+
   const formatChartAmount = (value: unknown) =>
     formatMinorUnits(value, displayCurrency);
 
@@ -110,6 +119,7 @@ function FamilyFinanceDashboardContent({
       <FamilyFinanceCharts
         cashFlowData={cashFlowData}
         pieChartData={pieChartData}
+        incomePieChartData={incomePieChartData}
         formatChartAmount={formatChartAmount}
         formatCompactChartAmount={formatCompactChartAmount}
       />

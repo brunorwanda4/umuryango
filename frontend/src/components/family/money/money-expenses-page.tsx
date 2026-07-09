@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { PageTitle } from "@/components/common/pages/page-title";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -405,63 +406,26 @@ export function MoneyExpensesPage({
 
 	return (
 		<div className="flex flex-col gap-6">
-			<div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-				<div className="flex min-w-0 flex-col gap-2">
-					<div className="flex flex-wrap items-center gap-2">
-						<Badge variant="outline">Money leaving</Badge>
-						<Badge variant="secondary">{currency}</Badge>
-					</div>
-					<div className="flex items-center gap-3">
-						<span className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background">
-							<ReceiptTextIcon className="size-5 text-muted-foreground" />
-						</span>
-						<h1 className="font-bold text-2xl tracking-tight sm:text-3xl">
-							Expenses
-						</h1>
-					</div>
-					<p className="max-w-4xl text-muted-foreground text-sm leading-6">
-						Track all family spending, including food, rent, school fees,
+			<PageTitle
+				title="Expenses"
+				description="	Track all family spending, including food, rent, school fees,
 						healthcare, transport, utilities, farming, business costs, and other
-						household expenses.
-					</p>
-				</div>
-				{hasCapability(family, "RECORD_EXPENSE") ? (
-					<Button
-						size="sm"
-						onClick={() => {
-							setDuplicateValues(null);
-							setOpenCreate(true);
-						}}
-					>
-						<PlusIcon aria-hidden="true" data-icon="inline-start" />
-						Add Expense
-					</Button>
-				) : null}
-			</div>
-
-			<nav
-				aria-label="Expense integrations"
-				className="flex gap-2 overflow-x-auto"
-			>
-				<Button
-					href={`/family/${encodeURIComponent(family.slug)}/money/categories`}
-					size="sm"
-					variant="outline"
-					className="shrink-0"
-				>
-					<WalletCardsIcon aria-hidden="true" data-icon="inline-start" />
-					Categories
-				</Button>
-				<Button
-					href={`/family/${encodeURIComponent(family.slug)}/money/approvals`}
-					size="sm"
-					variant="outline"
-					className="shrink-0"
-				>
-					Approvals
-				</Button>
-			</nav>
-
+						household expenses."
+				actions={
+					hasCapability(family, "RECORD_EXPENSE") ? (
+						<Button
+							size="sm"
+							onClick={() => {
+								setDuplicateValues(null);
+								setOpenCreate(true);
+							}}
+						>
+							<PlusIcon aria-hidden="true" data-icon="inline-start" />
+							Add Expense
+						</Button>
+					) : null
+				}
+			/>
 			<Separator />
 			<ExpenseMetricCards transactions={transactions} currency={currency} />
 			<Tabs>
