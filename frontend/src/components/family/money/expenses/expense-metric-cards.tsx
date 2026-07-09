@@ -16,6 +16,11 @@ import {
 import { formatMinorUnits } from "../utils";
 import type { ExpenseTransaction } from "./types-and-schemas";
 
+const countedExpenseStatuses = new Set<ExpenseTransaction["status"]>([
+  "APPROVED",
+  "PENDING",
+]);
+
 export function ExpenseMetricCards({
   transactions,
   currency,
@@ -24,9 +29,9 @@ export function ExpenseMetricCards({
   currency: string;
 }) {
   const summary = useMemo(() => {
-    const today = new Date().toISOString().split("T")[0];
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
 
     let totalExpenses = BigInt(0);
     let monthExpenses = BigInt(0);
@@ -38,22 +43,30 @@ export function ExpenseMetricCards({
     for (const transaction of transactions) {
       const amount = BigInt(transaction.amountMinorUnits);
       const txDate = new Date(transaction.date);
+      const isCountedExpense = countedExpenseStatuses.has(transaction.status);
       const isThisMonth =
         txDate.getMonth() === currentMonth &&
         txDate.getFullYear() === currentYear;
+      const isToday =
+        txDate.getDate() === today.getDate() &&
+        txDate.getMonth() === currentMonth &&
+        txDate.getFullYear() === currentYear;
 
-      if (transaction.status === "APPROVED") {
+      if (isCountedExpense) {
         totalExpenses += amount;
-        approvedExpenses += amount;
 
         if (isThisMonth) {
           monthExpenses += amount;
           if (amount > largestThisMonth) largestThisMonth = amount;
         }
 
-        if (transaction.date.split("T")[0] === today) {
+        if (isToday) {
           todayExpenses += amount;
         }
+      }
+
+      if (transaction.status === "APPROVED") {
+        approvedExpenses += amount;
       }
 
       if (transaction.status === "PENDING") {
@@ -127,8 +140,7 @@ export function ExpenseMetricCards({
               <Icon className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div  className="text-xl font-bold truncate">{card.value}</div>
-
+              <div className="truncate text-xl font-bold">{card.value}</div>
             </CardContent>
           </Card>
         );
