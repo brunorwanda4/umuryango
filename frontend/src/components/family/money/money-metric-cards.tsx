@@ -77,11 +77,6 @@ export function MoneyMetricCards({
               </div>
               <Icon className="size-5 shrink-0 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground text-xs leading-5">
-                {card.description}
-              </p>
-            </CardContent>
           </Card>
         );
         if (card.link) {
