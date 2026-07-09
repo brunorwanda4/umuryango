@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2Icon, PlusIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
@@ -20,21 +20,17 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import type { ProjectCategory } from "./types";
 
-type ProjectCategory =
-	| "house"
-	| "vehicle"
-	| "education"
-	| "business"
-	| "event"
-	| "other";
+// ─── Local types ──────────────────────────────────────────────────────────────
+
 type ContributionStrategy =
 	| "equal_shares"
 	| "pledges"
 	| "monthly"
 	| "as_available";
 
-type CreateProjectFormValues = {
+type ProjectFormValues = {
 	name: string;
 	category: ProjectCategory;
 	targetAmount: string;
@@ -46,6 +42,26 @@ type CreateProjectFormValues = {
 	participantNotes: string;
 	description: string;
 };
+
+/**
+ * Richer project shape needed to pre-fill the edit form.
+ * Callers should pass the record returned by the project detail API.
+ */
+export type ProjectForEdit = {
+	id: string;
+	name: string;
+	category?: ProjectCategory | string | null;
+	targetAmountMinorUnits?: number | string | null;
+	startDate?: string | null;
+	targetDate?: string | null;
+	ownerMemberId?: string | null;
+	contributionStrategy?: string | null;
+	expectedContributionMinorUnits?: number | string | null;
+	participantNotes?: string | null;
+	description?: string | null;
+};
+
+// ─── Static options ───────────────────────────────────────────────────────────
 
 const projectCategoryOptions: { value: ProjectCategory; label: string }[] = [
 	{ value: "house", label: "Build a house" },
@@ -66,6 +82,12 @@ const contributionStrategyOptions: {
 	{ value: "as_available", label: "As available" },
 ];
 
+// ─── Public wrappers ──────────────────────────────────────────────────────────
+
+/**
+ * Trigger-based dialog for creating a new project.
+ * Drop-in replacement for the original `CreateProjectDialog`.
+ */
 export function CreateProjectDialog({
 	currency,
 	family,
@@ -85,37 +107,114 @@ export function CreateProjectDialog({
 					New project
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl md:max-w-2xl">
-				<DialogHeader>
-					<DialogTitle>Create a family project</DialogTitle>
-					<DialogDescription>
-						Add a plan with a target amount, dates, responsible member, and
-						contribution approach.
-					</DialogDescription>
-				</DialogHeader>
-				<CreateProjectForm
-					currency={currency}
-					family={family}
-					onCreated={() => {
-						setOpen(false);
-						onProjectCreated();
-					}}
-				/>
-			</DialogContent>
+			<ProjectFormDialogContent
+				mode="create"
+				onOpenChange={setOpen}
+				currency={currency}
+				family={family}
+				onSuccess={onProjectCreated}
+			/>
 		</Dialog>
 	);
 }
 
-function CreateProjectForm({
+/**
+ * Controlled dialog for editing an existing project.
+ * The caller owns `open` / `onOpenChange` — no built-in trigger button.
+ */
+export function EditProjectDialog({
+	open,
+	onOpenChange,
 	currency,
 	family,
-	onCreated,
+	project,
+	onSuccess,
 }: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
 	currency: string;
 	family: FamilyDetail;
-	onCreated: () => void;
+	project: ProjectForEdit;
+	onSuccess: () => void;
 }) {
+	return (
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<ProjectFormDialogContent
+				mode="edit"
+				onOpenChange={onOpenChange}
+				currency={currency}
+				family={family}
+				project={project}
+				onSuccess={onSuccess}
+			/>
+		</Dialog>
+	);
+}
+
+// ─── Shared dialog content ────────────────────────────────────────────────────
+
+function ProjectFormDialogContent({
+	mode,
+	onOpenChange,
+	currency,
+	family,
+	project,
+	onSuccess,
+}: {
+	mode: "create" | "edit";
+	onOpenChange: (open: boolean) => void;
+	currency: string;
+	family: FamilyDetail;
+	project?: ProjectForEdit;
+	onSuccess: () => void;
+}) {
+	const isEdit = mode === "edit";
+
+	return (
+		<DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl md:max-w-2xl">
+			<DialogHeader>
+				<DialogTitle>
+					{isEdit ? "Edit project" : "Create a family project"}
+				</DialogTitle>
+				<DialogDescription>
+					{isEdit
+						? "Update the project details. Changes are saved to the family record."
+						: "Add a plan with a target amount, dates, responsible member, and contribution approach."}
+				</DialogDescription>
+			</DialogHeader>
+			<ProjectForm
+				mode={mode}
+				currency={currency}
+				family={family}
+				project={project}
+				onSuccess={() => {
+					onOpenChange(false);
+					onSuccess();
+				}}
+			/>
+		</DialogContent>
+	);
+}
+
+// ─── Shared form ──────────────────────────────────────────────────────────────
+
+function ProjectForm({
+	mode,
+	currency,
+	family,
+	project,
+	onSuccess,
+}: {
+	mode: "create" | "edit";
+	currency: string;
+	family: FamilyDetail;
+	project?: ProjectForEdit;
+	onSuccess: () => void;
+}) {
+	const isEdit = mode === "edit";
+
 	const schema = useMemo(() => createProjectSchema(currency), [currency]);
+
 	const memberOptions = useMemo(
 		() => [
 			{ value: "unassigned", label: "Assign later" },
@@ -126,9 +225,11 @@ function CreateProjectForm({
 		],
 		[family.members],
 	);
+
 	const defaultProjectDates = useMemo(() => getDefaultProjectDates(), []);
+
 	const { form, onSubmit, error, success, isPending } =
-		useZodFormSubmit<CreateProjectFormValues>({
+		useZodFormSubmit<ProjectFormValues>({
 			schema,
 			formOptions: {
 				defaultValues: {
@@ -144,43 +245,71 @@ function CreateProjectForm({
 					description: "",
 				},
 			},
-			request: {
-				method: "post",
-				url: `/families/${encodeURIComponent(family.id)}/projects`,
-				apiRequest: () => ({ idempotencyKey: crypto.randomUUID() }),
-			},
-			transform: (values) => {
-				const expectedContributionMinorUnits = parseMoneyToMinorUnits(
+			request: isEdit
+				? {
+						method: "patch",
+						url: `/families/${encodeURIComponent(family.id)}/projects/${project!.id}`,
+					}
+				: {
+						method: "post",
+						url: `/families/${encodeURIComponent(family.id)}/projects`,
+						apiRequest: () => ({ idempotencyKey: crypto.randomUUID() }),
+					},
+			transform: (values) => ({
+				name: values.name.trim(),
+				category: values.category,
+				targetAmountMinorUnits: parseMoneyToMinorUnits(
+					values.targetAmount,
+					currency,
+				),
+				currency,
+				startDate: values.startDate || null,
+				targetDate: values.targetDate,
+				ownerMemberId:
+					values.ownerMemberId === "unassigned" ? null : values.ownerMemberId,
+				contributionStrategy: values.contributionStrategy,
+				expectedContributionMinorUnits: parseMoneyToMinorUnits(
 					values.expectedContributionAmount,
 					currency,
-				);
-
-				return {
-					name: values.name.trim(),
-					category: values.category,
-					targetAmountMinorUnits: parseMoneyToMinorUnits(
-						values.targetAmount,
-						currency,
-					),
-					currency,
-					startDate: values.startDate || null,
-					targetDate: values.targetDate,
-					ownerMemberId:
-						values.ownerMemberId === "unassigned" ? null : values.ownerMemberId,
-					contributionStrategy: values.contributionStrategy,
-					expectedContributionMinorUnits,
-					participantNotes: values.participantNotes.trim() || null,
-					description: values.description.trim() || null,
-				};
-			},
-			onSuccessMessage: "Project plan saved.",
+				),
+				participantNotes: values.participantNotes.trim() || null,
+				description: values.description.trim() || null,
+			}),
+			onSuccessMessage: isEdit ? "Project updated." : "Project plan saved.",
 			onSuccess: () => {
-				form.reset();
-				onCreated();
+				if (!isEdit) form.reset();
+				onSuccess();
 			},
 			toastOnError: true,
 			toastOnSuccess: true,
 		});
+
+	// Pre-fill the form whenever the project record changes (edit mode only)
+	useEffect(() => {
+		if (!isEdit || !project) return;
+		form.reset({
+			name: project.name ?? "",
+			category: isProjectCategory(project.category)
+				? project.category
+				: "other",
+			targetAmount: minorUnitsToDisplayString(
+				project.targetAmountMinorUnits,
+				currency,
+			),
+			startDate: project.startDate ?? "",
+			targetDate: project.targetDate ?? "",
+			ownerMemberId: project.ownerMemberId ?? "unassigned",
+			contributionStrategy: isContributionStrategy(project.contributionStrategy)
+				? project.contributionStrategy
+				: "equal_shares",
+			expectedContributionAmount: minorUnitsToDisplayString(
+				project.expectedContributionMinorUnits,
+				currency,
+			),
+			participantNotes: project.participantNotes ?? "",
+			description: project.description ?? "",
+		});
+	}, [isEdit, project, form, currency]);
 
 	return (
 		<form
@@ -227,7 +356,6 @@ function CreateProjectForm({
 					required
 					fieldType="money"
 				/>
-
 				<CommonFormField
 					control={form.control}
 					name="expectedContributionAmount"
@@ -271,7 +399,6 @@ function CreateProjectForm({
 					selectOptions={contributionStrategyOptions}
 					required
 				/>
-
 				<CommonFormField
 					control={form.control}
 					name="participantNotes"
@@ -304,6 +431,8 @@ function CreateProjectForm({
 							<Spinner data-icon="inline-start" />
 							Saving
 						</>
+					) : isEdit ? (
+						"Save changes"
 					) : (
 						"Save project"
 					)}
@@ -312,6 +441,8 @@ function CreateProjectForm({
 		</form>
 	);
 }
+
+// ─── Schema ───────────────────────────────────────────────────────────────────
 
 function createProjectSchema(currency: string) {
 	return z.object({
@@ -354,6 +485,8 @@ function createProjectSchema(currency: string) {
 	});
 }
 
+// ─── Money helpers ────────────────────────────────────────────────────────────
+
 function parseMoneyToMinorUnits(value: string, currency: string) {
 	const normalized = value.trim().replaceAll(",", "");
 
@@ -392,6 +525,41 @@ function getCurrencyFractionDigits(currency: string) {
 		return 2;
 	}
 }
+
+/**
+ * Convert a stored minor-unit integer back to a display string for the form
+ * input (e.g. 5000000 RWF → "5000000", 5000 USD cents → "50.00").
+ */
+function minorUnitsToDisplayString(
+	value: number | string | null | undefined,
+	currency: string,
+): string {
+	if (value == null || value === "") return "";
+	const num = Number(value);
+	if (!Number.isFinite(num)) return "";
+	const fractionDigits = getCurrencyFractionDigits(currency);
+	if (fractionDigits === 0) return String(num);
+	const divisor = 10 ** fractionDigits;
+	const major = Math.floor(num / divisor);
+	const minor = String(num % divisor).padStart(fractionDigits, "0");
+	return `${major}.${minor}`;
+}
+
+// ─── Enum guards ──────────────────────────────────────────────────────────────
+
+function isProjectCategory(value: unknown): value is ProjectCategory {
+	return ["house", "vehicle", "education", "business", "event", "other"].includes(
+		value as string,
+	);
+}
+
+function isContributionStrategy(value: unknown): value is ContributionStrategy {
+	return ["equal_shares", "pledges", "monthly", "as_available"].includes(
+		value as string,
+	);
+}
+
+// ─── Date helpers ─────────────────────────────────────────────────────────────
 
 function getDefaultProjectDates() {
 	const today = new Date();
