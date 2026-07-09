@@ -370,16 +370,37 @@ export function MoneyIncomePage({
     setOpenCreate(open);
   }, []);
 
-  const handlePaymentOpenChange = useCallback((open: boolean) => {
-    setOpenPayment(open);
-    if (!open) {
-      setPaymentSourceTx(null);
-      setPaymentAmountMinorUnits(null);
-    }
-  }, []);
+  const handlePaymentOpenChange = useCallback(
+    (open: boolean) => {
+      if (open && !paymentSourceTx) {
+        toast.error(
+          "Choose an every-time income record before recording payment.",
+        );
+        return;
+      }
+
+      setOpenPayment(open);
+      if (!open) {
+        setPaymentSourceTx(null);
+        setPaymentAmountMinorUnits(null);
+      }
+    },
+    [paymentSourceTx],
+  );
 
   const handleAddPayment = useCallback(
     (tx: IncomeTransaction, amountDueMinorUnits: string) => {
+      if (tx.incomeRecurrence !== "MONTHLY") {
+        toast.error("Payments can only be recorded for every-time income.");
+        return;
+      }
+
+      if (!tx.id) {
+        toast.error("Income record is missing its transaction ID.");
+        return;
+      }
+
+      setSelectedTx(tx);
       setPaymentAmountMinorUnits(amountDueMinorUnits);
       setPaymentSourceTx(tx);
       setOpenPayment(true);
