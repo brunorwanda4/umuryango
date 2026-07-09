@@ -9,9 +9,9 @@ import {
 import { useMemo } from "react";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { formatMinorUnits, normalizeMinorUnitString } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
@@ -118,125 +118,72 @@ export function IncomeMetricCards({
     };
   }, [transactions]);
 
+  const cards = [
+    {
+      title: "Total Income",
+      value: formatMinorUnits(summary.totalRecorded, currency),
+      icon: WalletIcon,
+    },
+    {
+      title: "Income This Month",
+      value: formatMinorUnits(summary.monthRecorded, currency),
+      icon: CoinsIcon,
+    },
+    {
+      title: "Income Today",
+      value: formatMinorUnits(summary.todayRecorded, currency),
+      icon: TrendingDownIcon,
+    },
+    {
+      title: "Pending Income",
+      value: formatMinorUnits(summary.pendingAmount, currency),
+      icon: AlertCircleIcon,
+    },
+    {
+      title: "Approved Income",
+      value: formatMinorUnits(summary.approvedAmount, currency),
+      icon: CheckCircleIcon,
+    },
+    {
+      title: "Rent Balance",
+      value: formatMinorUnits(summary.rentBalance, currency),
+      icon: AlertCircleIcon,
+    },
+    {
+      title: "Overdue Rent",
+      value: String(summary.overdueRentCount),
+      icon: FileTextIcon,
+    },
+    {
+      title: "Income Records",
+      value: String(summary.recordCount),
+      icon: FileTextIcon,
+    },
+  ];
+
   return (
     <section
       aria-label="Income metrics"
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
     >
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-          <CardDescription className="text-xs font-medium uppercase tracking-wider">
-            Total Income
-          </CardDescription>
-          <WalletIcon className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-xl font-bold truncate">
-            {formatMinorUnits(summary.totalRecorded, currency)}
-          </div>
-
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-          <CardDescription className="text-xs font-medium uppercase tracking-wider">
-            Income This Month
-          </CardDescription>
-          <CoinsIcon className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-xl font-bold truncate">
-            {formatMinorUnits(summary.monthRecorded, currency)}
-          </div>
-
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-          <CardDescription className="text-xs font-medium uppercase tracking-wider">
-            Income Today
-          </CardDescription>
-          <TrendingDownIcon className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-xl font-bold truncate">
-            {formatMinorUnits(summary.todayRecorded, currency)}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-          <CardDescription className="text-xs font-medium uppercase tracking-wider">
-            Pending Income
-          </CardDescription>
-          <AlertCircleIcon className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-xl font-bold truncate">
-            {formatMinorUnits(summary.pendingAmount, currency)}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-          <CardDescription className="text-xs font-medium uppercase tracking-wider">
-            Approved Income
-          </CardDescription>
-          <CheckCircleIcon className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-xl font-bold truncate">
-            {formatMinorUnits(summary.approvedAmount, currency)}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-          <CardDescription className="text-xs font-medium uppercase tracking-wider">
-            Rent Balance
-          </CardDescription>
-          <AlertCircleIcon className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-xl font-bold truncate">
-            {formatMinorUnits(summary.rentBalance, currency)}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-          <CardDescription className="text-xs font-medium uppercase tracking-wider">
-            Overdue Rent
-          </CardDescription>
-          <FileTextIcon className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-xl font-bold truncate">
-            {summary.overdueRentCount}
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-          <CardDescription className="text-xs font-medium uppercase tracking-wider">
-            Income Records
-          </CardDescription>
-          <FileTextIcon className="size-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-xl font-bold truncate">
-            {summary.recordCount}
-          </div>
-        </CardContent>
-      </Card>
+      {cards.map((card) => {
+        const Icon = card.icon;
+        return (
+          <Card key={card.title}>
+            <CardHeader className="flex sm:flex-row flex-row-reverse items-center justify-end sm:justify-between gap-3">
+              <div className="min-w-0 max-sm:flex-row max-sm:flex max-sm:items-center max-sm:gap-4">
+                <CardDescription className="max-sm:font-semibold max-sm:text-lg max-sm:flex">
+                  <span>{card.title}</span> <span className="block sm:hidden">:</span>
+                </CardDescription>
+                <CardTitle className="mt-1 truncate text-xl sm:text-2xl font-bold">
+                  {card.value}
+                </CardTitle>
+              </div>
+              <Icon className="size-5 shrink-0 text-muted-foreground sm:block hidden" />
+            </CardHeader>
+          </Card>
+        );
+      })}
     </section>
   );
 }
