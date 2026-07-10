@@ -1,6 +1,7 @@
 "use client";
 
 import { PlusIcon } from "lucide-react";
+import type * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -22,11 +23,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 type MoneyFormType = "income" | "expense" | "savings" | "debt";
 
 interface MoneyFormDialogProps {
   type: MoneyFormType;
+  triggerClassName?: string;
+  triggerSize?: React.ComponentProps<typeof Button>["size"];
 }
 
 const formConfig: Record<
@@ -64,14 +68,18 @@ const formConfig: Record<
   },
 };
 
-export function MoneyFormDialog({ type }: MoneyFormDialogProps) {
+export function MoneyFormDialog({
+  type,
+  triggerClassName,
+  triggerSize = "sm",
+}: MoneyFormDialogProps) {
   const config = formConfig[type];
   const fieldPrefix = `money-${type}`;
 
   return (
     <Dialog syncWithSearchParams={false}>
       <DialogTrigger asChild>
-        <Button size="sm">
+        <Button size={triggerSize} className={cn(triggerClassName)}>
           <PlusIcon data-icon="inline-start" />
           {config.action}
         </Button>
