@@ -29,6 +29,13 @@ Use this file for agent behavior and verification expectations.
 6. Update docs if needed.
 7. Summarize changes and verification.
 
+## Styling Vs Application Classification
+
+- Styling-only requests are limited to presentation: layout, spacing, typography, responsive polish, theme tokens, icons, animations, and visual consistency. Keep behavior, data, permissions, validation, persistence, and APIs unchanged.
+- Application requests change product behavior: routes, forms, CRUD, filters, data fetching, mutations, server state, permissions, validation, approvals, reports, documents, finance workflows, or backend logic.
+- When a request is ambiguous, classify it by the highest-risk affected surface. If data, auth, money, documents, reports, or persistence are touched, treat it as application work.
+- DaisyUI may be used for styling-only frontend polish. It must not bypass shadcn/ui component rules, accessibility, permission-aware behavior, or backend-authoritative application logic.
+
 ## Sensitive Workflow
 
 For auth, authorization, money, reports, documents, personal data, or audit:

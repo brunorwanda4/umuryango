@@ -9,6 +9,13 @@ Use this file for screens, flows, components, responsive behavior, accessibility
 - English only for now, but layout and copy must be localization-ready.
 - Default identity is black and white with light/dark mode through tokens. Future family themes should not require component rewrites.
 
+## Styling Work Vs Application Work
+
+- Styling-only work covers visual presentation: spacing, sizing, responsive layout, typography, visual hierarchy, theme tokens, color usage, icons, animations, and polish for existing UI.
+- Styling-only work must not change API calls, server state, validation, permissions, database behavior, financial calculations, reports, document access, or business workflow rules.
+- Application work covers functional product behavior: new or changed routes, forms, CRUD flows, filters, tables, server mutations, persisted data, auth-sensitive actions, approval flows, document workflows, reports, and finance logic.
+- Application work must include the full state model: loading, empty, error, success, duplicate-submit prevention, permission-aware actions, backend authorization, validation, persistence, and relevant verification.
+
 ## shadcn/ui
 
 - shadcn/ui is the required component layer.
@@ -16,6 +23,12 @@ Use this file for screens, flows, components, responsive behavior, accessibility
 - Add before importing: `bunx shadcn@latest add <component>`.
 - Fetch docs before creating/fixing/debugging: `bunx shadcn@latest docs <component>`.
 - Read generated files after adding components.
+
+## DaisyUI
+
+- DaisyUI may be used only as a styling aid for presentation-focused work, layout polish, and theme-friendly utility classes.
+- Do not use DaisyUI as the primary app component system for workflow controls that are already covered by shadcn/ui, including forms, dialogs, drawers, tables, dropdowns, alerts, badges, skeletons, toasts, and destructive confirmations.
+- DaisyUI styling must still use semantic tokens where possible, preserve light/dark behavior, remain accessible, and support longer localization-ready text.
 
 ## Component Rules
 

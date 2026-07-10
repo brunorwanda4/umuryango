@@ -25,12 +25,16 @@ Use this file when writing or reviewing code.
 - RHF/Zod forms should use `frontend/src/hooks/use-zod-form-submit.ts` and `frontend/src/components/common/form/common-form-field.tsx` where appropriate.
 - Do not duplicate server state into local state except editable drafts.
 - Keep user-facing strings localization-ready.
+- Treat styling-only work as presentation changes only. Do not modify API behavior, validation, authorization, persistence, money logic, or workflow state unless the task is application work.
+- Treat application work as functional product behavior. It must handle typed data, server state, validation, permissions, persistence, loading/error/empty/success states, and relevant tests or manual verification.
 
-## Styling And shadcn
+## Styling, shadcn, And DaisyUI
 
 - Use Tailwind CSS and shadcn/ui with semantic tokens.
 - Add shadcn components before import and read generated files.
 - Fetch shadcn docs before component creation/fix/debug.
+- DaisyUI is allowed for styling-only presentation helpers, layout polish, and theme-aware Tailwind classes.
+- Do not replace required shadcn/ui workflow components with DaisyUI components for forms, dialogs, drawers, tables, dropdowns, alerts, badges, skeletons, toasts, or destructive confirmations.
 - Use built-in variants/sizes first; `className` is for layout.
 - Forms use `FieldGroup` + `Field`; mark errors with `data-invalid` and `aria-invalid`.
 - Use real components for alerts, empty states, badges, skeletons, separators, dialogs/sheets/drawers, and toasts.
