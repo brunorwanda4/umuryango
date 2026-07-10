@@ -86,7 +86,7 @@ export function MobileBottomNavigation({
   return (
     <nav
       aria-label="Primary mobile navigation"
-      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
     >
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
         {items.map((item) => {
@@ -106,7 +106,7 @@ export function MobileBottomNavigation({
               className={cn(
                 "flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
                 isActive &&
-                  "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                  "border-t-2 border-t-primary rounded-t-none text-primary",
               )}
             >
               <MobileLinkLoadingIndicator icon={item.icon} label={label} />
@@ -118,7 +118,7 @@ export function MobileBottomNavigation({
           aria-label="Open all navigation links"
           aria-current={!hasActiveItem ? "page" : undefined}
           className={cn(
-            "flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-md px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
+            "flex min-h-14 min-w-0 flex-col items-center justify-center gap-1  px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
             !hasActiveItem &&
               "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
           )}
