@@ -9,21 +9,32 @@ import {
 import { cn } from "@/lib/utils";
 
 interface OverviewCard {
-  description?: string;
+  description?: ReactNode;
   value?: ReactNode;
   icon?: ReactNode;
+  footer?: ReactNode;
   className?: string;
   link?: string;
 }
 
 interface OverviewCardDisplayProps {
   cards: OverviewCard[];
+  cardDescriptionClassName?: string;
+  cardFooterClassName?: string;
+  cardHeaderClassName?: string;
+  cardTitleClassName?: string;
   className?: string;
+  iconPosition?: "end" | "start";
 }
 
 const OverviewCardDisplay = ({
   cards,
+  cardDescriptionClassName,
+  cardFooterClassName,
+  cardHeaderClassName,
+  cardTitleClassName,
   className,
+  iconPosition = "end",
 }: OverviewCardDisplayProps) => {
   return (
     <div
@@ -32,32 +43,60 @@ const OverviewCardDisplay = ({
         className,
       )}
     >
-      {cards.map((data) => {
+      {cards.map((data, index) => {
+        const key =
+          typeof data.description === "string" ? data.description : index;
         const card = (
-          <Card>
-            <CardHeader className="flex sm:flex-row flex-row-reverse items-center justify-end sm:justify-between gap-3 ">
+          <Card className={data.className}>
+            <CardHeader
+              className={cn(
+                "flex sm:flex-row flex-row-reverse items-center justify-end sm:justify-between gap-3",
+                cardHeaderClassName,
+              )}
+            >
+              {iconPosition === "start" && data.icon}
               <div className="min-w-0 max-sm:flex-row max-sm:flex max-sm:items-center max-sm:gap-4">
-                <CardDescription className=" max-sm:font-semibold max-sm:text-lg max-sm:flex">
+                <CardDescription
+                  className={cn(
+                    "max-sm:font-semibold max-sm:text-lg max-sm:flex",
+                    cardDescriptionClassName,
+                  )}
+                >
                   <span>{data.description}</span>{" "}
                   <span className=" block sm:hidden">:</span>
                 </CardDescription>
-                <CardTitle className="mt-1 truncate text-xl sm:text-2xl font-bold ">
+                <CardTitle
+                  className={cn(
+                    "mt-1 truncate text-xl sm:text-2xl font-bold",
+                    cardTitleClassName,
+                  )}
+                >
                   {data.value}
                 </CardTitle>
+                {data.footer && (
+                  <div
+                    className={cn(
+                      "mt-3 flex items-center gap-2 font-medium text-muted-foreground text-sm",
+                      cardFooterClassName,
+                    )}
+                  >
+                    {data.footer}
+                  </div>
+                )}
               </div>
-              {data.icon}
+              {iconPosition === "end" && data.icon}
             </CardHeader>
           </Card>
         );
 
         if (data.link) {
           return (
-            <Link key={data.description} href={data.link}>
+            <Link key={key} href={data.link}>
               {card}
             </Link>
           );
         }
-        return <div key={data.description}>{card}</div>;
+        return <div key={key}>{card}</div>;
       })}
     </div>
   );
