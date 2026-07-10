@@ -271,7 +271,7 @@ function MemberRow({
           {member.avatarUrl ? (
             <AvatarImage src={member.avatarUrl} alt={member.fullName} />
           ) : null}
-          <AvatarFallback>{getInitials(member.fullName)}</AvatarFallback>
+          <AvatarFallback name={member.fullName} />
         </Avatar>
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate font-medium text-sm">
@@ -476,13 +476,4 @@ function MembersSkeleton() {
       <Skeleton className="h-64 w-full rounded-xl" />
     </div>
   );
-}
-
-function getInitials(value: string) {
-  return value
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
 }

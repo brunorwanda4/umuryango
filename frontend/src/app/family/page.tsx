@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AppSidebarShell } from "@/components/app-shell/app-sidebar";
 import {
-  getInitials,
   getKinshipLabel,
   joinedDateFormatter,
 } from "@/components/family/dashboard/dashboard-data";
@@ -235,7 +234,7 @@ function MemberRow({ member }: { member: FamilyMemberSummary }) {
         {member.avatarUrl ? (
           <AvatarImage src={member.avatarUrl} alt={member.fullName} />
         ) : null}
-        <AvatarFallback>{getInitials(member.fullName)}</AvatarFallback>
+        <AvatarFallback name={member.fullName} />
       </Avatar>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-sm">{member.fullName}</p>

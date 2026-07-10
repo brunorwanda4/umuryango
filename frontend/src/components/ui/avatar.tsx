@@ -3,6 +3,8 @@
 import { Avatar as AvatarPrimitive } from "radix-ui";
 import type * as React from "react";
 
+import { getInitialsUsername } from "@/lib/generate-username";
+import { getHslFromText } from "@/lib/get-color";
 import { cn } from "@/lib/utils";
 
 function Avatar({
@@ -43,8 +45,31 @@ function AvatarImage({
 
 function AvatarFallback({
   className,
+  name,
+  colorSeed,
+  isSubClass,
+  children,
+  style,
   ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
+}: React.ComponentProps<typeof AvatarPrimitive.Fallback> & {
+  name?: string;
+  colorSeed?: string;
+  isSubClass?: boolean;
+}) {
+  const textSeed =
+    colorSeed ??
+    name ??
+    (typeof children === "string" || typeof children === "number"
+      ? String(children)
+      : "");
+  const fallbackStyle = textSeed
+    ? ({
+        backgroundColor: getHslFromText(textSeed),
+        color: "white",
+        ...style,
+      } satisfies React.CSSProperties)
+    : style;
+
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
@@ -52,8 +77,11 @@ function AvatarFallback({
         "flex size-full items-center justify-center rounded-full bg-muted text-sm text-muted-foreground group-data-[size=sm]/avatar:text-xs",
         className,
       )}
+      style={fallbackStyle}
       {...props}
-    />
+    >
+      {children ?? (name ? getInitialsUsername(name, isSubClass) : null)}
+    </AvatarPrimitive.Fallback>
   );
 }
 

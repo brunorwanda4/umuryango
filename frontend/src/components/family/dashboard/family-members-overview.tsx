@@ -13,7 +13,6 @@ import {
 import { AUTHORITY_LABELS } from "@/lib/family-access";
 import { cn } from "@/lib/utils";
 import {
-  getInitials,
   getKinshipLabel,
   getVisibleMembers,
   joinedDateFormatter,
@@ -75,9 +74,7 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
                         alt={member.fullName}
                       />
                     ) : null}
-                    <AvatarFallback>
-                      {getInitials(member.fullName)}
-                    </AvatarFallback>
+                    <AvatarFallback name={member.fullName} />
                   </Avatar>
                   <span
                     className={cn(

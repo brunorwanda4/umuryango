@@ -16,14 +16,14 @@ const moneyTabs = [
   { label: "Transactions", value: "transactions" },
 ];
 
-export default function MyMoneyPage() {
+export default async function MyMoneyPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageTitle
         title="My Money"
         description="Manage income, expenses, savings, debts, and recent money activity in one organized workspace."
       />
-      <Tabs defaultValue="overview" syncWithHash={false}>
+      <Tabs defaultValue="overview" syncWithHash>
         <TabsList className="grid h-auto w-full grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-6">
           {moneyTabs.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value}>

@@ -21,11 +21,7 @@ import {
 import { AUTHORITY_LABELS } from "@/lib/family-access";
 import type { MoneyOverview } from "../money/types";
 import { formatMinorUnits, formatTitle } from "../money/utils";
-import {
-  formatRelativeTime,
-  getInitials,
-  getKinshipLabel,
-} from "./dashboard-data";
+import { formatRelativeTime, getKinshipLabel } from "./dashboard-data";
 import type { FamilyDetail } from "./types";
 
 const MAX_ENTRIES = 6;
@@ -202,7 +198,7 @@ export function FamilyActivityFeed({
                     {entry.avatarUrl ? (
                       <AvatarImage src={entry.avatarUrl} alt={entry.name} />
                     ) : null}
-                    <AvatarFallback>{getInitials(entry.name)}</AvatarFallback>
+                    <AvatarFallback name={entry.name} />
                   </Avatar>
 
                   <div className="min-w-0 flex-1">

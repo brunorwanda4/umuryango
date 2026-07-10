@@ -23,11 +23,7 @@ import {
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import type { CurrentUser } from "@/hooks/use-current-user";
 import apiRequest from "@/service/api";
-import {
-  type AppSidebarMode,
-  getInitials,
-  workspaceLinks,
-} from "./sidebar-utils";
+import { type AppSidebarMode, workspaceLinks } from "./sidebar-utils";
 
 type RecentFamily = {
   id: string;
@@ -94,7 +90,7 @@ export function WorkspaceSwitcher({
             {user?.avatarUrl ? (
               <AvatarImage src={user.avatarUrl} alt={title} />
             ) : null}
-            <AvatarFallback>{getInitials(title)}</AvatarFallback>
+            <AvatarFallback name={title} />
           </Avatar>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate font-medium">{title}</span>
