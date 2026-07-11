@@ -63,3 +63,11 @@ export interface MoneySummary {
   savingsMinorUnits: number;
   debtsMinorUnits: number;
 }
+
+/** Lightweight family shape returned by GET /families?limit=1. */
+export type FamilySummary = {
+  authority: "HEAD" | "ADMIN" | "MEMBER";
+  id: string;
+  name: string;
+  slug: string;
+};
