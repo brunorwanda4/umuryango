@@ -9,6 +9,8 @@ import {
   UserRoundPlusIcon,
   XCircleIcon,
 } from "lucide-react";
+import type { ReactNode } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -18,7 +20,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { formatDate, formatMinorUnits, formatTitle } from "../utils";
+import { formatDate, formatTitle } from "../utils";
 import {
   ApprovalStatusBadge,
   PriorityBadge,
@@ -80,9 +82,11 @@ export function ApprovalDetailsSheet({
                 <DetailRow
                   label="Amount"
                   value={
-                    approval.amountMinorUnits
-                      ? formatMinorUnits(approval.amountMinorUnits, currency)
-                      : "Not recorded"
+                    <CompactMoney
+                      currency={currency}
+                      emptyLabel="Not recorded"
+                      value={approval.amountMinorUnits}
+                    />
                   }
                   mono
                 />
@@ -254,7 +258,7 @@ function DetailRow({
 }: {
   label: string;
   mono?: boolean;
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] gap-4 border-b pb-2 text-sm last:border-b-0 last:pb-0">

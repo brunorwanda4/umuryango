@@ -1,6 +1,7 @@
 "use client";
 
 import { CommonFormField } from "@/components/common/form/common-form-field";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import type { FamilyDetail } from "../../dashboard/types";
-import { formatMinorUnits } from "../utils";
 import { toMinorNumber } from "./loan-utils";
 import {
   type LoanRecord,
@@ -104,7 +104,9 @@ export function AddRepaymentDialog({
           <DialogTitle>Add Repayment</DialogTitle>
           <DialogDescription>
             Record a payment against {loan?.title ?? "this loan"}. Remaining
-            balance: {formatMinorUnits(remaining, family.defaultCurrency)}.
+            balance:{" "}
+            <CompactMoney currency={family.defaultCurrency} value={remaining} />
+            .
           </DialogDescription>
         </DialogHeader>
         <form

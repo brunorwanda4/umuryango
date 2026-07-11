@@ -4,6 +4,7 @@ import { AlertCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +29,7 @@ import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
 import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
-import { formatDate, formatMinorUnits } from "../utils";
+import { formatDate } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
 
 const CREATE_PAYER_CONTACT_VALUE = "__create_payer_contact__";
@@ -279,19 +280,19 @@ export function IncomePaymentDialog({
               <div>
                 <span className="text-muted-foreground">Expected: </span>
                 <span className="font-medium">
-                  {formatMinorUnits(
-                    paymentSource.expectedAmountMinorUnits ?? "0",
-                    family.defaultCurrency,
-                  )}
+                  <CompactMoney
+                    currency={family.defaultCurrency}
+                    value={paymentSource.expectedAmountMinorUnits ?? "0"}
+                  />
                 </span>
               </div>
               <div>
                 <span className="text-muted-foreground">Left now: </span>
                 <span className="font-medium">
-                  {formatMinorUnits(
-                    paymentAmountMinorUnits ?? "0",
-                    family.defaultCurrency,
-                  )}
+                  <CompactMoney
+                    currency={family.defaultCurrency}
+                    value={paymentAmountMinorUnits ?? "0"}
+                  />
                 </span>
               </div>
               <div>

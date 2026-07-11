@@ -5,6 +5,7 @@ import {
 } from "@/lib/format-compact-number";
 
 export {
+  formatFullMinorUnits,
   getCurrencyFractionDigits,
   normalizeMinorUnitString,
   toChartNumber,

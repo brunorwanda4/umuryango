@@ -8,6 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { formatFullMinorUnits } from "@/lib/format-compact-number";
 import { formatRf } from "./formatters";
 import {
   incomeSourceData,
@@ -76,7 +77,9 @@ export function IncomeSourceChart() {
                 <ChartTooltipContent
                   nameKey="name"
                   formatter={(value) =>
-                    typeof value === "number" ? formatRf(value) : value
+                    typeof value === "number"
+                      ? formatFullMinorUnits(value, "RWF")
+                      : value
                   }
                 />
               }

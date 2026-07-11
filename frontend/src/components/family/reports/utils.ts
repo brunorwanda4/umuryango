@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import type { ChartConfig } from "@/components/ui/chart";
 import {
+  formatFullMinorUnits,
   formatOptionalCompactMinorUnits,
   formatCompactMinorUnits as formatSharedCompactMinorUnits,
   toChartNumber,
@@ -284,6 +285,8 @@ export function formatOptionalMoney(
 export function formatMinorUnits(value: unknown, currency: string) {
   return formatSharedCompactMinorUnits(value as MoneyMinorValue, currency);
 }
+
+export { formatFullMinorUnits };
 
 export function formatCompactMinorUnits(value: unknown, currency: string) {
   return formatSharedCompactMinorUnits(value as MoneyMinorValue, currency);

@@ -26,7 +26,7 @@ import type { MoneyOverview, ReportsOverview } from "./types";
 import {
   breakdownConfig,
   formatCompactMinorUnits,
-  formatMinorUnits,
+  formatFullMinorUnits,
   getBreakdownData,
   getTrendData,
   getTrendLabel,
@@ -85,7 +85,7 @@ export function ReportsCharts({
                             {getTrendLabel(String(name))}
                           </span>
                           <span className="font-mono font-medium">
-                            {formatMinorUnits(value, currency)}
+                            {formatFullMinorUnits(value, currency)}
                           </span>
                         </>
                       )}
@@ -162,7 +162,7 @@ export function ReportsCharts({
                         <>
                           <span className="text-muted-foreground">Amount</span>
                           <span className="font-mono font-medium">
-                            {formatMinorUnits(value, currency)}
+                            {formatFullMinorUnits(value, currency)}
                           </span>
                         </>
                       )}

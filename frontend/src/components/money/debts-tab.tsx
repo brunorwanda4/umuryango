@@ -1,4 +1,5 @@
 import { LandmarkIcon } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -9,12 +10,7 @@ import {
 } from "@/components/ui/card";
 import { debtRecords, moneyCurrency } from "./money-data";
 import { MoneyFormDialog } from "./money-form-dialog";
-import {
-  formatDate,
-  formatMoney,
-  formatStatus,
-  getStatusBadgeVariant,
-} from "./utils";
+import { formatDate, formatStatus, getStatusBadgeVariant } from "./utils";
 
 export function DebtsTab() {
   return (
@@ -56,13 +52,19 @@ export function DebtsTab() {
                 <div>
                   <p className="text-muted-foreground text-sm">Principal</p>
                   <p className="font-medium">
-                    {formatMoney(debt.principalMinorUnits, moneyCurrency)}
+                    <CompactMoney
+                      currency={moneyCurrency}
+                      value={debt.principalMinorUnits}
+                    />
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm">Outstanding</p>
                   <p className="font-medium">
-                    {formatMoney(debt.outstandingMinorUnits, moneyCurrency)}
+                    <CompactMoney
+                      currency={moneyCurrency}
+                      value={debt.outstandingMinorUnits}
+                    />
                   </p>
                 </div>
               </div>

@@ -8,6 +8,7 @@ import {
   HandCoinsIcon,
   ListChecksIcon,
 } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import {
   Card,
   CardAction,
@@ -16,7 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatMinorUnits } from "../utils";
 import { isLoanDueThisMonth, isLoanOverdue, toMinorNumber } from "./loan-utils";
 import type { LoanRecord } from "./types-and-schemas";
 
@@ -63,26 +63,30 @@ export function LoanSummaryCards({
     {
       title: "Total Borrowed",
       description: "Money the family owes to others.",
-      value: formatMinorUnits(summary.borrowed, currency),
+      value: summary.borrowed,
       icon: BanknoteArrowDownIcon,
+      isMoney: true,
     },
     {
       title: "Total Lent",
       description: "Money the family expects back.",
-      value: formatMinorUnits(summary.lent, currency),
+      value: summary.lent,
       icon: BanknoteArrowUpIcon,
+      isMoney: true,
     },
     {
       title: "Total Outstanding Balance",
       description: "Remaining balances across open loans.",
-      value: formatMinorUnits(summary.outstanding, currency),
+      value: summary.outstanding,
       icon: CircleDollarSignIcon,
+      isMoney: true,
     },
     {
       title: "Total Paid",
       description: "Repayments recorded so far.",
-      value: formatMinorUnits(summary.paid, currency),
+      value: summary.paid,
       icon: HandCoinsIcon,
+      isMoney: true,
     },
     {
       title: "Due This Month",
@@ -132,7 +136,11 @@ export function LoanSummaryCards({
             </CardHeader>
             <CardContent>
               <p className="font-semibold text-2xl tracking-tight">
-                {card.value}
+                {card.isMoney ? (
+                  <CompactMoney currency={currency} value={card.value} />
+                ) : (
+                  card.value
+                )}
               </p>
             </CardContent>
           </Card>

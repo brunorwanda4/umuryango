@@ -9,6 +9,7 @@ import {
   UserRoundPlusIcon,
   XCircleIcon,
 } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TableEmptyState } from "../money-ui-helpers";
-import { formatDate, formatMinorUnits } from "../utils";
+import { formatDate } from "../utils";
 import {
   ApprovalStatusBadge,
   PriorityBadge,
@@ -79,9 +80,11 @@ export function ApprovalQueue({
       header: () => <div className="text-right">Amount</div>,
       cell: ({ row }) => (
         <div className="whitespace-nowrap text-right font-mono">
-          {row.original.amountMinorUnits
-            ? formatMinorUnits(row.original.amountMinorUnits, currency)
-            : "Not recorded"}
+          <CompactMoney
+            currency={currency}
+            emptyLabel="Not recorded"
+            value={row.original.amountMinorUnits}
+          />
         </div>
       ),
     },

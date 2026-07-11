@@ -6,15 +6,14 @@ import {
   WalletCardsIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import type { MoneyOverview } from "./types";
-import { formatOptionalMoney } from "./utils";
 
 export function MoneyMetricCards({
   currency,
@@ -70,9 +69,16 @@ export function MoneyMetricCards({
           <Card key={card.title}>
             <CardHeader className="flex sm:flex-row flex-row-reverse items-center justify-end sm:justify-between gap-3 ">
               <div className="min-w-0 max-sm:flex-row max-sm:flex max-sm:items-center max-sm:gap-4">
-                <CardDescription className=" max-sm:font-semibold max-sm:text-lg max-sm:flex"><span>{card.title}</span> <span className=" block sm:hidden">:</span></CardDescription>
+                <CardDescription className=" max-sm:font-semibold max-sm:text-lg max-sm:flex">
+                  <span>{card.title}</span>{" "}
+                  <span className=" block sm:hidden">:</span>
+                </CardDescription>
                 <CardTitle className="mt-1 truncate text-xl sm:text-2xl font-bold ">
-                  {formatOptionalMoney(card.value, currency)}
+                  <CompactMoney
+                    currency={currency}
+                    emptyLabel="No records"
+                    value={card.value}
+                  />
                 </CardTitle>
               </div>
               <Icon className="size-5 shrink-0 text-muted-foreground sm:block hidden" />

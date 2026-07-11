@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { CheckIcon, FileClockIcon, Loader2Icon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +15,7 @@ import {
 import apiRequest from "@/service/api";
 import { StatusBadge, TableEmptyState } from "./money-ui-helpers";
 import type { MoneyApprovalRow, MoneyOverview } from "./types";
-import { formatOptionalMoney, formatTitle } from "./utils";
+import { formatTitle } from "./utils";
 
 export function MoneyApprovalTable({
   currency,
@@ -78,7 +79,11 @@ export function MoneyApprovalTable({
       header: () => <div className="text-right">Amount</div>,
       cell: ({ row }) => (
         <div className="text-right font-mono">
-          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+          <CompactMoney
+            currency={currency}
+            emptyLabel="No records"
+            value={row.original.amountMinorUnits}
+          />
         </div>
       ),
     },

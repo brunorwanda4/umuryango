@@ -2,10 +2,10 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { formatRf } from "./formatters";
 import {
   type RecentIncomeRecord,
   recentIncomeData,
@@ -63,7 +63,7 @@ const recentIncomeColumns: ColumnDef<RecentIncomeRecord>[] = [
     header: "Amount",
     cell: ({ row }) => (
       <span className="font-bold text-chart-2">
-        {formatRf(row.original.amountMinorUnits)}
+        <CompactMoney currency="RWF" value={row.original.amountMinorUnits} />
       </span>
     ),
   },

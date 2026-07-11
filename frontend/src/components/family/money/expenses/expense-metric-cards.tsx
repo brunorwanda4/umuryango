@@ -7,13 +7,13 @@ import {
   WalletCardsIcon,
 } from "lucide-react";
 import { useMemo } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatMinorUnits } from "../utils";
 import type { ExpenseTransaction } from "./types-and-schemas";
 
 const countedExpenseStatuses = new Set<ExpenseTransaction["status"]>([
@@ -88,28 +88,33 @@ export function ExpenseMetricCards({
   const cards = [
     {
       title: "Total Expenses",
-      value: formatMinorUnits(summary.totalExpenses, currency),
+      value: summary.totalExpenses,
       icon: WalletCardsIcon,
+      isMoney: true,
     },
     {
       title: "Expenses This Month",
-      value: formatMinorUnits(summary.monthExpenses, currency),
+      value: summary.monthExpenses,
       icon: TrendingDownIcon,
+      isMoney: true,
     },
     {
       title: "Expenses Today",
-      value: formatMinorUnits(summary.todayExpenses, currency),
+      value: summary.todayExpenses,
       icon: ReceiptTextIcon,
+      isMoney: true,
     },
     {
       title: "Pending Approval",
-      value: formatMinorUnits(summary.pendingApproval, currency),
+      value: summary.pendingApproval,
       icon: AlertCircleIcon,
+      isMoney: true,
     },
     {
       title: "Approved Expenses",
-      value: formatMinorUnits(summary.approvedExpenses, currency),
+      value: summary.approvedExpenses,
       icon: CheckCircleIcon,
+      isMoney: true,
     },
     {
       title: "Expense Records",
@@ -118,8 +123,9 @@ export function ExpenseMetricCards({
     },
     {
       title: "Largest This Month",
-      value: formatMinorUnits(summary.largestThisMonth, currency),
+      value: summary.largestThisMonth,
       icon: TrendingDownIcon,
+      isMoney: true,
     },
   ];
 
@@ -136,10 +142,15 @@ export function ExpenseMetricCards({
             <CardHeader className="flex sm:flex-row flex-row-reverse items-center justify-end sm:justify-between gap-3">
               <div className="min-w-0 max-sm:flex-row max-sm:flex max-sm:items-center max-sm:gap-4">
                 <CardDescription className="max-sm:font-semibold max-sm:text-lg max-sm:flex">
-                  <span>{card.title}</span> <span className="block sm:hidden">:</span>
+                  <span>{card.title}</span>{" "}
+                  <span className="block sm:hidden">:</span>
                 </CardDescription>
                 <CardTitle className="mt-1 truncate text-xl sm:text-2xl font-bold">
-                  {card.value}
+                  {card.isMoney ? (
+                    <CompactMoney currency={currency} value={card.value} />
+                  ) : (
+                    card.value
+                  )}
                 </CardTitle>
               </div>
               <Icon className="size-5 shrink-0 text-muted-foreground sm:block hidden" />

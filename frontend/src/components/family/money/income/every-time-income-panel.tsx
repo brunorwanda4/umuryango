@@ -10,11 +10,12 @@ import {
   WalletIcon,
 } from "lucide-react";
 import { useMemo } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { FamilyDetail } from "../../dashboard/types";
-import { formatDate, formatMinorUnits } from "../utils";
+import { formatDate } from "../utils";
 import { IncomeTable } from "./income-table";
 import type { IncomeTransaction } from "./types-and-schemas";
 
@@ -276,10 +277,10 @@ export function EveryTimeIncomePanel({
           </CardHeader>
           <CardContent>
             <div className="truncate font-bold text-xl">
-              {formatMinorUnits(
-                summary.expectedMinorUnits.toString(),
-                currency,
-              )}
+              <CompactMoney
+                currency={currency}
+                value={summary.expectedMinorUnits.toString()}
+              />
             </div>
           </CardContent>
         </Card>
@@ -293,7 +294,10 @@ export function EveryTimeIncomePanel({
           </CardHeader>
           <CardContent>
             <div className="truncate font-bold text-xl">
-              {formatMinorUnits(summary.paidMinorUnits.toString(), currency)}
+              <CompactMoney
+                currency={currency}
+                value={summary.paidMinorUnits.toString()}
+              />
             </div>
           </CardContent>
         </Card>
@@ -307,7 +311,10 @@ export function EveryTimeIncomePanel({
           </CardHeader>
           <CardContent>
             <div className="truncate font-bold text-xl">
-              {formatMinorUnits(summary.leftMinorUnits.toString(), currency)}
+              <CompactMoney
+                currency={currency}
+                value={summary.leftMinorUnits.toString()}
+              />
             </div>
           </CardContent>
         </Card>
@@ -364,19 +371,19 @@ export function EveryTimeIncomePanel({
                         Expected
                       </div>
                       <div className="font-mono">
-                        {formatMinorUnits(
-                          source.expectedMinorUnits.toString(),
-                          currency,
-                        )}
+                        <CompactMoney
+                          currency={currency}
+                          value={source.expectedMinorUnits.toString()}
+                        />
                       </div>
                     </div>
                     <div>
                       <div className="text-muted-foreground text-xs">Paid</div>
                       <div className="font-mono">
-                        {formatMinorUnits(
-                          source.paidMinorUnits.toString(),
-                          currency,
-                        )}
+                        <CompactMoney
+                          currency={currency}
+                          value={source.paidMinorUnits.toString()}
+                        />
                       </div>
                     </div>
                     <div>
@@ -384,10 +391,10 @@ export function EveryTimeIncomePanel({
                         Must pay left
                       </div>
                       <div className="font-mono font-semibold">
-                        {formatMinorUnits(
-                          source.leftMinorUnits.toString(),
-                          currency,
-                        )}
+                        <CompactMoney
+                          currency={currency}
+                          value={source.leftMinorUnits.toString()}
+                        />
                       </div>
                     </div>
                   </div>

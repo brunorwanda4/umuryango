@@ -5,6 +5,8 @@ import {
   PencilIcon,
   Trash2Icon,
 } from "lucide-react";
+import type { ReactNode } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +34,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate, formatOptionalMoney } from "../utils";
+import { formatDate } from "../utils";
 import { CategoryIcon } from "./category-icon";
 import {
   type CategoryStatus,
@@ -171,7 +173,13 @@ function CategoryCard({
           />
           <CategoryMetric
             label="Total amount"
-            value={formatOptionalMoney(category.totalMinorUnits, currency)}
+            value={
+              <CompactMoney
+                currency={currency}
+                emptyLabel="No records"
+                value={category.totalMinorUnits}
+              />
+            }
           />
           <CategoryMetric
             label="Last updated"
@@ -183,7 +191,7 @@ function CategoryCard({
   );
 }
 
-function CategoryMetric({ label, value }: { label: string; value: string }) {
+function CategoryMetric({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="min-w-0">
       <dt className="text-muted-foreground text-xs">{label}</dt>

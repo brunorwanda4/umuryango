@@ -1,15 +1,7 @@
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  Calendar,
-  LandmarkIcon,
-  Pen,
-  PiggyBankIcon,
-  WalletCardsIcon,
-} from "lucide-react";
+import { ArrowDownIcon, Calendar, Pen, PiggyBankIcon } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "../common/overview-card-display";
 import type { MoneySummary } from "./types";
-import { formatMoney } from "./utils";
 
 interface MoneySummaryCardsProps {
   currency: string;
@@ -22,7 +14,12 @@ const MeMoneyIncomeCard = ({ currency, summary }: MoneySummaryCardsProps) => {
     {
       description: "Total income",
       icon: <ArrowDownIcon className={iconClassName} />,
-      value: formatMoney(summary.totalIncomeMinorUnits, currency),
+      value: (
+        <CompactMoney
+          currency={currency}
+          value={summary.totalIncomeMinorUnits}
+        />
+      ),
     },
     {
       description: "Income Transactions",
@@ -40,7 +37,6 @@ const MeMoneyIncomeCard = ({ currency, summary }: MoneySummaryCardsProps) => {
       icon: <PiggyBankIcon className={iconClassName} />,
       value: 9000,
     },
-
   ];
   return (
     <section className="mt-4" aria-label="Income summary">

@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { formatTitle } from "./utils";
 
@@ -7,7 +8,7 @@ export function ProjectFact({
   value,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div className="rounded-xl border bg-muted/20 p-3">

@@ -1,4 +1,5 @@
 import { PiggyBankIcon } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -10,12 +11,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { moneyCurrency, savingsGoals } from "./money-data";
 import { MoneyFormDialog } from "./money-form-dialog";
-import {
-  formatDate,
-  formatMoney,
-  formatStatus,
-  getProgressPercent,
-} from "./utils";
+import { formatDate, formatStatus, getProgressPercent } from "./utils";
 
 export function SavingsTab() {
   return (
@@ -55,7 +51,10 @@ export function SavingsTab() {
                   <div>
                     <p className="text-muted-foreground text-sm">Saved</p>
                     <p className="font-semibold text-xl">
-                      {formatMoney(goal.savedMinorUnits, moneyCurrency)}
+                      <CompactMoney
+                        currency={moneyCurrency}
+                        value={goal.savedMinorUnits}
+                      />
                     </p>
                   </div>
                   <Badge
@@ -71,7 +70,11 @@ export function SavingsTab() {
                   <div className="flex justify-between gap-3 text-muted-foreground text-xs">
                     <span>{progress}% complete</span>
                     <span>
-                      Target {formatMoney(goal.targetMinorUnits, moneyCurrency)}
+                      Target{" "}
+                      <CompactMoney
+                        currency={moneyCurrency}
+                        value={goal.targetMinorUnits}
+                      />
                     </span>
                   </div>
                 </div>

@@ -7,8 +7,8 @@ import {
   TrendingUpIcon,
   WalletCardsIcon,
 } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
-import { formatRf } from "./formatters";
 import { totalIncomeMinorUnits } from "./income-dashboard-data";
 
 export function IncomeSummaryCards() {
@@ -45,7 +45,7 @@ export function IncomeSummaryCards() {
               <WalletCardsIcon className={iconClassName} aria-hidden="true" />
             </span>
           ),
-          value: formatRf(totalIncomeMinorUnits),
+          value: <CompactMoney currency="RWF" value={totalIncomeMinorUnits} />,
         },
         {
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
@@ -72,7 +72,7 @@ export function IncomeSummaryCards() {
               <CalendarDaysIcon className={iconClassName} aria-hidden="true" />
             </span>
           ),
-          value: formatRf(90000),
+          value: <CompactMoney currency="RWF" value={90000} />,
         },
         {
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
@@ -83,7 +83,7 @@ export function IncomeSummaryCards() {
               <TrendingUpIcon className={iconClassName} aria-hidden="true" />
             </span>
           ),
-          value: formatRf(40000),
+          value: <CompactMoney currency="RWF" value={40000} />,
         },
       ]}
     />

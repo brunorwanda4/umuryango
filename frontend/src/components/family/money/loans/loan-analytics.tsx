@@ -25,7 +25,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ChartEmptyState } from "../money-ui-helpers";
-import { formatCompactMinorUnits, formatMinorUnits } from "../utils";
+import { formatCompactMinorUnits, formatFullMinorUnits } from "../utils";
 import {
   getEffectiveLoanStatus,
   isLoanOverdue,
@@ -230,7 +230,7 @@ function BorrowedVsLentChart({
                           {name === "borrowed" ? "Borrowed" : "Lent"}
                         </span>
                         <span className="font-mono font-medium">
-                          {formatMinorUnits(value, currency)}
+                          {formatFullMinorUnits(value, currency)}
                         </span>
                       </>
                     )}
@@ -314,7 +314,7 @@ function OutstandingBalanceChart({
                           Outstanding
                         </span>
                         <span className="font-mono font-medium">
-                          {formatMinorUnits(value, currency)}
+                          {formatFullMinorUnits(value, currency)}
                         </span>
                       </>
                     )}
@@ -437,7 +437,7 @@ function OverdueLoansChart({
                       <>
                         <span className="text-muted-foreground">Remaining</span>
                         <span className="font-mono font-medium">
-                          {formatMinorUnits(value, currency)}
+                          {formatFullMinorUnits(value, currency)}
                         </span>
                       </>
                     )}
@@ -503,7 +503,7 @@ function PaidVsRemainingChart({
                           {name === "paid" ? "Paid" : "Remaining"}
                         </span>
                         <span className="font-mono font-medium">
-                          {formatMinorUnits(value, currency)}
+                          {formatFullMinorUnits(value, currency)}
                         </span>
                       </>
                     )}
@@ -574,7 +574,7 @@ function AmountTrendCard({
                       <>
                         <span className="text-muted-foreground">Amount</span>
                         <span className="font-mono font-medium">
-                          {formatMinorUnits(value, currency)}
+                          {formatFullMinorUnits(value, currency)}
                         </span>
                       </>
                     )}

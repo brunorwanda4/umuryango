@@ -140,6 +140,32 @@ export function formatOptionalCompactMinorUnits(
   return formatCompactMinorUnits(value, currency);
 }
 
+export function formatFullMinorUnits(value: unknown, currency = "RWF") {
+  if (value === null || value === undefined) {
+    return "\u2014";
+  }
+
+  const normalized = normalizeMinorUnitString(value);
+
+  if (normalized === null) {
+    return `${currency} ${String(value)}`;
+  }
+
+  const fractionDigits = getCurrencyFractionDigits(currency);
+  const negative = normalized.startsWith("-");
+  const absolute = negative ? normalized.slice(1) : normalized;
+
+  if (fractionDigits === 0) {
+    return `${negative ? "-" : ""}${currency} ${groupDigits(absolute)}`;
+  }
+
+  const padded = absolute.padStart(fractionDigits + 1, "0");
+  const major = padded.slice(0, -fractionDigits);
+  const minor = padded.slice(-fractionDigits);
+
+  return `${negative ? "-" : ""}${currency} ${groupDigits(major)}.${minor}`;
+}
+
 export function supportsCompactNotation(
   locale: Intl.LocalesArgument = DEFAULT_LOCALE,
 ) {
@@ -301,6 +327,10 @@ export function toChartNumber(value: unknown) {
   const numeric = typeof value === "string" ? Number(value) : value;
 
   return typeof numeric === "number" && Number.isFinite(numeric) ? numeric : 0;
+}
+
+export function groupDigits(value: string) {
+  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 interface RequiredCompactFormatOptions {

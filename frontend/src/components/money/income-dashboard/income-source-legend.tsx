@@ -1,4 +1,4 @@
-import { formatRf } from "./formatters";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import {
   incomeSourceData,
   totalIncomeMinorUnits,
@@ -24,7 +24,8 @@ export function IncomeSourceLegend() {
                 {source.name}
               </p>
               <p className="text-muted-foreground text-sm leading-5">
-                {formatRf(source.amountMinorUnits)} ({percent}%)
+                <CompactMoney currency="RWF" value={source.amountMinorUnits} />{" "}
+                ({percent}%)
               </p>
             </div>
           </div>

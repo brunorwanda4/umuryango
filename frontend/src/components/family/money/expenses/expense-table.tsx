@@ -1,3 +1,4 @@
+import type { ColumnDef } from "@tanstack/react-table";
 import {
   CheckCircleIcon,
   CopyIcon,
@@ -12,7 +13,8 @@ import {
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
-import type { ColumnDef } from "@tanstack/react-table";
+import { CompactMoney } from "@/components/common/money/compact-money";
+import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +31,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { hasCapability } from "@/lib/family-access";
 import type { FamilyDetail } from "../../dashboard/types";
-import { formatDate, formatMinorUnits } from "../utils";
+import { formatDate } from "../utils";
 import { formatPaymentMethod } from "./expense-utils";
 import type { ExpenseTransaction } from "./types-and-schemas";
 
@@ -65,7 +66,9 @@ export function ExpenseTable({
       accessorKey: "date",
       header: "Date",
       cell: ({ row }) => (
-        <span className="whitespace-nowrap">{formatDate(row.original.date)}</span>
+        <span className="whitespace-nowrap">
+          {formatDate(row.original.date)}
+        </span>
       ),
     },
     {
@@ -89,7 +92,10 @@ export function ExpenseTable({
       header: "Amount",
       cell: ({ row }) => (
         <span className="whitespace-nowrap font-mono">
-          {formatMinorUnits(row.original.amountMinorUnits, currency)}
+          <CompactMoney
+            currency={currency}
+            value={row.original.amountMinorUnits}
+          />
         </span>
       ),
     },

@@ -7,6 +7,8 @@ import {
   ReceiptTextIcon,
   ShieldCheckIcon,
 } from "lucide-react";
+import type { ReactNode } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,7 +21,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDate, formatMinorUnits } from "../utils";
+import { formatDate } from "../utils";
 import { ApprovalStatusBadge, LoanStatusBadge } from "./loan-status-badge";
 import {
   formatInterestRate,
@@ -71,29 +73,42 @@ export function LoanDetailsSheet({
               <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <DetailItem
                   label="Original amount"
-                  value={formatMinorUnits(
-                    loan.originalAmountMinorUnits,
-                    currency,
-                  )}
+                  value={
+                    <CompactMoney
+                      currency={currency}
+                      value={loan.originalAmountMinorUnits}
+                    />
+                  }
                 />
                 <DetailItem
                   label="Total expected payment"
-                  value={formatMinorUnits(
-                    loan.totalExpectedPaymentMinorUnits ??
-                      loan.originalAmountMinorUnits,
-                    currency,
-                  )}
+                  value={
+                    <CompactMoney
+                      currency={currency}
+                      value={
+                        loan.totalExpectedPaymentMinorUnits ??
+                        loan.originalAmountMinorUnits
+                      }
+                    />
+                  }
                 />
                 <DetailItem
                   label="Paid amount"
-                  value={formatMinorUnits(loan.paidAmountMinorUnits, currency)}
+                  value={
+                    <CompactMoney
+                      currency={currency}
+                      value={loan.paidAmountMinorUnits}
+                    />
+                  }
                 />
                 <DetailItem
                   label="Remaining balance"
-                  value={formatMinorUnits(
-                    loan.remainingBalanceMinorUnits,
-                    currency,
-                  )}
+                  value={
+                    <CompactMoney
+                      currency={currency}
+                      value={loan.remainingBalanceMinorUnits}
+                    />
+                  }
                 />
                 <DetailItem
                   label="Interest rate"
@@ -161,9 +176,11 @@ export function LoanDetailsSheet({
                     icon={ReceiptTextIcon}
                     items={(loan.repayments ?? []).map((repayment) => ({
                       id: repayment.id,
-                      title: formatMinorUnits(
-                        repayment.amountMinorUnits,
-                        currency,
+                      title: (
+                        <CompactMoney
+                          currency={currency}
+                          value={repayment.amountMinorUnits}
+                        />
                       ),
                       description: `${formatDate(repayment.paymentDate)} by ${
                         repayment.paidBy
@@ -221,7 +238,7 @@ export function LoanDetailsSheet({
   );
 }
 
-function DetailItem({ label, value }: { label: string; value: string }) {
+function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="rounded-md border bg-muted/20 p-3">
       <p className="text-muted-foreground text-xs">{label}</p>
@@ -237,7 +254,7 @@ function TimelineList({
 }: {
   emptyTitle: string;
   icon: typeof CalendarClockIcon;
-  items: { id: string; title: string; description: string }[];
+  items: { id: string; title: ReactNode; description: string }[];
 }) {
   if (!items.length) {
     return (

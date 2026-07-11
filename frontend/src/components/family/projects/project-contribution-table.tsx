@@ -1,5 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { HandCoinsIcon } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import {
   Card,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { StatusBadge, TableEmptyState } from "./projects-ui-helpers";
 import type { ProjectContributionRow, ProjectsOverview } from "./types";
-import { formatDate, formatOptionalMoney } from "./utils";
+import { formatDate } from "./utils";
 
 export function ProjectContributionTable({
   currency,
@@ -49,7 +50,11 @@ export function ProjectContributionTable({
       header: () => <div className="text-right">Amount</div>,
       cell: ({ row }) => (
         <div className="text-right font-mono">
-          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+          <CompactMoney
+            currency={currency}
+            emptyLabel="No records"
+            value={row.original.amountMinorUnits}
+          />
         </div>
       ),
     },

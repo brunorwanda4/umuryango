@@ -1,3 +1,4 @@
+import { CompactMoney } from "@/components/common/money/compact-money";
 import {
   Card,
   CardContent,
@@ -14,7 +15,7 @@ import {
 } from "./money-data";
 import { MoneySummaryCards } from "./money-summary-cards";
 import { MoneyTable } from "./money-table";
-import { formatDate, formatMoney, getProgressPercent } from "./utils";
+import { formatDate, getProgressPercent } from "./utils";
 
 export function MoneyOverview() {
   const nextSavingsGoal = savingsGoals[0];
@@ -50,13 +51,19 @@ export function MoneyOverview() {
               <div className="flex justify-between gap-3 text-sm">
                 <span className="text-muted-foreground">Saved</span>
                 <span className="font-medium">
-                  {formatMoney(nextSavingsGoal.savedMinorUnits, moneyCurrency)}
+                  <CompactMoney
+                    currency={moneyCurrency}
+                    value={nextSavingsGoal.savedMinorUnits}
+                  />
                 </span>
               </div>
               <div className="flex justify-between gap-3 text-sm">
                 <span className="text-muted-foreground">Target</span>
                 <span className="font-medium">
-                  {formatMoney(nextSavingsGoal.targetMinorUnits, moneyCurrency)}
+                  <CompactMoney
+                    currency={moneyCurrency}
+                    value={nextSavingsGoal.targetMinorUnits}
+                  />
                 </span>
               </div>
               <div className="flex justify-between gap-3 text-sm">
@@ -84,7 +91,10 @@ export function MoneyOverview() {
               <div className="flex justify-between gap-3 text-sm">
                 <span className="text-muted-foreground">Outstanding</span>
                 <span className="font-medium">
-                  {formatMoney(nextDebt.outstandingMinorUnits, moneyCurrency)}
+                  <CompactMoney
+                    currency={moneyCurrency}
+                    value={nextDebt.outstandingMinorUnits}
+                  />
                 </span>
               </div>
               <div className="flex justify-between gap-3 text-sm">

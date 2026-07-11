@@ -2,10 +2,10 @@
 
 import { CoinsIcon, PlusIcon, ReceiptTextIcon, WalletIcon } from "lucide-react";
 import { useMemo } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { FamilyDetail } from "../../dashboard/types";
-import { formatMinorUnits } from "../utils";
 import { IncomeTable } from "./income-table";
 import type { IncomeTransaction } from "./types-and-schemas";
 
@@ -94,7 +94,10 @@ export function OneTimeIncomePanel({
           </CardHeader>
           <CardContent>
             <div className="truncate font-bold text-xl">
-              {formatMinorUnits(summary.totalMinorUnits.toString(), currency)}
+              <CompactMoney
+                currency={currency}
+                value={summary.totalMinorUnits.toString()}
+              />
             </div>
           </CardContent>
         </Card>
@@ -108,10 +111,10 @@ export function OneTimeIncomePanel({
           </CardHeader>
           <CardContent>
             <div className="truncate font-bold text-xl">
-              {formatMinorUnits(
-                summary.approvedMinorUnits.toString(),
-                currency,
-              )}
+              <CompactMoney
+                currency={currency}
+                value={summary.approvedMinorUnits.toString()}
+              />
             </div>
           </CardContent>
         </Card>
@@ -125,7 +128,10 @@ export function OneTimeIncomePanel({
           </CardHeader>
           <CardContent>
             <div className="truncate font-bold text-xl">
-              {formatMinorUnits(summary.pendingMinorUnits.toString(), currency)}
+              <CompactMoney
+                currency={currency}
+                value={summary.pendingMinorUnits.toString()}
+              />
             </div>
           </CardContent>
         </Card>

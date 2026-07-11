@@ -6,6 +6,7 @@ import {
   ShieldCheckIcon,
   XCircleIcon,
 } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import {
   Card,
   CardAction,
@@ -13,7 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatMinorUnits } from "../utils";
 import type { ApprovalAnalyticsModel } from "./types";
 
 export function ApprovalSummaryCards({
@@ -44,9 +44,10 @@ export function ApprovalSummaryCards({
     },
     {
       title: "Total Approved This Month",
-      value: formatMinorUnits(analytics.approvedThisMonthMinorUnits, currency),
+      value: analytics.approvedThisMonthMinorUnits,
       helper: "Persisted approved transactions",
       icon: ShieldCheckIcon,
+      isMoney: true,
     },
     {
       title: "Average Approval Time",
@@ -79,7 +80,11 @@ export function ApprovalSummaryCards({
               </CardAction>
               <CardDescription>{card.title}</CardDescription>
               <CardTitle className="font-semibold text-2xl tracking-tight">
-                {card.value}
+                {card.isMoney ? (
+                  <CompactMoney currency={currency} value={card.value} />
+                ) : (
+                  card.value
+                )}
               </CardTitle>
               <p className="text-muted-foreground text-xs">{card.helper}</p>
             </CardHeader>

@@ -1,5 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { ReceiptTextIcon } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import {
   Card,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { StatusBadge, TableEmptyState } from "./money-ui-helpers";
 import type { MoneyOverview, MoneyRecordRow } from "./types";
-import { formatDate, formatOptionalMoney, formatTitle } from "./utils";
+import { formatDate, formatTitle } from "./utils";
 
 export function MoneyRecordsTable({
   currency,
@@ -54,7 +55,11 @@ export function MoneyRecordsTable({
       header: () => <div className="text-right">Amount</div>,
       cell: ({ row }) => (
         <div className="text-right font-mono">
-          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+          <CompactMoney
+            currency={currency}
+            emptyLabel="No records"
+            value={row.original.amountMinorUnits}
+          />
         </div>
       ),
     },

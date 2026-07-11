@@ -1,3 +1,4 @@
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -11,7 +12,6 @@ import type { MoneyActivity } from "./types";
 import {
   formatDate,
   formatRecordType,
-  formatSignedMoney,
   formatStatus,
   getStatusBadgeVariant,
 } from "./utils";
@@ -78,11 +78,11 @@ export function MoneyTable({
               </Badge>
             </TableCell>
             <TableCell className="text-right font-mono">
-              {formatSignedMoney({
-                amountMinorUnits: record.amountMinorUnits,
-                currency,
-                direction: record.direction,
-              })}
+              {record.direction === "in" ? "+" : "-"}
+              <CompactMoney
+                currency={currency}
+                value={Math.abs(record.amountMinorUnits)}
+              />
             </TableCell>
           </TableRow>
         ))}

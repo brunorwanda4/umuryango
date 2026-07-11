@@ -8,6 +8,7 @@ import {
   TargetIcon,
   WalletCardsIcon,
 } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import {
   Card,
   CardContent,
@@ -21,7 +22,6 @@ import type {
   ProjectsOverview,
   ReportsOverview,
 } from "./types";
-import { formatOptionalMoney } from "./utils";
 
 export function ReportMetricCards({
   contributions,
@@ -40,69 +40,59 @@ export function ReportMetricCards({
   const cards = [
     {
       title: "Cash balance",
-      value: formatOptionalMoney(
+      value:
         totals?.cashBalanceMinorUnits ?? money?.totals?.cashBalanceMinorUnits,
-        currency,
-      ),
       description: "Server-approved family position",
       icon: WalletCardsIcon,
+      isMoney: true,
     },
     {
       title: "Income",
-      value: formatOptionalMoney(
-        totals?.incomeMinorUnits ?? money?.totals?.incomeMinorUnits,
-        currency,
-      ),
+      value: totals?.incomeMinorUnits ?? money?.totals?.incomeMinorUnits,
       description: "Approved money received",
       icon: ReceiptTextIcon,
+      isMoney: true,
     },
     {
       title: "Expenses",
-      value: formatOptionalMoney(
-        totals?.expenseMinorUnits ?? money?.totals?.expenseMinorUnits,
-        currency,
-      ),
+      value: totals?.expenseMinorUnits ?? money?.totals?.expenseMinorUnits,
       description: "Approved money spent",
       icon: PieChartIcon,
+      isMoney: true,
     },
     {
       title: "Contributions",
-      value: formatOptionalMoney(
+      value:
         totals?.contributionsPaidMinorUnits ??
-          money?.totals?.contributionsPaidMinorUnits ??
-          contributions?.totals?.collectedMinorUnits,
-        currency,
-      ),
+        money?.totals?.contributionsPaidMinorUnits ??
+        contributions?.totals?.collectedMinorUnits,
       description: "Verified family commitments",
       icon: HandCoinsIcon,
+      isMoney: true,
     },
     {
       title: "Savings",
-      value: formatOptionalMoney(
-        totals?.savingsMinorUnits ?? money?.totals?.savingsMinorUnits,
-        currency,
-      ),
+      value: totals?.savingsMinorUnits ?? money?.totals?.savingsMinorUnits,
       description: "Saved toward family goals",
       icon: TargetIcon,
+      isMoney: true,
     },
     {
       title: "Debts",
-      value: formatOptionalMoney(
+      value:
         totals?.debtOutstandingMinorUnits ??
-          money?.totals?.debtOutstandingMinorUnits,
-        currency,
-      ),
+        money?.totals?.debtOutstandingMinorUnits,
       description: "Outstanding borrowed or lent money",
       icon: LandmarkIcon,
+      isMoney: true,
     },
     {
       title: "Project budgets",
-      value: formatOptionalMoney(
+      value:
         totals?.projectPlannedMinorUnits ?? projects?.totals?.plannedMinorUnits,
-        currency,
-      ),
       description: "Approved target amounts across projects",
       icon: FolderKanbanIcon,
+      isMoney: true,
     },
     {
       title: "Generated reports",
@@ -131,7 +121,15 @@ export function ReportMetricCards({
               <div className="min-w-0">
                 <CardDescription>{card.title}</CardDescription>
                 <CardTitle className="mt-1 truncate text-xl">
-                  {card.value}
+                  {card.isMoney ? (
+                    <CompactMoney
+                      currency={currency}
+                      emptyLabel="No records"
+                      value={card.value}
+                    />
+                  ) : (
+                    card.value
+                  )}
                 </CardTitle>
               </div>
               <Icon className="size-5 shrink-0 text-muted-foreground" />

@@ -26,7 +26,7 @@ import { ChartEmptyState } from "../money-ui-helpers";
 import type { MoneyBudgetRow } from "../types";
 import {
   formatCompactMinorUnits,
-  formatMinorUnits,
+  formatFullMinorUnits,
   toChartNumber,
 } from "../utils";
 import { formatPaymentMethod } from "./expense-utils";
@@ -247,7 +247,7 @@ function AmountChart({
                       <>
                         <span className="text-muted-foreground">Amount</span>
                         <span className="font-mono font-medium">
-                          {formatMinorUnits(value, currency)}
+                          {formatFullMinorUnits(value, currency)}
                         </span>
                       </>
                     )}
@@ -309,7 +309,7 @@ function TrendChart({
                       <>
                         <span className="text-muted-foreground">Amount</span>
                         <span className="font-mono font-medium">
-                          {formatMinorUnits(value, currency)}
+                          {formatFullMinorUnits(value, currency)}
                         </span>
                       </>
                     )}
@@ -376,7 +376,7 @@ function BudgetActualChart({
                           {name === "budget" ? "Budget" : "Actual"}
                         </span>
                         <span className="font-mono font-medium">
-                          {formatMinorUnits(value, currency)}
+                          {formatFullMinorUnits(value, currency)}
                         </span>
                       </>
                     )}

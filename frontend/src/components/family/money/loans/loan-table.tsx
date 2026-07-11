@@ -13,6 +13,7 @@ import {
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -46,7 +47,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { FamilyDetail } from "../../dashboard/types";
-import { formatDate, formatMinorUnits } from "../utils";
+import { formatDate } from "../utils";
 import { LoanStatusBadge } from "./loan-status-badge";
 import { getLoanProgress, isLoanOverdue, loanTypeLabel } from "./loan-utils";
 import type { LoanRecord } from "./types-and-schemas";
@@ -133,19 +134,22 @@ export function LoanTable({
                         {loan.lender}
                       </TableCell>
                       <TableCell className="whitespace-nowrap font-mono">
-                        {formatMinorUnits(
-                          loan.originalAmountMinorUnits,
-                          currency,
-                        )}
+                        <CompactMoney
+                          currency={currency}
+                          value={loan.originalAmountMinorUnits}
+                        />
                       </TableCell>
                       <TableCell className="whitespace-nowrap font-mono">
-                        {formatMinorUnits(loan.paidAmountMinorUnits, currency)}
+                        <CompactMoney
+                          currency={currency}
+                          value={loan.paidAmountMinorUnits}
+                        />
                       </TableCell>
                       <TableCell className="whitespace-nowrap font-mono">
-                        {formatMinorUnits(
-                          loan.remainingBalanceMinorUnits,
-                          currency,
-                        )}
+                        <CompactMoney
+                          currency={currency}
+                          value={loan.remainingBalanceMinorUnits}
+                        />
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
                         <span

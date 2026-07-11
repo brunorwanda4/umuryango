@@ -1,4 +1,6 @@
 import { FileTextIcon } from "lucide-react";
+import type { ReactNode } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -7,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatDate, formatMinorUnits } from "../utils";
+import { formatDate } from "../utils";
 import { ExpenseStatusBadge } from "./expense-table";
 import { formatPaymentMethod, getNoteLinkValue } from "./expense-utils";
 import type { ExpenseTransaction } from "./types-and-schemas";
@@ -73,7 +75,12 @@ export function ExpenseDetailsDialog({
             />
             <DetailRow
               label="Amount"
-              value={formatMinorUnits(transaction.amountMinorUnits, currency)}
+              value={
+                <CompactMoney
+                  currency={currency}
+                  value={transaction.amountMinorUnits}
+                />
+              }
               strong
               mono
             />
@@ -197,7 +204,7 @@ function DetailRow({
   strong = false,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   mono?: boolean;
   strong?: boolean;
 }) {

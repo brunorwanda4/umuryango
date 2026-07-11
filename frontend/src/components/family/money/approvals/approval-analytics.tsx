@@ -24,7 +24,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { TableEmptyState } from "../money-ui-helpers";
-import { formatCompactMinorUnits, formatMinorUnits } from "../utils";
+import { formatCompactMinorUnits, formatFullMinorUnits } from "../utils";
 import type { ApprovalAnalyticsModel } from "./types";
 import { approvalChartConfig } from "./utils";
 
@@ -208,7 +208,7 @@ export function ApprovalAnalytics({
                       <>
                         <span className="text-muted-foreground">Amount</span>
                         <span className="font-mono font-medium">
-                          {formatMinorUnits(value, currency)}
+                          {formatFullMinorUnits(value, currency)}
                         </span>
                       </>
                     )}

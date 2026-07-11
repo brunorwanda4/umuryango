@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { ReceiptTextIcon } from "lucide-react";
 import { useMemo } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import {
   Card,
@@ -15,12 +16,7 @@ import type {
   ReportSourceRecordRow,
   ReportsOverview,
 } from "./types";
-import {
-  formatDate,
-  formatOptionalMoney,
-  formatTitle,
-  getSourceRecords,
-} from "./utils";
+import { formatDate, formatTitle, getSourceRecords } from "./utils";
 
 export function SourceRecordsTable({
   currency,
@@ -70,7 +66,11 @@ export function SourceRecordsTable({
       header: () => <div className="text-right">Amount</div>,
       cell: ({ row }) => (
         <div className="text-right font-mono">
-          {formatOptionalMoney(row.original.amountMinorUnits, currency)}
+          <CompactMoney
+            currency={currency}
+            emptyLabel="No records"
+            value={row.original.amountMinorUnits}
+          />
         </div>
       ),
     },

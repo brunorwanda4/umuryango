@@ -5,6 +5,7 @@ import {
   PiggyBankIcon,
   WalletCardsIcon,
 } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import {
   Card,
   CardDescription,
@@ -12,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { MoneySummary } from "./types";
-import { formatMoney } from "./utils";
 
 interface MoneySummaryCardsProps {
   currency: string;
@@ -27,27 +27,27 @@ export function MoneySummaryCards({
     {
       description: "Total income",
       icon: ArrowDownIcon,
-      title: formatMoney(summary.totalIncomeMinorUnits, currency),
+      value: summary.totalIncomeMinorUnits,
     },
     {
       description: "Total expenses",
       icon: ArrowUpIcon,
-      title: formatMoney(summary.totalExpensesMinorUnits, currency),
+      value: summary.totalExpensesMinorUnits,
     },
     {
       description: "Balance",
       icon: WalletCardsIcon,
-      title: formatMoney(summary.balanceMinorUnits, currency),
+      value: summary.balanceMinorUnits,
     },
     {
       description: "Savings",
       icon: PiggyBankIcon,
-      title: formatMoney(summary.savingsMinorUnits, currency),
+      value: summary.savingsMinorUnits,
     },
     {
       description: "Debts",
       icon: LandmarkIcon,
-      title: formatMoney(summary.debtsMinorUnits, currency),
+      value: summary.debtsMinorUnits,
     },
   ];
 
@@ -65,7 +65,7 @@ export function MoneySummaryCards({
               <div className="min-w-0">
                 <CardDescription>{card.description}</CardDescription>
                 <CardTitle className="truncate text-2xl">
-                  {card.title}
+                  <CompactMoney currency={currency} value={card.value} />
                 </CardTitle>
               </div>
               <Icon className="shrink-0 text-muted-foreground" />

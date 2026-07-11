@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -58,7 +59,6 @@ import {
   clampPercent,
   findProjectByRouteSlug,
   formatDate,
-  formatOptionalMoney,
   formatTitle,
   normalizeProjectsOverview,
 } from "./utils";
@@ -90,7 +90,7 @@ export function ProjectDetailWorkspace({
   initialData?: ProjectDetailWorkspaceInitialData;
 }) {
   const [state, setState] = useState<ProjectDetailFetchState>(
-    initialData && initialData.family
+    initialData?.family
       ? {
           status: "success",
           family: initialData.family,
@@ -344,21 +344,24 @@ function ProjectDetailMetrics({
   const cards = [
     {
       title: "Target amount",
-      value: formatOptionalMoney(project.targetAmountMinorUnits, currency),
+      value: project.targetAmountMinorUnits,
       description: "Saved project budget target",
       icon: WalletCardsIcon,
+      isMoney: true,
     },
     {
       title: "Contributed",
-      value: formatOptionalMoney(project.contributedMinorUnits, currency),
+      value: project.contributedMinorUnits,
       description: "Verified contributions received",
       icon: HandCoinsIcon,
+      isMoney: true,
     },
     {
       title: "Outstanding",
-      value: formatOptionalMoney(project.outstandingMinorUnits, currency),
+      value: project.outstandingMinorUnits,
       description: "Remaining amount from persisted records",
       icon: TargetIcon,
+      isMoney: true,
     },
     {
       title: "Target date",
@@ -382,7 +385,15 @@ function ProjectDetailMetrics({
               <div className="min-w-0">
                 <CardDescription>{card.title}</CardDescription>
                 <CardTitle className="mt-1 truncate text-xl">
-                  {card.value}
+                  {card.isMoney ? (
+                    <CompactMoney
+                      currency={currency}
+                      emptyLabel="No records"
+                      value={card.value}
+                    />
+                  ) : (
+                    card.value
+                  )}
                 </CardTitle>
               </div>
               <Icon className="size-5 shrink-0 text-muted-foreground" />
@@ -431,7 +442,13 @@ function ProjectProgressCard({
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <ProjectFact
             label="Contributed"
-            value={formatOptionalMoney(project.contributedMinorUnits, currency)}
+            value={
+              <CompactMoney
+                currency={currency}
+                emptyLabel="No records"
+                value={project.contributedMinorUnits}
+              />
+            }
           />
           <ProjectFact
             label="Start date"

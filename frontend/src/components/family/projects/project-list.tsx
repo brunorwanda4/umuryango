@@ -1,5 +1,6 @@
 import { FolderKanbanIcon } from "lucide-react";
 import Link from "next/link";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -19,7 +20,6 @@ import {
   clampPercent,
   createProjectSlug,
   formatDate,
-  formatOptionalMoney,
   formatTitle,
 } from "./utils";
 
@@ -87,17 +87,23 @@ export function ProjectList({
               <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
                 <ProjectFact
                   label="Target amount"
-                  value={formatOptionalMoney(
-                    project.targetAmountMinorUnits,
-                    currency,
-                  )}
+                  value={
+                    <CompactMoney
+                      currency={currency}
+                      emptyLabel="No records"
+                      value={project.targetAmountMinorUnits}
+                    />
+                  }
                 />
                 <ProjectFact
                   label="Contributed"
-                  value={formatOptionalMoney(
-                    project.contributedMinorUnits,
-                    currency,
-                  )}
+                  value={
+                    <CompactMoney
+                      currency={currency}
+                      emptyLabel="No records"
+                      value={project.contributedMinorUnits}
+                    />
+                  }
                 />
                 <ProjectFact
                   label="Target date"

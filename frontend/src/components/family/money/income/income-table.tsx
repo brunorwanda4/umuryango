@@ -10,6 +10,7 @@ import {
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { hasCapability } from "@/lib/family-access";
 import type { FamilyDetail } from "../../dashboard/types";
-import { formatDate, formatMinorUnits } from "../utils";
+import { formatDate } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
 
 function getRemainingMinorUnits(tx: IncomeTransaction) {
@@ -96,7 +97,10 @@ export function IncomeTable({
       header: "Paid",
       cell: ({ row }) => (
         <span className="whitespace-nowrap font-mono">
-          {formatMinorUnits(row.original.amountMinorUnits, currency)}
+          <CompactMoney
+            currency={currency}
+            value={row.original.amountMinorUnits}
+          />
         </span>
       ),
     },
@@ -108,7 +112,11 @@ export function IncomeTable({
 
         return (
           <span className="whitespace-nowrap font-mono">
-            {remaining === null ? "-" : formatMinorUnits(remaining, currency)}
+            {remaining === null ? (
+              "-"
+            ) : (
+              <CompactMoney currency={currency} value={remaining} />
+            )}
           </span>
         );
       },

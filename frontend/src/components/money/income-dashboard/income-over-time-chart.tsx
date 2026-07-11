@@ -9,7 +9,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { formatCompactAmount, formatRf } from "./formatters";
+import { formatFullMinorUnits } from "@/lib/format-compact-number";
+import { formatCompactAmount } from "./formatters";
 import { incomeOverTimeData } from "./income-dashboard-data";
 
 const incomeChartConfig = {
@@ -81,7 +82,9 @@ export function IncomeOverTimeChart() {
               content={
                 <ChartTooltipContent
                   formatter={(value) =>
-                    typeof value === "number" ? formatRf(value) : value
+                    typeof value === "number"
+                      ? formatFullMinorUnits(value, "RWF")
+                      : value
                   }
                 />
               }

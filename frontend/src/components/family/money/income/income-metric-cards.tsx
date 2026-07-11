@@ -7,13 +7,14 @@ import {
   WalletIcon,
 } from "lucide-react";
 import { useMemo } from "react";
+import { CompactMoney } from "@/components/common/money/compact-money";
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatMinorUnits, normalizeMinorUnitString } from "../utils";
+import { normalizeMinorUnitString } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
 
 function formatDateKey(date: Date) {
@@ -121,33 +122,39 @@ export function IncomeMetricCards({
   const cards = [
     {
       title: "Total Income",
-      value: formatMinorUnits(summary.totalRecorded, currency),
+      value: summary.totalRecorded,
       icon: WalletIcon,
+      isMoney: true,
     },
     {
       title: "Income This Month",
-      value: formatMinorUnits(summary.monthRecorded, currency),
+      value: summary.monthRecorded,
       icon: CoinsIcon,
+      isMoney: true,
     },
     {
       title: "Income Today",
-      value: formatMinorUnits(summary.todayRecorded, currency),
+      value: summary.todayRecorded,
       icon: TrendingDownIcon,
+      isMoney: true,
     },
     {
       title: "Pending Income",
-      value: formatMinorUnits(summary.pendingAmount, currency),
+      value: summary.pendingAmount,
       icon: AlertCircleIcon,
+      isMoney: true,
     },
     {
       title: "Approved Income",
-      value: formatMinorUnits(summary.approvedAmount, currency),
+      value: summary.approvedAmount,
       icon: CheckCircleIcon,
+      isMoney: true,
     },
     {
       title: "Rent Balance",
-      value: formatMinorUnits(summary.rentBalance, currency),
+      value: summary.rentBalance,
       icon: AlertCircleIcon,
+      isMoney: true,
     },
     {
       title: "Overdue Rent",
@@ -173,10 +180,15 @@ export function IncomeMetricCards({
             <CardHeader className="flex sm:flex-row flex-row-reverse items-center justify-end sm:justify-between gap-3">
               <div className="min-w-0 max-sm:flex-row max-sm:flex max-sm:items-center max-sm:gap-4">
                 <CardDescription className="max-sm:font-semibold max-sm:text-lg max-sm:flex">
-                  <span>{card.title}</span> <span className="block sm:hidden">:</span>
+                  <span>{card.title}</span>{" "}
+                  <span className="block sm:hidden">:</span>
                 </CardDescription>
                 <CardTitle className="mt-1 truncate text-xl sm:text-2xl font-bold">
-                  {card.value}
+                  {card.isMoney ? (
+                    <CompactMoney currency={currency} value={card.value} />
+                  ) : (
+                    card.value
+                  )}
                 </CardTitle>
               </div>
               <Icon className="size-5 shrink-0 text-muted-foreground sm:block hidden" />

@@ -27,7 +27,7 @@ import {
   allocationConfig,
   cashFlowConfig,
   formatCompactMinorUnits,
-  formatMinorUnits,
+  formatFullMinorUnits,
   toChartNumber,
 } from "./utils";
 
@@ -95,7 +95,7 @@ export function MoneyCharts({
                               : "Expenses"}
                           </span>
                           <span className="font-mono font-medium">
-                            {formatMinorUnits(value, currency)}
+                            {formatFullMinorUnits(value, currency)}
                           </span>
                         </>
                       )}
@@ -164,7 +164,7 @@ export function MoneyCharts({
                         <>
                           <span className="text-muted-foreground">Amount</span>
                           <span className="font-mono font-medium">
-                            {formatMinorUnits(value, currency)}
+                            {formatFullMinorUnits(value, currency)}
                           </span>
                         </>
                       )}

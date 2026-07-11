@@ -1,3 +1,4 @@
+import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -6,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { formatDate, formatMinorUnits } from "../utils";
+import { formatDate } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
 
 function getRemainingMinorUnits(transaction: IncomeTransaction) {
@@ -45,12 +46,17 @@ export function ViewDetailsDialog({
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-4 text-sm">
-          <h2 className="text-2xl font-bold text-center mb-6">{transaction.description || "Income Transaction"}</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">
+            {transaction.description || "Income Transaction"}
+          </h2>
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">Amount</span>
             <span className="font-mono font-semibold text-right text-primary">
-              {formatMinorUnits(transaction.amountMinorUnits, currency)}
+              <CompactMoney
+                currency={currency}
+                value={transaction.amountMinorUnits}
+              />
             </span>
           </div>
 
@@ -61,12 +67,14 @@ export function ViewDetailsDialog({
                   Expected Amount
                 </span>
                 <span className="font-mono text-right">
-                  {transaction.expectedAmountMinorUnits
-                    ? formatMinorUnits(
-                        transaction.expectedAmountMinorUnits,
-                        currency,
-                      )
-                    : "-"}
+                  {transaction.expectedAmountMinorUnits ? (
+                    <CompactMoney
+                      currency={currency}
+                      value={transaction.expectedAmountMinorUnits}
+                    />
+                  ) : (
+                    "-"
+                  )}
                 </span>
               </div>
 
@@ -75,9 +83,14 @@ export function ViewDetailsDialog({
                   Amount Left
                 </span>
                 <span className="font-mono text-right">
-                  {remainingMinorUnits === null
-                    ? "-"
-                    : formatMinorUnits(remainingMinorUnits, currency)}
+                  {remainingMinorUnits === null ? (
+                    "-"
+                  ) : (
+                    <CompactMoney
+                      currency={currency}
+                      value={remainingMinorUnits}
+                    />
+                  )}
                 </span>
               </div>
 
