@@ -137,7 +137,6 @@ export function CreateExpenseDialog({
     }
   }, [defaultPaidBy, form]);
 
-
   return (
     <Dialog
       open={open}

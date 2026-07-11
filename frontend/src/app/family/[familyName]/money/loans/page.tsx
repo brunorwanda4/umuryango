@@ -42,9 +42,10 @@ async function getLoansPageData(familyName: string) {
   return {
     family,
     loans: loansResponse.ok ? (loansResponse.data ?? []) : [],
-    contacts: contactsResponse.ok && contactsResponse.data
-      ? (contactsResponse.data.items ?? [])
-      : [],
+    contacts:
+      contactsResponse.ok && contactsResponse.data
+        ? (contactsResponse.data.items ?? [])
+        : [],
     error: null,
   };
 }

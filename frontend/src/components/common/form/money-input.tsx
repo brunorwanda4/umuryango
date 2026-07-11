@@ -1,187 +1,187 @@
 "use client";
 
 import {
-	type ComponentProps,
-	forwardRef,
-	useEffect,
-	useMemo,
-	useState,
+  type ComponentProps,
+  forwardRef,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
 import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupInput,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
 type MoneyInputProps = Omit<
-	ComponentProps<typeof InputGroupInput>,
-	"onChange" | "type" | "value"
+  ComponentProps<typeof InputGroupInput>,
+  "onChange" | "type" | "value"
 > & {
-	value?: number | string | null;
-	currency: string;
-	onValueChange: (value: number) => void;
+  value?: number | string | null;
+  currency: string;
+  onValueChange: (value: number) => void;
 };
 
 function getCurrencyFractionDigits(currency: string): number {
-	try {
-		return (
-			new Intl.NumberFormat(undefined, {
-				style: "currency",
-				currency,
-			}).resolvedOptions().maximumFractionDigits ?? 2
-		);
-	} catch {
-		return 2;
-	}
+  try {
+    return (
+      new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency,
+      }).resolvedOptions().maximumFractionDigits ?? 2
+    );
+  } catch {
+    return 2;
+  }
 }
 
 function groupDigits(value: string) {
-	return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function formatMoneyText(value: string, fractionDigits: number) {
-	if (!value) return "";
+  if (!value) return "";
 
-	if (fractionDigits === 0) {
-		return groupDigits(value);
-	}
+  if (fractionDigits === 0) {
+    return groupDigits(value);
+  }
 
-	const [whole = "", fraction = ""] = value.split(".");
+  const [whole = "", fraction = ""] = value.split(".");
 
-	return fraction.length
-		? `${groupDigits(whole)}.${fraction}`
-		: groupDigits(whole);
+  return fraction.length
+    ? `${groupDigits(whole)}.${fraction}`
+    : groupDigits(whole);
 }
 
 function formatMinorUnits(
-	value: MoneyInputProps["value"],
-	fractionDigits: number,
+  value: MoneyInputProps["value"],
+  fractionDigits: number,
 ) {
-	if (
-		value === null ||
-		value === undefined ||
-		value === "" ||
-		Number(value) === 0
-	) {
-		return "";
-	}
+  if (
+    value === null ||
+    value === undefined ||
+    value === "" ||
+    Number(value) === 0
+  ) {
+    return "";
+  }
 
-	const minorUnits = BigInt(String(value));
-	const scale = BigInt(10) ** BigInt(fractionDigits);
+  const minorUnits = BigInt(String(value));
+  const scale = BigInt(10) ** BigInt(fractionDigits);
 
-	if (fractionDigits === 0) {
-		return groupDigits(minorUnits.toString());
-	}
+  if (fractionDigits === 0) {
+    return groupDigits(minorUnits.toString());
+  }
 
-	const wholeUnits = minorUnits / scale;
-	const fractionalUnits = (minorUnits % scale)
-		.toString()
-		.padStart(fractionDigits, "0");
+  const wholeUnits = minorUnits / scale;
+  const fractionalUnits = (minorUnits % scale)
+    .toString()
+    .padStart(fractionDigits, "0");
 
-	return `${groupDigits(wholeUnits.toString())}.${fractionalUnits}`;
+  return `${groupDigits(wholeUnits.toString())}.${fractionalUnits}`;
 }
 
 function sanitizeMoneyText(value: string, fractionDigits: number) {
-	const normalized = value.replace(/[^\d.]/g, "");
+  const normalized = value.replace(/[^\d.]/g, "");
 
-	if (fractionDigits === 0) {
-		return normalized.replace(/\D/g, "");
-	}
+  if (fractionDigits === 0) {
+    return normalized.replace(/\D/g, "");
+  }
 
-	const [whole = "", ...fractionParts] = normalized.split(".");
-	const fraction = fractionParts.join("").slice(0, fractionDigits);
+  const [whole = "", ...fractionParts] = normalized.split(".");
+  const fraction = fractionParts.join("").slice(0, fractionDigits);
 
-	return fractionParts.length ? `${whole}.${fraction}` : whole;
+  return fractionParts.length ? `${whole}.${fraction}` : whole;
 }
 
 function parseMoneyTextToMinorUnits(value: string, fractionDigits: number) {
-	const sanitized = sanitizeMoneyText(value, fractionDigits);
+  const sanitized = sanitizeMoneyText(value, fractionDigits);
 
-	if (!sanitized || sanitized === ".") {
-		return 0;
-	}
+  if (!sanitized || sanitized === ".") {
+    return 0;
+  }
 
-	const [whole = "0", fraction = ""] = sanitized.split(".");
-	const wholeUnits = BigInt(whole || "0");
+  const [whole = "0", fraction = ""] = sanitized.split(".");
+  const wholeUnits = BigInt(whole || "0");
 
-	if (fractionDigits === 0) {
-		return Number(wholeUnits);
-	}
+  if (fractionDigits === 0) {
+    return Number(wholeUnits);
+  }
 
-	const scale = BigInt(10) ** BigInt(fractionDigits);
+  const scale = BigInt(10) ** BigInt(fractionDigits);
 
-	const fractionalUnits = BigInt(
-		fraction.padEnd(fractionDigits, "0").slice(0, fractionDigits) || "0",
-	);
+  const fractionalUnits = BigInt(
+    fraction.padEnd(fractionDigits, "0").slice(0, fractionDigits) || "0",
+  );
 
-	return Number(wholeUnits * scale + fractionalUnits);
+  return Number(wholeUnits * scale + fractionalUnits);
 }
 
 export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
-	function MoneyInput(
-		{
-			value,
-			currency,
-			onValueChange,
-			className,
-			onBlur,
-			onFocus,
-			disabled,
-			...props
-		},
-		ref,
-	) {
-		const fractionDigits = useMemo(
-			() => getCurrencyFractionDigits(currency),
-			[currency],
-		);
+  function MoneyInput(
+    {
+      value,
+      currency,
+      onValueChange,
+      className,
+      onBlur,
+      onFocus,
+      disabled,
+      ...props
+    },
+    ref,
+  ) {
+    const fractionDigits = useMemo(
+      () => getCurrencyFractionDigits(currency),
+      [currency],
+    );
 
-		const [displayValue, setDisplayValue] = useState(() =>
-			formatMinorUnits(value, fractionDigits),
-		);
+    const [displayValue, setDisplayValue] = useState(() =>
+      formatMinorUnits(value, fractionDigits),
+    );
 
-		useEffect(() => {
-			setDisplayValue(formatMinorUnits(value, fractionDigits));
-		}, [value, fractionDigits]);
+    useEffect(() => {
+      setDisplayValue(formatMinorUnits(value, fractionDigits));
+    }, [value, fractionDigits]);
 
-		return (
-			<InputGroup
-				data-disabled={disabled}
-				className={cn(disabled && "opacity-50", className)}
-			>
-				<InputGroupAddon align="inline-start">{currency}</InputGroupAddon>
+    return (
+      <InputGroup
+        data-disabled={disabled}
+        className={cn(disabled && "opacity-50", className)}
+      >
+        <InputGroupAddon align="inline-start">{currency}</InputGroupAddon>
 
-				<InputGroupInput
-					{...props}
-					ref={ref}
-					type="text"
-					inputMode={fractionDigits === 0 ? "numeric" : "decimal"}
-					disabled={disabled}
-					value={displayValue}
-					onChange={(event) => {
-						const sanitized = sanitizeMoneyText(
-							event.target.value,
-							fractionDigits,
-						);
+        <InputGroupInput
+          {...props}
+          ref={ref}
+          type="text"
+          inputMode={fractionDigits === 0 ? "numeric" : "decimal"}
+          disabled={disabled}
+          value={displayValue}
+          onChange={(event) => {
+            const sanitized = sanitizeMoneyText(
+              event.target.value,
+              fractionDigits,
+            );
 
-						setDisplayValue(formatMoneyText(sanitized, fractionDigits));
+            setDisplayValue(formatMoneyText(sanitized, fractionDigits));
 
-						onValueChange(
-							parseMoneyTextToMinorUnits(sanitized, fractionDigits),
-						);
-					}}
-					onBlur={(event) => {
-						setDisplayValue(formatMinorUnits(value, fractionDigits));
-						onBlur?.(event);
-					}}
-					onFocus={(event) => {
-						onFocus?.(event);
-					}}
-				/>
-			</InputGroup>
-		);
-	},
+            onValueChange(
+              parseMoneyTextToMinorUnits(sanitized, fractionDigits),
+            );
+          }}
+          onBlur={(event) => {
+            setDisplayValue(formatMinorUnits(value, fractionDigits));
+            onBlur?.(event);
+          }}
+          onFocus={(event) => {
+            onFocus?.(event);
+          }}
+        />
+      </InputGroup>
+    );
+  },
 );
 
 MoneyInput.displayName = "MoneyInput";

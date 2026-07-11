@@ -164,10 +164,16 @@ function MoneyCategoriesWorkspace({
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle title="Categories" description="Manage your family's money categories." actions={    <CreateCategoryForm
-        existingCategories={categories}
-        familyId={familyId}
-      />} />
+      <PageTitle
+        title="Categories"
+        description="Manage your family's money categories."
+        actions={
+          <CreateCategoryForm
+            existingCategories={categories}
+            familyId={familyId}
+          />
+        }
+      />
       <CategoryStatsCards stats={stats} />
       <CategoryFilters
         search={search}
@@ -211,6 +217,6 @@ function MoneyCategoriesWorkspace({
           if (!open) setDeleteCategory(null);
         }}
       />
-   </div>
+    </div>
   );
 }

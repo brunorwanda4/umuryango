@@ -1,9 +1,5 @@
 const MeMoneyMetricCards = () => {
-  return (
-    <section>
-      Cards Over view
-    </section>
-  );
+  return <section>Cards Over view</section>;
 };
 
 export default MeMoneyMetricCards;

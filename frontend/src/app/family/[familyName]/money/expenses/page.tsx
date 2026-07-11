@@ -50,17 +50,13 @@ async function getExpensesPageData(familyName: string) {
     ),
     serverApiRequest<undefined, MoneyOverview>(
       "get",
-      `/families/${encodeURIComponent(
-        family.id,
-      )}/money/overview?period=month`,
+      `/families/${encodeURIComponent(family.id)}/money/overview?period=month`,
       undefined,
       { cache: "no-store" },
     ),
     serverApiRequest<undefined, ProjectsOverview>(
       "get",
-      `/families/${encodeURIComponent(
-        family.id,
-      )}/projects/overview?status=all`,
+      `/families/${encodeURIComponent(family.id)}/projects/overview?status=all`,
       undefined,
       { cache: "no-store" },
     ),
@@ -68,18 +64,22 @@ async function getExpensesPageData(familyName: string) {
 
   return {
     family,
-    transactions: transactionResponse.ok ? (transactionResponse.data ?? []) : [],
-    categories: categoriesResponse.ok && categoriesResponse.data
-      ? categoriesResponse.data.filter((c) => c.type === "EXPENSE")
+    transactions: transactionResponse.ok
+      ? (transactionResponse.data ?? [])
       : [],
+    categories:
+      categoriesResponse.ok && categoriesResponse.data
+        ? categoriesResponse.data.filter((c) => c.type === "EXPENSE")
+        : [],
     money: moneyResponse.ok ? (moneyResponse.data ?? null) : null,
-    projects: projectsResponse.ok && projectsResponse.data?.projects
-      ? projectsResponse.data.projects.map((project) => ({
-          id: project.id,
-          name: project.name,
-          status: project.status,
-        }))
-      : [],
+    projects:
+      projectsResponse.ok && projectsResponse.data?.projects
+        ? projectsResponse.data.projects.map((project) => ({
+            id: project.id,
+            name: project.name,
+            status: project.status,
+          }))
+        : [],
     error: null,
   };
 }

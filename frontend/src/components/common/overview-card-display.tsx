@@ -95,7 +95,10 @@ const OverviewCardDisplay = ({
             </ItemContent>
             <ItemActions className="min-w-0">
               <span
-                className={cn("truncate text-lg font-semibold", cardTitleClassName)}
+                className={cn(
+                  "truncate text-lg font-semibold",
+                  cardTitleClassName,
+                )}
               >
                 {data.value}
               </span>

@@ -171,21 +171,27 @@ function ProjectsWorkspaceContent({
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle title="Family Projects" badge={AUTHORITY_LABELS[family.authority]} actions={   <div className="flex flex-wrap gap-2 lg:justify-end">
-             {canManageProjects ? (
-               <CreateProjectDialog
-                 currency={currency}
-                 family={family}
-                 onProjectCreated={onProjectCreated}
-               />
-             ) : null}
-             {canExportReports ? (
-               <Button size="sm" variant="outline">
-                 <DownloadIcon aria-hidden="true" data-icon="inline-start" />
-                 Export
-               </Button>
-             ) : null}
-           </div>} />
+      <PageTitle
+        title="Family Projects"
+        badge={AUTHORITY_LABELS[family.authority]}
+        actions={
+          <div className="flex flex-wrap gap-2 lg:justify-end">
+            {canManageProjects ? (
+              <CreateProjectDialog
+                currency={currency}
+                family={family}
+                onProjectCreated={onProjectCreated}
+              />
+            ) : null}
+            {canExportReports ? (
+              <Button size="sm" variant="outline">
+                <DownloadIcon aria-hidden="true" data-icon="inline-start" />
+                Export
+              </Button>
+            ) : null}
+          </div>
+        }
+      />
 
       <Separator />
       <ProjectFilters
