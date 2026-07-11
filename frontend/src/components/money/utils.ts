@@ -1,14 +1,8 @@
+import { formatCompactMinorUnits } from "@/lib/format-compact-number";
 import type { MoneyBadgeVariant, MoneyRecordType, MoneyStatus } from "./types";
 
 export function formatMoney(amountMinorUnits: number, currency = "RWF") {
-  const sign = amountMinorUnits < 0 ? "-" : "";
-  const absoluteAmount = Math.abs(amountMinorUnits);
-
-  return `${sign}${new Intl.NumberFormat("en-RW", {
-    currency,
-    maximumFractionDigits: 0,
-    style: "currency",
-  }).format(absoluteAmount)}`;
+  return formatCompactMinorUnits(amountMinorUnits, currency, "en-RW");
 }
 
 export function formatSignedMoney({
@@ -22,7 +16,7 @@ export function formatSignedMoney({
 }) {
   const sign = direction === "in" ? "+" : "-";
 
-  return `${sign}${formatMoney(amountMinorUnits, currency)}`;
+  return `${sign}${formatMoney(Math.abs(amountMinorUnits), currency)}`;
 }
 
 export function formatDate(value: string) {

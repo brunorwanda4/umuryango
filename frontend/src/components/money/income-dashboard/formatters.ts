@@ -1,11 +1,13 @@
+import { formatCompactMinorUnits } from "@/lib/format-compact-number";
+
 export function formatRf(amountMinorUnits: number) {
-  return `RF ${new Intl.NumberFormat("en-RW", {
-    maximumFractionDigits: 0,
-  }).format(amountMinorUnits)}`;
+  return formatCompactMinorUnits(amountMinorUnits, "RWF", "en-RW");
 }
 
 export function formatCompactAmount(value: unknown) {
-  if (typeof value !== "number") return "";
-  if (value === 0) return "0";
-  return `${Math.round(value / 1000)}K`;
+  return formatCompactMinorUnits(
+    typeof value === "number" ? value : undefined,
+    "RWF",
+    "en-RW",
+  );
 }

@@ -8,12 +8,16 @@ import {
   WalletCardsIcon,
 } from "lucide-react";
 import type { ChartConfig } from "@/components/ui/chart";
+import {
+  formatOptionalCompactMinorUnits,
+  formatCompactMinorUnits as formatSharedCompactMinorUnits,
+  toChartNumber,
+} from "@/lib/format-compact-number";
 import type {
   ContributionsOverview,
   MoneyMinorValue,
   MoneyOverview,
   ProjectsOverview,
-  ReportBreakdownPoint,
   ReportPeriod,
   ReportsOverview,
   ReportTypeFilter,
@@ -274,83 +278,15 @@ export function formatOptionalMoney(
   value: MoneyMinorValue | null | undefined,
   currency: string,
 ) {
-  if (value === null || value === undefined) {
-    return "No records";
-  }
-
-  return formatMinorUnits(value, currency);
+  return formatOptionalCompactMinorUnits(value, currency);
 }
 
 export function formatMinorUnits(value: unknown, currency: string) {
-  const normalized = normalizeMinorUnitString(value);
-
-  if (!normalized) {
-    return `${currency} ${String(value)}`;
-  }
-
-  const digits = getCurrencyFractionDigits(currency);
-  const negative = normalized.startsWith("-");
-  const absolute = negative ? normalized.slice(1) : normalized;
-
-  if (digits === 0) {
-    return `${negative ? "-" : ""}${currency} ${groupDigits(absolute)}`;
-  }
-
-  const padded = absolute.padStart(digits + 1, "0");
-  const major = padded.slice(0, -digits);
-  const minor = padded.slice(-digits);
-
-  return `${negative ? "-" : ""}${currency} ${groupDigits(major)}.${minor}`;
+  return formatSharedCompactMinorUnits(value as MoneyMinorValue, currency);
 }
 
 export function formatCompactMinorUnits(value: unknown, currency: string) {
-  const numeric = toChartNumber(value);
-  const digits = getCurrencyFractionDigits(currency);
-  const divisor = 10 ** digits;
-  const major = numeric / divisor;
-
-  return `${currency} ${Intl.NumberFormat("en", {
-    compactDisplay: "short",
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(major)}`;
-}
-
-export function normalizeMinorUnitString(value: unknown) {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return Math.trunc(value).toString();
-  }
-
-  if (typeof value === "string" && /^-?\d+$/.test(value)) {
-    return value;
-  }
-
-  return null;
-}
-
-export function getCurrencyFractionDigits(currency: string) {
-  try {
-    const maximumFractionDigits = new Intl.NumberFormat("en", {
-      currency,
-      style: "currency",
-    }).resolvedOptions().maximumFractionDigits;
-
-    return typeof maximumFractionDigits === "number"
-      ? maximumFractionDigits
-      : 2;
-  } catch {
-    return 2;
-  }
-}
-
-export function groupDigits(value: string) {
-  return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-export function toChartNumber(value: unknown) {
-  const numeric = typeof value === "string" ? Number(value) : value;
-
-  return typeof numeric === "number" && Number.isFinite(numeric) ? numeric : 0;
+  return formatSharedCompactMinorUnits(value as MoneyMinorValue, currency);
 }
 
 export function formatTitle(value: string) {
