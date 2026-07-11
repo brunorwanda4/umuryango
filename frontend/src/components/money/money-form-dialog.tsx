@@ -246,7 +246,7 @@ export function MoneyFormDialog({
 					)}
 				</DialogTrigger>
 			)}
-			<DialogContent>
+			<DialogContent className="max-h-[95vh] overflow-y-auto">
 				<DialogHeader>
 					<DialogTitle>
 						{isUpdate ? config.updateTitle : config.title}
