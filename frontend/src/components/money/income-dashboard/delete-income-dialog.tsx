@@ -30,7 +30,11 @@ export function DeleteIncomeDialog({
   trigger,
 }: DeleteIncomeDialogProps) {
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      syncWithSearchParams={false}
+    >
       {trigger !== null && (
         <AlertDialogTrigger asChild>
           {trigger === undefined ? (

@@ -146,8 +146,7 @@ export function ViewIncomeDialog({
             </dl>
           </div>
 
-          <DialogFooter className="border-t bg-muted/20 px-6 py-4 ">
-
+          <DialogFooter className="border-t bg-muted/20 px-6 py-4">
             <Button
               className="w-full sm:w-auto"
               onClick={() => {

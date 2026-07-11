@@ -33,7 +33,12 @@ export function RecentIncomeActionsPopover({
           <MoreHorizontalIcon aria-hidden="true" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-52 gap-2 p-2">
+      <PopoverContent
+        align="end"
+        className="w-52 gap-2 p-2"
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
+      >
         <div className="flex flex-col gap-1">
           <ViewIncomeDialog income={income} />
           <UpdateIncomeDialog income={income} />

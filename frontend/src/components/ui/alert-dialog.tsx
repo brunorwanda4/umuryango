@@ -3,12 +3,78 @@
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 import type * as React from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DialogSearchParamSegmentProvider,
+  type DialogSearchParamSyncProps,
+  useDialogSearchParamSync,
+} from "@/components/ui/dialog-search-params";
 import { cn } from "@/lib/utils";
 
+type AlertDialogProps = React.ComponentProps<typeof AlertDialogPrimitive.Root> &
+  DialogSearchParamSyncProps;
+
 function AlertDialog({
+  children,
+  defaultOpen,
+  onOpenChange,
+  open,
+  searchParamHistory = "replace",
+  searchParamName = "dialog",
+  searchParamSegment,
+  searchParamValue,
+  syncWithSearchParams = true,
   ...props
-}: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />;
+}: AlertDialogProps) {
+  const {
+    activeOpen,
+    canSyncWithSearchParams,
+    handleOpenChange,
+    resolvedSearchParamSegment,
+  } = useDialogSearchParamSync({
+    children,
+    componentName: "AlertDialog",
+    defaultOpen,
+    fallbackSearchParamPrefix: "alert-dialog",
+    onOpenChange,
+    open,
+    rootComponent: AlertDialog,
+    searchParamHistory,
+    searchParamName,
+    searchParamSegment,
+    searchParamValue,
+    syncWithSearchParams,
+    titleComponent: AlertDialogTitle,
+  });
+
+  if (!canSyncWithSearchParams) {
+    return (
+      <AlertDialogPrimitive.Root
+        data-slot="alert-dialog"
+        defaultOpen={defaultOpen}
+        onOpenChange={onOpenChange}
+        open={open}
+        {...props}
+      >
+        {children}
+      </AlertDialogPrimitive.Root>
+    );
+  }
+
+  return (
+    <DialogSearchParamSegmentProvider
+      name={searchParamName}
+      nextSegment={resolvedSearchParamSegment + 1}
+    >
+      <AlertDialogPrimitive.Root
+        data-slot="alert-dialog"
+        onOpenChange={handleOpenChange}
+        open={activeOpen}
+        {...props}
+      >
+        {children}
+      </AlertDialogPrimitive.Root>
+    </DialogSearchParamSegmentProvider>
+  );
 }
 
 function AlertDialogTrigger({
