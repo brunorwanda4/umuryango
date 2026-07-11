@@ -1,7 +1,6 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontalIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
@@ -13,6 +12,7 @@ import {
   type RecentIncomeRecord,
   recentIncomeData,
 } from "./income-dashboard-data";
+import { RecentIncomeActionsPopover } from "./recent-income-actions-popover";
 import { RecentIncomeFilter } from "./recent-income-filter";
 import { RecentIncomeItems } from "./recent-income-items";
 
@@ -108,13 +108,7 @@ const recentIncomeColumns: ColumnDef<RecentIncomeRecord>[] = [
     header: () => <div className="text-right">Actions</div>,
     cell: ({ row }) => (
       <div className="flex justify-end">
-        <button
-          type="button"
-          aria-label={`Open actions for ${row.original.source}`}
-          className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-        >
-          <MoreHorizontalIcon className="size-4" />
-        </button>
+        <RecentIncomeActionsPopover income={row.original} />
       </div>
     ),
   },

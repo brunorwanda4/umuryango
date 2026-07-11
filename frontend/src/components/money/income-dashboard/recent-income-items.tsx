@@ -1,9 +1,8 @@
 "use client";
 
-import { MoreHorizontalIcon, SearchIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -21,6 +20,7 @@ import {
 } from "@/components/ui/item";
 import { cn } from "@/lib/utils";
 import type { RecentIncomeRecord } from "./income-dashboard-data";
+import { RecentIncomeActionsPopover } from "./recent-income-actions-popover";
 
 type RecentIncomeItemsProps = {
   data: RecentIncomeRecord[];
@@ -84,14 +84,7 @@ export function RecentIncomeItems({ data }: RecentIncomeItemsProps) {
                     value={income.amountMinorUnits}
                   />
                 </span>
-                <Button
-                  aria-label={`Open actions for ${income.source}`}
-                  size="icon-sm"
-                  type="button"
-                  variant="ghost"
-                >
-                  <MoreHorizontalIcon aria-hidden="true" />
-                </Button>
+                <RecentIncomeActionsPopover income={income} />
               </ItemActions>
             </li>
           </Item>

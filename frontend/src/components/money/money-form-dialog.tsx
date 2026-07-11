@@ -2,6 +2,8 @@
 
 import { PlusIcon } from "lucide-react";
 import type * as React from "react";
+import { useForm } from "react-hook-form";
+import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,16 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { FieldGroup } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 
 type MoneyFormType = "income" | "expense" | "savings" | "debt";
@@ -32,6 +25,14 @@ interface MoneyFormDialogProps {
   triggerClassName?: string;
   triggerSize?: React.ComponentProps<typeof Button>["size"];
 }
+
+type MoneyFormValues = {
+  title: string;
+  amountMinorUnits: number;
+  category: string;
+  date: string;
+  account: string;
+};
 
 const formConfig: Record<
   MoneyFormType,
@@ -68,13 +69,28 @@ const formConfig: Record<
   },
 };
 
+const accountOptions = [
+  { value: "mobile-money", label: "Mobile money" },
+  { value: "bank-account", label: "Bank account" },
+  { value: "cash", label: "Cash" },
+  { value: "savings-wallet", label: "Savings wallet" },
+];
+
 export function MoneyFormDialog({
   type,
   triggerClassName,
   triggerSize = "sm",
 }: MoneyFormDialogProps) {
   const config = formConfig[type];
-  const fieldPrefix = `money-${type}`;
+  const form = useForm<MoneyFormValues>({
+    defaultValues: {
+      title: "",
+      amountMinorUnits: 0,
+      category: config.categories[0] ?? "",
+      date: "",
+      account: "mobile-money",
+    },
+  });
 
   return (
     <Dialog syncWithSearchParams={false}>
@@ -91,74 +107,50 @@ export function MoneyFormDialog({
         </DialogHeader>
         <form
           className="flex flex-col gap-6"
-          onSubmit={(event) => event.preventDefault()}
+          onSubmit={form.handleSubmit(() => undefined)}
         >
           <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor={`${fieldPrefix}-title`}>Title</FieldLabel>
-              <Input
-                id={`${fieldPrefix}-title`}
-                placeholder="Example: Monthly contribution"
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor={`${fieldPrefix}-amount`}>Amount</FieldLabel>
-              <Input
-                id={`${fieldPrefix}-amount`}
-                inputMode="numeric"
-                min="0"
-                placeholder="0"
-                type="number"
-              />
-            </Field>
+            <CommonFormField
+              control={form.control}
+              name="title"
+              label="Title"
+              placeholder="Example: Monthly contribution"
+            />
+            <CommonFormField
+              control={form.control}
+              name="amountMinorUnits"
+              label="Amount"
+              fieldType="money"
+              currency="RWF"
+              placeholder="0"
+            />
             <FieldGroup className="grid gap-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor={`${fieldPrefix}-category`}>
-                  Category
-                </FieldLabel>
-                <Select defaultValue={config.categories[0]}>
-                  <SelectTrigger
-                    id={`${fieldPrefix}-category`}
-                    className="w-full"
-                  >
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {config.categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${fieldPrefix}-date`}>Date</FieldLabel>
-                <Input id={`${fieldPrefix}-date`} type="date" />
-              </Field>
+              <CommonFormField
+                control={form.control}
+                name="category"
+                label="Category"
+                fieldType="select"
+                placeholder="Select category"
+                selectOptions={config.categories.map((category) => ({
+                  value: category,
+                  label: category,
+                }))}
+              />
+              <CommonFormField
+                control={form.control}
+                name="date"
+                label="Date"
+                fieldType="date"
+              />
             </FieldGroup>
-            <Field>
-              <FieldLabel htmlFor={`${fieldPrefix}-account`}>
-                Account
-              </FieldLabel>
-              <Select defaultValue="mobile-money">
-                <SelectTrigger id={`${fieldPrefix}-account`} className="w-full">
-                  <SelectValue placeholder="Select account" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="mobile-money">Mobile money</SelectItem>
-                    <SelectItem value="bank-account">Bank account</SelectItem>
-                    <SelectItem value="cash">Cash</SelectItem>
-                    <SelectItem value="savings-wallet">
-                      Savings wallet
-                    </SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
+            <CommonFormField
+              control={form.control}
+              name="account"
+              label="Account"
+              fieldType="select"
+              placeholder="Select account"
+              selectOptions={accountOptions}
+            />
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
