@@ -19,18 +19,31 @@ import {
 } from "@/components/ui/popover";
 import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
+import { formatMonthPeriod, getMonthPeriod } from "./utils";
 
-type FamilySummary = {
+// ---------------------------------------------------------------------------
+// Shared types
+// ---------------------------------------------------------------------------
+
+/** Lightweight family listing shape returned by GET /families?limit=1. */
+export type FamilySummary = {
   authority: "HEAD" | "ADMIN" | "MEMBER";
   id: string;
   name: string;
   slug: string;
 };
 
-export function PersonalIncomePage() {
-  const [month, setMonth] = useState(() =>
-    new Date().toISOString().slice(0, 7),
-  );
+// ---------------------------------------------------------------------------
+// Hook: useIncomePageData
+// ---------------------------------------------------------------------------
+
+/**
+ * Encapsulates all data fetching for the personal income page.
+ * Returns the family, categories, dashboard data, loading/error state, and a
+ * `reload` callback that can be passed to child components for optimistic
+ * refresh after mutations.
+ */
+export function useIncomePageData(period: { from: string; to: string }) {
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [categories, setCategories] = useState<IncomeCategory[]>([]);
   const [dashboard, setDashboard] = useState<IncomeDashboardResponse | null>(
@@ -39,12 +52,11 @@ export function PersonalIncomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const period = useMemo(() => getMonthPeriod(month), [month]);
-
-  const loadIncome = useCallback(async () => {
+  const reload = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
+    // Step 1 – resolve the user's first family workspace.
     const familiesResponse = await apiRequest<undefined, FamilySummary[]>(
       "get",
       "/families?limit=1",
@@ -65,6 +77,7 @@ export function PersonalIncomePage() {
       return;
     }
 
+    // Step 2 – fetch full family detail, categories, and dashboard in parallel.
     const [familyResponse, categoriesResponse, dashboardResponse] =
       await Promise.all([
         apiRequest<undefined, FamilyDetail>(
@@ -105,12 +118,128 @@ export function PersonalIncomePage() {
   }, [period.from, period.to]);
 
   useEffect(() => {
-    loadIncome();
-  }, [loadIncome]);
+    void reload();
+  }, [reload]);
 
-  const canRecordIncome = family
-    ? hasCapability(family, "RECORD_INCOME")
-    : false;
+  return { categories, dashboard, error, family, isLoading, reload };
+}
+
+// ---------------------------------------------------------------------------
+// Component: IncomeMonthPicker
+// ---------------------------------------------------------------------------
+
+/**
+ * A popover that lets the user pick a calendar month.
+ * Renders the formatted period label as the trigger button and an `<input
+ * type="month">` inside the popover content.
+ *
+ * Reusable for any page that needs month-range selection.
+ */
+export function IncomeMonthPicker({
+  month,
+  onMonthChange,
+}: {
+  month: string;
+  onMonthChange: (month: string) => void;
+}) {
+  const period = useMemo(() => getMonthPeriod(month), [month]);
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button type="button" variant="outline">
+          <span>{formatMonthPeriod(period.from, period.to)}</span>
+          <CalendarDaysIcon data-icon="inline-end" aria-hidden="true" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-64">
+        <label
+          className="flex flex-col gap-2 font-medium text-sm"
+          htmlFor="income-month"
+        >
+          Income month
+          <Input
+            aria-label="Income month"
+            id="income-month"
+            max="9999-12"
+            min="2000-01"
+            onChange={(event) => onMonthChange(event.target.value)}
+            type="month"
+            value={month}
+          />
+        </label>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Component: IncomePageActions
+// ---------------------------------------------------------------------------
+
+/**
+ * The action bar rendered in the page header: month picker on the left and
+ * (when the user has RECORD_INCOME permission) an "Add income" button on the
+ * right.
+ *
+ * Split out so it can be unit-tested or reused in a modal/sheet context.
+ */
+export function IncomePageActions({
+  categories,
+  canRecordIncome,
+  family,
+  month,
+  onMonthChange,
+  onSuccess,
+}: {
+  canRecordIncome: boolean;
+  categories: IncomeCategory[];
+  family: FamilyDetail | null;
+  month: string;
+  onMonthChange: (month: string) => void;
+  onSuccess: () => void | Promise<void>;
+}) {
+  return (
+    <div className="mt-4 flex w-full flex-col gap-3 sm:w-auto sm:flex-row lg:mt-0">
+      <IncomeMonthPicker month={month} onMonthChange={onMonthChange} />
+      {canRecordIncome && family ? (
+        <MoneyFormDialog
+          categories={categories}
+          familyId={family.id}
+          onCategoryCreated={onSuccess}
+          onSuccess={onSuccess}
+          triggerSize="default"
+          type="income"
+        />
+      ) : null}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Page: PersonalIncomePage
+// ---------------------------------------------------------------------------
+
+/**
+ * Full personal income page.
+ *
+ * Composes `useIncomePageData`, `IncomePageActions`, and `IncomeDashboard`
+ * together. Keep this component thin — business logic belongs in the hook,
+ * UI sub-trees belong in the extracted components above.
+ */
+export function PersonalIncomePage() {
+  const [month, setMonth] = useState(() =>
+    new Date().toISOString().slice(0, 7),
+  );
+
+  const period = useMemo(() => getMonthPeriod(month), [month]);
+
+  const { categories, dashboard, error, family, isLoading, reload } =
+    useIncomePageData(period);
+
+  const canRecordIncome = family ? hasCapability(family, "RECORD_INCOME") : false;
+
+  // Only pass ACTIVE INCOME categories to the dashboard filter chip list.
   const incomeCategories = categories.filter(
     (category) => category.type === "INCOME" && category.status === "ACTIVE",
   );
@@ -123,43 +252,14 @@ export function PersonalIncomePage() {
         description="Track money you receive from work, business, contributions, gifts, and family support."
         badge={family?.name}
         actions={
-          <div className="mt-4 flex w-full flex-col gap-3 sm:w-auto sm:flex-row lg:mt-0">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button type="button" variant="outline">
-                  <span>{formatMonthPeriod(period.from, period.to)}</span>
-                  <CalendarDaysIcon data-icon="inline-end" aria-hidden="true" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-64">
-                <label
-                  className="flex flex-col gap-2 font-medium text-sm"
-                  htmlFor="income-month"
-                >
-                  Income month
-                  <Input
-                    aria-label="Income month"
-                    id="income-month"
-                    max="9999-12"
-                    min="2000-01"
-                    onChange={(event) => setMonth(event.target.value)}
-                    type="month"
-                    value={month}
-                  />
-                </label>
-              </PopoverContent>
-            </Popover>
-            {canRecordIncome && family ? (
-              <MoneyFormDialog
-                categories={categories}
-                familyId={family.id}
-                onCategoryCreated={loadIncome}
-                onSuccess={loadIncome}
-                triggerSize="default"
-                type="income"
-              />
-            ) : null}
-          </div>
+          <IncomePageActions
+            canRecordIncome={canRecordIncome}
+            categories={categories}
+            family={family}
+            month={month}
+            onMonthChange={setMonth}
+            onSuccess={reload}
+          />
         }
       />
       <IncomeDashboard
@@ -168,33 +268,8 @@ export function PersonalIncomePage() {
         error={error}
         familyId={family?.id ?? null}
         isLoading={isLoading}
-        onRetry={loadIncome}
+        onRetry={reload}
       />
     </div>
   );
-}
-
-function getMonthPeriod(month: string) {
-  const [yearValue, monthValue] = month.split("-");
-  const year = Number(yearValue);
-  const monthIndex = Number(monthValue) - 1;
-  const from = new Date(Date.UTC(year, monthIndex, 1));
-  const to = new Date(Date.UTC(year, monthIndex + 1, 0));
-
-  return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
-  };
-}
-
-function formatMonthPeriod(from: string, to: string) {
-  const formatter = new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-
-  return `${formatter.format(new Date(`${from}T00:00:00`))} - ${formatter.format(
-    new Date(`${to}T00:00:00`),
-  )}`;
 }
