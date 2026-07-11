@@ -29,6 +29,8 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   table?: TanStackTable<TData>;
+  getRowAriaLabel?: (row: Row<TData>) => string;
+  onRowClick?: (row: Row<TData>) => void;
   rowClassName?: (row: Row<TData>) => string;
   serverMode?: boolean;
   pageIndex?: number;
@@ -42,6 +44,8 @@ interface DataTableProps<TData, TValue> {
 export function CommonDataTable<TData, TValue>({
   columns,
   data,
+  getRowAriaLabel,
+  onRowClick,
   table: externalTable,
   rowClassName,
   serverMode,
@@ -171,22 +175,44 @@ export function CommonDataTable<TData, TValue>({
                   </TableCell>
                 </TableRow>
               ) : table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className={rowClassName ? rowClassName(row) : undefined}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                table.getRowModel().rows.map((row) => {
+                  const isInteractive = Boolean(onRowClick);
+
+                  return (
+                    <TableRow
+                      key={row.id}
+                      aria-label={getRowAriaLabel?.(row)}
+                      data-state={row.getIsSelected() && "selected"}
+                      role={isInteractive ? "button" : undefined}
+                      tabIndex={isInteractive ? 0 : undefined}
+                      className={cn(
+                        isInteractive &&
+                          "cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                        rowClassName?.(row),
+                      )}
+                      onClick={onRowClick ? () => onRowClick(row) : undefined}
+                      onKeyDown={
+                        onRowClick
+                          ? (event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                onRowClick(row);
+                              }
+                            }
+                          : undefined
+                      }
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
                   <TableCell

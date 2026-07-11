@@ -15,6 +15,7 @@ import type {
 import { RecentIncomeActionsPopover } from "./recent-income-actions-popover";
 import { RecentIncomeFilter } from "./recent-income-filter";
 import { RecentIncomeItems } from "./recent-income-items";
+import { ViewIncomeDialog } from "./view-income-dialog";
 
 const RECENT_INCOME_VIEW_MODE_STORAGE_KEY =
   "rwanda-family-recent-income-view-mode";
@@ -141,6 +142,7 @@ export function RecentIncomeTable({
   onSuccess: () => void | Promise<void>;
 }) {
   const [search, setSearch] = useState("");
+  const [viewIncomeId, setViewIncomeId] = useState<string | null>(null);
   const [viewMode, setViewMode] = usePersistentViewMode(
     RECENT_INCOME_VIEW_MODE_STORAGE_KEY,
   );
@@ -169,6 +171,10 @@ export function RecentIncomeTable({
     () => getRecentIncomeColumns({ categories, familyId, onSuccess }),
     [categories, familyId, onSuccess],
   );
+  const selectedIncome = useMemo(
+    () => data.find((income) => income.id === viewIncomeId),
+    [data, viewIncomeId],
+  );
 
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
@@ -187,6 +193,11 @@ export function RecentIncomeTable({
           <CommonDataTable
             columns={recentIncomeColumns}
             data={filteredIncomeData}
+            getRowAriaLabel={(row) =>
+              `View income details for ${row.original.source}`
+            }
+            onRowClick={(row) => setViewIncomeId(row.original.id)}
+            rowClassName={() => "hover:bg-muted/50"}
             className="rounded-none border-0 [&>div:last-child]:hidden [&_table]:w-full [&_tbody_tr]:h-[4.5rem] [&_thead_tr]:bg-transparent [&_th]:h-11 [&_th]:text-muted-foreground"
           />
         ) : (
@@ -198,6 +209,21 @@ export function RecentIncomeTable({
           />
         )}
       </CardContent>
+      {selectedIncome ? (
+        <ViewIncomeDialog
+          categories={categories}
+          familyId={familyId}
+          income={selectedIncome}
+          open={Boolean(viewIncomeId)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setViewIncomeId(null);
+            }
+          }}
+          trigger={null}
+          onSuccess={onSuccess}
+        />
+      ) : null}
     </Card>
   );
 }
