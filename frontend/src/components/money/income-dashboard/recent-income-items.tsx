@@ -1,6 +1,7 @@
 "use client";
 
 import { SearchIcon } from "lucide-react";
+import { useState } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,6 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { RecentIncomeRecord } from "./income-dashboard-data";
 import { RecentIncomeActionsPopover } from "./recent-income-actions-popover";
+import { ViewIncomeDialog } from "./view-income-dialog";
 
 type RecentIncomeItemsProps = {
   data: RecentIncomeRecord[];
@@ -47,49 +49,69 @@ export function RecentIncomeItems({ data }: RecentIncomeItemsProps) {
 
   return (
     <ul className="flex w-full flex-col gap-4 px-5 pb-5 sm:px-6">
-      {data.map((income) => {
-        const SourceIcon = income.icon;
-        const PaymentIcon = income.paymentIcon;
-
-        return (
-          <Item onClick={() => {}} key={income.id} asChild variant="outline">
-            <li>
-              <ItemMedia
-                variant="icon"
-                className={cn("size-9 rounded-full", income.sourceClassName)}
-              >
-                <SourceIcon aria-hidden="true" />
-              </ItemMedia>
-              <ItemContent className="min-w-0">
-                <ItemTitle className="max-w-full">
-                  <span className="truncate">{income.source}</span>
-                  <Badge className={income.categoryClassName}>
-                    {income.category}
-                  </Badge>
-                </ItemTitle>
-                <ItemDescription>{income.description}</ItemDescription>
-                <div className="flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
-                  <span>{income.date}</span>
-                  <span aria-hidden="true">/</span>
-                  <span className="inline-flex items-center gap-1">
-                    <PaymentIcon aria-hidden="true" />
-                    {income.paymentMethod}
-                  </span>
-                </div>
-              </ItemContent>
-              <ItemActions className="ml-auto">
-                <span className="font-bold text-chart-2 text-sm">
-                  <CompactMoney
-                    currency="RWF"
-                    value={income.amountMinorUnits}
-                  />
-                </span>
-                <RecentIncomeActionsPopover income={income} />
-              </ItemActions>
-            </li>
-          </Item>
-        );
-      })}
+      {data.map((income) => (
+        <RecentIncomeItem income={income} key={income.id} />
+      ))}
     </ul>
+  );
+}
+
+function RecentIncomeItem({ income }: { income: RecentIncomeRecord }) {
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const SourceIcon = income.icon;
+  const PaymentIcon = income.paymentIcon;
+
+  return (
+    <>
+      <li>
+        <Item
+          className="relative cursor-pointer hover:bg-muted/50"
+          onClick={() => setIsViewOpen(true)}
+          variant="outline"
+        >
+          <button
+            aria-label={`View income details for ${income.source}`}
+            className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            onClick={() => setIsViewOpen(true)}
+            type="button"
+          />
+          <ItemMedia
+            variant="icon"
+            className={cn("size-9 rounded-full", income.sourceClassName)}
+          >
+            <SourceIcon aria-hidden="true" />
+          </ItemMedia>
+          <ItemContent className="min-w-0">
+            <ItemTitle className="max-w-full">
+              <span className="truncate">{income.source}</span>
+              <Badge className={income.categoryClassName}>
+                {income.category}
+              </Badge>
+            </ItemTitle>
+            <ItemDescription>{income.description}</ItemDescription>
+            <div className="flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
+              <span>{income.date}</span>
+              <span aria-hidden="true">/</span>
+              <span className="inline-flex items-center gap-1">
+                <PaymentIcon aria-hidden="true" />
+                {income.paymentMethod}
+              </span>
+            </div>
+          </ItemContent>
+          <ItemActions className="relative z-10 ml-auto">
+            <span className="font-bold text-chart-2 text-sm">
+              <CompactMoney currency="RWF" value={income.amountMinorUnits} />
+            </span>
+            <RecentIncomeActionsPopover income={income} />
+          </ItemActions>
+        </Item>
+      </li>
+      <ViewIncomeDialog
+        income={income}
+        open={isViewOpen}
+        onOpenChange={setIsViewOpen}
+        trigger={null}
+      />
+    </>
   );
 }

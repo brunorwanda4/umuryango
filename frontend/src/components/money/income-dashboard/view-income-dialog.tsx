@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarDaysIcon, EyeIcon, PencilIcon, TagIcon } from "lucide-react";
+import type * as React from "react";
 import { useState } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
@@ -21,13 +22,23 @@ import { UpdateIncomeDialog } from "./update-income-dialog";
 
 type ViewIncomeDialogProps = {
   income: RecentIncomeRecord;
+  onOpenChange?: (open: boolean) => void;
+  open?: boolean;
+  trigger?: React.ReactElement | null;
 };
 
-export function ViewIncomeDialog({ income }: ViewIncomeDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function ViewIncomeDialog({
+  income,
+  onOpenChange,
+  open,
+  trigger,
+}: ViewIncomeDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const IncomeIcon = income.icon;
   const PaymentIcon = income.paymentIcon;
+  const isOpen = open ?? internalOpen;
+  const setIsOpen = onOpenChange ?? setInternalOpen;
 
   return (
     <>
@@ -36,17 +47,21 @@ export function ViewIncomeDialog({ income }: ViewIncomeDialogProps) {
         onOpenChange={setIsOpen}
         syncWithSearchParams={false}
       >
-        <DialogTrigger asChild>
-          <Button
-            className="justify-start"
-            size="sm"
-            type="button"
-            variant="ghost"
-          >
-            <EyeIcon aria-hidden="true" data-icon="inline-start" />
-            View income
-          </Button>
-        </DialogTrigger>
+        {trigger !== null && (
+          <DialogTrigger asChild>
+            {trigger ?? (
+              <Button
+                className="justify-start"
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                <EyeIcon aria-hidden="true" data-icon="inline-start" />
+                View income
+              </Button>
+            )}
+          </DialogTrigger>
+        )}
         <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
           <DialogHeader className="px-6 pt-6 pb-5 pr-14">
             <DialogTitle>Income details</DialogTitle>

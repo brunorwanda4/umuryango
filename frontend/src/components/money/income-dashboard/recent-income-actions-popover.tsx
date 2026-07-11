@@ -24,6 +24,8 @@ export function RecentIncomeActionsPopover({
       <PopoverTrigger asChild>
         <Button
           aria-label={`Open actions for ${income.source}`}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
           size="icon-sm"
           type="button"
           variant="ghost"

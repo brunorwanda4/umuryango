@@ -55,7 +55,7 @@ export function UpdateIncomeDialog({
         account: getIncomeAccount(income.paymentMethod),
       }}
       trigger={
-        trigger ?? (
+        trigger === undefined ? (
           <Button
             className="justify-start"
             size="sm"
@@ -65,6 +65,8 @@ export function UpdateIncomeDialog({
             <PencilIcon aria-hidden="true" data-icon="inline-start" />
             Update income
           </Button>
+        ) : (
+          trigger
         )
       }
     />
