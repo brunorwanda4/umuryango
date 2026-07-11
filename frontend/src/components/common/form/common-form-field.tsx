@@ -15,6 +15,7 @@ import {
 } from "react-hook-form";
 import { LucideIconPicker } from "@/components/common/form/lucide-icon-picker";
 import { MoneyInput } from "@/components/common/form/money-input";
+import { DatePickerInput, TimePickerInput } from "@/components/ui/calendar-day";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -188,7 +189,44 @@ export function CommonFormField<T extends FieldValues>({
               );
 
             case "date":
+              return (
+                <DatePickerInput
+                  id={id}
+                  name={field.name}
+                  disabled={disabled}
+                  required={required}
+                  placeholder={placeholder || "Pick a date"}
+                  value={stringValue}
+                  aria-invalid={invalid}
+                  className={className}
+                  min={inputProps?.min}
+                  max={inputProps?.max}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                />
+              );
+
             case "time":
+              return (
+                <TimePickerInput
+                  id={id}
+                  name={field.name}
+                  disabled={disabled}
+                  required={required}
+                  placeholder={placeholder || "Pick a time"}
+                  value={stringValue}
+                  aria-invalid={invalid}
+                  className={className}
+                  min={inputProps?.min}
+                  max={inputProps?.max}
+                  step={inputProps?.step}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                />
+              );
+
             case "phone":
               return (
                 <Input
