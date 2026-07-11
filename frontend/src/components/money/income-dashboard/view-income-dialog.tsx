@@ -1,6 +1,6 @@
 "use client";
 
-import { EyeIcon } from "lucide-react";
+import { CalendarDaysIcon, EyeIcon, TagIcon } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import type { RecentIncomeRecord } from "./income-dashboard-data";
 
 type ViewIncomeDialogProps = {
@@ -21,6 +22,9 @@ type ViewIncomeDialogProps = {
 };
 
 export function ViewIncomeDialog({ income }: ViewIncomeDialogProps) {
+  const IncomeIcon = income.icon;
+  const PaymentIcon = income.paymentIcon;
+
   return (
     <Dialog syncWithSearchParams={false}>
       <DialogTrigger asChild>
@@ -34,39 +38,84 @@ export function ViewIncomeDialog({ income }: ViewIncomeDialogProps) {
           View income
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
+        <DialogHeader className="px-6 pt-6 pb-5 pr-14">
           <DialogTitle>Income details</DialogTitle>
-          <DialogDescription>{income.description}</DialogDescription>
+          <DialogDescription>
+            Review the recorded income and payment information.
+          </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <span className="font-medium">{income.source}</span>
-              <span className="text-muted-foreground text-sm">
-                {income.date}
+        <Separator />
+
+        <div className="flex flex-col gap-6 px-6 py-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <IncomeIcon aria-hidden="true" className="size-5" />
+              </div>
+              <div className="flex min-w-0 flex-col gap-1">
+                <span className="font-medium leading-5">{income.source}</span>
+                <span className="text-sm leading-5 text-muted-foreground">
+                  {income.description}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 flex-col gap-1 sm:items-end">
+              <span className="text-xs font-medium text-muted-foreground">
+                Amount received
+              </span>
+              <span className="font-heading text-2xl font-semibold tabular-nums">
+                <CompactMoney currency="RWF" value={income.amountMinorUnits} />
               </span>
             </div>
-            <span className="font-bold text-chart-2">
-              <CompactMoney currency="RWF" value={income.amountMinorUnits} />
-            </span>
           </div>
-          <div className="grid gap-3 rounded-2xl bg-muted/50 p-4 text-sm sm:grid-cols-2">
-            <div className="flex flex-col gap-1">
-              <span className="text-muted-foreground">Category</span>
-              <Badge className={income.categoryClassName}>
-                {income.category}
-              </Badge>
+
+          <dl className="overflow-hidden rounded-lg border bg-muted/20">
+            <div className="flex items-center gap-3 border-b px-4 py-3.5">
+              <CalendarDaysIcon
+                aria-hidden="true"
+                className="size-4 shrink-0 text-muted-foreground"
+              />
+              <dt className="text-sm text-muted-foreground">Date received</dt>
+              <dd className="ml-auto text-right text-sm font-medium">
+                {income.date}
+              </dd>
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-muted-foreground">Payment method</span>
-              <span>{income.paymentMethod}</span>
+
+            <div className="flex items-center gap-3 border-b px-4 py-3.5">
+              <TagIcon
+                aria-hidden="true"
+                className="size-4 shrink-0 text-muted-foreground"
+              />
+              <dt className="text-sm text-muted-foreground">Category</dt>
+              <dd className="ml-auto">
+                <Badge className={income.categoryClassName}>
+                  {income.category}
+                </Badge>
+              </dd>
             </div>
-          </div>
+
+            <div className="flex items-center gap-3 px-4 py-3.5">
+              <PaymentIcon
+                aria-hidden="true"
+                className="size-4 shrink-0 text-muted-foreground"
+              />
+              <dt className="text-sm text-muted-foreground">Payment method</dt>
+              <dd className="ml-auto text-right text-sm font-medium">
+                {income.paymentMethod}
+              </dd>
+            </div>
+          </dl>
         </div>
-        <DialogFooter>
+
+        <DialogFooter className="border-t bg-muted/20 px-6 py-4">
           <DialogClose asChild>
-            <Button type="button" variant="outline">
+            <Button
+              className="w-full sm:w-auto"
+              type="button"
+              variant="outline"
+            >
               Close
             </Button>
           </DialogClose>
