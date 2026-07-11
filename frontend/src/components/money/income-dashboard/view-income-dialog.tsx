@@ -1,6 +1,12 @@
 "use client";
 
-import { CalendarDaysIcon, EyeIcon, PencilIcon, TagIcon } from "lucide-react";
+import {
+  CalendarDaysIcon,
+  EyeIcon,
+  PencilIcon,
+  TagIcon,
+  Trash2Icon,
+} from "lucide-react";
 import type * as React from "react";
 import { useState } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
@@ -17,6 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { DeleteIncomeDialog } from "./delete-income-dialog";
 import type { RecentIncomeRecord } from "./income-dashboard-data";
 import { UpdateIncomeDialog } from "./update-income-dialog";
 
@@ -34,6 +41,7 @@ export function ViewIncomeDialog({
   trigger,
 }: ViewIncomeDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const IncomeIcon = income.icon;
   const PaymentIcon = income.paymentIcon;
@@ -152,6 +160,18 @@ export function ViewIncomeDialog({
               className="w-full sm:w-auto"
               onClick={() => {
                 setIsOpen(false);
+                setIsDeleteOpen(true);
+              }}
+              type="button"
+              variant="destructive"
+            >
+              <Trash2Icon aria-hidden="true" data-icon="inline-start" />
+              Delete income
+            </Button>
+            <Button
+              className="w-full sm:w-auto"
+              onClick={() => {
+                setIsOpen(false);
                 setIsUpdateOpen(true);
               }}
               type="button"
@@ -166,6 +186,12 @@ export function ViewIncomeDialog({
         income={income}
         open={isUpdateOpen}
         onOpenChange={setIsUpdateOpen}
+        trigger={null}
+      />
+      <DeleteIncomeDialog
+        income={income}
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
         trigger={null}
       />
     </>

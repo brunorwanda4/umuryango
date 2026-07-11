@@ -1,6 +1,7 @@
 "use client";
 
 import { Trash2Icon } from "lucide-react";
+import type * as React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,22 +18,36 @@ import type { RecentIncomeRecord } from "./income-dashboard-data";
 
 type DeleteIncomeDialogProps = {
   income: RecentIncomeRecord;
+  onOpenChange?: (open: boolean) => void;
+  open?: boolean;
+  trigger?: React.ReactElement | null;
 };
 
-export function DeleteIncomeDialog({ income }: DeleteIncomeDialogProps) {
+export function DeleteIncomeDialog({
+  income,
+  onOpenChange,
+  open,
+  trigger,
+}: DeleteIncomeDialogProps) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          className="justify-start text-destructive"
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
-          <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-          Delete income
-        </Button>
-      </AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      {trigger !== null && (
+        <AlertDialogTrigger asChild>
+          {trigger === undefined ? (
+            <Button
+              className="justify-start text-destructive"
+              size="sm"
+              type="button"
+              variant="ghost"
+            >
+              <Trash2Icon aria-hidden="true" data-icon="inline-start" />
+              Delete income
+            </Button>
+          ) : (
+            trigger
+          )}
+        </AlertDialogTrigger>
+      )}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete income?</AlertDialogTitle>
