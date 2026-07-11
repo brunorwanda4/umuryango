@@ -54,7 +54,11 @@ export function ApprovalDetailsSheet({
     approval?.status === "PENDING";
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      syncWithSearchParams={false}
+    >
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl lg:max-w-2xl">
         {approval ? (
           <>

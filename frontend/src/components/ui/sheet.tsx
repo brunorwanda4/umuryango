@@ -4,10 +4,78 @@ import { XIcon } from "lucide-react";
 import { Dialog as SheetPrimitive } from "radix-ui";
 import type * as React from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DialogSearchParamSegmentProvider,
+  type DialogSearchParamSyncProps,
+  useDialogSearchParamSync,
+} from "@/components/ui/dialog-search-params";
 import { cn } from "@/lib/utils";
 
-function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
-  return <SheetPrimitive.Root data-slot="sheet" {...props} />;
+type SheetProps = React.ComponentProps<typeof SheetPrimitive.Root> &
+  DialogSearchParamSyncProps;
+
+function Sheet({
+  children,
+  defaultOpen,
+  onOpenChange,
+  open,
+  searchParamHistory = "replace",
+  searchParamName = "sheet",
+  searchParamSegment,
+  searchParamValue,
+  syncWithSearchParams = true,
+  ...props
+}: SheetProps) {
+  const {
+    activeOpen,
+    canSyncWithSearchParams,
+    handleOpenChange,
+    resolvedSearchParamSegment,
+  } = useDialogSearchParamSync({
+    children,
+    componentName: "Sheet",
+    defaultOpen,
+    fallbackSearchParamPrefix: "sheet",
+    onOpenChange,
+    open,
+    rootComponent: Sheet,
+    searchParamHistory,
+    searchParamName,
+    searchParamSegment,
+    searchParamValue,
+    syncWithSearchParams,
+    titleComponent: SheetTitle,
+  });
+
+  if (!canSyncWithSearchParams) {
+    return (
+      <SheetPrimitive.Root
+        data-slot="sheet"
+        defaultOpen={defaultOpen}
+        onOpenChange={onOpenChange}
+        open={open}
+        {...props}
+      >
+        {children}
+      </SheetPrimitive.Root>
+    );
+  }
+
+  return (
+    <DialogSearchParamSegmentProvider
+      name={searchParamName}
+      nextSegment={resolvedSearchParamSegment + 1}
+    >
+      <SheetPrimitive.Root
+        data-slot="sheet"
+        onOpenChange={handleOpenChange}
+        open={activeOpen}
+        {...props}
+      >
+        {children}
+      </SheetPrimitive.Root>
+    </DialogSearchParamSegmentProvider>
+  );
 }
 
 function SheetTrigger({
