@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatPeriodLabel } from "@/lib/format-period-label";
 import { IncomeChartsSection } from "./income-dashboard/income-charts-section";
 import {
   type IncomeCategory,
@@ -105,15 +106,4 @@ function IncomeDashboardSkeleton() {
       <span className="sr-only">Loading income</span>
     </output>
   );
-}
-
-function formatPeriodLabel(from: string, to: string) {
-  const formatter = new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  return `${formatter.format(new Date(`${from}T00:00:00`))} - ${formatter.format(
-    new Date(`${to}T00:00:00`),
-  )}`;
 }
