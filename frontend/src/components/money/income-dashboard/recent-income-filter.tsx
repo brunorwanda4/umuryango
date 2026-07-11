@@ -24,7 +24,7 @@ export function RecentIncomeFilter({
   const hasSearch = search.trim().length > 0;
 
   return (
-    <div className="flex flex-col gap-2 px-5 pb-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <div className="flex flex-col gap-3 px-5 pb-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
       <InputGroup className="sm:max-w-sm">
         <InputGroupAddon align="inline-start">
           <SearchIcon aria-hidden="true" />
@@ -50,9 +50,11 @@ export function RecentIncomeFilter({
           </InputGroupAddon>
         ) : null}
       </InputGroup>
-      <p className="text-muted-foreground text-xs">
-        Showing {resultCount} of {totalCount}
-      </p>
+      <div className="flex items-center justify-between gap-3 sm:justify-end">
+        <p className="text-muted-foreground text-xs">
+          Showing {resultCount} of {totalCount}
+        </p>
+      </div>
     </div>
   );
 }

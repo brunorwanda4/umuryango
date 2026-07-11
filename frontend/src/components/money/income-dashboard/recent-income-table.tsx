@@ -5,13 +5,19 @@ import { MoreHorizontalIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
+import { DataViewToggle } from "@/components/common/table/data-view-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
 import { cn } from "@/lib/utils";
 import {
   type RecentIncomeRecord,
   recentIncomeData,
 } from "./income-dashboard-data";
 import { RecentIncomeFilter } from "./recent-income-filter";
+import { RecentIncomeItems } from "./recent-income-items";
+
+const RECENT_INCOME_VIEW_MODE_STORAGE_KEY =
+  "rwanda-family-recent-income-view-mode";
 
 const recentIncomeColumns: ColumnDef<RecentIncomeRecord>[] = [
   {
@@ -116,6 +122,9 @@ const recentIncomeColumns: ColumnDef<RecentIncomeRecord>[] = [
 
 export function RecentIncomeTable() {
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = usePersistentViewMode(
+    RECENT_INCOME_VIEW_MODE_STORAGE_KEY,
+  );
   const filteredIncomeData = useMemo(() => {
     const query = search.trim().toLowerCase();
 
@@ -140,9 +149,9 @@ export function RecentIncomeTable() {
 
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
-      <CardHeader className="px-5 pt-5 pb-2 sm:px-6">
+      <CardHeader className="flex items-center justify-between px-5 pt-5 pb-2 sm:px-6">
         <CardTitle className="font-bold text-base">Recent income</CardTitle>
-        {/*<Group></Group>*/}
+        <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
       <CardContent className="px-0 pb-0">
         <RecentIncomeFilter
@@ -151,11 +160,15 @@ export function RecentIncomeTable() {
           totalCount={recentIncomeData.length}
           onSearchChange={setSearch}
         />
-        <CommonDataTable
-          columns={recentIncomeColumns}
-          data={filteredIncomeData}
-          className="rounded-none border-0 [&>div:last-child]:hidden [&_table]:w-full [&_tbody_tr]:h-[4.5rem] [&_thead_tr]:bg-transparent [&_th]:h-11 [&_th]:text-muted-foreground"
-        />
+        {viewMode === "table" ? (
+          <CommonDataTable
+            columns={recentIncomeColumns}
+            data={filteredIncomeData}
+            className="rounded-none border-0 [&>div:last-child]:hidden [&_table]:w-full [&_tbody_tr]:h-[4.5rem] [&_thead_tr]:bg-transparent [&_th]:h-11 [&_th]:text-muted-foreground"
+          />
+        ) : (
+          <RecentIncomeItems data={filteredIncomeData} />
+        )}
       </CardContent>
     </Card>
   );
