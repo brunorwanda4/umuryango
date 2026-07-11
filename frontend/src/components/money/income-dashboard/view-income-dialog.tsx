@@ -146,16 +146,8 @@ export function ViewIncomeDialog({
             </dl>
           </div>
 
-          <DialogFooter className="border-t bg-muted/20 px-6 py-4">
-            <DialogClose asChild>
-              <Button
-                className="w-full sm:w-auto"
-                type="button"
-                variant="outline"
-              >
-                Close
-              </Button>
-            </DialogClose>
+          <DialogFooter className="border-t bg-muted/20 px-6 py-4 ">
+
             <Button
               className="w-full sm:w-auto"
               onClick={() => {
@@ -179,6 +171,15 @@ export function ViewIncomeDialog({
               <PencilIcon aria-hidden="true" data-icon="inline-start" />
               Update income
             </Button>
+            <DialogClose asChild>
+              <Button
+                className="w-full sm:w-auto"
+                type="button"
+                variant="outline"
+              >
+                Close
+              </Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>
