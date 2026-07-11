@@ -286,9 +286,8 @@ const TimePickerInput = forwardRef<HTMLButtonElement, TimePickerInputProps>(
               Now
             </Button>
           </div>
-          <div
+          <fieldset
             className="grid max-h-56 grid-cols-3 gap-1 overflow-y-auto"
-            role="group"
             aria-label="Common times"
           >
             {timeOptions.map((time) => (
@@ -305,7 +304,7 @@ const TimePickerInput = forwardRef<HTMLButtonElement, TimePickerInputProps>(
                 {value === time ? <CheckIcon data-icon="inline-end" /> : null}
               </Button>
             ))}
-          </div>
+          </fieldset>
         </PopoverContent>
       </Popover>
     );
