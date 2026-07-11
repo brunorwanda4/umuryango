@@ -1,20 +1,23 @@
-import {
-  ArrowDownIcon,
-  ArrowUpRightIcon,
-  CalendarDaysIcon,
-  FileTextIcon,
-  InfoIcon,
-  TrendingUpIcon,
-  WalletCardsIcon,
-} from "lucide-react";
+import { ArrowDownIcon, ArrowUpRightIcon, InfoIcon } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
-import { totalIncomeMinorUnits } from "./income-dashboard-data";
 
-export function IncomeSummaryCards() {
-  const iconClassName = "size-5 text-chart-2";
-  const iconWrapperClassName =
-    "flex size-10 items-center justify-center rounded-xl bg-chart-2/10";
+export function IncomeSummaryCards({
+  periodLabel,
+  summary,
+}: {
+  periodLabel: string;
+  summary: {
+    allTimeTotalMinorUnits: string;
+    approvedTransactionCount: number;
+    largestIncome: {
+      amountMinorUnits: string;
+      category: string;
+      description: string | null;
+    } | null;
+    periodTotalMinorUnits: string;
+  };
+}) {
   const descriptionWithInfo = (label: string) => (
     <span className="inline-flex items-center gap-2">
       {label}
@@ -41,7 +44,12 @@ export function IncomeSummaryCards() {
             </span>
           ),
           iconImage: "/images/icons/wallet.png",
-          value: <CompactMoney currency="RWF" value={totalIncomeMinorUnits} />,
+          value: (
+            <CompactMoney
+              currency="RWF"
+              value={summary.allTimeTotalMinorUnits}
+            />
+          ),
         },
         {
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
@@ -53,21 +61,38 @@ export function IncomeSummaryCards() {
             </span>
           ),
           iconImage: "/images/icons/transaction.png",
-          value: "90",
+          value: summary.approvedTransactionCount.toString(),
         },
         {
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
           description: descriptionWithInfo("This month's income"),
-          footer: <span className="text-chart-2">Jul 1 - Jul 31, 2026</span>,
+          footer: <span className="text-chart-2">{periodLabel}</span>,
           iconImage: "/images/icons/calendar.png",
-          value: <CompactMoney currency="RWF" value={90000} />,
+          value: (
+            <CompactMoney
+              currency="RWF"
+              value={summary.periodTotalMinorUnits}
+            />
+          ),
         },
         {
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
           description: descriptionWithInfo("Largest income"),
-          footer: <span className="text-chart-2">Business income</span>,
+          footer: (
+            <span className="text-chart-2">
+              {summary.largestIncome?.description ??
+                summary.largestIncome?.category ??
+                "No approved income"}
+            </span>
+          ),
           iconImage: "/images/icons/quality.png",
-          value: <CompactMoney currency="RWF" value={40000} />,
+          value: (
+            <CompactMoney
+              currency="RWF"
+              emptyLabel="No records"
+              value={summary.largestIncome?.amountMinorUnits}
+            />
+          ),
         },
       ]}
     />

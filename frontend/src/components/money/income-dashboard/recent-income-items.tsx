@@ -20,15 +20,26 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { cn } from "@/lib/utils";
-import type { RecentIncomeRecord } from "./income-dashboard-data";
+import type {
+  IncomeCategory,
+  RecentIncomeRecord,
+} from "./income-dashboard-data";
 import { RecentIncomeActionsPopover } from "./recent-income-actions-popover";
 import { ViewIncomeDialog } from "./view-income-dialog";
 
 type RecentIncomeItemsProps = {
   data: RecentIncomeRecord[];
+  categories: IncomeCategory[];
+  familyId: string;
+  onSuccess: () => void | Promise<void>;
 };
 
-export function RecentIncomeItems({ data }: RecentIncomeItemsProps) {
+export function RecentIncomeItems({
+  categories,
+  data,
+  familyId,
+  onSuccess,
+}: RecentIncomeItemsProps) {
   if (data.length === 0) {
     return (
       <div className="px-5 pb-5 sm:px-6">
@@ -50,13 +61,29 @@ export function RecentIncomeItems({ data }: RecentIncomeItemsProps) {
   return (
     <ul className="flex w-full flex-col gap-4 px-5 pb-5 sm:px-6">
       {data.map((income) => (
-        <RecentIncomeItem income={income} key={income.id} />
+        <RecentIncomeItem
+          categories={categories}
+          familyId={familyId}
+          income={income}
+          key={income.id}
+          onSuccess={onSuccess}
+        />
       ))}
     </ul>
   );
 }
 
-function RecentIncomeItem({ income }: { income: RecentIncomeRecord }) {
+function RecentIncomeItem({
+  categories,
+  familyId,
+  income,
+  onSuccess,
+}: {
+  categories: IncomeCategory[];
+  familyId: string;
+  income: RecentIncomeRecord;
+  onSuccess: () => void | Promise<void>;
+}) {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const SourceIcon = income.icon;
   const PaymentIcon = income.paymentIcon;
@@ -102,15 +129,23 @@ function RecentIncomeItem({ income }: { income: RecentIncomeRecord }) {
             <span className="font-bold text-chart-2 text-sm">
               <CompactMoney currency="RWF" value={income.amountMinorUnits} />
             </span>
-            <RecentIncomeActionsPopover income={income} />
+            <RecentIncomeActionsPopover
+              categories={categories}
+              familyId={familyId}
+              income={income}
+              onSuccess={onSuccess}
+            />
           </ItemActions>
         </Item>
       </li>
       <ViewIncomeDialog
+        categories={categories}
+        familyId={familyId}
         income={income}
         open={isViewOpen}
         onOpenChange={setIsViewOpen}
         trigger={null}
+        onSuccess={onSuccess}
       />
     </>
   );

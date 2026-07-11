@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/chart";
 import { formatFullMinorUnits } from "@/lib/format-compact-number";
 import { formatCompactAmount } from "./formatters";
-import { incomeOverTimeData } from "./income-dashboard-data";
+import type { IncomeOverTimeDatum } from "./income-dashboard-data";
 
 const incomeChartConfig = {
   amount: {
@@ -20,7 +20,7 @@ const incomeChartConfig = {
   },
 } satisfies ChartConfig;
 
-export function IncomeOverTimeChart() {
+export function IncomeOverTimeChart({ data }: { data: IncomeOverTimeDatum[] }) {
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between gap-4 px-5 pt-5 pb-1 sm:px-6 sm:pt-6">
@@ -40,7 +40,7 @@ export function IncomeOverTimeChart() {
           initialDimension={{ height: 300, width: 660 }}
         >
           <AreaChart
-            data={incomeOverTimeData}
+            data={data}
             margin={{ bottom: 0, left: 8, right: 18, top: 18 }}
           >
             <defs>

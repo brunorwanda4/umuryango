@@ -12,6 +12,7 @@ import {
   FamilyContactStatus,
   IncomePaymentStatus,
   IncomeRecurrence,
+  Prisma,
   TransactionStatus,
   TransactionType,
 } from '@prisma/client';
@@ -19,6 +20,7 @@ import { can } from '../families/family-access';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { RecordIncomePaymentDto } from './dto/record-income-payment.dto';
+import { TransactionDashboardQueryDto } from './dto/transaction-dashboard-query.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 @Injectable()
@@ -232,6 +234,85 @@ export class TransactionsService {
     return transactions.map((t) => this.serializeTransaction(t));
   }
 
+  async dashboard(
+    userId: string,
+    familyId: string,
+    query: TransactionDashboardQueryDto,
+  ) {
+    await this.requireMembership(userId, familyId);
+    const period = this.resolveDashboardPeriod(query.from, query.to);
+    const ownershipWhere: Prisma.FamilyTransactionWhereInput = {
+      familyId,
+      createdById: userId,
+      type: query.type,
+    };
+    const approvedWhere: Prisma.FamilyTransactionWhereInput = {
+      ...ownershipWhere,
+      status: TransactionStatus.APPROVED,
+    };
+    const periodWhere: Prisma.FamilyTransactionWhereInput = {
+      ...ownershipWhere,
+      status: { not: TransactionStatus.REVERSED },
+      date: { gte: period.from, lt: period.toExclusive },
+    };
+
+    const [allTime, largest, records] = await Promise.all([
+      this.prisma.familyTransaction.aggregate({
+        where: approvedWhere,
+        _count: { _all: true },
+        _sum: { amountMinorUnits: true },
+      }),
+      this.prisma.familyTransaction.findFirst({
+        where: {
+          ...approvedWhere,
+          date: { gte: period.from, lt: period.toExclusive },
+        },
+        orderBy: [{ amountMinorUnits: 'desc' }, { date: 'desc' }],
+        include: { category: { select: { name: true } } },
+      }),
+      this.prisma.familyTransaction.findMany({
+        where: periodWhere,
+        orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+        include: {
+          category: { select: { name: true, icon: true, color: true } },
+          createdBy: { select: { fullName: true } },
+        },
+      }),
+    ]);
+
+    const approvedRecords = records.filter(
+      (record) => record.status === TransactionStatus.APPROVED,
+    );
+    const periodTotal = approvedRecords.reduce(
+      (total, record) => total + record.amountMinorUnits,
+      0n,
+    );
+
+    return {
+      period: {
+        from: this.dateKey(period.from),
+        to: this.dateKey(new Date(period.toExclusive.getTime() - 1)),
+      },
+      summary: {
+        allTimeTotalMinorUnits: (
+          allTime._sum.amountMinorUnits ?? 0n
+        ).toString(),
+        approvedTransactionCount: allTime._count._all,
+        periodTotalMinorUnits: periodTotal.toString(),
+        largestIncome: largest
+          ? {
+              amountMinorUnits: largest.amountMinorUnits.toString(),
+              category: largest.category.name,
+              description: largest.description,
+            }
+          : null,
+      },
+      byCategory: this.groupDashboardByCategory(approvedRecords),
+      overTime: this.groupDashboardByDay(approvedRecords),
+      records: records.map((record) => this.serializeTransaction(record)),
+    };
+  }
+
   async findOne(userId: string, familyId: string, id: string) {
     await this.requireMembership(userId, familyId);
 
@@ -272,6 +353,15 @@ export class TransactionsService {
 
     if (!transaction) {
       throw new NotFoundException('Transaction not found');
+    }
+
+    const canManageOthers =
+      membership.authority === FamilyAuthority.HEAD ||
+      membership.authority === FamilyAuthority.ADMIN;
+    if (transaction.createdById !== userId && !canManageOthers) {
+      throw new ForbiddenException(
+        'You cannot update another member transaction',
+      );
     }
 
     // Rule: "If income is approved, normal users should not edit it. Admin can edit approved income if allowed."
@@ -424,12 +514,21 @@ export class TransactionsService {
   }
 
   async remove(userId: string, familyId: string, id: string) {
-    await this.requireMembership(userId, familyId);
+    const membership = await this.requireMembership(userId, familyId);
 
     const transaction = await this.prisma.familyTransaction.findFirst({
       where: { familyId, id },
     });
     if (!transaction) throw new NotFoundException('Transaction not found');
+
+    const canManageOthers =
+      membership.authority === FamilyAuthority.HEAD ||
+      membership.authority === FamilyAuthority.ADMIN;
+    if (transaction.createdById !== userId && !canManageOthers) {
+      throw new ForbiddenException(
+        'You cannot reverse another member transaction',
+      );
+    }
 
     return this.prisma.$transaction(async (tx) => {
       const updated = await tx.familyTransaction.update({
@@ -635,6 +734,71 @@ export class TransactionsService {
     if (paid < expected) return IncomePaymentStatus.PARTIAL;
     if (paid === expected) return IncomePaymentStatus.PAID;
     return IncomePaymentStatus.OVERPAID;
+  }
+
+  private resolveDashboardPeriod(fromValue?: string, toValue?: string) {
+    const now = new Date();
+    const from = fromValue
+      ? this.parseDashboardDate(fromValue)
+      : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const to = toValue
+      ? this.parseDashboardDate(toValue)
+      : new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0));
+
+    if (to < from) {
+      throw new BadRequestException('to must be on or after from');
+    }
+
+    if (to.getTime() - from.getTime() > 366 * 86400000) {
+      throw new BadRequestException('Dashboard periods cannot exceed 366 days');
+    }
+
+    return { from, toExclusive: new Date(to.getTime() + 86400000) };
+  }
+
+  private parseDashboardDate(value: string) {
+    return new Date(`${value.slice(0, 10)}T00:00:00.000Z`);
+  }
+
+  private groupDashboardByCategory(
+    records: Array<{
+      amountMinorUnits: bigint;
+      category: { name: string };
+    }>,
+  ) {
+    const totals = new Map<string, bigint>();
+    for (const record of records) {
+      totals.set(
+        record.category.name,
+        (totals.get(record.category.name) ?? 0n) + record.amountMinorUnits,
+      );
+    }
+
+    return Array.from(totals, ([category, amountMinorUnits]) => ({
+      category,
+      amountMinorUnits: amountMinorUnits.toString(),
+    })).sort((left, right) =>
+      BigInt(right.amountMinorUnits) > BigInt(left.amountMinorUnits) ? 1 : -1,
+    );
+  }
+
+  private groupDashboardByDay(
+    records: Array<{ amountMinorUnits: bigint; date: Date }>,
+  ) {
+    const totals = new Map<string, bigint>();
+    for (const record of records) {
+      const date = this.dateKey(record.date);
+      totals.set(date, (totals.get(date) ?? 0n) + record.amountMinorUnits);
+    }
+
+    return Array.from(totals, ([date, amountMinorUnits]) => ({
+      date,
+      amountMinorUnits: amountMinorUnits.toString(),
+    })).sort((left, right) => left.date.localeCompare(right.date));
+  }
+
+  private dateKey(date: Date) {
+    return date.toISOString().slice(0, 10);
   }
 
   private nullableString(value: string | null | undefined) {

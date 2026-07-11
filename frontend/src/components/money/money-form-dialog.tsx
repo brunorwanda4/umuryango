@@ -1,9 +1,12 @@
 "use client";
 
-import { PencilIcon, PlusIcon } from "lucide-react";
+import { FolderPlusIcon, PencilIcon, PlusIcon } from "lucide-react";
 import type * as React from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
+import { CreateCategoryForm } from "@/components/family/money/forms/create-category-form";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,36 +19,67 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
+import { Spinner } from "@/components/ui/spinner";
+import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import { cn } from "@/lib/utils";
 
 type MoneyFormType = "income" | "expense" | "savings" | "debt";
 
+export type MoneyFormCategory = {
+  id: string;
+  name: string;
+  type: "INCOME" | "EXPENSE";
+};
+
+export type MoneyFormValues = {
+  account: string;
+  amountMinorUnits: number;
+  categoryId: string;
+  date: string;
+  notes: string;
+  title: string;
+};
+
 interface MoneyFormDialogProps {
-  type: MoneyFormType;
+  categories?: MoneyFormCategory[];
   defaultValues?: Partial<MoneyFormValues>;
+  familyId?: string;
+  incomeId?: string;
   mode?: "create" | "update";
+  onCategoryCreated?: () => void | Promise<void>;
   onOpenChange?: (open: boolean) => void;
+  onSuccess?: () => void | Promise<void>;
   open?: boolean;
   trigger?: React.ReactElement | null;
   triggerClassName?: string;
   triggerSize?: React.ComponentProps<typeof Button>["size"];
+  type: MoneyFormType;
 }
 
-type MoneyFormValues = {
-  title: string;
-  amountMinorUnits: number;
-  category: string;
-  date: string;
-  account: string;
-};
+const moneyFormSchema = z.object({
+  account: z.string().min(1, "Account is required"),
+  amountMinorUnits: z.coerce
+    .number()
+    .int("Amount must be a whole number")
+    .positive("Amount must be greater than zero")
+    .max(999_999_999_999_999, "Amount is too large"),
+  categoryId: z.string().min(1, "Category is required"),
+  date: z.string().min(1, "Date is required"),
+  notes: z.string().max(1000, "Notes are too long"),
+  title: z
+    .string()
+    .trim()
+    .min(1, "Source is required")
+    .max(180, "Source is too long"),
+});
 
 const formConfig: Record<
   MoneyFormType,
   {
     action: string;
-    categories: string[];
     description: string;
     title: string;
+    transactionType?: "INCOME" | "EXPENSE";
     updateAction: string;
     updateDescription: string;
     updateTitle: string;
@@ -53,74 +87,151 @@ const formConfig: Record<
 > = {
   debt: {
     action: "Add debt",
-    categories: ["Borrowed money", "Lent money", "Repayment plan"],
-    description: "Track borrowed or lent money before connecting live data.",
+    description: "Track borrowed or lent money.",
     title: "Add Debt",
     updateAction: "Update debt",
-    updateDescription: "Update this debt record before connecting live data.",
+    updateDescription: "Update this debt record.",
     updateTitle: "Update Debt",
   },
   expense: {
     action: "Add expense",
-    categories: ["Education", "Health", "Food", "Transport", "Events"],
     description: "Record money spent by you or the family.",
     title: "Add Expense",
+    transactionType: "EXPENSE",
     updateAction: "Update expense",
-    updateDescription:
-      "Update this expense record before connecting live data.",
+    updateDescription: "Update this expense record.",
     updateTitle: "Update Expense",
   },
   income: {
     action: "Add income",
-    categories: ["Salary", "Business", "Contribution", "Gift", "Other"],
-    description: "Record money received from personal or family sources.",
+    description: "Record money received from a personal source.",
     title: "Add Income",
+    transactionType: "INCOME",
     updateAction: "Update income",
-    updateDescription: "Update this income record before connecting live data.",
+    updateDescription: "Update this income record.",
     updateTitle: "Update Income",
   },
   savings: {
     action: "Add goal",
-    categories: ["Emergency fund", "Education", "Project", "Event", "Other"],
-    description: "Create a savings goal and track progress toward it.",
+    description: "Create a savings goal and track its progress.",
     title: "Add Savings Goal",
     updateAction: "Update goal",
-    updateDescription: "Update this savings goal before connecting live data.",
+    updateDescription: "Update this savings goal.",
     updateTitle: "Update Savings Goal",
   },
 };
 
 const accountOptions = [
-  { value: "mobile-money", label: "Mobile money" },
-  { value: "bank-account", label: "Bank account" },
-  { value: "cash", label: "Cash" },
-  { value: "savings-wallet", label: "Savings wallet" },
+  { value: "MOBILE_MONEY", label: "Mobile money" },
+  { value: "BANK_TRANSFER", label: "Bank account" },
+  { value: "CASH", label: "Cash" },
+  { value: "SAVINGS_WALLET", label: "Savings wallet" },
 ];
 
+function defaultFormValues(
+  defaultValues: Partial<MoneyFormValues> | undefined,
+  categories: MoneyFormCategory[],
+): MoneyFormValues {
+  return {
+    account: defaultValues?.account ?? "MOBILE_MONEY",
+    amountMinorUnits: defaultValues?.amountMinorUnits ?? 0,
+    categoryId: defaultValues?.categoryId ?? categories[0]?.id ?? "",
+    date: defaultValues?.date ?? new Date().toISOString().slice(0, 10),
+    notes: defaultValues?.notes ?? "",
+    title: defaultValues?.title ?? "",
+  };
+}
+
 export function MoneyFormDialog({
+  categories = [],
   defaultValues,
+  familyId,
+  incomeId,
   mode = "create",
+  onCategoryCreated,
   onOpenChange,
-  open,
-  type,
+  onSuccess,
+  open: controlledOpen,
   trigger,
   triggerClassName,
   triggerSize = "sm",
+  type,
 }: MoneyFormDialogProps) {
   const config = formConfig[type];
   const isUpdate = mode === "update";
-  const form = useForm<MoneyFormValues>({
-    defaultValues: {
-      title: defaultValues?.title ?? "",
-      amountMinorUnits: defaultValues?.amountMinorUnits ?? 0,
-      category: defaultValues?.category ?? config.categories[0] ?? "",
-      date: defaultValues?.date ?? "",
-      account: defaultValues?.account ?? "mobile-money",
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
+  const idempotencyKeyRef = useRef<string | undefined>(undefined);
+  const activeCategories = useMemo(
+    () =>
+      categories.filter((category) => category.type === config.transactionType),
+    [categories, config.transactionType],
+  );
+  const endpoint = isUpdate
+    ? `/families/${encodeURIComponent(familyId ?? "")}/money/transactions/${encodeURIComponent(incomeId ?? "")}`
+    : `/families/${encodeURIComponent(familyId ?? "")}/money/transactions`;
+
+  const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
+    MoneyFormValues,
+    unknown
+  >({
+    schema: moneyFormSchema,
+    formOptions: {
+      defaultValues: defaultFormValues(defaultValues, activeCategories),
+    },
+    request: { method: isUpdate ? "patch" : "post", url: endpoint },
+    transform: (values) => {
+      if (!idempotencyKeyRef.current) {
+        idempotencyKeyRef.current = crypto.randomUUID();
+      }
+
+      return {
+        amountMinorUnits: Math.trunc(values.amountMinorUnits).toString(),
+        categoryId: values.categoryId,
+        currency: "RWF",
+        date: values.date,
+        description: values.title,
+        incomeRecurrence: "ONE_TIME",
+        notes: values.notes || undefined,
+        paymentMethod: values.account,
+        type: config.transactionType,
+        ...(isUpdate ? {} : { idempotencyKey: idempotencyKeyRef.current }),
+      };
+    },
+    onSuccessMessage: isUpdate
+      ? "Income updated successfully"
+      : "Income recorded successfully",
+    toastOnSuccess: true,
+    onSuccess: async () => {
+      idempotencyKeyRef.current = undefined;
+      setOpen(false);
+      form.reset(defaultFormValues(undefined, activeCategories));
+      await onSuccess?.();
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      form.reset(defaultFormValues(defaultValues, activeCategories));
+    }
+  }, [activeCategories, defaultValues, form, open]);
+
+  const canSubmit = Boolean(
+    familyId &&
+      config.transactionType &&
+      activeCategories.length &&
+      (!isUpdate || incomeId),
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        if (!nextOpen) resetMessages();
+      }}
+    >
       {trigger !== null && (
         <DialogTrigger asChild>
           {trigger ?? (
@@ -146,14 +257,21 @@ export function MoneyFormDialog({
         </DialogHeader>
         <form
           className="flex flex-col gap-6"
-          onSubmit={form.handleSubmit(() => undefined)}
+          onSubmit={form.handleSubmit(onSubmit)}
         >
+          {error ? (
+            <Alert variant="destructive">
+              <AlertTitle>Income was not saved</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
           <FieldGroup>
             <CommonFormField
               control={form.control}
               name="title"
-              label="Title"
-              placeholder="Example: Monthly contribution"
+              label="Source"
+              placeholder="Example: July salary"
+              required
             />
             <CommonFormField
               control={form.control}
@@ -162,17 +280,19 @@ export function MoneyFormDialog({
               fieldType="money"
               currency="RWF"
               placeholder="0"
+              required
             />
             <FieldGroup className="grid gap-4 sm:grid-cols-2">
               <CommonFormField
                 control={form.control}
-                name="category"
+                name="categoryId"
                 label="Category"
                 fieldType="select"
                 placeholder="Select category"
-                selectOptions={config.categories.map((category) => ({
-                  value: category,
-                  label: category,
+                required
+                selectOptions={activeCategories.map((category) => ({
+                  value: category.id,
+                  label: category.name,
                 }))}
               />
               <CommonFormField
@@ -180,24 +300,60 @@ export function MoneyFormDialog({
                 name="date"
                 label="Date"
                 fieldType="date"
+                required
               />
             </FieldGroup>
+            {familyId && config.transactionType ? (
+              <CreateCategoryForm
+                defaultType={config.transactionType}
+                existingCategories={categories}
+                familyId={familyId}
+                onSuccess={async (category) => {
+                  await onCategoryCreated?.();
+                  if (category && category.type === config.transactionType) {
+                    form.setValue("categoryId", category.id, {
+                      shouldValidate: true,
+                    });
+                  }
+                }}
+                trigger={
+                  <Button type="button" variant="outline" size="sm">
+                    <FolderPlusIcon data-icon="inline-start" />
+                    Add category
+                  </Button>
+                }
+              />
+            ) : null}
             <CommonFormField
               control={form.control}
               name="account"
               label="Account"
               fieldType="select"
               placeholder="Select account"
+              required
               selectOptions={accountOptions}
             />
+            <CommonFormField
+              control={form.control}
+              name="notes"
+              label="Notes"
+              fieldType="textarea"
+              placeholder="Optional details about this income"
+            />
           </FieldGroup>
+          {!activeCategories.length ? (
+            <p className="text-sm text-muted-foreground">
+              Add an income category before saving this record.
+            </p>
+          ) : null}
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline">
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit">
+            <Button disabled={!canSubmit || isPending} type="submit">
+              {isPending ? <Spinner data-icon="inline-start" /> : null}
               {isUpdate ? "Save changes" : "Save entry"}
             </Button>
           </DialogFooter>

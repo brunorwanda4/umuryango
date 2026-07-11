@@ -23,6 +23,7 @@ import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { RecordIncomePaymentDto } from './dto/record-income-payment.dto';
+import { TransactionDashboardQueryDto } from './dto/transaction-dashboard-query.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransactionsService } from './transactions.service';
 
@@ -69,6 +70,24 @@ export class TransactionsController {
       status,
     });
     return { data, message: 'Transactions retrieved successfully.' };
+  }
+
+  @Get('mine/dashboard')
+  @ApiOperation({
+    summary: 'Get the current user transaction dashboard for a family',
+  })
+  @ApiOkResponse({ description: 'Transaction dashboard retrieved.' })
+  async dashboard(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Query() query: TransactionDashboardQueryDto,
+  ) {
+    const data = await this.transactionsService.dashboard(
+      userId,
+      familyId,
+      query,
+    );
+    return { data, message: 'Transaction dashboard retrieved successfully.' };
   }
 
   @Get(':id')

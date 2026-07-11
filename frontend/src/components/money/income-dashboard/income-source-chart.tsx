@@ -10,24 +10,23 @@ import {
 } from "@/components/ui/chart";
 import { formatFullMinorUnits } from "@/lib/format-compact-number";
 import { formatRf } from "./formatters";
-import {
-  incomeSourceData,
-  totalIncomeMinorUnits,
-} from "./income-dashboard-data";
+import type { IncomeSourceDatum } from "./income-dashboard-data";
 import { IncomeSourceLegend } from "./income-source-legend";
 
-const sourceChartConfig = incomeSourceData.reduce<ChartConfig>(
-  (config, source) => {
+export function IncomeSourceChart({
+  data,
+  totalIncomeMinorUnits,
+}: {
+  data: IncomeSourceDatum[];
+  totalIncomeMinorUnits: string;
+}) {
+  const sourceChartConfig = data.reduce<ChartConfig>((config, source) => {
     config[source.name] = {
       color: source.color,
       label: source.name,
     };
     return config;
-  },
-  {},
-);
-
-export function IncomeSourceChart() {
+  }, {});
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="px-5 pt-5 pb-0 sm:px-6 sm:pt-6">
@@ -41,7 +40,7 @@ export function IncomeSourceChart() {
         >
           <PieChart>
             <Pie
-              data={incomeSourceData}
+              data={data}
               dataKey="amountMinorUnits"
               innerRadius={64}
               nameKey="name"
@@ -50,7 +49,7 @@ export function IncomeSourceChart() {
               stroke="var(--card)"
               strokeWidth={2}
             >
-              {incomeSourceData.map((source) => (
+              {data.map((source) => (
                 <Cell key={source.name} fill={source.color} />
               ))}
             </Pie>
@@ -61,7 +60,7 @@ export function IncomeSourceChart() {
               dominantBaseline="middle"
               className="fill-foreground font-bold text-lg"
             >
-              {formatRf(totalIncomeMinorUnits)}
+              {formatRf(Number(totalIncomeMinorUnits))}
             </text>
             <text
               x="50%"
@@ -86,7 +85,10 @@ export function IncomeSourceChart() {
             />
           </PieChart>
         </ChartContainer>
-        <IncomeSourceLegend />
+        <IncomeSourceLegend
+          data={data}
+          totalIncomeMinorUnits={totalIncomeMinorUnits}
+        />
       </CardContent>
     </Card>
   );

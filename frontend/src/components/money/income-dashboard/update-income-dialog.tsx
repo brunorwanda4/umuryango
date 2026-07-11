@@ -4,40 +4,27 @@ import { PencilIcon } from "lucide-react";
 import type * as React from "react";
 import { MoneyFormDialog } from "@/components/money/money-form-dialog";
 import { Button } from "@/components/ui/button";
-import type { RecentIncomeRecord } from "./income-dashboard-data";
+import type {
+  IncomeCategory,
+  RecentIncomeRecord,
+} from "./income-dashboard-data";
 
 type UpdateIncomeDialogProps = {
   income: RecentIncomeRecord;
+  categories: IncomeCategory[];
+  familyId: string;
+  onSuccess?: () => void | Promise<void>;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
   trigger?: React.ReactElement | null;
 };
 
-function getIncomeAccount(paymentMethod: string) {
-  if (paymentMethod.toLowerCase().includes("bank")) {
-    return "bank-account";
-  }
-
-  if (paymentMethod.toLowerCase().includes("cash")) {
-    return "cash";
-  }
-
-  return "mobile-money";
-}
-
-function getDateInputValue(date: string) {
-  const parsedDate = new Date(date);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return "";
-  }
-
-  return parsedDate.toISOString().slice(0, 10);
-}
-
 export function UpdateIncomeDialog({
+  categories,
+  familyId,
   income,
   onOpenChange,
+  onSuccess,
   open,
   trigger,
 }: UpdateIncomeDialogProps) {
@@ -45,14 +32,20 @@ export function UpdateIncomeDialog({
     <MoneyFormDialog
       type="income"
       mode="update"
+      categories={categories}
+      familyId={familyId}
+      incomeId={income.id}
       open={open}
       onOpenChange={onOpenChange}
+      onCategoryCreated={onSuccess}
+      onSuccess={onSuccess}
       defaultValues={{
         title: income.source,
-        amountMinorUnits: income.amountMinorUnits,
-        category: income.category,
-        date: getDateInputValue(income.date),
-        account: getIncomeAccount(income.paymentMethod),
+        amountMinorUnits: Number(income.amountMinorUnits),
+        categoryId: income.categoryId,
+        date: income.dateValue,
+        account: income.account,
+        notes: income.notes,
       }}
       trigger={
         trigger === undefined ? (

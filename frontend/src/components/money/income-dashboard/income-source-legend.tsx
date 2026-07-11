@@ -1,15 +1,19 @@
 import { CompactMoney } from "@/components/common/money/compact-money";
-import {
-  incomeSourceData,
-  totalIncomeMinorUnits,
-} from "./income-dashboard-data";
+import type { IncomeSourceDatum } from "./income-dashboard-data";
 
-export function IncomeSourceLegend() {
+export function IncomeSourceLegend({
+  data,
+  totalIncomeMinorUnits,
+}: {
+  data: IncomeSourceDatum[];
+  totalIncomeMinorUnits: string;
+}) {
+  const numericTotal = Number(totalIncomeMinorUnits);
   return (
     <div className="flex min-w-48 flex-col gap-4">
-      {incomeSourceData.map((source) => {
-        const percent = totalIncomeMinorUnits
-          ? ((source.amountMinorUnits * 100) / totalIncomeMinorUnits).toFixed(1)
+      {data.map((source) => {
+        const percent = numericTotal
+          ? ((source.amountMinorUnits * 100) / numericTotal).toFixed(1)
           : "0.0";
 
         return (
@@ -24,7 +28,10 @@ export function IncomeSourceLegend() {
                 {source.name}
               </p>
               <p className="text-muted-foreground text-sm leading-5">
-                <CompactMoney currency="RWF" value={source.amountMinorUnits} />{" "}
+                <CompactMoney
+                  currency="RWF"
+                  value={source.amountMinorUnitsValue}
+                />{" "}
                 ({percent}%)
               </p>
             </div>

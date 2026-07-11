@@ -24,19 +24,28 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { DeleteIncomeDialog } from "./delete-income-dialog";
-import type { RecentIncomeRecord } from "./income-dashboard-data";
+import type {
+  IncomeCategory,
+  RecentIncomeRecord,
+} from "./income-dashboard-data";
 import { UpdateIncomeDialog } from "./update-income-dialog";
 
 type ViewIncomeDialogProps = {
   income: RecentIncomeRecord;
+  categories: IncomeCategory[];
+  familyId: string;
+  onSuccess?: () => void | Promise<void>;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
   trigger?: React.ReactElement | null;
 };
 
 export function ViewIncomeDialog({
+  categories,
+  familyId,
   income,
   onOpenChange,
+  onSuccess,
   open,
   trigger,
 }: ViewIncomeDialogProps) {
@@ -179,16 +188,21 @@ export function ViewIncomeDialog({
         </DialogContent>
       </Dialog>
       <UpdateIncomeDialog
+        categories={categories}
+        familyId={familyId}
         income={income}
         open={isUpdateOpen}
         onOpenChange={setIsUpdateOpen}
         trigger={null}
+        onSuccess={onSuccess}
       />
       <DeleteIncomeDialog
+        familyId={familyId}
         income={income}
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
         trigger={null}
+        onSuccess={onSuccess}
       />
     </>
   );

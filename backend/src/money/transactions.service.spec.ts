@@ -70,6 +70,7 @@ describe('TransactionsService', () => {
       familyMember: { findFirst: jest.fn() },
       familyTransactionCategory: { findFirst: jest.fn() },
       familyTransaction: {
+        aggregate: jest.fn(),
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn(),
@@ -264,5 +265,47 @@ describe('TransactionsService', () => {
         date: '2026-07-08T12:00:00.000Z',
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('builds a dashboard from only the authenticated user transactions', async () => {
+    const approved = makeTransaction({
+      amountMinorUnits: 200000n,
+      status: TransactionStatus.APPROVED,
+      category: { name: 'Salary', icon: null, color: null },
+      createdBy: { fullName: 'Current User' },
+    });
+    const pending = makeTransaction({
+      id: 'tx-2',
+      amountMinorUnits: 50000n,
+      status: TransactionStatus.PENDING,
+      category: { name: 'Gift', icon: null, color: null },
+      createdBy: { fullName: 'Current User' },
+    });
+    prisma.familyMember.findFirst.mockResolvedValue(managerMembership);
+    prisma.familyTransaction.aggregate.mockResolvedValue({
+      _count: { _all: 3 },
+      _sum: { amountMinorUnits: 450000n },
+    });
+    prisma.familyTransaction.findFirst.mockResolvedValue(approved);
+    prisma.familyTransaction.findMany.mockResolvedValue([approved, pending]);
+
+    const result = await service.dashboard('user-1', 'family-1', {
+      type: TransactionType.INCOME,
+      from: '2026-07-01',
+      to: '2026-07-31',
+    });
+
+    expect(result.summary.allTimeTotalMinorUnits).toBe('450000');
+    expect(result.summary.periodTotalMinorUnits).toBe('200000');
+    expect(result.records).toHaveLength(2);
+    expect(prisma.familyTransaction.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          familyId: 'family-1',
+          createdById: 'user-1',
+          type: TransactionType.INCOME,
+        }),
+      }),
+    );
   });
 });

@@ -1,11 +1,11 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -48,16 +48,23 @@ export class CategoriesController {
   @Get()
   @ApiOperation({ summary: 'List all transaction categories for a family' })
   @ApiOkResponse({ description: 'Categories retrieved successfully.' })
-  async findAll(@Param('familyId') familyId: string) {
-    const data = await this.categoriesService.findAll(familyId);
+  async findAll(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+  ) {
+    const data = await this.categoriesService.findAll(userId, familyId);
     return { data, message: 'Categories retrieved successfully.' };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific category by ID' })
   @ApiOkResponse({ description: 'Category retrieved successfully.' })
-  async findOne(@Param('familyId') familyId: string, @Param('id') id: string) {
-    const data = await this.categoriesService.findOne(familyId, id);
+  async findOne(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Param('id') id: string,
+  ) {
+    const data = await this.categoriesService.findOne(userId, familyId, id);
     return { data, message: 'Category retrieved successfully.' };
   }
 
@@ -65,11 +72,13 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Update a category' })
   @ApiOkResponse({ description: 'Category updated successfully.' })
   async update(
+    @CurrentUserId() userId: string,
     @Param('familyId') familyId: string,
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     const data = await this.categoriesService.update(
+      userId,
       familyId,
       id,
       updateCategoryDto,
@@ -78,10 +87,14 @@ export class CategoriesController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a category' })
-  @ApiOkResponse({ description: 'Category deleted successfully.' })
-  async remove(@Param('familyId') familyId: string, @Param('id') id: string) {
-    const data = await this.categoriesService.remove(familyId, id);
-    return { data, message: 'Category deleted successfully.' };
+  @ApiOperation({ summary: 'Archive a category' })
+  @ApiOkResponse({ description: 'Category archived successfully.' })
+  async remove(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Param('id') id: string,
+  ) {
+    const data = await this.categoriesService.remove(userId, familyId, id);
+    return { data, message: 'Category archived successfully.' };
   }
 }

@@ -8,16 +8,25 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { DeleteIncomeDialog } from "./delete-income-dialog";
-import type { RecentIncomeRecord } from "./income-dashboard-data";
+import type {
+  IncomeCategory,
+  RecentIncomeRecord,
+} from "./income-dashboard-data";
 import { UpdateIncomeDialog } from "./update-income-dialog";
 import { ViewIncomeDialog } from "./view-income-dialog";
 
 type RecentIncomeActionsPopoverProps = {
   income: RecentIncomeRecord;
+  categories: IncomeCategory[];
+  familyId: string;
+  onSuccess: () => void | Promise<void>;
 };
 
 export function RecentIncomeActionsPopover({
+  categories,
+  familyId,
   income,
+  onSuccess,
 }: RecentIncomeActionsPopoverProps) {
   return (
     <Popover>
@@ -40,9 +49,23 @@ export function RecentIncomeActionsPopover({
         onKeyDown={(event) => event.stopPropagation()}
       >
         <div className="flex flex-col gap-1">
-          <ViewIncomeDialog income={income} />
-          <UpdateIncomeDialog income={income} />
-          <DeleteIncomeDialog income={income} />
+          <ViewIncomeDialog
+            categories={categories}
+            familyId={familyId}
+            income={income}
+            onSuccess={onSuccess}
+          />
+          <UpdateIncomeDialog
+            categories={categories}
+            familyId={familyId}
+            income={income}
+            onSuccess={onSuccess}
+          />
+          <DeleteIncomeDialog
+            familyId={familyId}
+            income={income}
+            onSuccess={onSuccess}
+          />
         </div>
       </PopoverContent>
     </Popover>

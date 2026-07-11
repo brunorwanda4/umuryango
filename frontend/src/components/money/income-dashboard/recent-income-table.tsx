@@ -8,9 +8,9 @@ import { DataViewToggle } from "@/components/common/table/data-view-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
 import { cn } from "@/lib/utils";
-import {
-  type RecentIncomeRecord,
-  recentIncomeData,
+import type {
+  IncomeCategory,
+  RecentIncomeRecord,
 } from "./income-dashboard-data";
 import { RecentIncomeActionsPopover } from "./recent-income-actions-popover";
 import { RecentIncomeFilter } from "./recent-income-filter";
@@ -19,102 +19,127 @@ import { RecentIncomeItems } from "./recent-income-items";
 const RECENT_INCOME_VIEW_MODE_STORAGE_KEY =
   "rwanda-family-recent-income-view-mode";
 
-const recentIncomeColumns: ColumnDef<RecentIncomeRecord>[] = [
-  {
-    accessorKey: "source",
-    header: "Source",
-    cell: ({ row }) => {
-      const SourceIcon = row.original.icon;
+function getRecentIncomeColumns({
+  categories,
+  familyId,
+  onSuccess,
+}: {
+  categories: IncomeCategory[];
+  familyId: string;
+  onSuccess: () => void | Promise<void>;
+}): ColumnDef<RecentIncomeRecord>[] {
+  return [
+    {
+      accessorKey: "source",
+      header: "Source",
+      cell: ({ row }) => {
+        const SourceIcon = row.original.icon;
 
-      return (
-        <div className="flex min-w-44 items-center gap-3">
-          <span
-            className={cn(
-              "flex size-9 shrink-0 items-center justify-center rounded-full",
-              row.original.sourceClassName,
-            )}
-          >
-            <SourceIcon className="size-4" aria-hidden="true" />
-          </span>
-          <span className="font-medium text-muted-foreground">
-            {row.original.source}
-          </span>
-        </div>
-      );
+        return (
+          <div className="flex min-w-44 items-center gap-3">
+            <span
+              className={cn(
+                "flex size-9 shrink-0 items-center justify-center rounded-full",
+                row.original.sourceClassName,
+              )}
+            >
+              <SourceIcon className="size-4" aria-hidden="true" />
+            </span>
+            <span className="font-medium text-muted-foreground">
+              {row.original.source}
+            </span>
+          </div>
+        );
+      },
     },
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-    cell: ({ row }) => (
-      <span className="block min-w-60 text-muted-foreground">
-        {row.original.description}
-      </span>
-    ),
-  },
-  {
-    accessorKey: "category",
-    header: "Category",
-    cell: ({ row }) => (
-      <span
-        className={cn(
-          "inline-flex rounded-full px-2.5 py-1 font-medium text-xs",
-          row.original.categoryClassName,
-        )}
-      >
-        {row.original.category}
-      </span>
-    ),
-  },
-  {
-    accessorKey: "amountMinorUnits",
-    header: "Amount",
-    cell: ({ row }) => (
-      <span className="font-bold text-chart-2">
-        <CompactMoney currency="RWF" value={row.original.amountMinorUnits} />
-      </span>
-    ),
-  },
-  {
-    accessorKey: "date",
-    header: "Date",
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.date}</span>
-    ),
-  },
-  {
-    accessorKey: "paymentMethod",
-    header: "Payment method",
-    cell: ({ row }) => {
-      const PaymentIcon = row.original.paymentIcon;
-
-      return (
-        <div className="flex min-w-44 items-center gap-2.5 text-muted-foreground">
-          <span
-            className={cn(
-              "flex size-7 items-center justify-center rounded-md",
-              row.original.paymentClassName,
-            )}
-          >
-            <PaymentIcon className="size-4" aria-hidden="true" />
-          </span>
-          {row.original.paymentMethod}
-        </div>
-      );
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => (
+        <span className="block min-w-60 text-muted-foreground">
+          {row.original.description}
+        </span>
+      ),
     },
-  },
-  {
-    id: "actions",
-    header: () => <div className="text-right">Actions</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-end">
-        <RecentIncomeActionsPopover income={row.original} />
-      </div>
-    ),
-  },
-];
+    {
+      accessorKey: "category",
+      header: "Category",
+      cell: ({ row }) => (
+        <span
+          className={cn(
+            "inline-flex rounded-full px-2.5 py-1 font-medium text-xs",
+            row.original.categoryClassName,
+          )}
+        >
+          {row.original.category}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "amountMinorUnits",
+      header: "Amount",
+      cell: ({ row }) => (
+        <span className="font-bold text-chart-2">
+          <CompactMoney currency="RWF" value={row.original.amountMinorUnits} />
+        </span>
+      ),
+    },
+    {
+      accessorKey: "date",
+      header: "Date",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">{row.original.date}</span>
+      ),
+    },
+    {
+      accessorKey: "paymentMethod",
+      header: "Payment method",
+      cell: ({ row }) => {
+        const PaymentIcon = row.original.paymentIcon;
 
-export function RecentIncomeTable() {
+        return (
+          <div className="flex min-w-44 items-center gap-2.5 text-muted-foreground">
+            <span
+              className={cn(
+                "flex size-7 items-center justify-center rounded-md",
+                row.original.paymentClassName,
+              )}
+            >
+              <PaymentIcon className="size-4" aria-hidden="true" />
+            </span>
+            {row.original.paymentMethod}
+          </div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">Actions</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <RecentIncomeActionsPopover
+            categories={categories}
+            familyId={familyId}
+            income={row.original}
+            onSuccess={onSuccess}
+          />
+        </div>
+      ),
+    },
+  ];
+}
+
+export function RecentIncomeTable({
+  categories,
+  data,
+  familyId,
+  onSuccess,
+}: {
+  categories: IncomeCategory[];
+  data: RecentIncomeRecord[];
+  familyId: string;
+  onSuccess: () => void | Promise<void>;
+}) {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = usePersistentViewMode(
     RECENT_INCOME_VIEW_MODE_STORAGE_KEY,
@@ -123,10 +148,10 @@ export function RecentIncomeTable() {
     const query = search.trim().toLowerCase();
 
     if (!query) {
-      return recentIncomeData;
+      return data;
     }
 
-    return recentIncomeData.filter((income) =>
+    return data.filter((income) =>
       [
         income.source,
         income.description,
@@ -139,7 +164,11 @@ export function RecentIncomeTable() {
         .toLowerCase()
         .includes(query),
     );
-  }, [search]);
+  }, [data, search]);
+  const recentIncomeColumns = useMemo(
+    () => getRecentIncomeColumns({ categories, familyId, onSuccess }),
+    [categories, familyId, onSuccess],
+  );
 
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
@@ -151,7 +180,7 @@ export function RecentIncomeTable() {
         <RecentIncomeFilter
           resultCount={filteredIncomeData.length}
           search={search}
-          totalCount={recentIncomeData.length}
+          totalCount={data.length}
           onSearchChange={setSearch}
         />
         {viewMode === "table" ? (
@@ -161,7 +190,12 @@ export function RecentIncomeTable() {
             className="rounded-none border-0 [&>div:last-child]:hidden [&_table]:w-full [&_tbody_tr]:h-[4.5rem] [&_thead_tr]:bg-transparent [&_th]:h-11 [&_th]:text-muted-foreground"
           />
         ) : (
-          <RecentIncomeItems data={filteredIncomeData} />
+          <RecentIncomeItems
+            categories={categories}
+            data={filteredIncomeData}
+            familyId={familyId}
+            onSuccess={onSuccess}
+          />
         )}
       </CardContent>
     </Card>
