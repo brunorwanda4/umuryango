@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderPlusIcon, PencilIcon, PlusIcon } from "lucide-react";
+import { PencilIcon, PlusIcon } from "lucide-react";
 import type * as React from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
@@ -19,11 +19,21 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import { cn } from "@/lib/utils";
 
 type MoneyFormType = "income" | "expense" | "savings" | "debt";
+
+const CREATE_CATEGORY_VALUE = "__create_money_category__";
 
 export type MoneyFormCategory = {
 	id: string;
@@ -160,14 +170,48 @@ export function MoneyFormDialog({
 	const config = formConfig[type];
 	const isUpdate = mode === "update";
 	const [internalOpen, setInternalOpen] = useState(false);
+	const [openCreateCategory, setOpenCreateCategory] = useState(false);
+	const [createdCategory, setCreatedCategory] =
+		useState<MoneyFormCategory | null>(null);
 	const open = controlledOpen ?? internalOpen;
 	const setOpen = onOpenChange ?? setInternalOpen;
 	const idempotencyKeyRef = useRef<string | undefined>(undefined);
+	const wasOpenRef = useRef(false);
+	const availableCategories = useMemo(() => {
+		if (
+			!createdCategory ||
+			categories.some((category) => category.id === createdCategory.id)
+		) {
+			return categories;
+		}
+
+		return [...categories, createdCategory];
+	}, [categories, createdCategory]);
 	const activeCategories = useMemo(
 		() =>
-			categories.filter((category) => category.type === config.transactionType),
-		[categories, config.transactionType],
+			availableCategories.filter(
+				(category) => category.type === config.transactionType,
+			),
+		[availableCategories, config.transactionType],
 	);
+	const canCreateCategoryInline = Boolean(familyId && config.transactionType);
+	const categoryTypeLabel = config.transactionType?.toLowerCase();
+	const categoryOptions = [
+		...activeCategories.map((category) => ({
+			value: category.id,
+			label: category.name,
+		})),
+		...(canCreateCategoryInline
+			? [
+					{
+						value: CREATE_CATEGORY_VALUE,
+						label: activeCategories.length
+							? `Create another ${categoryTypeLabel} category`
+							: `Other / create ${categoryTypeLabel} category`,
+					},
+				]
+			: []),
+	];
 	const endpoint = isUpdate
 		? `/families/${encodeURIComponent(familyId ?? "")}/money/transactions/${encodeURIComponent(incomeId ?? "")}`
 		: `/families/${encodeURIComponent(familyId ?? "")}/money/transactions`;
@@ -212,9 +256,11 @@ export function MoneyFormDialog({
 	});
 
 	useEffect(() => {
-		if (open) {
+		if (open && !wasOpenRef.current) {
 			form.reset(defaultFormValues(defaultValues, activeCategories));
 		}
+
+		wasOpenRef.current = open;
 	}, [activeCategories, defaultValues, form, open]);
 
 	const canSubmit = Boolean(
@@ -287,13 +333,76 @@ export function MoneyFormDialog({
 								control={form.control}
 								name="categoryId"
 								label="Category"
-								fieldType="select"
+								fieldType="custom"
+								disabled={
+									!activeCategories.length && !canCreateCategoryInline
+								}
 								placeholder="Select category"
 								required
-								selectOptions={activeCategories.map((category) => ({
-									value: category.id,
-									label: category.name,
-								}))}
+								render={({ field, id, invalid, disabled }) => (
+									<>
+										<Select
+											value={field.value?.toString() ?? ""}
+											onValueChange={(value) => {
+												if (value === CREATE_CATEGORY_VALUE) {
+													setOpenCreateCategory(true);
+													field.onChange("");
+													return;
+												}
+
+												field.onChange(value);
+											}}
+											disabled={disabled}
+											name={field.name}
+										>
+											<SelectTrigger
+												id={id}
+												className="w-full"
+												aria-invalid={invalid}
+												onBlur={field.onBlur}
+												ref={field.ref}
+											>
+												<SelectValue placeholder="Select category" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectGroup>
+													{categoryOptions.map((option) => (
+														<SelectItem
+															key={option.value}
+															value={option.value}
+														>
+															{option.label}
+														</SelectItem>
+													))}
+												</SelectGroup>
+											</SelectContent>
+										</Select>
+
+										{canCreateCategoryInline &&
+										familyId &&
+										config.transactionType ? (
+											<CreateCategoryForm
+												defaultType={config.transactionType}
+												existingCategories={availableCategories}
+												familyId={familyId}
+												open={openCreateCategory}
+												onOpenChange={setOpenCreateCategory}
+												onSuccess={async (category) => {
+													if (
+														category &&
+														category.type === config.transactionType
+													) {
+														setCreatedCategory(category);
+														field.onChange(category.id);
+													}
+
+													await onCategoryCreated?.();
+												}}
+												trigger={null}
+											/>
+										) : null}
+									</>
+								)}
 							/>
 							<CommonFormField
 								control={form.control}
@@ -303,27 +412,6 @@ export function MoneyFormDialog({
 								required
 							/>
 						</FieldGroup>
-						{familyId && config.transactionType ? (
-							<CreateCategoryForm
-								defaultType={config.transactionType}
-								existingCategories={categories}
-								familyId={familyId}
-								onSuccess={async (category) => {
-									await onCategoryCreated?.();
-									if (category && category.type === config.transactionType) {
-										form.setValue("categoryId", category.id, {
-											shouldValidate: true,
-										});
-									}
-								}}
-								trigger={
-									<Button type="button" variant="outline" size="sm">
-										<FolderPlusIcon data-icon="inline-start" />
-										Add category
-									</Button>
-								}
-							/>
-						) : null}
 						<CommonFormField
 							control={form.control}
 							name="account"
