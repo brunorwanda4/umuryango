@@ -142,6 +142,7 @@ export function RecentIncomeTable() {
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="px-5 pt-5 pb-2 sm:px-6">
         <CardTitle className="font-bold text-base">Recent income</CardTitle>
+        {/*<Group></Group>*/}
       </CardHeader>
       <CardContent className="px-0 pb-0">
         <RecentIncomeFilter
