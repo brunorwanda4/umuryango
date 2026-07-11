@@ -24,10 +24,10 @@ export function IncomeSummaryCards() {
 
   return (
     <CommonOverviewCardDisplay
-      cardDescriptionClassName="flex items-center text-sm font-medium leading-5 text-muted-foreground max-sm:text-sm max-sm:font-medium [&>span:last-child]:hidden"
-      cardFooterClassName="mt-4 font-semibold text-sm"
+      cardDescriptionClassName="flex items-center text-sm font-medium leading-5 text-muted-foreground max-sm:text-sm max-sm:font-medium "
+      cardFooterClassName="sm:mt-4 font-semibold text-sm"
       cardHeaderClassName="min-h-[10.75rem] flex-col items-start justify-between gap-4 p-5 sm:p-6"
-      cardTitleClassName="mt-2 whitespace-normal text-2xl font-bold leading-tight tracking-normal sm:text-3xl"
+      cardTitleClassName="sm:mt-2 whitespace-normal  leading-tight tracking-normal sm:text-3xl"
       className="grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4"
       iconPosition="start"
       cards={[
