@@ -78,6 +78,7 @@ const DatePickerInput = forwardRef<HTMLButtonElement, DatePickerInputProps>(
     const minDate = parseDateValue(min);
     const maxDate = parseDateValue(max);
     const today = new Date();
+    const [month, setMonth] = useState(selectedDate ?? today);
     const yesterday = subDays(today, 1);
     const disabledDates = [
       ...(minDate ? [{ before: minDate }] : []),
@@ -95,6 +96,7 @@ const DatePickerInput = forwardRef<HTMLButtonElement, DatePickerInputProps>(
         open={open}
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen);
+          if (nextOpen) setMonth(selectedDate ?? today);
           if (!nextOpen) onBlur?.();
         }}
       >
@@ -120,7 +122,7 @@ const DatePickerInput = forwardRef<HTMLButtonElement, DatePickerInputProps>(
             {selectedDate ? format(selectedDate, "PPP") : placeholder}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto p-0">
+        <PopoverContent align="start" className="w-auto rounded-md p-0">
           <div className="flex max-sm:flex-col">
             <div className="flex gap-1 border-b p-2 sm:w-28 sm:flex-col sm:border-r sm:border-b-0">
               <Button
@@ -147,7 +149,8 @@ const DatePickerInput = forwardRef<HTMLButtonElement, DatePickerInputProps>(
             <Calendar
               mode="single"
               captionLayout="dropdown"
-              defaultMonth={selectedDate ?? today}
+              month={month}
+              onMonthChange={setMonth}
               startMonth={minDate ?? new Date(today.getFullYear() - 100, 0)}
               endMonth={maxDate ?? new Date(today.getFullYear() + 20, 11)}
               selected={selectedDate}
@@ -254,7 +257,7 @@ const TimePickerInput = forwardRef<HTMLButtonElement, TimePickerInputProps>(
             {timeLabel ?? placeholder}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-72 gap-3">
+        <PopoverContent align="start" className="w-72 gap-3 rounded-md">
           <div className="flex gap-2">
             <Input
               type="time"
@@ -285,7 +288,7 @@ const TimePickerInput = forwardRef<HTMLButtonElement, TimePickerInputProps>(
           </div>
           <div
             className="grid max-h-56 grid-cols-3 gap-1 overflow-y-auto"
-            role="listbox"
+            role="group"
             aria-label="Common times"
           >
             {timeOptions.map((time) => (
@@ -294,8 +297,7 @@ const TimePickerInput = forwardRef<HTMLButtonElement, TimePickerInputProps>(
                 type="button"
                 size="sm"
                 variant={value === time ? "secondary" : "ghost"}
-                role="option"
-                aria-selected={value === time}
+                aria-pressed={value === time}
                 className="justify-between"
                 onClick={() => selectTime(time)}
               >
