@@ -1,6 +1,12 @@
 "use client";
 
-import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react";
+import {
+  BanknoteArrowDownIcon,
+  ChevronsUpDownIcon,
+  ClipboardListIcon,
+  LogOutIcon,
+  UsersIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,9 +34,22 @@ type RecentFamily = {
 };
 
 const menuIcons = {
-  account: { src: "/images/icons/account.png" },
-  family: { src: "/images/icons/family.png" },
-  members: { src: "/images/icons/members.png" },
+  account: {
+    image: { src: "/images/icons/account.png" },
+    line: UsersIcon,
+  },
+  family: {
+    image: { src: "/images/icons/family.png" },
+    line: UsersIcon,
+  },
+  members: {
+    image: { src: "/images/icons/members.png" },
+    line: ClipboardListIcon,
+  },
+  createFamily: {
+    image: { src: "/images/icons/family.png" },
+    line: BanknoteArrowDownIcon,
+  },
 };
 
 function useRecentFamilies() {
@@ -89,7 +108,7 @@ export function WorkspaceSwitcher({
         <SidebarMenuButton size="lg" tooltip={title}>
           <Avatar size="sm">
             <AvatarImage
-              src={user?.avatarUrl ?? menuIcons.account.src}
+              src={user?.avatarUrl ?? menuIcons.account.image.src}
               alt={title}
             />
             <AvatarFallback name={title} />
@@ -149,7 +168,7 @@ export function WorkspaceSwitcher({
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/family/new">
-              <SidebarIcon icon={menuIcons.family} className="size-4" />
+              <SidebarIcon icon={menuIcons.createFamily} className="size-4" />
               Create family
             </Link>
           </DropdownMenuItem>
