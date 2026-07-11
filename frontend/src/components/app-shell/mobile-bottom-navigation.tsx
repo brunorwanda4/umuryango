@@ -1,8 +1,9 @@
 "use client";
 
-import { Loader2Icon, type LucideIcon, MenuIcon } from "lucide-react";
+import { Loader2Icon, MenuIcon } from "lucide-react";
 import Link, { useLinkStatus } from "next/link";
 import { cn } from "@/lib/utils";
+import { SidebarIcon, type SidebarIconSource } from "./sidebar-icon";
 import {
   type AppSidebarMode,
   isActivePath,
@@ -40,10 +41,10 @@ function getMobileNavigationLabel(title: string) {
 }
 
 function MobileLinkLoadingIndicator({
-  icon: Icon,
+  icon,
   label,
 }: {
-  icon: LucideIcon;
+  icon: SidebarIconSource;
   label: string;
 }) {
   const { pending } = useLinkStatus();
@@ -56,7 +57,7 @@ function MobileLinkLoadingIndicator({
           className="size-5 shrink-0 animate-spin"
         />
       ) : (
-        <Icon aria-hidden="true" className="size-5 shrink-0" />
+        <SidebarIcon icon={icon} className="size-5" />
       )}
       <span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
         {label}

@@ -1,27 +1,28 @@
 "use client";
 
-import { Loader2Icon, type LucideIcon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { useLinkStatus } from "next/link";
+import { SidebarIcon, type SidebarIconSource } from "./sidebar-icon";
 
 export function LinkLoadingIndicator({
-	icon: Icon,
-	title,
-	isOpen,
+  icon,
+  title,
+  isOpen,
 }: {
-	icon: LucideIcon;
-	title: string;
-	isOpen: boolean;
+  icon: SidebarIconSource;
+  title: string;
+  isOpen: boolean;
 }) {
-	const { pending } = useLinkStatus();
+  const { pending } = useLinkStatus();
 
-	return (
-		<>
-			{pending ? (
-				<Loader2Icon size={24} className="size-5 animate-spin" />
-			) : (
-				<Icon size={24} className="size-5" />
-			)}
-			{isOpen ? <span>{title}</span> : null}
-		</>
-	);
+  return (
+    <>
+      {pending ? (
+        <Loader2Icon size={24} className="size-5 animate-spin" />
+      ) : (
+        <SidebarIcon icon={icon} className="size-5" />
+      )}
+      {isOpen ? <span>{title}</span> : null}
+    </>
+  );
 }

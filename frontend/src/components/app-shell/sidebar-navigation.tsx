@@ -20,6 +20,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { LinkLoadingIndicator } from "./link-loading-indicator";
+import { SidebarIcon } from "./sidebar-icon";
 import { isActivePath, type NavigationGroup } from "./sidebar-utils";
 
 export function SidebarNavigationGroups({
@@ -62,7 +63,7 @@ export function SidebarNavigationGroups({
                           isActive={itemIsActive}
                           tooltip={item.title}
                         >
-                          <item.icon aria-hidden="true" />
+                          <SidebarIcon icon={item.icon} className="size-4" />
                           <span>{item.title}</span>
                           <ChevronRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                         </SidebarMenuButton>

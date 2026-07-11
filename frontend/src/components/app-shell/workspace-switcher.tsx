@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  BanknoteArrowDownIcon,
-  ChevronsUpDownIcon,
-  ClipboardListIcon,
-  LogOutIcon,
-  UsersIcon,
-} from "lucide-react";
+import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -23,6 +17,7 @@ import {
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import type { CurrentUser } from "@/hooks/use-current-user";
 import apiRequest from "@/service/api";
+import { SidebarIcon } from "./sidebar-icon";
 import { type AppSidebarMode, workspaceLinks } from "./sidebar-utils";
 
 type RecentFamily = {
@@ -30,6 +25,12 @@ type RecentFamily = {
   name: string;
   slug: string;
   role: string;
+};
+
+const menuIcons = {
+  account: { src: "/images/icons/account.png" },
+  family: { src: "/images/icons/family.png" },
+  members: { src: "/images/icons/members.png" },
 };
 
 function useRecentFamilies() {
@@ -87,9 +88,10 @@ export function WorkspaceSwitcher({
       <DropdownMenuTrigger asChild>
         <SidebarMenuButton size="lg" tooltip={title}>
           <Avatar size="sm">
-            {user?.avatarUrl ? (
-              <AvatarImage src={user.avatarUrl} alt={title} />
-            ) : null}
+            <AvatarImage
+              src={user?.avatarUrl ?? menuIcons.account.src}
+              alt={title}
+            />
             <AvatarFallback name={title} />
           </Avatar>
           <span className="flex min-w-0 flex-1 flex-col">
@@ -107,7 +109,7 @@ export function WorkspaceSwitcher({
           {currentFamilyHref ? (
             <DropdownMenuItem asChild>
               <Link href={currentFamilyHref}>
-                <UsersIcon aria-hidden="true" />
+                <SidebarIcon icon={menuIcons.family} className="size-4" />
                 {currentFamilyName}
               </Link>
             </DropdownMenuItem>
@@ -115,7 +117,7 @@ export function WorkspaceSwitcher({
           {workspaceLinks.map((link) => (
             <DropdownMenuItem key={link.href} asChild>
               <Link href={link.href}>
-                <link.icon aria-hidden="true" />
+                <SidebarIcon icon={link.icon} className="size-4" />
                 {link.title}
               </Link>
             </DropdownMenuItem>
@@ -129,7 +131,7 @@ export function WorkspaceSwitcher({
               {recentFamilies.map((family) => (
                 <DropdownMenuItem key={family.id} asChild>
                   <Link href={`/family/${encodeURIComponent(family.slug)}`}>
-                    <UsersIcon aria-hidden="true" />
+                    <SidebarIcon icon={menuIcons.family} className="size-4" />
                     {family.name}
                   </Link>
                 </DropdownMenuItem>
@@ -141,13 +143,13 @@ export function WorkspaceSwitcher({
         <DropdownMenuGroup>
           <DropdownMenuItem asChild>
             <Link href="/family">
-              <ClipboardListIcon aria-hidden="true" />
+              <SidebarIcon icon={menuIcons.members} className="size-4" />
               Manage family access
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/family/new">
-              <BanknoteArrowDownIcon aria-hidden="true" />
+              <SidebarIcon icon={menuIcons.family} className="size-4" />
               Create family
             </Link>
           </DropdownMenuItem>
