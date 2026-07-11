@@ -22,11 +22,7 @@ export function CategoryDeleteDialog({
   const isUsed = Boolean(category && category.transactionsCount > 0);
 
   return (
-    <AlertDialog
-      open={Boolean(category)}
-      onOpenChange={onOpenChange}
-      syncWithSearchParams={false}
-    >
+    <AlertDialog open={Boolean(category)} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>

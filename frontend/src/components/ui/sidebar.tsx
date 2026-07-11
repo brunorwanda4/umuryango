@@ -182,7 +182,6 @@ function Sidebar({
       <Sheet
         open={openMobile}
         onOpenChange={setOpenMobile}
-        syncWithSearchParams={false}
         {...props}
       >
         <SheetContent

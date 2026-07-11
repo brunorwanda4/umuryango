@@ -42,11 +42,7 @@ export function LoanDetailsSheet({
   onOpenChange: (open: boolean) => void;
 }) {
   return (
-    <Sheet
-      open={Boolean(loan)}
-      onOpenChange={onOpenChange}
-      syncWithSearchParams={false}
-    >
+    <Sheet open={Boolean(loan)} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-2xl">
         <SheetHeader>
           <SheetTitle>{loan?.title ?? "Loan Details"}</SheetTitle>

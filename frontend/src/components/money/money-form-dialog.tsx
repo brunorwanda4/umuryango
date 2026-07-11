@@ -120,11 +120,7 @@ export function MoneyFormDialog({
   });
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-      syncWithSearchParams={false}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger !== null && (
         <DialogTrigger asChild>
           {trigger ?? (

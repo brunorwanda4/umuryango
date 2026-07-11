@@ -50,11 +50,7 @@ export function ViewIncomeDialog({
 
   return (
     <>
-      <Dialog
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        syncWithSearchParams={false}
-      >
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         {trigger !== null && (
           <DialogTrigger asChild>
             {trigger ?? (
