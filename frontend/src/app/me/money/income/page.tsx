@@ -16,7 +16,6 @@ const IncomeName = () => {
             <Button
               type="button"
               variant="outline"
-              // className="h-11 justify-between gap-6 rounded-lg px-4 text-muted-foreground sm:min-w-64"
             >
               <span>Jul 1 - Jul 31, 2026</span>
               <CalendarDaysIcon
@@ -27,7 +26,6 @@ const IncomeName = () => {
             <MoneyFormDialog
               type="income"
               triggerSize="default"
-              // triggerClassName="h-11 rounded-lg bg-chart-2 px-5 text-background hover:bg-chart-2/90"
             />
           </div>
         }
