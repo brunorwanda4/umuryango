@@ -1,3 +1,4 @@
+"use client"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { IncomeChartsSection } from "./income-dashboard/income-charts-section";
 import { IncomeSummaryCards } from "./income-dashboard/income-summary-cards";
@@ -7,7 +8,7 @@ export function IncomeDashboard() {
   return (
     <div className="flex flex-col gap-4">
       <IncomeSummaryCards />
-      <Tabs>
+      <Tabs defaultValue="data">
         <TabsList>
           <TabsTrigger value="data">Data</TabsTrigger>
           <TabsTrigger value="charts">Charts</TabsTrigger>

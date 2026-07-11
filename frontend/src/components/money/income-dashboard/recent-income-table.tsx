@@ -2,6 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontalIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import {
   type RecentIncomeRecord,
   recentIncomeData,
 } from "./income-dashboard-data";
+import { RecentIncomeFilter } from "./recent-income-filter";
 
 const recentIncomeColumns: ColumnDef<RecentIncomeRecord>[] = [
   {
@@ -113,15 +115,44 @@ const recentIncomeColumns: ColumnDef<RecentIncomeRecord>[] = [
 ];
 
 export function RecentIncomeTable() {
+  const [search, setSearch] = useState("");
+  const filteredIncomeData = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    if (!query) {
+      return recentIncomeData;
+    }
+
+    return recentIncomeData.filter((income) =>
+      [
+        income.source,
+        income.description,
+        income.category,
+        income.date,
+        income.paymentMethod,
+        income.amountMinorUnits.toString(),
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(query),
+    );
+  }, [search]);
+
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="px-5 pt-5 pb-2 sm:px-6">
         <CardTitle className="font-bold text-base">Recent income</CardTitle>
       </CardHeader>
       <CardContent className="px-0 pb-0">
+        <RecentIncomeFilter
+          resultCount={filteredIncomeData.length}
+          search={search}
+          totalCount={recentIncomeData.length}
+          onSearchChange={setSearch}
+        />
         <CommonDataTable
           columns={recentIncomeColumns}
-          data={recentIncomeData}
+          data={filteredIncomeData}
           className="rounded-none border-0 [&>div:last-child]:hidden [&_table]:w-full [&_tbody_tr]:h-[4.5rem] [&_thead_tr]:bg-transparent [&_th]:h-11 [&_th]:text-muted-foreground"
         />
       </CardContent>
