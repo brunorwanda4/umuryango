@@ -13,7 +13,8 @@ const MeMoneyIncomeCard = ({ currency, summary }: MoneySummaryCardsProps) => {
   const cards = [
     {
       description: "Total income",
-      icon: <ArrowDownIcon className={iconClassName} />,
+      // icon: <ArrowDownIcon className={iconClassName} />,
+      iconImage: "/images/icons/money.png",
       value: (
         <CompactMoney
           currency={currency}

@@ -40,11 +40,7 @@ export function IncomeSummaryCards() {
               <ArrowDownIcon className="size-4" aria-hidden="true" />
             </span>
           ),
-          icon: (
-            <span className={iconWrapperClassName}>
-              <WalletCardsIcon className={iconClassName} aria-hidden="true" />
-            </span>
-          ),
+          iconImage: "/images/icons/wallet.png",
           value: <CompactMoney currency="RWF" value={totalIncomeMinorUnits} />,
         },
         {
@@ -56,33 +52,21 @@ export function IncomeSummaryCards() {
               <ArrowUpRightIcon className="size-4" aria-hidden="true" />
             </span>
           ),
-          icon: (
-            <span className={iconWrapperClassName}>
-              <FileTextIcon className={iconClassName} aria-hidden="true" />
-            </span>
-          ),
+          iconImage: "/images/icons/transaction.png",
           value: "90",
         },
         {
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
           description: descriptionWithInfo("This month's income"),
           footer: <span className="text-chart-2">Jul 1 - Jul 31, 2026</span>,
-          icon: (
-            <span className={iconWrapperClassName}>
-              <CalendarDaysIcon className={iconClassName} aria-hidden="true" />
-            </span>
-          ),
+          iconImage: "/images/icons/calendar.png",
           value: <CompactMoney currency="RWF" value={90000} />,
         },
         {
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
           description: descriptionWithInfo("Largest income"),
           footer: <span className="text-chart-2">Business income</span>,
-          icon: (
-            <span className={iconWrapperClassName}>
-              <TrendingUpIcon className={iconClassName} aria-hidden="true" />
-            </span>
-          ),
+          iconImage: "/images/icons/quality.png",
           value: <CompactMoney currency="RWF" value={40000} />,
         },
       ]}
