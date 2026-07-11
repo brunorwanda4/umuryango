@@ -24,7 +24,9 @@ interface MoneyFormDialogProps {
   type: MoneyFormType;
   defaultValues?: Partial<MoneyFormValues>;
   mode?: "create" | "update";
-  trigger?: React.ReactElement;
+  onOpenChange?: (open: boolean) => void;
+  open?: boolean;
+  trigger?: React.ReactElement | null;
   triggerClassName?: string;
   triggerSize?: React.ComponentProps<typeof Button>["size"];
 }
@@ -98,6 +100,8 @@ const accountOptions = [
 export function MoneyFormDialog({
   defaultValues,
   mode = "create",
+  onOpenChange,
+  open,
   type,
   trigger,
   triggerClassName,
@@ -116,19 +120,25 @@ export function MoneyFormDialog({
   });
 
   return (
-    <Dialog syncWithSearchParams={false}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button size={triggerSize} className={cn(triggerClassName)}>
-            {isUpdate ? (
-              <PencilIcon data-icon="inline-start" />
-            ) : (
-              <PlusIcon data-icon="inline-start" />
-            )}
-            {isUpdate ? config.updateAction : config.action}
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      syncWithSearchParams={false}
+    >
+      {trigger !== null && (
+        <DialogTrigger asChild>
+          {trigger ?? (
+            <Button size={triggerSize} className={cn(triggerClassName)}>
+              {isUpdate ? (
+                <PencilIcon data-icon="inline-start" />
+              ) : (
+                <PlusIcon data-icon="inline-start" />
+              )}
+              {isUpdate ? config.updateAction : config.action}
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>

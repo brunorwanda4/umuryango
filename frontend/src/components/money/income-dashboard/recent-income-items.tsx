@@ -52,7 +52,7 @@ export function RecentIncomeItems({ data }: RecentIncomeItemsProps) {
         const PaymentIcon = income.paymentIcon;
 
         return (
-          <Item key={income.id} asChild variant="outline">
+          <Item onClick={() => {}} key={income.id} asChild variant="outline">
             <li>
               <ItemMedia
                 variant="icon"
