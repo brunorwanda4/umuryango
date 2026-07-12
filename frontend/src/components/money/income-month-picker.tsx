@@ -35,6 +35,7 @@ export function IncomeMonthPicker({
       displayValue={formatMonthPeriod(period.from, period.to)}
       placeholder="Pick a month"
       onValueChange={(date) => onMonthChange(date.slice(0, 7))}
+      className="max-w-60"
     />
   );
 }
