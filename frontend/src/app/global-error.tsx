@@ -1,7 +1,7 @@
 "use client"; // Error boundaries must be Client Components
 
-import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { CheckIcon, ChevronDownIcon, CopyIcon } from "lucide-react";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { useEffect, useState } from "react";
 import { defaultLocale, getMessages } from "@/i18n/config";
 import { createTranslator } from "@/i18n/translate";

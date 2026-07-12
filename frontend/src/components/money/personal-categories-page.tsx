@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/common/pages/page-title";
-import { CategoryFilters } from "@/components/family/money/categories/category-filters";
 import { CategoryStatsCards } from "@/components/family/money/categories/category-stats-cards";
 import { CategoryTable } from "@/components/family/money/categories/category-table";
 import { EditCategoryDialog } from "@/components/family/money/categories/edit-category-dialog";
@@ -28,11 +27,9 @@ export function PersonalCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string>();
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"ALL" | CategoryType>("ALL");
-  const [statusFilter, setStatusFilter] = useState<"ALL" | CategoryStatus>(
-    "ALL",
-  );
-  const [sort, setSort] = useState<CategorySort>("updated-desc");
+  const typeFilter: "ALL" | CategoryType = "ALL";
+  const statusFilter: "ALL" | CategoryStatus = "ALL";
+  const sort: CategorySort = "updated-desc";
   const [editingCategory, setEditingCategory] = useState<MoneyCategory | null>(
     null,
   );
@@ -91,7 +88,7 @@ export function PersonalCategoriesPage() {
         statusFilter,
         sort,
       ),
-    [categories, search, sort, statusFilter, typeFilter],
+    [categories, search],
   );
 
   const setCategoryStatus = async (
@@ -151,6 +148,8 @@ export function PersonalCategoriesPage() {
             loading={loading}
             onArchive={setCategoryStatus}
             onEdit={setEditingCategory}
+            search={search}
+            onSearchChange={setSearch}
           />
         </TabsContent>
         <TabsContent value="charts">charts</TabsContent>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { PageTitle } from "@/components/common/pages/page-title";
 import apiRequest from "@/service/api";
 import { CategoryDeleteDialog } from "./categories/category-delete-dialog";
 import { CategoryFilters } from "./categories/category-filters";
@@ -13,7 +14,6 @@ import {
   type CategorySort,
   type CategoryStatus,
   type CategoryType,
-  categoryHeader,
   demoCategories,
   enrichApiCategories,
   filterAndSortCategories,
@@ -23,9 +23,7 @@ import {
 } from "./categories/types-and-constants";
 import { FamilyMoneyPageData } from "./family-money-page-data";
 import { CreateCategoryForm } from "./forms/create-category-form";
-import { MoneySectionLayout } from "./money-section-layout";
 import type { MoneyOverview } from "./types";
-import { PageTitle } from "@/components/common/pages/page-title";
 
 export function MoneyCategoriesPage({ familyName }: { familyName: string }) {
   return (
@@ -34,7 +32,6 @@ export function MoneyCategoriesPage({ familyName }: { familyName: string }) {
         <MoneyCategoriesWorkspace
           currency={currency}
           familyId={family.id}
-          family={family}
           money={money}
         />
       )}
@@ -44,12 +41,10 @@ export function MoneyCategoriesPage({ familyName }: { familyName: string }) {
 
 function MoneyCategoriesWorkspace({
   currency,
-  family,
   familyId,
   money,
 }: {
   currency: string;
-  family: Parameters<typeof MoneySectionLayout>[0]["family"];
   familyId: string;
   money: MoneyOverview | null;
 }) {
@@ -193,6 +188,8 @@ function MoneyCategoriesWorkspace({
         onArchive={setCategoryStatus}
         onDelete={setDeleteCategory}
         onEdit={setEditingCategory}
+        search={search}
+        onSearchChange={setSearch}
       />
       <EditCategoryDialog
         categories={categories}

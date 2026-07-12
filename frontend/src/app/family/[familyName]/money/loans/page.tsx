@@ -1,7 +1,7 @@
 import type { ContactListResponse } from "@/components/family/contacts/types-and-schemas";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
-import { MoneyLoansPage } from "@/components/family/money/money-loans-page";
 import type { LoanRecord } from "@/components/family/money/loans/types-and-schemas";
+import { MoneyLoansPage } from "@/components/family/money/money-loans-page";
 import { serverApiRequest } from "@/service/server-api";
 
 async function getLoansPageData(familyName: string) {

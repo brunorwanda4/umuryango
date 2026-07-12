@@ -9,9 +9,9 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { formatFullMinorUnits } from "@/lib/format-compact-number";
-import { formatRf } from "./formatters";
 import type { ExpenseSourceDatum } from "./expense-dashboard-data";
 import { ExpenseSourceLegend } from "./expense-source-legend";
+import { formatRf } from "./formatters";
 
 export function ExpenseSourceChart({
   data,

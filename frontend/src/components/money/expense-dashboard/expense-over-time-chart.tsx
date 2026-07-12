@@ -10,8 +10,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { formatFullMinorUnits } from "@/lib/format-compact-number";
-import { formatCompactAmount } from "./formatters";
 import type { ExpenseOverTimeDatum } from "./expense-dashboard-data";
+import { formatCompactAmount } from "./formatters";
 
 const expenseChartConfig = {
   amount: {

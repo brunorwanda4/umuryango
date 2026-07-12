@@ -36,6 +36,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "../utils";
 import { CategoryIcon } from "./category-icon";
+import { CategorySearch } from "./category-search";
 import {
   type CategoryStatus,
   formatCategoryStatus,
@@ -54,6 +55,8 @@ export function CategoryTable({
   onArchive,
   onDelete,
   onEdit,
+  search,
+  onSearchChange,
 }: {
   apiMessage?: string;
   categories: MoneyCategory[];
@@ -62,14 +65,18 @@ export function CategoryTable({
   onArchive: (category: MoneyCategory, status: CategoryStatus) => void;
   onDelete?: (category: MoneyCategory) => void;
   onEdit: (category: MoneyCategory) => void;
+  search: string;
+  onSearchChange: (value: string) => void;
 }) {
   return (
     <Card className="min-w-0">
-      <CardHeader>
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>Category master data</CardTitle>
-        <div>
-          Search Categories
-       </div>
+        <CategorySearch
+          value={search}
+          onChange={onSearchChange}
+          className="max-w-sm"
+        />
       </CardHeader>
       <CardContent className="flex min-w-0 flex-col gap-3">
         {apiMessage ? (

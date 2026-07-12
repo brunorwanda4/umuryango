@@ -1,6 +1,3 @@
-import { SearchIcon } from "lucide-react";
-
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -9,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CategorySearch } from "./category-search";
 import type {
   CategorySort,
   CategoryStatus,
@@ -36,19 +34,11 @@ export function CategoryFilters({
 }) {
   return (
     <div className="grid min-w-0 gap-3 md:grid-cols-2 2xl:grid-cols-[minmax(16rem,1fr)_12rem_12rem_14rem]">
-      <div className="relative">
-        <SearchIcon
-          aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-        />
-        <Input
-          aria-label="Search categories"
-          className="pl-9"
-          onChange={(event) => setSearch(event.target.value)}
-          placeholder="Search by name or description"
-          value={search}
-        />
-      </div>
+      <CategorySearch
+        value={search}
+        onChange={setSearch}
+        placeholder="Search by name or description"
+      />
       <Select
         value={typeFilter}
         onValueChange={(value) => setTypeFilter(value as "ALL" | CategoryType)}
