@@ -1,3 +1,5 @@
-export default async function PlansPage() {
-  return <div>Plans page</div>;
+import { PersonPlansPage } from "@/components/plans/person-plans-page";
+
+export default function PlansPage() {
+	return <PersonPlansPage />;
 }

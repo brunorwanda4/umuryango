@@ -5,6 +5,7 @@ import { ContactsModule } from './contacts/contacts.module';
 import { ContributionsModule } from './contributions/contributions.module';
 import { FamiliesModule } from './families/families.module';
 import { MoneyModule } from './money/money.module';
+import { PersonalPlansModule } from './personal-plans/personal-plans.module';
 import { ProjectsModule } from './projects/projects.module';
 import { ReportsModule } from './reports/reports.module';
 
@@ -16,6 +17,7 @@ import { ReportsModule } from './reports/reports.module';
     ContactsModule,
     ContributionsModule,
     MoneyModule,
+    PersonalPlansModule,
     ProjectsModule,
     ReportsModule,
   ],

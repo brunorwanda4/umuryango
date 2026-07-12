@@ -262,6 +262,29 @@ enum FamilyContactStatus {
   INACTIVE
 }
 
+enum PersonPlanType {
+  TASK
+  LONG_TERM_GOAL
+}
+
+enum PersonPlanStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PersonPlanPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum PersonGoalProgressMethod {
+  MILESTONE
+  FINANCIAL
+}
+
 enum FamilyProjectCategory {
   HOUSE
   VEHICLE
@@ -336,8 +359,62 @@ model User {
   createdLoanRepayments        FamilyLoanRepayment[]       @relation("LoanRepaymentsCreated")
   uploadedLoanDocuments        FamilyLoanDocument[]        @relation("LoanDocumentsUploaded")
   performedLoanAuditLogs       FamilyLoanAuditLog[]        @relation("LoanAuditPerformed")
+  personPlans                  PersonPlan[]                @relation("PersonPlans")
+  createdPersonPlans           PersonPlan[]                @relation("PersonPlansCreated")
 
   @@index([status])
+}
+
+model PersonPlan {
+  id                      String                   @id @default(cuid())
+  personId                String
+  type                    PersonPlanType
+  title                   String
+  description             String?
+  status                  PersonPlanStatus         @default(PENDING)
+  priority                PersonPlanPriority?
+  startDate               DateTime?
+  dueDate                 DateTime?
+  dueTime                 String?
+  targetDate              DateTime?
+  reminderAt              DateTime?
+  reminderFrequency       String?
+  note                    String?
+  goalCategory            String?
+  goalIcon                String?
+  needsMoney              Boolean                  @default(false)
+  targetAmountMinorUnits  BigInt?
+  currentAmountMinorUnits BigInt?
+  currency                String                   @default("RWF")
+  progressMethod          PersonGoalProgressMethod @default(MILESTONE)
+  completedAt             DateTime?
+  deletedAt               DateTime?
+  createdById             String
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  person                  User                     @relation("PersonPlans", fields: [personId], references: [id], onDelete: Cascade)
+  createdBy               User                     @relation("PersonPlansCreated", fields: [createdById], references: [id], onDelete: Restrict)
+  milestones              PersonPlanMilestone[]
+
+  @@index([personId, status])
+  @@index([personId, dueDate])
+  @@index([personId, targetDate])
+  @@index([personId, deletedAt])
+}
+
+model PersonPlanMilestone {
+  id          String     @id @default(cuid())
+  planId      String
+  title       String
+  position    Int
+  completedAt DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  plan        PersonPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId, position])
+  @@index([planId, deletedAt])
 }
 
 model EmailVerification {
@@ -730,10 +807,10 @@ model FamilyTransactionCategory {
   budgets      FamilyBudget[]
   loans        FamilyLoan[]
 
+  @@unique([familyId, scope, ownerId, type, name])
   @@index([familyId, type])
   @@index([familyId, status])
   @@index([familyId, scope, ownerId, type, status])
-  @@unique([familyId, scope, ownerId, type, name])
 }
 
 model FamilyTransaction {
