@@ -54,6 +54,22 @@ export class TransactionsController {
     };
   }
 
+  @Post('mine')
+  @ApiOperation({ summary: 'Create a personal transaction' })
+  @ApiCreatedResponse({ description: 'Personal transaction recorded.' })
+  async createPersonal(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Body() dto: CreateTransactionDto,
+  ) {
+    const data = await this.transactionsService.createPersonal(
+      userId,
+      familyId,
+      dto,
+    );
+    return { data, message: 'Personal transaction recorded successfully.' };
+  }
+
   @Get()
   @ApiOperation({ summary: 'List all transactions for a family' })
   @ApiQuery({ name: 'type', enum: TransactionType, required: false })

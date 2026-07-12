@@ -6,6 +6,7 @@ import {
   FamilyCapability,
   IncomePaymentStatus,
   IncomeRecurrence,
+  TransactionScope,
   TransactionStatus,
   TransactionType,
 } from '@prisma/client';
@@ -35,6 +36,7 @@ function makeTransaction(overrides: Record<string, unknown> = {}) {
     amountMinorUnits: 200000n,
     currency: 'RWF',
     type: TransactionType.INCOME,
+    scope: TransactionScope.FAMILY,
     status: TransactionStatus.PENDING,
     incomeRecurrence: IncomeRecurrence.MONTHLY,
     paymentStatus: IncomePaymentStatus.PARTIAL,
@@ -252,6 +254,47 @@ describe('TransactionsService', () => {
     ).rejects.toBeInstanceOf(ForbiddenException);
   });
 
+  it('creates personal income for a member without family income permission', async () => {
+    const created = makeTransaction({
+      scope: TransactionScope.PERSONAL,
+      status: TransactionStatus.APPROVED,
+      incomeRecurrence: IncomeRecurrence.ONE_TIME,
+      expectedAmountMinorUnits: null,
+      dueDate: null,
+      periodStart: null,
+      periodEnd: null,
+      propertyName: null,
+      paymentStatus: IncomePaymentStatus.NOT_EXPECTED,
+    });
+    prisma.familyMember.findFirst.mockResolvedValue(plainMembership);
+    prisma.familyTransactionCategory.findFirst.mockResolvedValue({
+      id: 'category-rent',
+    });
+    prisma.familyTransaction.findUnique.mockResolvedValue(null);
+    prisma.familyTransaction.create.mockResolvedValue(created);
+    prisma.familyAuditEvent.create.mockResolvedValue({ id: 'audit-personal' });
+
+    const result = await service.createPersonal('user-1', 'family-1', {
+      categoryId: 'category-rent',
+      amountMinorUnits: '200000',
+      currency: 'RWF',
+      type: TransactionType.INCOME,
+      date: '2026-07-08T12:00:00.000Z',
+    });
+
+    expect(result.scope).toBe(TransactionScope.PERSONAL);
+    expect(result.status).toBe(TransactionStatus.APPROVED);
+    expect(prisma.familyTransaction.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          createdById: 'user-1',
+          scope: TransactionScope.PERSONAL,
+          status: TransactionStatus.APPROVED,
+        }),
+      }),
+    );
+  });
+
   it('rejects categories outside the family or transaction type', async () => {
     prisma.familyMember.findFirst.mockResolvedValue(managerMembership);
     prisma.familyTransactionCategory.findFirst.mockResolvedValue(null);
@@ -312,6 +355,7 @@ describe('TransactionsService', () => {
         where: expect.objectContaining({
           familyId: 'family-1',
           createdById: 'user-1',
+          scope: TransactionScope.PERSONAL,
           type: TransactionType.INCOME,
         }),
       }),
@@ -378,6 +422,7 @@ describe('TransactionsService', () => {
       where: {
         familyId: 'family-1',
         createdById: 'user-1',
+        scope: TransactionScope.PERSONAL,
         type: TransactionType.EXPENSE,
         status: {
           in: [TransactionStatus.PENDING, TransactionStatus.APPROVED],
@@ -391,6 +436,7 @@ describe('TransactionsService', () => {
         where: {
           familyId: 'family-1',
           createdById: 'user-1',
+          scope: TransactionScope.PERSONAL,
           type: TransactionType.EXPENSE,
           status: { not: TransactionStatus.REVERSED },
           date: {

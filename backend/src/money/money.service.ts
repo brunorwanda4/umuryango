@@ -4,6 +4,7 @@ import {
   ContributionPaymentStatus,
   FamilyAuthority,
   FamilyCapability,
+  TransactionScope,
   TransactionStatus,
   TransactionType,
 } from '@prisma/client';
@@ -99,6 +100,7 @@ export class MoneyService {
       this.prisma.familyTransaction.findMany({
         where: {
           familyId,
+          scope: TransactionScope.FAMILY,
           type: TransactionType.INCOME,
           status: { in: COUNTED_TRANSACTION_STATUSES },
           date: { gte: range.start, lt: range.end },
@@ -108,6 +110,7 @@ export class MoneyService {
       this.prisma.familyTransaction.findMany({
         where: {
           familyId,
+          scope: TransactionScope.FAMILY,
           type: TransactionType.EXPENSE,
           status: { in: COUNTED_TRANSACTION_STATUSES },
           date: { gte: range.start, lt: range.end },
@@ -125,6 +128,7 @@ export class MoneyService {
       this.prisma.familyTransaction.findMany({
         where: {
           familyId,
+          scope: TransactionScope.FAMILY,
           reversedAt: null,
           status: TransactionStatus.PENDING,
         },
@@ -138,6 +142,7 @@ export class MoneyService {
       this.prisma.familyTransaction.findMany({
         where: {
           familyId,
+          scope: TransactionScope.FAMILY,
           date: { gte: range.start, lt: range.end },
           reversedAt: null,
           status: { in: COUNTED_TRANSACTION_STATUSES },
@@ -152,6 +157,7 @@ export class MoneyService {
       this.prisma.familyTransaction.count({
         where: {
           familyId,
+          scope: TransactionScope.FAMILY,
           reversedAt: null,
           status: TransactionStatus.PENDING,
         },

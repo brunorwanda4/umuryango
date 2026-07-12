@@ -214,7 +214,7 @@ export function MoneyFormDialog({
 	];
 	const endpoint = isUpdate
 		? `/families/${encodeURIComponent(familyId ?? "")}/money/transactions/${encodeURIComponent(incomeId ?? "")}`
-		: `/families/${encodeURIComponent(familyId ?? "")}/money/transactions`;
+		: `/families/${encodeURIComponent(familyId ?? "")}/money/transactions/mine`;
 
 	const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
 		MoneyFormValues,

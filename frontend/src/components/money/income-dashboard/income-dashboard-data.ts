@@ -36,6 +36,7 @@ export type IncomeTransaction = {
   paymentMethod: string | null;
   reversedAt: string | null;
   status: "PENDING" | "APPROVED" | "REJECTED" | "REVERSED";
+  scope: "FAMILY" | "PERSONAL";
   type: "INCOME" | "EXPENSE";
   updatedAt: string;
 };

@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { PageTitle } from "@/components/common/pages/page-title";
 import { IncomeDashboard } from "@/components/money/income-dashboard";
 import { useIncomePageData } from "@/hooks/use-income-page-data";
-import { hasCapability } from "@/lib/family-access";
 import { IncomePageActions } from "./income-page-actions";
 import { getMonthPeriod } from "./utils";
 
@@ -18,10 +17,6 @@ export function PersonalIncomePage() {
 	const { categories, dashboard, error, family, isLoading, reload } =
 		useIncomePageData(period);
 
-	const canRecordIncome = family
-		? hasCapability(family, "RECORD_INCOME")
-		: false;
-
 	const incomeCategories = categories.filter(
 		(c) => c.type === "INCOME" && c.status === "ACTIVE",
 	);
@@ -31,11 +26,10 @@ export function PersonalIncomePage() {
 			<PageTitle
 				title="Income"
 				iconImage="/images/icons/income.png"
-				description="Track money you receive from work, business, contributions, gifts, and family support."
-				badge={family?.name}
+				description="Track your personal income from work, business, gifts, and other sources."
 				actions={
 					<IncomePageActions
-						canRecordIncome={canRecordIncome}
+						canRecordIncome={Boolean(family)}
 						categories={categories}
 						family={family}
 						month={month}

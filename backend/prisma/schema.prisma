@@ -150,6 +150,11 @@ enum TransactionType {
   EXPENSE
 }
 
+enum TransactionScope {
+  FAMILY
+  PERSONAL
+}
+
 enum CategoryStatus {
   ACTIVE
   INACTIVE
@@ -732,6 +737,7 @@ model FamilyTransaction {
   amountMinorUnits         BigInt
   currency                 String
   type                     TransactionType
+  scope                    TransactionScope          @default(FAMILY)
   status                   TransactionStatus         @default(PENDING)
   incomeRecurrence         IncomeRecurrence          @default(ONE_TIME)
   paymentStatus            IncomePaymentStatus       @default(NOT_EXPECTED)
@@ -762,6 +768,7 @@ model FamilyTransaction {
   receipts                 FamilyReceipt[]
 
   @@unique([familyId, idempotencyKey])
+  @@index([familyId, scope, type, date])
   @@index([familyId, type, date])
   @@index([familyId, incomeRecurrence, dueDate])
   @@index([familyId, paymentStatus])

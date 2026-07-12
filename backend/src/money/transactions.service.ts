@@ -13,6 +13,7 @@ import {
   IncomePaymentStatus,
   IncomeRecurrence,
   Prisma,
+  TransactionScope,
   TransactionStatus,
   TransactionType,
 } from '@prisma/client';
@@ -30,6 +31,24 @@ export class TransactionsService {
   async create(userId: string, familyId: string, dto: CreateTransactionDto) {
     const membership = await this.requireMembership(userId, familyId);
     this.requireRecordCapability(membership, dto.type);
+    return this.createScoped(userId, familyId, dto, TransactionScope.FAMILY);
+  }
+
+  async createPersonal(
+    userId: string,
+    familyId: string,
+    dto: CreateTransactionDto,
+  ) {
+    await this.requireMembership(userId, familyId);
+    return this.createScoped(userId, familyId, dto, TransactionScope.PERSONAL);
+  }
+
+  private async createScoped(
+    userId: string,
+    familyId: string,
+    dto: CreateTransactionDto,
+    scope: TransactionScope,
+  ) {
     await this.requireCategory(familyId, dto.categoryId, dto.type);
     const receivedFromContact = dto.receivedFromContactId
       ? await this.requireContact(familyId, dto.receivedFromContactId)
@@ -45,6 +64,11 @@ export class TransactionsService {
         },
       });
       if (existing) {
+        if (existing.scope !== scope || existing.createdById !== userId) {
+          throw new BadRequestException(
+            'Idempotency key is already used by another transaction',
+          );
+        }
         return this.serializeTransaction(existing);
       }
     }
@@ -60,11 +84,15 @@ export class TransactionsService {
           amountMinorUnits: BigInt(dto.amountMinorUnits),
           currency: dto.currency,
           type: dto.type,
+          scope,
           date: new Date(dto.date),
           description: this.nullableString(dto.description),
           paymentMethod: this.nullableString(dto.paymentMethod),
           idempotencyKey: dto.idempotencyKey,
-          status: TransactionStatus.PENDING, // Always pending initially, requiring approval
+          status:
+            scope === TransactionScope.PERSONAL
+              ? TransactionStatus.APPROVED
+              : TransactionStatus.PENDING,
           notes: this.nullableString(dto.notes),
           receivedFrom:
             this.nullableString(dto.receivedFrom) ??
@@ -101,6 +129,7 @@ export class TransactionsService {
       where: {
         id: sourceTransactionId,
         familyId,
+        scope: TransactionScope.FAMILY,
         type: TransactionType.INCOME,
       },
     });
@@ -205,7 +234,10 @@ export class TransactionsService {
   ) {
     await this.requireMembership(userId, familyId);
 
-    const where: any = { familyId };
+    const where: Prisma.FamilyTransactionWhereInput = {
+      familyId,
+      scope: TransactionScope.FAMILY,
+    };
     if (query?.type) where.type = query.type;
     if (query?.status) where.status = query.status;
 
@@ -244,6 +276,7 @@ export class TransactionsService {
     const ownershipWhere: Prisma.FamilyTransactionWhereInput = {
       familyId,
       createdById: userId,
+      scope: TransactionScope.PERSONAL,
       type: query.type,
     };
     const activeWhere: Prisma.FamilyTransactionWhereInput = {
@@ -333,7 +366,14 @@ export class TransactionsService {
     await this.requireMembership(userId, familyId);
 
     const transaction = await this.prisma.familyTransaction.findFirst({
-      where: { familyId, id },
+      where: {
+        familyId,
+        id,
+        OR: [
+          { scope: TransactionScope.FAMILY },
+          { scope: TransactionScope.PERSONAL, createdById: userId },
+        ],
+      },
       include: {
         category: { select: { name: true } },
         createdBy: { select: { fullName: true } },
@@ -371,17 +411,30 @@ export class TransactionsService {
       throw new NotFoundException('Transaction not found');
     }
 
+    if (
+      transaction.scope === TransactionScope.PERSONAL &&
+      transaction.createdById !== userId
+    ) {
+      throw new NotFoundException('Transaction not found');
+    }
+
     const canManageOthers =
       membership.authority === FamilyAuthority.HEAD ||
       membership.authority === FamilyAuthority.ADMIN;
-    if (transaction.createdById !== userId && !canManageOthers) {
+    if (
+      transaction.createdById !== userId &&
+      (transaction.scope === TransactionScope.PERSONAL || !canManageOthers)
+    ) {
       throw new ForbiddenException(
         'You cannot update another member transaction',
       );
     }
 
     // Rule: "If income is approved, normal users should not edit it. Admin can edit approved income if allowed."
-    if (transaction.status === TransactionStatus.APPROVED) {
+    if (
+      transaction.scope === TransactionScope.FAMILY &&
+      transaction.status === TransactionStatus.APPROVED
+    ) {
       const canEditApproved =
         membership.authority === FamilyAuthority.HEAD ||
         membership.authority === FamilyAuthority.ADMIN;
@@ -459,7 +512,7 @@ export class TransactionsService {
     await this.checkApprovalCapability(userId, familyId);
 
     const transaction = await this.prisma.familyTransaction.findFirst({
-      where: { familyId, id },
+      where: { familyId, id, scope: TransactionScope.FAMILY },
     });
     if (!transaction) throw new NotFoundException('Transaction not found');
     if (transaction.status !== TransactionStatus.PENDING) {
@@ -498,9 +551,16 @@ export class TransactionsService {
     await this.checkApprovalCapability(userId, familyId);
 
     const transaction = await this.prisma.familyTransaction.findFirst({
-      where: { familyId, id },
+      where: { familyId, id, scope: TransactionScope.FAMILY },
     });
     if (!transaction) throw new NotFoundException('Transaction not found');
+
+    if (
+      transaction.scope === TransactionScope.PERSONAL &&
+      transaction.createdById !== userId
+    ) {
+      throw new NotFoundException('Transaction not found');
+    }
     if (transaction.status !== TransactionStatus.PENDING) {
       throw new BadRequestException('Transaction is not pending approval');
     }
@@ -537,10 +597,20 @@ export class TransactionsService {
     });
     if (!transaction) throw new NotFoundException('Transaction not found');
 
+    if (
+      transaction.scope === TransactionScope.PERSONAL &&
+      transaction.createdById !== userId
+    ) {
+      throw new NotFoundException('Transaction not found');
+    }
+
     const canManageOthers =
       membership.authority === FamilyAuthority.HEAD ||
       membership.authority === FamilyAuthority.ADMIN;
-    if (transaction.createdById !== userId && !canManageOthers) {
+    if (
+      transaction.createdById !== userId &&
+      (transaction.scope === TransactionScope.PERSONAL || !canManageOthers)
+    ) {
       throw new ForbiddenException(
         'You cannot reverse another member transaction',
       );
@@ -848,6 +918,7 @@ export class TransactionsService {
           ? null
           : transaction.expectedAmountMinorUnits.toString(),
       type: transaction.type,
+      scope: transaction.scope,
       status: transaction.status,
       incomeRecurrence: transaction.incomeRecurrence,
       paymentStatus: transaction.paymentStatus,
