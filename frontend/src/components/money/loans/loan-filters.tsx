@@ -34,7 +34,9 @@ export function LoanFilters({
 }) {
   const activeFilterCount =
     Number(filters.status !== "all") + Number(filters.personId !== "all");
-  const selectedPerson = people.find((person) => person.id === filters.personId);
+  const selectedPerson = people.find(
+    (person) => person.id === filters.personId,
+  );
   const statusLabel =
     filters.status === "all"
       ? "All statuses"
@@ -62,7 +64,10 @@ export function LoanFilters({
             className="w-full justify-center sm:w-auto"
             aria-label="Add loan filters"
           >
-            <SlidersHorizontalIcon aria-hidden="true" data-icon="inline-start" />
+            <SlidersHorizontalIcon
+              aria-hidden="true"
+              data-icon="inline-start"
+            />
             {activeFilterCount > 0
               ? `${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"}`
               : "Filters"}
@@ -119,7 +124,9 @@ export function LoanFilters({
               }
             >
               <SelectTrigger className="w-full" aria-label="Filter by person">
-                <SelectValue placeholder={selectedPerson?.name ?? "All people"} />
+                <SelectValue
+                  placeholder={selectedPerson?.name ?? "All people"}
+                />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
