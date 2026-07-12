@@ -42,6 +42,7 @@ import {
   formatCategoryType,
   type MoneyCategory,
 } from "./types-and-constants";
+import { CategoryFilters } from "./category-filters";
 
 const categorySkeletonKeys = ["category-1", "category-2", "category-3"];
 const categoryCountFormatter = new Intl.NumberFormat("en");
@@ -83,6 +84,16 @@ export function CategoryTable({
             aria-label="Category list"
             className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3"
           >
+            <CategoryFilters
+              search={search}
+              setSearch={setSearch}
+              setSort={setSort}
+              setStatusFilter={setStatusFilter}
+              setTypeFilter={setTypeFilter}
+              sort={sort}
+              statusFilter={statusFilter}
+              typeFilter={typeFilter}
+            />
             {categories.map((category) => (
               <CategoryCard
                 category={category}

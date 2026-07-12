@@ -16,12 +16,7 @@ import {
   subYears,
 } from "date-fns";
 import { CalendarIcon, CheckIcon, ClockIcon } from "lucide-react";
-import {
-  forwardRef,
-  type ReactNode,
-  useMemo,
-  useState,
-} from "react";
+import { forwardRef, type ReactNode, useMemo, useState } from "react";
 import type { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
@@ -97,11 +92,7 @@ function parseDateValue(value?: string | number) {
   return isValid(parsedDate) ? startOfDay(parsedDate) : undefined;
 }
 
-function isDateWithinLimits(
-  date: Date,
-  minDate?: Date,
-  maxDate?: Date,
-) {
+function isDateWithinLimits(date: Date, minDate?: Date, maxDate?: Date) {
   return !(
     (minDate && isBefore(date, minDate)) ||
     (maxDate && isAfter(date, maxDate))
@@ -137,14 +128,9 @@ function restrictDateRange(
   }
 
   const from =
-    minDate && isBefore(originalFrom, minDate)
-      ? minDate
-      : originalFrom;
+    minDate && isBefore(originalFrom, minDate) ? minDate : originalFrom;
 
-  const to =
-    maxDate && isAfter(originalTo, maxDate)
-      ? maxDate
-      : originalTo;
+  const to = maxDate && isAfter(originalTo, maxDate) ? maxDate : originalTo;
 
   if (isAfter(from, to)) {
     return undefined;
@@ -179,148 +165,138 @@ function formatDateRangeLabel(
 /*                            SINGLE DATE PICKER                              */
 /* -------------------------------------------------------------------------- */
 
-const DatePickerInput = forwardRef<
-  HTMLButtonElement,
-  DatePickerInputProps
->(function DatePickerInput(
-  {
-    id,
-    name,
-    value,
-    placeholder = "Pick a date",
-    disabled,
-    required,
-    "aria-invalid": invalid,
-    className,
-    min,
-    max,
-    align = "start",
-    displayValue,
-    onBlur,
-    onValueChange,
-  },
-  ref,
-) {
-  const [open, setOpen] = useState(false);
+const DatePickerInput = forwardRef<HTMLButtonElement, DatePickerInputProps>(
+  function DatePickerInput(
+    {
+      id,
+      name,
+      value,
+      placeholder = "Pick a date",
+      disabled,
+      required,
+      "aria-invalid": invalid,
+      className,
+      min,
+      max,
+      align = "start",
+      displayValue,
+      onBlur,
+      onValueChange,
+    },
+    ref,
+  ) {
+    const [open, setOpen] = useState(false);
 
-  const selectedDate = parseDateValue(value);
-  const minDate = parseDateValue(min);
-  const maxDate = parseDateValue(max);
+    const selectedDate = parseDateValue(value);
+    const minDate = parseDateValue(min);
+    const maxDate = parseDateValue(max);
 
-  const today = startOfDay(new Date());
-  const yesterday = subDays(today, 1);
+    const today = startOfDay(new Date());
+    const yesterday = subDays(today, 1);
 
-  const [month, setMonth] = useState(selectedDate ?? today);
+    const [month, setMonth] = useState(selectedDate ?? today);
 
-  const disabledDates = [
-    ...(minDate ? [{ before: minDate }] : []),
-    ...(maxDate ? [{ after: maxDate }] : []),
-  ];
+    const disabledDates = [
+      ...(minDate ? [{ before: minDate }] : []),
+      ...(maxDate ? [{ after: maxDate }] : []),
+    ];
 
-  const selectDate = (date: Date) => {
-    if (!isDateWithinLimits(date, minDate, maxDate)) {
-      return;
-    }
+    const selectDate = (date: Date) => {
+      if (!isDateWithinLimits(date, minDate, maxDate)) {
+        return;
+      }
 
-    onValueChange(format(date, DATE_VALUE_FORMAT));
-    setOpen(false);
-  };
+      onValueChange(format(date, DATE_VALUE_FORMAT));
+      setOpen(false);
+    };
 
-  return (
-    <Popover
-      open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen);
+    return (
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
 
-        if (nextOpen) {
-          setMonth(selectedDate ?? today);
-        }
+          if (nextOpen) {
+            setMonth(selectedDate ?? today);
+          }
 
-        if (!nextOpen) {
-          onBlur?.();
-        }
-      }}
-    >
-      <PopoverTrigger asChild>
-        <Button
-          ref={ref}
-          id={id}
-          name={name}
-          type="button"
-          variant="outline"
-          disabled={disabled}
-          aria-invalid={invalid}
-          aria-required={required}
-          aria-label={selectedDate ? undefined : placeholder}
-          className={cn(
-            "w-full justify-start font-normal",
-            !selectedDate && "text-muted-foreground",
-            className,
-          )}
-        >
-          <CalendarIcon className="size-4" />
-
-          {selectedDate
-            ? (displayValue ?? format(selectedDate, "PPP"))
-            : placeholder}
-        </Button>
-      </PopoverTrigger>
-
-      <PopoverContent
-        align={align}
-        className="w-auto rounded-md p-0"
+          if (!nextOpen) {
+            onBlur?.();
+          }
+        }}
       >
-        <div className="flex max-sm:flex-col">
-          <div className="flex gap-1 border-b p-2 sm:w-32 sm:flex-col sm:border-r sm:border-b-0">
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="flex-1 justify-start"
-              disabled={!isDateWithinLimits(today, minDate, maxDate)}
-              onClick={() => selectDate(today)}
-            >
-              Today
-            </Button>
+        <PopoverTrigger asChild>
+          <Button
+            ref={ref}
+            id={id}
+            name={name}
+            type="button"
+            variant="outline"
+            disabled={disabled}
+            aria-invalid={invalid}
+            aria-required={required}
+            aria-label={selectedDate ? undefined : placeholder}
+            className={cn(
+              "w-full justify-start font-normal",
+              !selectedDate && "text-muted-foreground",
+              className,
+            )}
+          >
+            <CalendarIcon className="size-4" />
 
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="flex-1 justify-start"
-              disabled={
-                !isDateWithinLimits(yesterday, minDate, maxDate)
-              }
-              onClick={() => selectDate(yesterday)}
-            >
-              Yesterday
-            </Button>
+            {selectedDate
+              ? (displayValue ?? format(selectedDate, "PPP"))
+              : placeholder}
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent align={align} className="w-auto rounded-md p-0">
+          <div className="flex max-sm:flex-col">
+            <div className="flex gap-1 border-b p-2 sm:w-32 sm:flex-col sm:border-r sm:border-b-0">
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="flex-1 justify-start"
+                disabled={!isDateWithinLimits(today, minDate, maxDate)}
+                onClick={() => selectDate(today)}
+              >
+                Today
+              </Button>
+
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="flex-1 justify-start"
+                disabled={!isDateWithinLimits(yesterday, minDate, maxDate)}
+                onClick={() => selectDate(yesterday)}
+              >
+                Yesterday
+              </Button>
+            </div>
+
+            <Calendar
+              mode="single"
+              captionLayout="dropdown"
+              month={month}
+              onMonthChange={setMonth}
+              startMonth={minDate ?? new Date(today.getFullYear() - 100, 0)}
+              endMonth={maxDate ?? new Date(today.getFullYear() + 20, 11)}
+              selected={selectedDate}
+              disabled={disabledDates}
+              onSelect={(date) => {
+                if (date) {
+                  selectDate(date);
+                }
+              }}
+            />
           </div>
-
-          <Calendar
-            mode="single"
-            captionLayout="dropdown"
-            month={month}
-            onMonthChange={setMonth}
-            startMonth={
-              minDate ?? new Date(today.getFullYear() - 100, 0)
-            }
-            endMonth={
-              maxDate ?? new Date(today.getFullYear() + 20, 11)
-            }
-            selected={selectedDate}
-            disabled={disabledDates}
-            onSelect={(date) => {
-              if (date) {
-                selectDate(date);
-              }
-            }}
-          />
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-});
+        </PopoverContent>
+      </Popover>
+    );
+  },
+);
 
 /* -------------------------------------------------------------------------- */
 /*                             DATE RANGE PICKER                              */
@@ -363,13 +339,11 @@ const DateRangePickerInput = forwardRef<
       }
     : undefined;
 
-  const [draftRange, setDraftRange] = useState<
-    DateRange | undefined
-  >(selectedRange);
-
-  const [month, setMonth] = useState(
-    selectedRange?.from ?? today,
+  const [draftRange, setDraftRange] = useState<DateRange | undefined>(
+    selectedRange,
   );
+
+  const [month, setMonth] = useState(selectedRange?.from ?? today);
 
   const disabledDates = [
     ...(minDate ? [{ before: minDate }] : []),
@@ -377,11 +351,7 @@ const DateRangePickerInput = forwardRef<
   ];
 
   const applyRange = (range: DateRange) => {
-    const restrictedRange = restrictDateRange(
-      range,
-      minDate,
-      maxDate,
-    );
+    const restrictedRange = restrictDateRange(range, minDate, maxDate);
 
     if (!restrictedRange?.from) {
       return;
@@ -486,10 +456,7 @@ const DateRangePickerInput = forwardRef<
     });
   };
 
-  const label = formatDateRangeLabel(
-    selectedRange,
-    placeholder,
-  );
+  const label = formatDateRangeLabel(selectedRange, placeholder);
 
   return (
     <>
@@ -527,9 +494,7 @@ const DateRangePickerInput = forwardRef<
             <CalendarIcon className="size-4 shrink-0" />
 
             <span className="truncate">
-              {selectedRange?.from
-                ? (displayValue ?? label)
-                : placeholder}
+              {selectedRange?.from ? (displayValue ?? label) : placeholder}
             </span>
           </Button>
         </PopoverTrigger>
@@ -606,9 +571,7 @@ const DateRangePickerInput = forwardRef<
                     disabled={disabled}
                     aria-label="Number of previous months"
                     className="h-8 min-w-0"
-                    onChange={(event) =>
-                      setCustomMonths(event.target.value)
-                    }
+                    onChange={(event) => setCustomMonths(event.target.value)}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
                         event.preventDefault();
@@ -642,14 +605,8 @@ const DateRangePickerInput = forwardRef<
                 numberOfMonths={calendarMonths}
                 month={month}
                 onMonthChange={setMonth}
-                startMonth={
-                  minDate ??
-                  new Date(today.getFullYear() - 100, 0)
-                }
-                endMonth={
-                  maxDate ??
-                  new Date(today.getFullYear() + 20, 11)
-                }
+                startMonth={minDate ?? new Date(today.getFullYear() - 100, 0)}
+                endMonth={maxDate ?? new Date(today.getFullYear() + 20, 11)}
                 selected={draftRange}
                 disabled={disabledDates}
                 onSelect={setDraftRange}
@@ -695,11 +652,7 @@ const DateRangePickerInput = forwardRef<
             value={value?.from ?? ""}
           />
 
-          <input
-            type="hidden"
-            name={`${name}.to`}
-            value={value?.to ?? ""}
-          />
+          <input type="hidden" name={`${name}.to`} value={value?.to ?? ""} />
         </>
       ) : null}
     </>
@@ -726,164 +679,142 @@ function isTimeWithinLimits(
   const minValue = typeof min === "string" ? min : undefined;
   const maxValue = typeof max === "string" ? max : undefined;
 
-  return (
-    (!minValue || value >= minValue) &&
-    (!maxValue || value <= maxValue)
-  );
+  return (!minValue || value >= minValue) && (!maxValue || value <= maxValue);
 }
 
-const TimePickerInput = forwardRef<
-  HTMLButtonElement,
-  TimePickerInputProps
->(function TimePickerInput(
-  {
-    id,
-    name,
-    value,
-    placeholder = "Pick a time",
-    disabled,
-    required,
-    "aria-invalid": invalid,
-    className,
-    min,
-    max,
-    step = 60,
-    onBlur,
-    onValueChange,
-  },
-  ref,
-) {
-  const [open, setOpen] = useState(false);
-  const timeLabel = formatTimeLabel(value);
+const TimePickerInput = forwardRef<HTMLButtonElement, TimePickerInputProps>(
+  function TimePickerInput(
+    {
+      id,
+      name,
+      value,
+      placeholder = "Pick a time",
+      disabled,
+      required,
+      "aria-invalid": invalid,
+      className,
+      min,
+      max,
+      step = 60,
+      onBlur,
+      onValueChange,
+    },
+    ref,
+  ) {
+    const [open, setOpen] = useState(false);
+    const timeLabel = formatTimeLabel(value);
 
-  const timeOptions = useMemo(
-    () =>
-      Array.from({ length: 48 }, (_, index) => {
-        const hours = Math.floor(index / 2);
-        const minutes = index % 2 === 0 ? "00" : "30";
+    const timeOptions = useMemo(
+      () =>
+        Array.from({ length: 48 }, (_, index) => {
+          const hours = Math.floor(index / 2);
+          const minutes = index % 2 === 0 ? "00" : "30";
 
-        return `${hours
-          .toString()
-          .padStart(2, "0")}:${minutes}`;
-      }).filter((time) => isTimeWithinLimits(time, min, max)),
-    [max, min],
-  );
+          return `${hours.toString().padStart(2, "0")}:${minutes}`;
+        }).filter((time) => isTimeWithinLimits(time, min, max)),
+      [max, min],
+    );
 
-  const selectTime = (time: string) => {
-    onValueChange(time);
-    setOpen(false);
-  };
+    const selectTime = (time: string) => {
+      onValueChange(time);
+      setOpen(false);
+    };
 
-  const getCurrentTime = () => {
-    const now = new Date();
+    const getCurrentTime = () => {
+      const now = new Date();
 
-    return `${now
-      .getHours()
-      .toString()
-      .padStart(2, "0")}:${now
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
-  };
+      return `${now.getHours().toString().padStart(2, "0")}:${now
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`;
+    };
 
-  const selectCurrentTime = () => {
-    selectTime(getCurrentTime());
-  };
+    const selectCurrentTime = () => {
+      selectTime(getCurrentTime());
+    };
 
-  return (
-    <Popover
-      open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen);
+    return (
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
 
-        if (!nextOpen) {
-          onBlur?.();
-        }
-      }}
-    >
-      <PopoverTrigger asChild>
-        <Button
-          ref={ref}
-          id={id}
-          name={name}
-          type="button"
-          variant="outline"
-          disabled={disabled}
-          aria-invalid={invalid}
-          aria-required={required}
-          aria-label={timeLabel ? undefined : placeholder}
-          className={cn(
-            "w-full justify-start font-normal",
-            !timeLabel && "text-muted-foreground",
-            className,
-          )}
-        >
-          <ClockIcon className="size-4" />
-          {timeLabel ?? placeholder}
-        </Button>
-      </PopoverTrigger>
-
-      <PopoverContent
-        align="start"
-        className="w-72 gap-3 rounded-md"
+          if (!nextOpen) {
+            onBlur?.();
+          }
+        }}
       >
-        <div className="flex gap-2">
-          <Input
-            type="time"
-            value={value ?? ""}
-            min={min}
-            max={max}
-            step={step}
-            aria-label="Enter an exact time"
-            onChange={(event) =>
-              onValueChange(event.target.value)
-            }
-          />
-
+        <PopoverTrigger asChild>
           <Button
+            ref={ref}
+            id={id}
+            name={name}
             type="button"
             variant="outline"
-            disabled={
-              !isTimeWithinLimits(getCurrentTime(), min, max)
-            }
-            onClick={selectCurrentTime}
+            disabled={disabled}
+            aria-invalid={invalid}
+            aria-required={required}
+            aria-label={timeLabel ? undefined : placeholder}
+            className={cn(
+              "w-full justify-start font-normal",
+              !timeLabel && "text-muted-foreground",
+              className,
+            )}
           >
-            Now
+            <ClockIcon className="size-4" />
+            {timeLabel ?? placeholder}
           </Button>
-        </div>
+        </PopoverTrigger>
 
-        <fieldset
-          className="grid max-h-56 grid-cols-3 gap-1 overflow-y-auto"
-          aria-label="Common times"
-        >
-          {timeOptions.map((time) => (
+        <PopoverContent align="start" className="w-72 gap-3 rounded-md">
+          <div className="flex gap-2">
+            <Input
+              type="time"
+              value={value ?? ""}
+              min={min}
+              max={max}
+              step={step}
+              aria-label="Enter an exact time"
+              onChange={(event) => onValueChange(event.target.value)}
+            />
+
             <Button
-              key={time}
               type="button"
-              size="sm"
-              variant={value === time ? "secondary" : "ghost"}
-              aria-pressed={value === time}
-              className="justify-between"
-              onClick={() => selectTime(time)}
+              variant="outline"
+              disabled={!isTimeWithinLimits(getCurrentTime(), min, max)}
+              onClick={selectCurrentTime}
             >
-              {formatTimeLabel(time)}
-
-              {value === time ? (
-                <CheckIcon className="size-4" />
-              ) : null}
+              Now
             </Button>
-          ))}
-        </fieldset>
-      </PopoverContent>
-    </Popover>
-  );
-});
+          </div>
 
-export {
-  DatePickerInput,
-  DateRangePickerInput,
-  TimePickerInput,
-};
+          <fieldset
+            className="grid max-h-56 grid-cols-3 gap-1 overflow-y-auto"
+            aria-label="Common times"
+          >
+            {timeOptions.map((time) => (
+              <Button
+                key={time}
+                type="button"
+                size="sm"
+                variant={value === time ? "secondary" : "ghost"}
+                aria-pressed={value === time}
+                className="justify-between"
+                onClick={() => selectTime(time)}
+              >
+                {formatTimeLabel(time)}
+
+                {value === time ? <CheckIcon className="size-4" /> : null}
+              </Button>
+            ))}
+          </fieldset>
+        </PopoverContent>
+      </Popover>
+    );
+  },
+);
+
+export { DatePickerInput, DateRangePickerInput, TimePickerInput };
 
 export type {
   DatePickerInputProps,

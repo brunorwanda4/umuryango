@@ -123,7 +123,9 @@ export function mapExpenseDashboard(data: ExpenseDashboardResponse) {
   };
 }
 
-function mapExpenseRecord(transaction: ExpenseTransaction): RecentExpenseRecord {
+function mapExpenseRecord(
+  transaction: ExpenseTransaction,
+): RecentExpenseRecord {
   const category = transaction.category.name;
   const account = transaction.paymentMethod ?? "OTHER";
   const categoryStyle = getCategoryStyle(category);
@@ -153,19 +155,41 @@ function mapExpenseRecord(transaction: ExpenseTransaction): RecentExpenseRecord 
 
 function getCategoryStyle(category: string) {
   const normalized = category.toLowerCase();
-  if (normalized.includes("food") || normalized.includes("grocery") || normalized.includes("groceries")) {
+  if (
+    normalized.includes("food") ||
+    normalized.includes("grocery") ||
+    normalized.includes("groceries")
+  ) {
     return { icon: ShoppingCartIcon, className: "bg-chart-1/10 text-chart-1" };
   }
-  if (normalized.includes("transport") || normalized.includes("travel") || normalized.includes("fuel")) {
+  if (
+    normalized.includes("transport") ||
+    normalized.includes("travel") ||
+    normalized.includes("fuel")
+  ) {
     return { icon: CarIcon, className: "bg-chart-3/10 text-chart-3" };
   }
-  if (normalized.includes("health") || normalized.includes("medical") || normalized.includes("clinic")) {
+  if (
+    normalized.includes("health") ||
+    normalized.includes("medical") ||
+    normalized.includes("clinic")
+  ) {
     return { icon: HeartPulseIcon, className: "bg-chart-4/10 text-chart-4" };
   }
-  if (normalized.includes("restaurant") || normalized.includes("dining") || normalized.includes("lunch") || normalized.includes("dinner")) {
+  if (
+    normalized.includes("restaurant") ||
+    normalized.includes("dining") ||
+    normalized.includes("lunch") ||
+    normalized.includes("dinner")
+  ) {
     return { icon: UtensilsIcon, className: "bg-chart-5/10 text-chart-5" };
   }
-  if (normalized.includes("rent") || normalized.includes("house") || normalized.includes("home") || normalized.includes("utilities")) {
+  if (
+    normalized.includes("rent") ||
+    normalized.includes("house") ||
+    normalized.includes("home") ||
+    normalized.includes("utilities")
+  ) {
     return { icon: HomeIcon, className: "bg-chart-2/10 text-chart-2" };
   }
   if (normalized.includes("business") || normalized.includes("office")) {

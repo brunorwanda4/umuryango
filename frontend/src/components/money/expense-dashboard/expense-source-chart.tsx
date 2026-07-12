@@ -30,7 +30,9 @@ export function ExpenseSourceChart({
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="px-5 pt-5 pb-0 sm:px-6 sm:pt-6">
-        <CardTitle className="font-bold text-base">Expenses by category</CardTitle>
+        <CardTitle className="font-bold text-base">
+          Expenses by category
+        </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 px-5 pb-5 sm:px-6 lg:grid-cols-[minmax(13rem,1fr)_auto] lg:items-center">
         <ChartContainer

@@ -20,6 +20,7 @@ import {
 import { CreateCategoryForm } from "@/components/family/money/forms/create-category-form";
 import type { FamilySummary } from "@/components/money/types";
 import apiRequest from "@/service/api";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 export function PersonalCategoriesPage() {
   const [familyId, setFamilyId] = useState<string | null>(null);
@@ -137,24 +138,23 @@ export function PersonalCategoriesPage() {
         }
       />
       <CategoryStatsCards stats={stats} />
-      <CategoryFilters
-        search={search}
-        setSearch={setSearch}
-        setSort={setSort}
-        setStatusFilter={setStatusFilter}
-        setTypeFilter={setTypeFilter}
-        sort={sort}
-        statusFilter={statusFilter}
-        typeFilter={typeFilter}
-      />
-      <CategoryTable
-        apiMessage={message}
-        categories={visibleCategories}
-        currency="RWF"
-        loading={loading}
-        onArchive={setCategoryStatus}
-        onEdit={setEditingCategory}
-      />
+      <Tabs>
+        <TabsList>
+          <TabsTrigger value="data">Data</TabsTrigger>
+          <TabsTrigger value="charts">Charts</TabsTrigger>
+        </TabsList>
+        <TabsContent value="data">
+          <CategoryTable
+            apiMessage={message}
+            categories={visibleCategories}
+            currency="RWF"
+            loading={loading}
+            onArchive={setCategoryStatus}
+            onEdit={setEditingCategory}
+          />
+        </TabsContent>
+        <TabsContent value="charts">charts</TabsContent>
+      </Tabs>
       {familyId ? (
         <EditCategoryDialog
           categories={categories}

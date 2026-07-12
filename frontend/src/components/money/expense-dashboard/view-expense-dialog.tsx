@@ -97,7 +97,9 @@ export function ViewExpenseDialog({
                   <ExpenseIcon aria-hidden="true" className="size-5" />
                 </div>
                 <div className="flex min-w-0 flex-col gap-1">
-                  <span className="font-medium leading-5">{expense.source}</span>
+                  <span className="font-medium leading-5">
+                    {expense.source}
+                  </span>
                   <span className="text-sm leading-5 text-muted-foreground">
                     {expense.description}
                   </span>

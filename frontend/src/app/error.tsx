@@ -1,6 +1,10 @@
 "use client"; // Error boundaries must be Client Components
 
-import { RotateCcwIcon, TriangleAlertIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  RotateCcwIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -30,7 +34,7 @@ export default function ErrorPage({
         />
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 w-full">
         <h1 className="text-4xl font-semibold tracking-normal text-balance sm:text-5xl">
           {t("title")}
         </h1>
@@ -42,6 +46,36 @@ export default function ErrorPage({
             {t("reference", { digest: error.digest })}
           </p>
         ) : null}
+
+        {error.message && (
+          <div className="mx-auto mt-4 w-full max-w-md text-left">
+            <details className="group rounded-lg border border-border bg-muted/50 p-4 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer items-center justify-between gap-1.5 text-xs font-medium text-muted-foreground select-none">
+                <span>View Error Details</span>
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className="size-4 transition-transform duration-200 group-open:-rotate-180"
+                />
+              </summary>
+              <div className="mt-3 font-mono text-xs text-destructive break-all whitespace-pre-wrap border-t border-border pt-3 leading-relaxed">
+                {error.name && (
+                  <span className="font-semibold">{error.name}: </span>
+                )}
+                {error.message}
+                {error.stack && (
+                  <details className="mt-3 group/stack [&_summary::-webkit-details-marker]:hidden">
+                    <summary className="cursor-pointer text-[10px] text-muted-foreground underline select-none hover:text-foreground transition-colors">
+                      Show Stack Trace
+                    </summary>
+                    <pre className="mt-2 max-h-40 overflow-y-auto text-[10px] text-muted-foreground bg-background p-2.5 rounded border border-border font-mono whitespace-pre scrollbar-thin">
+                      {error.stack}
+                    </pre>
+                  </details>
+                )}
+              </div>
+            </details>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
