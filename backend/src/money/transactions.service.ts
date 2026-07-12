@@ -299,13 +299,25 @@ export class TransactionsService {
         ).toString(),
         approvedTransactionCount: allTime._count._all,
         periodTotalMinorUnits: periodTotal.toString(),
-        largestIncome: largest
+        ...(query.type === TransactionType.EXPENSE
           ? {
-              amountMinorUnits: largest.amountMinorUnits.toString(),
-              category: largest.category.name,
-              description: largest.description,
+              largestExpense: largest
+                ? {
+                    amountMinorUnits: largest.amountMinorUnits.toString(),
+                    category: largest.category.name,
+                    description: largest.description,
+                  }
+                : null,
             }
-          : null,
+          : {
+              largestIncome: largest
+                ? {
+                    amountMinorUnits: largest.amountMinorUnits.toString(),
+                    category: largest.category.name,
+                    description: largest.description,
+                  }
+                : null,
+            }),
       },
       byCategory: this.groupDashboardByCategory(approvedRecords),
       overTime: this.groupDashboardByDay(approvedRecords),

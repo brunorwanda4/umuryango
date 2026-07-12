@@ -297,6 +297,15 @@ describe('TransactionsService', () => {
 
     expect(result.summary.allTimeTotalMinorUnits).toBe('450000');
     expect(result.summary.periodTotalMinorUnits).toBe('200000');
+    expect(result.summary).toEqual(
+      expect.objectContaining({
+        largestIncome: {
+          amountMinorUnits: '200000',
+          category: 'Salary',
+          description: 'July rent',
+        },
+      }),
+    );
     expect(result.records).toHaveLength(2);
     expect(prisma.familyTransaction.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -305,6 +314,86 @@ describe('TransactionsService', () => {
           createdById: 'user-1',
           type: TransactionType.INCOME,
         }),
+      }),
+    );
+  });
+
+  it('builds the personal expense dashboard contract from approved expenses', async () => {
+    const approved = makeTransaction({
+      id: 'expense-approved',
+      amountMinorUnits: 75000n,
+      type: TransactionType.EXPENSE,
+      status: TransactionStatus.APPROVED,
+      description: 'Weekly groceries',
+      category: { name: 'Food', icon: 'basket', color: null },
+      createdBy: { fullName: 'Current User' },
+    });
+    const pending = makeTransaction({
+      id: 'expense-pending',
+      amountMinorUnits: 25000n,
+      type: TransactionType.EXPENSE,
+      status: TransactionStatus.PENDING,
+      category: { name: 'Transport', icon: null, color: null },
+      createdBy: { fullName: 'Current User' },
+    });
+    prisma.familyMember.findFirst.mockResolvedValue(managerMembership);
+    prisma.familyTransaction.aggregate.mockResolvedValue({
+      _count: { _all: 4 },
+      _sum: { amountMinorUnits: 300000n },
+    });
+    prisma.familyTransaction.findFirst.mockResolvedValue(approved);
+    prisma.familyTransaction.findMany.mockResolvedValue([approved, pending]);
+
+    const result = await service.dashboard('user-1', 'family-1', {
+      type: TransactionType.EXPENSE,
+      from: '2026-07-01',
+      to: '2026-07-31',
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        period: { from: '2026-07-01', to: '2026-07-31' },
+        summary: {
+          allTimeTotalMinorUnits: '300000',
+          approvedTransactionCount: 4,
+          periodTotalMinorUnits: '75000',
+          largestExpense: {
+            amountMinorUnits: '75000',
+            category: 'Food',
+            description: 'Weekly groceries',
+          },
+        },
+        byCategory: [{ category: 'Food', amountMinorUnits: '75000' }],
+        overTime: [{ date: '2026-07-08', amountMinorUnits: '75000' }],
+      }),
+    );
+    expect(result.records.map((record) => record.amountMinorUnits)).toEqual([
+      '75000',
+      '25000',
+    ]);
+    expect(prisma.familyTransaction.aggregate).toHaveBeenCalledWith({
+      where: {
+        familyId: 'family-1',
+        createdById: 'user-1',
+        type: TransactionType.EXPENSE,
+        status: TransactionStatus.APPROVED,
+      },
+      _count: { _all: true },
+      _sum: { amountMinorUnits: true },
+    });
+    expect(prisma.familyTransaction.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          familyId: 'family-1',
+          createdById: 'user-1',
+          type: TransactionType.EXPENSE,
+          status: { not: TransactionStatus.REVERSED },
+          date: {
+            gte: new Date('2026-07-01T00:00:00.000Z'),
+            lt: new Date('2026-08-01T00:00:00.000Z'),
+          },
+        },
+        orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
       }),
     );
   });
