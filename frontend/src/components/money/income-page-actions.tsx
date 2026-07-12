@@ -17,8 +17,8 @@ import { IncomeMonthPicker } from "./income-month-picker";
  *   canRecordIncome={canRecordIncome}
  *   categories={categories}
  *   family={family}
- *   month={month}
- *   onMonthChange={setMonth}
+ *   period={period}
+ *   onPeriodChange={setPeriod}
  *   onSuccess={reload}
  * />
  */
@@ -26,8 +26,8 @@ export function IncomePageActions({
   canRecordIncome,
   categories,
   family,
-  month,
-  onMonthChange,
+  period,
+  onPeriodChange,
   onSuccess,
 }: {
   /** Whether the current user has permission to record income. */
@@ -36,16 +36,16 @@ export function IncomePageActions({
   categories: IncomeCategory[];
   /** Resolved family detail; null while loading or on error. */
   family: FamilyDetail | null;
-  /** Currently selected month as a `YYYY-MM` string. */
-  month: string;
-  /** Called with the new `YYYY-MM` string when the user picks a month. */
-  onMonthChange: (month: string) => void;
+  /** Currently selected dashboard period as ISO date strings. */
+  period: { from: string; to: string };
+  /** Called with the new ISO date range when the user picks a period. */
+  onPeriodChange: (period: { from: string; to: string }) => void;
   /** Called after a successful income record or category creation. */
   onSuccess: () => void | Promise<void>;
 }) {
   return (
     <div className="mt-4 flex w-full flex-col gap-3 sm:w-auto sm:flex-row lg:mt-0">
-      <IncomeMonthPicker month={month} onMonthChange={onMonthChange} />
+      <IncomeMonthPicker period={period} onPeriodChange={onPeriodChange} />
 
       {canRecordIncome && family ? (
         <MoneyFormDialog

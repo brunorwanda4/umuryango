@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { PageTitle } from "@/components/common/pages/page-title";
 import { ExpenseDashboard } from "@/components/money/expense-dashboard";
 import { useExpensePageData } from "@/hooks/use-expense-page-data";
@@ -8,11 +8,9 @@ import { ExpensePageActions } from "./expense-page-actions";
 import { getMonthPeriod } from "./utils";
 
 export function PersonalExpensePage() {
-  const [month, setMonth] = useState(() =>
-    new Date().toISOString().slice(0, 7),
+  const [period, setPeriod] = useState(() =>
+    getMonthPeriod(new Date().toISOString().slice(0, 7)),
   );
-
-  const period = useMemo(() => getMonthPeriod(month), [month]);
 
   const { categories, dashboard, error, family, isLoading, reload } =
     useExpensePageData(period);
@@ -32,8 +30,8 @@ export function PersonalExpensePage() {
             canRecordExpense={Boolean(family)}
             categories={categories}
             family={family}
-            month={month}
-            onMonthChange={setMonth}
+            period={period}
+            onPeriodChange={setPeriod}
             onSuccess={reload}
           />
         }

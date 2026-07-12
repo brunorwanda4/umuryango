@@ -1,40 +1,49 @@
 "use client";
 
 import { useMemo } from "react";
-import { DatePickerInput } from "@/components/ui/calendar-day";
-import { formatMonthPeriod, getMonthPeriod } from "./utils";
+import { DateRangePickerInput } from "@/components/ui/calendar-day";
+import { formatMonthPeriod } from "./utils";
 
 /**
- * A calendar picker that lets the user pick the dashboard month.
+ * A calendar picker that lets the user pick the dashboard period.
  *
- * The selected date is normalized to `YYYY-MM`, preserving the month-based
- * query contract used by income and expense dashboards.
+ * Supports exact calendar ranges plus the shared quick picks such as
+ * last week, last month, and last year.
  *
  * @example
- * <IncomeMonthPicker month={month} onMonthChange={setMonth} />
+ * <IncomeMonthPicker period={period} onPeriodChange={setPeriod} />
  */
 export function IncomeMonthPicker({
-  month,
-  onMonthChange,
+  period,
+  onPeriodChange,
 }: {
-  /** Currently selected month as a `YYYY-MM` string. */
-  month: string;
-  /** Called with the new `YYYY-MM` string when the user picks a month. */
-  onMonthChange: (month: string) => void;
+  /** Currently selected dashboard period as ISO date strings. */
+  period: { from: string; to: string };
+  /** Called with the new ISO date range when the user picks a period. */
+  onPeriodChange: (period: { from: string; to: string }) => void;
 }) {
-  const period = useMemo(() => getMonthPeriod(month), [month]);
+  const periodLabel = useMemo(
+    () => formatMonthPeriod(period.from, period.to),
+    [period.from, period.to],
+  );
 
   return (
-    <DatePickerInput
-      id="income-month"
-      name="income-month"
-      value={`${month}-01`}
+    <DateRangePickerInput
+      id="income-period"
+      name="income-period"
+      value={period}
       min="2000-01-01"
       max="2100-12-31"
       align="end"
-      displayValue={formatMonthPeriod(period.from, period.to)}
-      placeholder="Pick a month"
-      onValueChange={(date) => onMonthChange(date.slice(0, 7))}
+      calendarMonths={1}
+      displayValue={periodLabel}
+      placeholder="Pick a period"
+      required
+      onValueChange={(value) => {
+        if (value.from && value.to) {
+          onPeriodChange({ from: value.from, to: value.to });
+        }
+      }}
       className="max-w-60"
     />
   );
