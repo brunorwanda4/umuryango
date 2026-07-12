@@ -1,12 +1,14 @@
 "use client"; // Error boundaries must be Client Components
 
 import {
+  CheckIcon,
   ChevronDownIcon,
+  CopyIcon,
   RotateCcwIcon,
   TriangleAlertIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { defaultLocale, getLocalizedHref, getMessages } from "@/i18n/config";
 import { createTranslator } from "@/i18n/translate";
@@ -18,10 +20,28 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   unstable_retry: () => void;
 }) {
+  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
     // Log the error to an error reporting service
     console.error(error);
   }, [error]);
+
+  const handleCopy = () => {
+    const errorText = [
+      `Name: ${error.name}`,
+      `Message: ${error.message}`,
+      error.digest ? `Digest: ${error.digest}` : "",
+      error.stack ? `Stack: ${error.stack}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    navigator.clipboard.writeText(errorText).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   const t = createTranslator(getMessages(defaultLocale), "ErrorPage");
 
@@ -58,10 +78,29 @@ export default function ErrorPage({
                 />
               </summary>
               <div className="mt-3 font-mono text-xs text-destructive break-all whitespace-pre-wrap border-t border-border pt-3 leading-relaxed">
-                {error.name && (
-                  <span className="font-semibold">{error.name}: </span>
-                )}
-                {error.message}
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="font-semibold text-destructive">
+                    {error.name || "Error"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded bg-background hover:bg-muted border border-border text-[10px] text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+                  >
+                    {copied ? (
+                      <>
+                        <CheckIcon className="size-3 text-green-500" />
+                        <span>Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <CopyIcon className="size-3" />
+                        <span>Copy Error</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <p className="mb-2">{error.message}</p>
                 {error.stack && (
                   <details className="mt-3 group/stack [&_summary::-webkit-details-marker]:hidden">
                     <summary className="cursor-pointer text-[10px] text-muted-foreground underline select-none hover:text-foreground transition-colors">
