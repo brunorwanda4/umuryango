@@ -57,6 +57,7 @@ export function CreateCategoryForm({
   defaultType = "EXPENSE",
   existingCategories = [],
   familyId,
+  personal = false,
   onSuccess,
   open: controlledOpen,
   onOpenChange,
@@ -65,6 +66,7 @@ export function CreateCategoryForm({
   defaultType?: "INCOME" | "EXPENSE";
   existingCategories?: CategoryNameSource[];
   familyId: string;
+  personal?: boolean;
   onSuccess?: (category: CreatedCategory | undefined) => void | Promise<void>;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -100,7 +102,7 @@ export function CreateCategoryForm({
     }),
     request: {
       method: "post",
-      url: `/families/${encodeURIComponent(familyId)}/money/categories`,
+      url: `/families/${encodeURIComponent(familyId)}/money/categories${personal ? "/mine" : ""}`,
     },
     onSuccessMessage: "Category created successfully",
     toastOnSuccess: true,

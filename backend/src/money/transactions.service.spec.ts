@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import {
+  CategoryStatus,
   FamilyAuditAction,
   FamilyAuthority,
   FamilyCapability,
@@ -284,6 +285,17 @@ describe('TransactionsService', () => {
 
     expect(result.scope).toBe(TransactionScope.PERSONAL);
     expect(result.status).toBe(TransactionStatus.APPROVED);
+    expect(prisma.familyTransactionCategory.findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'category-rent',
+        familyId: 'family-1',
+        type: TransactionType.INCOME,
+        status: CategoryStatus.ACTIVE,
+        scope: TransactionScope.PERSONAL,
+        ownerId: 'user-1',
+      },
+      select: { id: true },
+    });
     expect(prisma.familyTransaction.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({

@@ -45,6 +45,24 @@ export class CategoriesController {
     return { data, message: 'Category created successfully.' };
   }
 
+  @Post('mine')
+  @ApiOperation({ summary: 'Create a personal transaction category' })
+  @ApiCreatedResponse({
+    description: 'Personal category created successfully.',
+  })
+  async createPersonal(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Body() createCategoryDto: CreateCategoryDto,
+  ) {
+    const data = await this.categoriesService.createPersonal(
+      userId,
+      familyId,
+      createCategoryDto,
+    );
+    return { data, message: 'Personal category created successfully.' };
+  }
+
   @Get()
   @ApiOperation({ summary: 'List all transaction categories for a family' })
   @ApiOkResponse({ description: 'Categories retrieved successfully.' })
@@ -54,6 +72,51 @@ export class CategoriesController {
   ) {
     const data = await this.categoriesService.findAll(userId, familyId);
     return { data, message: 'Categories retrieved successfully.' };
+  }
+
+  @Get('mine')
+  @ApiOperation({ summary: 'List the current user personal categories' })
+  @ApiOkResponse({ description: 'Personal categories retrieved successfully.' })
+  async findAllPersonal(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+  ) {
+    const data = await this.categoriesService.findAllPersonal(userId, familyId);
+    return { data, message: 'Personal categories retrieved successfully.' };
+  }
+
+  @Patch('mine/:id')
+  @ApiOperation({ summary: 'Update a personal category' })
+  @ApiOkResponse({ description: 'Personal category updated successfully.' })
+  async updatePersonal(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Param('id') id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ) {
+    const data = await this.categoriesService.updatePersonal(
+      userId,
+      familyId,
+      id,
+      updateCategoryDto,
+    );
+    return { data, message: 'Personal category updated successfully.' };
+  }
+
+  @Delete('mine/:id')
+  @ApiOperation({ summary: 'Archive a personal category' })
+  @ApiOkResponse({ description: 'Personal category archived successfully.' })
+  async removePersonal(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Param('id') id: string,
+  ) {
+    const data = await this.categoriesService.removePersonal(
+      userId,
+      familyId,
+      id,
+    );
+    return { data, message: 'Personal category archived successfully.' };
   }
 
   @Get(':id')

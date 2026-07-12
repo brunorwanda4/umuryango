@@ -328,6 +328,7 @@ model User {
   uploadedReceipts             FamilyReceipt[]             @relation("ReceiptsUploaded")
   createdBudgets               FamilyBudget[]              @relation("BudgetsCreated")
   createdCategories            FamilyTransactionCategory[] @relation("CategoryCreatedBy")
+  ownedCategories              FamilyTransactionCategory[] @relation("CategoryOwner")
   createdFamilyContacts        FamilyContact[]             @relation("FamilyContactsCreated")
   createdLoans                 FamilyLoan[]                @relation("LoansCreated")
   updatedLoans                 FamilyLoan[]                @relation("LoansUpdated")
@@ -717,17 +718,22 @@ model FamilyTransactionCategory {
   color        String?
   status       CategoryStatus      @default(ACTIVE)
   isDefault    Boolean             @default(false)
+  scope        TransactionScope    @default(FAMILY)
+  ownerId      String?
   createdById  String?
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
   family       Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
   createdBy    User?               @relation("CategoryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  owner        User?               @relation("CategoryOwner", fields: [ownerId], references: [id], onDelete: Restrict)
   transactions FamilyTransaction[]
   budgets      FamilyBudget[]
   loans        FamilyLoan[]
 
   @@index([familyId, type])
   @@index([familyId, status])
+  @@index([familyId, scope, ownerId, type, status])
+  @@unique([familyId, scope, ownerId, type, name])
 }
 
 model FamilyTransaction {

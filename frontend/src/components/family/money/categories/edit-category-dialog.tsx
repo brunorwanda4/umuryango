@@ -28,12 +28,14 @@ export function EditCategoryDialog({
   familyId,
   onOpenChange,
   onUpdated,
+  personal = false,
 }: {
   categories: MoneyCategory[];
   category: MoneyCategory | null;
   familyId: string;
   onOpenChange: (open: boolean) => void;
   onUpdated: (category: MoneyCategory) => void;
+  personal?: boolean;
 }) {
   const schema = useMemo(
     () => getEditCategorySchema(categories, category?.id),
@@ -61,7 +63,7 @@ export function EditCategoryDialog({
     if (category.source === "api") {
       const response = await apiRequest(
         "patch",
-        `/families/${encodeURIComponent(familyId)}/money/categories/${category.id}`,
+        `/families/${encodeURIComponent(familyId)}/money/categories${personal ? "/mine" : ""}/${category.id}`,
         {
           color: values.color,
           description: values.description,

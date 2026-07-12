@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { CategoryStatus, TransactionScope } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
@@ -8,6 +13,7 @@ export class BudgetsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: string, familyId: string, dto: CreateBudgetDto) {
+    await this.assertFamilyCategory(familyId, dto.categoryId);
     return this.prisma.familyBudget.create({
       data: {
         familyId,
@@ -52,6 +58,9 @@ export class BudgetsService {
 
   async update(familyId: string, id: string, dto: UpdateBudgetDto) {
     await this.findOne(familyId, id); // check if exists
+    if (dto.categoryId !== undefined) {
+      await this.assertFamilyCategory(familyId, dto.categoryId);
+    }
 
     const data: any = { ...dto };
     if (dto.amountMinorUnits !== undefined) {
@@ -86,5 +95,25 @@ export class BudgetsService {
       ...deleted,
       amountMinorUnits: deleted.amountMinorUnits.toString(),
     };
+  }
+
+  private async assertFamilyCategory(
+    familyId: string,
+    categoryId: string | undefined,
+  ) {
+    if (!categoryId) return;
+    const category = await this.prisma.familyTransactionCategory.findFirst({
+      where: {
+        id: categoryId,
+        familyId,
+        scope: TransactionScope.FAMILY,
+        ownerId: null,
+        status: CategoryStatus.ACTIVE,
+      },
+      select: { id: true },
+    });
+    if (!category) {
+      throw new BadRequestException('Budget category not found.');
+    }
   }
 }

@@ -60,7 +60,7 @@ export function CategoryTable({
   currency: string;
   loading: boolean;
   onArchive: (category: MoneyCategory, status: CategoryStatus) => void;
-  onDelete: (category: MoneyCategory) => void;
+  onDelete?: (category: MoneyCategory) => void;
   onEdit: (category: MoneyCategory) => void;
 }) {
   return (
@@ -123,7 +123,7 @@ function CategoryCard({
   category: MoneyCategory;
   currency: string;
   onArchive: (category: MoneyCategory, status: CategoryStatus) => void;
-  onDelete: (category: MoneyCategory) => void;
+  onDelete?: (category: MoneyCategory) => void;
   onEdit: (category: MoneyCategory) => void;
 }) {
   return (
@@ -208,7 +208,7 @@ function CategoryActions({
 }: {
   category: MoneyCategory;
   onArchive: (category: MoneyCategory, status: CategoryStatus) => void;
-  onDelete: (category: MoneyCategory) => void;
+  onDelete?: (category: MoneyCategory) => void;
   onEdit: (category: MoneyCategory) => void;
 }) {
   return (
@@ -241,16 +241,20 @@ function CategoryActions({
             {category.status === "ACTIVE" ? "Archive" : "Activate"}
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
-          <DropdownMenuItem
-            variant="destructive"
-            onSelect={() => onDelete(category)}
-          >
-            <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-            Delete category
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
+        {onDelete ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => onDelete(category)}
+              >
+                <Trash2Icon aria-hidden="true" data-icon="inline-start" />
+                Delete category
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );

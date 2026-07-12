@@ -17,6 +17,7 @@ import {
   LoanStatus,
   LoanType,
   Prisma,
+  TransactionScope,
   TransactionType,
 } from '@prisma/client';
 import { can } from '../families/family-access';
@@ -1164,7 +1165,13 @@ export class LoansService {
         ? TransactionType.INCOME
         : TransactionType.EXPENSE;
     const category = await this.prisma.familyTransactionCategory.findFirst({
-      where: { id: categoryId, familyId, status: CategoryStatus.ACTIVE },
+      where: {
+        id: categoryId,
+        familyId,
+        scope: TransactionScope.FAMILY,
+        ownerId: null,
+        status: CategoryStatus.ACTIVE,
+      },
     });
     if (!category) throw new BadRequestException('Loan category not found.');
     if (category.type !== expectedType) {

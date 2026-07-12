@@ -6,8 +6,8 @@ import type {
   ExpenseCategory,
   ExpenseDashboardResponse,
 } from "@/components/money/expense-dashboard/expense-dashboard-data";
-import apiRequest from "@/service/api";
 import type { FamilySummary } from "@/components/money/types";
+import apiRequest from "@/service/api";
 
 /**
  * Fetches and manages all data needed by the personal expenses page:
@@ -62,7 +62,7 @@ export function useExpensePageData(period: { from: string; to: string }) {
         ),
         apiRequest<undefined, ExpenseCategory[]>(
           "get",
-          `/families/${encodeURIComponent(familySummary.id)}/money/categories`,
+          `/families/${encodeURIComponent(familySummary.id)}/money/categories/mine`,
         ),
         apiRequest<undefined, ExpenseDashboardResponse>(
           "get",

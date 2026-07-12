@@ -394,6 +394,7 @@ export function MoneyFormDialog({
 												defaultType={config.transactionType}
 												existingCategories={availableCategories}
 												familyId={familyId}
+												personal
 												open={openCreateCategory}
 												onOpenChange={setOpenCreateCategory}
 												onSuccess={async (category) => {

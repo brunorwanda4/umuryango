@@ -6,8 +6,8 @@ import type {
   IncomeCategory,
   IncomeDashboardResponse,
 } from "@/components/money/income-dashboard/income-dashboard-data";
-import apiRequest from "@/service/api";
 import type { FamilySummary } from "@/components/money/types";
+import apiRequest from "@/service/api";
 
 /**
  * Fetches and manages all data needed by the personal income page:
@@ -62,7 +62,7 @@ export function useIncomePageData(period: { from: string; to: string }) {
         ),
         apiRequest<undefined, IncomeCategory[]>(
           "get",
-          `/families/${encodeURIComponent(familySummary.id)}/money/categories`,
+          `/families/${encodeURIComponent(familySummary.id)}/money/categories/mine`,
         ),
         apiRequest<undefined, IncomeDashboardResponse>(
           "get",

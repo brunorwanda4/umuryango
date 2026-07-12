@@ -49,7 +49,13 @@ export class TransactionsService {
     dto: CreateTransactionDto,
     scope: TransactionScope,
   ) {
-    await this.requireCategory(familyId, dto.categoryId, dto.type);
+    await this.requireCategory(
+      userId,
+      familyId,
+      dto.categoryId,
+      dto.type,
+      scope,
+    );
     const receivedFromContact = dto.receivedFromContactId
       ? await this.requireContact(familyId, dto.receivedFromContactId)
       : null;
@@ -450,7 +456,13 @@ export class TransactionsService {
     }
 
     if (dto.categoryId) {
-      await this.requireCategory(familyId, dto.categoryId, transaction.type);
+      await this.requireCategory(
+        userId,
+        familyId,
+        dto.categoryId,
+        transaction.type,
+        transaction.scope,
+      );
     }
 
     const data: any = { ...dto };
@@ -682,18 +694,27 @@ export class TransactionsService {
   }
 
   private async requireCategory(
+    userId: string,
     familyId: string,
     categoryId: string,
     type: TransactionType,
+    scope: TransactionScope,
   ) {
     const category = await this.prisma.familyTransactionCategory.findFirst({
-      where: { id: categoryId, familyId, type, status: CategoryStatus.ACTIVE },
+      where: {
+        id: categoryId,
+        familyId,
+        type,
+        status: CategoryStatus.ACTIVE,
+        scope,
+        ownerId: scope === TransactionScope.PERSONAL ? userId : null,
+      },
       select: { id: true },
     });
 
     if (!category) {
       throw new BadRequestException(
-        'Select an active category that belongs to this family and transaction type',
+        'Select an active category that belongs to this transaction scope and type',
       );
     }
   }
