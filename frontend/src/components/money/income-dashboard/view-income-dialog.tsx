@@ -37,6 +37,7 @@ type ViewIncomeDialogProps = {
   onSuccess?: () => void | Promise<void>;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
+  searchParamValue?: string;
   trigger?: React.ReactElement | null;
 };
 
@@ -47,6 +48,7 @@ export function ViewIncomeDialog({
   onOpenChange,
   onSuccess,
   open,
+  searchParamValue,
   trigger,
 }: ViewIncomeDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
@@ -59,7 +61,11 @@ export function ViewIncomeDialog({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        searchParamValue={searchParamValue ?? `view-income-${income.id}`}
+      >
         {trigger !== null && (
           <DialogTrigger asChild>
             {trigger ?? (

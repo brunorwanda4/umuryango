@@ -54,6 +54,7 @@ export function RecentIncomeActionsPopover({
             familyId={familyId}
             income={income}
             onSuccess={onSuccess}
+            searchParamValue={`view-income-action-${income.id}`}
           />
           <UpdateIncomeDialog
             categories={categories}

@@ -57,7 +57,11 @@ export function DeleteIncomeDialog({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      searchParamValue={`delete-income-${income.id}`}
+    >
       {trigger !== null && (
         <AlertDialogTrigger asChild>
           {trigger === undefined ? (
