@@ -57,7 +57,11 @@ export function DeleteExpenseDialog({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      searchParamValue={`delete-expense-${expense.id}`}
+    >
       {trigger !== null && (
         <AlertDialogTrigger asChild>
           {trigger === undefined ? (

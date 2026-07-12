@@ -37,6 +37,7 @@ export type ExpenseTransaction = {
   notes: string | null;
   paymentMethod: string | null;
   reversedAt: string | null;
+  scope: "FAMILY" | "PERSONAL";
   status: "PENDING" | "APPROVED" | "REJECTED" | "REVERSED";
   type: "INCOME" | "EXPENSE";
   updatedAt: string;

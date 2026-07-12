@@ -38,6 +38,7 @@ const CREATE_CATEGORY_VALUE = "__create_money_category__";
 export type MoneyFormCategory = {
 	id: string;
 	name: string;
+	status?: "ACTIVE" | "INACTIVE";
 	type: "INCOME" | "EXPENSE";
 };
 
@@ -79,8 +80,8 @@ const moneyFormSchema = z.object({
 	title: z
 		.string()
 		.trim()
-		.min(1, "Source is required")
-		.max(180, "Source is too long"),
+		.min(1, "This field is required")
+		.max(180, "Must be 180 characters or fewer"),
 });
 
 const formConfig: Record<
@@ -105,7 +106,7 @@ const formConfig: Record<
 	},
 	expense: {
 		action: "Add expense",
-		description: "Record money spent by you or the family.",
+		description: "Record money spent from a personal account.",
 		title: "Add Expense",
 		transactionType: "EXPENSE",
 		updateAction: "Update expense",
@@ -190,12 +191,20 @@ export function MoneyFormDialog({
 	const activeCategories = useMemo(
 		() =>
 			availableCategories.filter(
-				(category) => category.type === config.transactionType,
+				(category) =>
+					category.type === config.transactionType &&
+					category.status !== "INACTIVE",
 			),
 		[availableCategories, config.transactionType],
 	);
 	const canCreateCategoryInline = Boolean(familyId && config.transactionType);
 	const categoryTypeLabel = config.transactionType?.toLowerCase();
+	const entryLabel = config.transactionType === "EXPENSE" ? "Expense" : "Income";
+	const entryLabelLower = entryLabel.toLowerCase();
+	const titleField =
+		config.transactionType === "EXPENSE"
+			? { label: "Expense", placeholder: "Example: Groceries" }
+			: { label: "Source", placeholder: "Example: July salary" };
 	const categoryOptions = [
 		...activeCategories.map((category) => ({
 			value: category.id,
@@ -236,16 +245,16 @@ export function MoneyFormDialog({
 				currency: "RWF",
 				date: values.date,
 				description: values.title,
-				incomeRecurrence: "ONE_TIME",
 				notes: values.notes || undefined,
 				paymentMethod: values.account,
 				type: config.transactionType,
+				...(config.transactionType === "INCOME"
+					? { incomeRecurrence: "ONE_TIME" }
+					: {}),
 				...(isUpdate ? {} : { idempotencyKey: idempotencyKeyRef.current }),
 			};
 		},
-		onSuccessMessage: isUpdate
-			? "Income updated successfully"
-			: "Income recorded successfully",
+		onSuccessMessage: `${entryLabel} ${isUpdate ? "updated" : "recorded"} successfully`,
 		toastOnSuccess: true,
 		onSuccess: async () => {
 			idempotencyKeyRef.current = undefined;
@@ -307,7 +316,7 @@ export function MoneyFormDialog({
 				>
 					{error ? (
 						<Alert variant="destructive">
-							<AlertTitle>Income was not saved</AlertTitle>
+							<AlertTitle>{entryLabel} was not saved</AlertTitle>
 							<AlertDescription>{error}</AlertDescription>
 						</Alert>
 					) : null}
@@ -315,8 +324,8 @@ export function MoneyFormDialog({
 						<CommonFormField
 							control={form.control}
 							name="title"
-							label="Source"
-							placeholder="Example: July salary"
+							label={titleField.label}
+							placeholder={titleField.placeholder}
 							required
 						/>
 						<CommonFormField
@@ -426,12 +435,12 @@ export function MoneyFormDialog({
 							name="notes"
 							label="Notes"
 							fieldType="textarea"
-							placeholder="Optional details about this income"
+							placeholder={`Optional details about this ${entryLabelLower}`}
 						/>
 					</FieldGroup>
 					{!activeCategories.length ? (
 						<p className="text-sm text-muted-foreground">
-							Add an income category before saving this record.
+							Add an {entryLabelLower} category before saving this record.
 						</p>
 					) : null}
 					<DialogFooter>

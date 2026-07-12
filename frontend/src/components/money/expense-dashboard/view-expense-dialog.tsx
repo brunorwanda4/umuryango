@@ -37,6 +37,7 @@ type ViewExpenseDialogProps = {
   onSuccess?: () => void | Promise<void>;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
+  searchParamValue?: string;
   trigger?: React.ReactElement | null;
 };
 
@@ -47,6 +48,7 @@ export function ViewExpenseDialog({
   onOpenChange,
   onSuccess,
   open,
+  searchParamValue,
   trigger,
 }: ViewExpenseDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
@@ -59,7 +61,11 @@ export function ViewExpenseDialog({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        searchParamValue={searchParamValue ?? `view-expense-${expense.id}`}
+      >
         {trigger !== null && (
           <DialogTrigger asChild>
             {trigger ?? (

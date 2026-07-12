@@ -54,6 +54,7 @@ export function RecentExpenseActionsPopover({
             familyId={familyId}
             expense={expense}
             onSuccess={onSuccess}
+            searchParamValue={`view-expense-action-${expense.id}`}
           />
           <UpdateExpenseDialog
             categories={categories}
