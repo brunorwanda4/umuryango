@@ -2,7 +2,7 @@
 
 import { format, isAfter, isBefore, isValid, parse, subDays } from "date-fns";
 import { CalendarIcon, CheckIcon, ClockIcon } from "lucide-react";
-import { forwardRef, useMemo, useState } from "react";
+import { forwardRef, type ReactNode, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -33,6 +33,8 @@ type PickerProps = {
 type DatePickerInputProps = PickerProps & {
   min?: string | number;
   max?: string | number;
+  align?: "start" | "center" | "end";
+  displayValue?: ReactNode;
 };
 
 type TimePickerInputProps = PickerProps & {
@@ -68,6 +70,8 @@ const DatePickerInput = forwardRef<HTMLButtonElement, DatePickerInputProps>(
       className,
       min,
       max,
+      align = "start",
+      displayValue,
       onBlur,
       onValueChange,
     },
@@ -119,10 +123,12 @@ const DatePickerInput = forwardRef<HTMLButtonElement, DatePickerInputProps>(
             )}
           >
             <CalendarIcon data-icon="inline-start" />
-            {selectedDate ? format(selectedDate, "PPP") : placeholder}
+            {selectedDate
+              ? (displayValue ?? format(selectedDate, "PPP"))
+              : placeholder}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto rounded-md p-0">
+        <PopoverContent align={align} className="w-auto rounded-md p-0">
           <div className="flex max-sm:flex-col">
             <div className="flex gap-1 border-b p-2 sm:w-28 sm:flex-col sm:border-r sm:border-b-0">
               <Button

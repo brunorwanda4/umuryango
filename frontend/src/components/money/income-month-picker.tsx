@@ -1,22 +1,14 @@
 "use client";
 
-import { CalendarDaysIcon } from "lucide-react";
 import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { DatePickerInput } from "@/components/ui/calendar-day";
 import { formatMonthPeriod, getMonthPeriod } from "./utils";
 
 /**
- * A popover that lets the user pick a calendar month.
+ * A calendar picker that lets the user pick the dashboard month.
  *
- * Renders the formatted period label as the trigger button and an `<input
- * type="month">` inside the popover body. Can be dropped into any page header
- * that needs month-range selection (e.g. income, expenses, savings).
+ * The selected date is normalized to `YYYY-MM`, preserving the month-based
+ * query contract used by income and expense dashboards.
  *
  * @example
  * <IncomeMonthPicker month={month} onMonthChange={setMonth} />
@@ -33,30 +25,16 @@ export function IncomeMonthPicker({
   const period = useMemo(() => getMonthPeriod(month), [month]);
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button type="button" variant="outline">
-          <span>{formatMonthPeriod(period.from, period.to)}</span>
-          <CalendarDaysIcon data-icon="inline-end" aria-hidden="true" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-64">
-        <label
-          className="flex flex-col gap-2 font-medium text-sm"
-          htmlFor="income-month"
-        >
-          Income month
-          <Input
-            aria-label="Income month"
-            id="income-month"
-            max="9999-12"
-            min="2000-01"
-            onChange={(event) => onMonthChange(event.target.value)}
-            type="month"
-            value={month}
-          />
-        </label>
-      </PopoverContent>
-    </Popover>
+    <DatePickerInput
+      id="income-month"
+      name="income-month"
+      value={`${month}-01`}
+      min="2000-01-01"
+      max="2100-12-31"
+      align="end"
+      displayValue={formatMonthPeriod(period.from, period.to)}
+      placeholder="Pick a month"
+      onValueChange={(date) => onMonthChange(date.slice(0, 7))}
+    />
   );
 }

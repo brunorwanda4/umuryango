@@ -47,7 +47,7 @@ export type IncomeDashboardResponse = {
   records: IncomeTransaction[];
   summary: {
     allTimeTotalMinorUnits: string;
-    approvedTransactionCount: number;
+    transactionCount: number;
     largestIncome: {
       amountMinorUnits: string;
       category: string;

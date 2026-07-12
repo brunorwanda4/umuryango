@@ -49,7 +49,7 @@ export type ExpenseDashboardResponse = {
   records: ExpenseTransaction[];
   summary: {
     allTimeTotalMinorUnits: string;
-    approvedTransactionCount: number;
+    transactionCount: number;
     largestExpense: {
       amountMinorUnits: string;
       category: string;

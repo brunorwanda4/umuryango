@@ -9,7 +9,7 @@ export function ExpenseSummaryCards({
   periodLabel: string;
   summary: {
     allTimeTotalMinorUnits: string;
-    approvedTransactionCount: number;
+    transactionCount: number;
     largestExpense: {
       amountMinorUnits: string;
       category: string;
@@ -61,7 +61,7 @@ export function ExpenseSummaryCards({
             </span>
           ),
           iconImage: "/images/icons/transaction.png",
-          value: summary.approvedTransactionCount.toString(),
+          value: summary.transactionCount.toString(),
         },
         {
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
@@ -82,7 +82,7 @@ export function ExpenseSummaryCards({
             <span className="text-chart-1">
               {summary.largestExpense?.description ??
                 summary.largestExpense?.category ??
-                "No approved expenses"}
+                "No expenses recorded"}
             </span>
           ),
           iconImage: "/images/icons/quality.png",

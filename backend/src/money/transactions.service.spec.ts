@@ -296,7 +296,7 @@ describe('TransactionsService', () => {
     });
 
     expect(result.summary.allTimeTotalMinorUnits).toBe('450000');
-    expect(result.summary.periodTotalMinorUnits).toBe('200000');
+    expect(result.summary.periodTotalMinorUnits).toBe('250000');
     expect(result.summary).toEqual(
       expect.objectContaining({
         largestIncome: {
@@ -318,7 +318,7 @@ describe('TransactionsService', () => {
     );
   });
 
-  it('builds the personal expense dashboard contract from approved expenses', async () => {
+  it('builds the personal expense dashboard contract from active expenses', async () => {
     const approved = makeTransaction({
       id: 'expense-approved',
       amountMinorUnits: 75000n,
@@ -355,16 +355,19 @@ describe('TransactionsService', () => {
         period: { from: '2026-07-01', to: '2026-07-31' },
         summary: {
           allTimeTotalMinorUnits: '300000',
-          approvedTransactionCount: 4,
-          periodTotalMinorUnits: '75000',
+          transactionCount: 4,
+          periodTotalMinorUnits: '100000',
           largestExpense: {
             amountMinorUnits: '75000',
             category: 'Food',
             description: 'Weekly groceries',
           },
         },
-        byCategory: [{ category: 'Food', amountMinorUnits: '75000' }],
-        overTime: [{ date: '2026-07-08', amountMinorUnits: '75000' }],
+        byCategory: [
+          { category: 'Food', amountMinorUnits: '75000' },
+          { category: 'Transport', amountMinorUnits: '25000' },
+        ],
+        overTime: [{ date: '2026-07-08', amountMinorUnits: '100000' }],
       }),
     );
     expect(result.records.map((record) => record.amountMinorUnits)).toEqual([
@@ -376,7 +379,9 @@ describe('TransactionsService', () => {
         familyId: 'family-1',
         createdById: 'user-1',
         type: TransactionType.EXPENSE,
-        status: TransactionStatus.APPROVED,
+        status: {
+          in: [TransactionStatus.PENDING, TransactionStatus.APPROVED],
+        },
       },
       _count: { _all: true },
       _sum: { amountMinorUnits: true },

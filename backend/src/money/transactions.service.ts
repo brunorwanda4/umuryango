@@ -246,9 +246,11 @@ export class TransactionsService {
       createdById: userId,
       type: query.type,
     };
-    const approvedWhere: Prisma.FamilyTransactionWhereInput = {
+    const activeWhere: Prisma.FamilyTransactionWhereInput = {
       ...ownershipWhere,
-      status: TransactionStatus.APPROVED,
+      status: {
+        in: [TransactionStatus.PENDING, TransactionStatus.APPROVED],
+      },
     };
     const periodWhere: Prisma.FamilyTransactionWhereInput = {
       ...ownershipWhere,
@@ -258,13 +260,13 @@ export class TransactionsService {
 
     const [allTime, largest, records] = await Promise.all([
       this.prisma.familyTransaction.aggregate({
-        where: approvedWhere,
+        where: activeWhere,
         _count: { _all: true },
         _sum: { amountMinorUnits: true },
       }),
       this.prisma.familyTransaction.findFirst({
         where: {
-          ...approvedWhere,
+          ...activeWhere,
           date: { gte: period.from, lt: period.toExclusive },
         },
         orderBy: [{ amountMinorUnits: 'desc' }, { date: 'desc' }],
@@ -280,10 +282,12 @@ export class TransactionsService {
       }),
     ]);
 
-    const approvedRecords = records.filter(
-      (record) => record.status === TransactionStatus.APPROVED,
+    const activeRecords = records.filter(
+      (record) =>
+        record.status === TransactionStatus.PENDING ||
+        record.status === TransactionStatus.APPROVED,
     );
-    const periodTotal = approvedRecords.reduce(
+    const periodTotal = activeRecords.reduce(
       (total, record) => total + record.amountMinorUnits,
       0n,
     );
@@ -297,7 +301,7 @@ export class TransactionsService {
         allTimeTotalMinorUnits: (
           allTime._sum.amountMinorUnits ?? 0n
         ).toString(),
-        approvedTransactionCount: allTime._count._all,
+        transactionCount: allTime._count._all,
         periodTotalMinorUnits: periodTotal.toString(),
         ...(query.type === TransactionType.EXPENSE
           ? {
@@ -319,8 +323,8 @@ export class TransactionsService {
                 : null,
             }),
       },
-      byCategory: this.groupDashboardByCategory(approvedRecords),
-      overTime: this.groupDashboardByDay(approvedRecords),
+      byCategory: this.groupDashboardByCategory(activeRecords),
+      overTime: this.groupDashboardByDay(activeRecords),
       records: records.map((record) => this.serializeTransaction(record)),
     };
   }

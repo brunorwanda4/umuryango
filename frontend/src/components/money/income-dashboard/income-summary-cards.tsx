@@ -9,7 +9,7 @@ export function IncomeSummaryCards({
   periodLabel: string;
   summary: {
     allTimeTotalMinorUnits: string;
-    approvedTransactionCount: number;
+    transactionCount: number;
     largestIncome: {
       amountMinorUnits: string;
       category: string;
@@ -61,7 +61,7 @@ export function IncomeSummaryCards({
             </span>
           ),
           iconImage: "/images/icons/transaction.png",
-          value: summary.approvedTransactionCount.toString(),
+          value: summary.transactionCount.toString(),
         },
         {
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
@@ -82,7 +82,7 @@ export function IncomeSummaryCards({
             <span className="text-chart-2">
               {summary.largestIncome?.description ??
                 summary.largestIncome?.category ??
-                "No approved income"}
+                "No income recorded"}
             </span>
           ),
           iconImage: "/images/icons/quality.png",
