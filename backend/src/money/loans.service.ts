@@ -9,11 +9,14 @@ import {
   FamilyAuthority,
   FamilyCapability,
   type FamilyContact,
+  FamilyContactStatus,
+  FamilyContactType,
   type FamilyLoan,
   type FamilyLoanRepayment,
   LoanApprovalStatus,
   LoanAuditAction,
   LoanInterestType,
+  LoanRepaymentFrequency,
   LoanStatus,
   LoanType,
   Prisma,
@@ -23,6 +26,7 @@ import {
 import { can } from '../families/family-access';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLoanDto } from './dto/create-loan.dto';
+import { CreatePersonalLoanDto } from './dto/create-personal-loan.dto';
 import { CreateRepaymentDto } from './dto/create-repayment.dto';
 import { LoanQueryDto } from './dto/loan-query.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
@@ -42,6 +46,15 @@ type Membership = {
 const ACTIVE_LOAN_STATUSES: LoanStatus[] = [
   LoanStatus.ACTIVE,
   LoanStatus.OVERDUE,
+];
+
+const PERSONAL_CONTACT_TYPES: FamilyContactType[] = [
+  FamilyContactType.RELATIVE,
+  FamilyContactType.FAMILY_FRIEND,
+  FamilyContactType.NEIGHBOR,
+  FamilyContactType.EMERGENCY_CONTACT,
+  FamilyContactType.LOAN_CONTACT,
+  FamilyContactType.OTHER,
 ];
 
 const LOAN_INCLUDE = Prisma.validator<Prisma.FamilyLoanInclude>()({
@@ -112,7 +125,12 @@ type DocumentWithUploader = Prisma.FamilyLoanDocumentGetPayload<{
 export class LoansService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createLoan(userId: string, familyId: string, dto: CreateLoanDto) {
+  async createLoan(
+    userId: string,
+    familyId: string,
+    dto: CreateLoanDto,
+    options: { approveImmediately?: boolean } = {},
+  ) {
     const membership = await this.requireMembership(userId, familyId);
 
     if (dto.idempotencyKey) {
@@ -186,6 +204,16 @@ export class LoansService {
           startDate,
           dueDate,
           repaymentFrequency: dto.repaymentFrequency,
+          status: options.approveImmediately
+            ? dueDate < new Date()
+              ? LoanStatus.OVERDUE
+              : LoanStatus.ACTIVE
+            : LoanStatus.DRAFT,
+          approvalStatus: options.approveImmediately
+            ? LoanApprovalStatus.APPROVED
+            : LoanApprovalStatus.DRAFT,
+          approvedById: options.approveImmediately ? userId : null,
+          approvedAt: options.approveImmediately ? new Date() : null,
           createdById: userId,
           idempotencyKey: dto.idempotencyKey || null,
         },
@@ -199,7 +227,9 @@ export class LoansService {
         LoanAuditAction.CREATED,
         {
           newValue: this.loanSnapshot(created),
-          description: 'Loan request created.',
+          description: options.approveImmediately
+            ? 'Personal loan created.'
+            : 'Loan request created.',
         },
       );
 
@@ -207,6 +237,56 @@ export class LoansService {
     });
 
     return this.serializeLoan(loan);
+  }
+
+  async createPersonalLoan(
+    userId: string,
+    familyId: string,
+    dto: CreatePersonalLoanDto,
+  ) {
+    const membership = await this.requireMembership(userId, familyId);
+    const person = await this.prisma.familyContact.findFirst({
+      where: {
+        id: dto.personContactId,
+        familyId,
+        status: FamilyContactStatus.ACTIVE,
+        deletedAt: null,
+        contactType: { in: PERSONAL_CONTACT_TYPES },
+        organization: null,
+      },
+    });
+
+    if (!person) {
+      throw new BadRequestException(
+        'Choose an active trusted person from People Management.',
+      );
+    }
+
+    return this.createLoan(
+      userId,
+      familyId,
+      {
+        title: dto.title,
+        description: dto.notes,
+        loanType: dto.loanType,
+        principalAmountMinorUnits: dto.principalAmountMinorUnits,
+        currency: dto.currency,
+        interestType: dto.interestType ?? LoanInterestType.NONE,
+        interestRate: dto.interestRate ?? '0',
+        borrowerMemberId:
+          dto.loanType === LoanType.BORROWED ? membership.id : null,
+        borrowerContactId: dto.loanType === LoanType.LENT ? person.id : null,
+        lenderMemberId: dto.loanType === LoanType.LENT ? membership.id : null,
+        lenderContactId: dto.loanType === LoanType.BORROWED ? person.id : null,
+        categoryId: dto.categoryId,
+        startDate: dto.startDate,
+        dueDate: dto.dueDate,
+        repaymentFrequency:
+          dto.repaymentFrequency ?? LoanRepaymentFrequency.ONCE,
+        idempotencyKey: dto.idempotencyKey,
+      },
+      { approveImmediately: true },
+    );
   }
 
   async updateLoan(
@@ -440,6 +520,72 @@ export class LoansService {
         orderBy: {
           [query.sortBy ?? 'createdAt']: query.sortOrder ?? 'desc',
         },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      this.prisma.familyLoan.count({ where }),
+    ]);
+
+    return {
+      items: items.map((loan) => this.serializeLoan(loan)),
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async findPersonalLoans(
+    userId: string,
+    familyId: string,
+    query: LoanQueryDto,
+  ) {
+    const membership = await this.requireMembership(userId, familyId);
+    await this.refreshOverdueLoans(familyId);
+
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 100;
+    const where: Prisma.FamilyLoanWhereInput = {
+      familyId,
+      deletedAt: null,
+      OR: [
+        {
+          borrowerMemberId: membership.id,
+          lenderContactId: { not: null },
+        },
+        {
+          lenderMemberId: membership.id,
+          borrowerContactId: { not: null },
+        },
+      ],
+    };
+
+    if (query.loanType) where.loanType = query.loanType;
+    if (query.status) where.status = query.status;
+    if (query.search) {
+      const search = query.search.trim();
+      where.AND = {
+        OR: [
+          { title: { contains: search, mode: 'insensitive' } },
+          {
+            borrowerContact: {
+              fullName: { contains: search, mode: 'insensitive' },
+            },
+          },
+          {
+            lenderContact: {
+              fullName: { contains: search, mode: 'insensitive' },
+            },
+          },
+        ],
+      };
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.familyLoan.findMany({
+        where,
+        include: this.loanInclude(),
+        orderBy: { [query.sortBy ?? 'createdAt']: query.sortOrder ?? 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),

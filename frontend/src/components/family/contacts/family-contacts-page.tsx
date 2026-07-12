@@ -486,6 +486,14 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined" || detailsContact) return;
+    const contactId = new URLSearchParams(window.location.search).get("view");
+    if (!contactId) return;
+    const contact = contacts.find((item) => item.id === contactId);
+    if (contact) setDetailsContact(contact);
+  }, [contacts, detailsContact]);
+
   const filteredContacts = useMemo(
     () => filterContacts(contacts, filters),
     [contacts, filters],

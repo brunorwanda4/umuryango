@@ -3,6 +3,8 @@ import { Test } from '@nestjs/testing';
 import {
   FamilyAuthority,
   FamilyCapability,
+  FamilyContactStatus,
+  FamilyContactType,
   LoanApprovalStatus,
   LoanAuditAction,
   LoanInterestType,
@@ -132,7 +134,7 @@ describe('LoansService', () => {
         create: jest.fn(),
         update: jest.fn(),
       },
-      familyContact: { findMany: jest.fn() },
+      familyContact: { findFirst: jest.fn(), findMany: jest.fn() },
       familyTransactionCategory: { findFirst: jest.fn() },
       familyReceipt: { findFirst: jest.fn() },
       familyLoanAuditLog: { create: jest.fn() },
@@ -206,6 +208,76 @@ describe('LoansService', () => {
         }),
       }),
     );
+  });
+
+  it('creates a personal borrowed loan with the current member inferred', async () => {
+    const person = {
+      id: 'contact-1',
+      familyId: 'family-1',
+      fullName: 'Aunt Grace',
+      contactType: FamilyContactType.RELATIVE,
+      status: FamilyContactStatus.ACTIVE,
+      organization: null,
+    };
+    const created = makeLoan({
+      status: LoanStatus.ACTIVE,
+      approvalStatus: LoanApprovalStatus.APPROVED,
+      approvedById: 'user-1',
+      borrowerMemberId: 'member-1',
+      lenderContactId: 'contact-1',
+      lenderContact: {
+        id: 'contact-1',
+        fullName: 'Aunt Grace',
+        phoneNumber: null,
+        relationshipToFamily: 'Aunt',
+        organization: null,
+      },
+      approvedBy: { fullName: 'Jean Mutesi' },
+    });
+
+    prisma.familyMember.findFirst.mockResolvedValue(memberMembership);
+    prisma.familyContact.findFirst.mockResolvedValue(person);
+    prisma.familyContact.findMany.mockResolvedValue([person]);
+    prisma.familyMember.count.mockResolvedValue(1);
+    prisma.familyLoan.create.mockResolvedValue(created);
+    prisma.familyLoanAuditLog.create.mockResolvedValue({ id: 'audit-1' });
+
+    const result = await service.createPersonalLoan('user-1', 'family-1', {
+      title: 'School fees support',
+      loanType: LoanType.BORROWED,
+      personContactId: 'contact-1',
+      principalAmountMinorUnits: '100000',
+      startDate: '2026-07-01',
+      dueDate: '2026-12-31',
+    });
+
+    expect(result.status).toBe(LoanStatus.ACTIVE);
+    expect(prisma.familyLoan.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          borrowerMemberId: 'member-1',
+          lenderContactId: 'contact-1',
+          status: LoanStatus.ACTIVE,
+          approvalStatus: LoanApprovalStatus.APPROVED,
+        }),
+      }),
+    );
+  });
+
+  it('rejects organizations as personal loan counterparties', async () => {
+    prisma.familyMember.findFirst.mockResolvedValue(memberMembership);
+    prisma.familyContact.findFirst.mockResolvedValue(null);
+
+    await expect(
+      service.createPersonalLoan('user-1', 'family-1', {
+        title: 'Business lender',
+        loanType: LoanType.LENT,
+        personContactId: 'company-1',
+        principalAmountMinorUnits: '100000',
+        startDate: '2026-07-01',
+        dueDate: '2026-12-31',
+      }),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('records repayment inside a transaction and recalculates loan balance', async () => {

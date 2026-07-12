@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   Param,
   Patch,
   Post,
@@ -12,6 +13,7 @@ import {
 import {
   ApiCookieAuth,
   ApiCreatedResponse,
+  ApiExtraModels,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -20,6 +22,7 @@ import { ACCESS_COOKIE_NAME } from '../auth/auth.constants';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateLoanDto } from './dto/create-loan.dto';
+import { CreatePersonalLoanDto } from './dto/create-personal-loan.dto';
 import { CreateRepaymentDto } from './dto/create-repayment.dto';
 import { LoanQueryDto } from './dto/loan-query.dto';
 import { UpdateLoanDto } from './dto/update-loan.dto';
@@ -28,11 +31,54 @@ import { UploadLoanDocumentDto } from './dto/upload-loan-document.dto';
 import { LoansService } from './loans.service';
 
 @ApiTags('money-loans')
+@ApiExtraModels(
+  CreateLoanDto,
+  CreatePersonalLoanDto,
+  CreateRepaymentDto,
+  LoanQueryDto,
+  UpdateLoanDto,
+  UpdateRepaymentDto,
+  UploadLoanDocumentDto,
+)
 @ApiCookieAuth(ACCESS_COOKIE_NAME)
 @UseGuards(JwtAuthGuard)
 @Controller('api/v1/families/:familyId/money/loans')
 export class LoansController {
-  constructor(private readonly loansService: LoansService) {}
+  constructor(
+    @Inject(LoansService) private readonly loansService: LoansService,
+  ) {}
+
+  @Get('personal')
+  @ApiOperation({ summary: 'List personal loans with trusted people' })
+  @ApiOkResponse({ description: 'Personal loans retrieved successfully.' })
+  async findPersonalLoans(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Query() query: LoanQueryDto,
+  ) {
+    const data = await this.loansService.findPersonalLoans(
+      userId,
+      familyId,
+      query,
+    );
+    return { data, message: 'Personal loans retrieved successfully.' };
+  }
+
+  @Post('personal')
+  @ApiOperation({ summary: 'Create a personal loan with a trusted person' })
+  @ApiCreatedResponse({ description: 'Personal loan created successfully.' })
+  async createPersonalLoan(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Body() dto: CreatePersonalLoanDto,
+  ) {
+    const data = await this.loansService.createPersonalLoan(
+      userId,
+      familyId,
+      dto,
+    );
+    return { data, message: 'Personal loan created successfully.' };
+  }
 
   @Get()
   @ApiOperation({ summary: 'List family loans' })
