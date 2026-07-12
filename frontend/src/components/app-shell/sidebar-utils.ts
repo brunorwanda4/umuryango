@@ -69,6 +69,40 @@ const personalSettingsChildren: NavigationItem[] = [
   },
 ];
 
+const personalMoneyChildren: NavigationItem[] = [
+  {
+    title: "Overview",
+    href: "/me/money",
+    icon: sidebarIcon("money", BadgeDollarSignIcon),
+    exact: true,
+  },
+  {
+    title: "Income",
+    href: "/me/money/income",
+    icon: sidebarIcon("income", ArrowDownIcon),
+  },
+  {
+    title: "Expenses",
+    href: "/me/money/expenses",
+    icon: sidebarIcon("expense", ArrowUpIcon),
+  },
+  {
+    title: "Categories",
+    href: "/me/money/categories",
+    icon: sidebarIcon("categories", FolderTreeIcon),
+  },
+  {
+    title: "Savings",
+    href: "/me/money/savings",
+    icon: sidebarIcon("savings", TargetIcon),
+  },
+  {
+    title: "Loans",
+    href: "/me/money/loans",
+    icon: sidebarIcon("loan", LandmarkIcon),
+  },
+];
+
 export const personalNavigation: NavigationGroup[] = [
   {
     label: "Personal",
@@ -82,6 +116,7 @@ export const personalNavigation: NavigationGroup[] = [
         title: "My money",
         href: "/me/money",
         icon: sidebarIcon("money", WalletCardsIcon),
+        items: personalMoneyChildren,
       },
       {
         title: "Plans",
