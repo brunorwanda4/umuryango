@@ -163,9 +163,15 @@ export function CreateCategoryForm({
 					)}
 					<CategoryFormFields control={form.control} />
 				</form>
-				<DialogFooter>
+				<DialogFooter className=" flex flex-row gap-4 ">
 					<DialogClose asChild>
-						<Button variant="ghost">Cancel</Button>
+						<Button
+							variant="ghost"
+							type="button"
+							onClick={() => setOpen(false)}
+						>
+							Cancel
+						</Button>
 					</DialogClose>
 					<Button
 						type="submit"

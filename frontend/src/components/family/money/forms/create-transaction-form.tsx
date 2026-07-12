@@ -182,6 +182,13 @@ export function CreateTransactionForm({
         </form>
         <DialogFooter>
           <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
             type="submit"
             form="transaction-form"
             disabled={isPending || loadingCategories}
