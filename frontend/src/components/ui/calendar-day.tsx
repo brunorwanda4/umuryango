@@ -536,7 +536,7 @@ const DateRangePickerInput = forwardRef<
 
         <PopoverContent
           align={align}
-          className="max-w-[calc(100vw-2rem)] overflow-x-auto rounded-md p-0"
+          className=" overflow-x-auto rounded-md p-0"
         >
           <div className="flex max-sm:flex-col">
             <div className="border-b p-2 sm:w-44 sm:border-r sm:border-b-0">
