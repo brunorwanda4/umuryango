@@ -67,10 +67,9 @@ export function CategoryTable({
     <Card className="min-w-0">
       <CardHeader>
         <CardTitle>Category master data</CardTitle>
-        <CardDescription>
-          Reusable income and expense categories selected by the transaction,
-          budget, receipt, and reporting workflows.
-        </CardDescription>
+        <div>
+          Search Categories
+       </div>
       </CardHeader>
       <CardContent className="flex min-w-0 flex-col gap-3">
         {apiMessage ? (
