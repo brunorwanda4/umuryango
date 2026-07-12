@@ -163,8 +163,10 @@ function AppSidebarContent({
         <SidebarResizeHandle open={open} />
       </Sidebar>
       <SidebarInset>
-        <main className="min-h-[calc(100svh-3.5rem)] min-w-0 max-w-full p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6">
-          {children}
+        <main className=" min-w-0 max-w-full p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6">
+          <div className="min-h-screen">
+            {children}
+         </div>
           <AppFooter />
         </main>
       </SidebarInset>

@@ -92,11 +92,6 @@ const personalMoneyChildren: NavigationItem[] = [
     icon: sidebarIcon("categories", FolderTreeIcon),
   },
   {
-    title: "Savings",
-    href: "/me/money/savings",
-    icon: sidebarIcon("savings", TargetIcon),
-  },
-  {
     title: "Loans",
     href: "/me/money/loans",
     icon: sidebarIcon("loan", LandmarkIcon),
@@ -122,11 +117,6 @@ export const personalNavigation: NavigationGroup[] = [
         title: "Plans",
         href: "/me/plans",
         icon: sidebarIcon("plan", ListChecksIcon),
-      },
-      {
-        title: "Savings goals",
-        href: "/me/savings",
-        icon: sidebarIcon("savings", TargetIcon),
       },
       {
         title: "Debts",
