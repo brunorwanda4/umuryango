@@ -54,7 +54,7 @@ export function LoanSummary({
               value={totals.borrowed.toString()}
             />
           ),
-          icon: <ArrowDownToLineIcon className="size-5 text-primary" />,
+          iconImage: "/images/icons/borrowing.png",
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
         },
         {
@@ -62,7 +62,7 @@ export function LoanSummary({
           value: (
             <CompactMoney currency={currency} value={totals.lent.toString()} />
           ),
-          icon: <ArrowUpFromLineIcon className="size-5 text-primary" />,
+          iconImage: "/images/icons/lent.png",
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
         },
         {
@@ -73,7 +73,7 @@ export function LoanSummary({
               value={totals.repaid.toString()}
             />
           ),
-          icon: <CircleDollarSignIcon className="size-5 text-primary" />,
+          iconImage: "/images/icons/repaid.png",
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
         },
         {
@@ -84,7 +84,7 @@ export function LoanSummary({
               value={totals.remaining.toString()}
             />
           ),
-          icon: <WalletCardsIcon className="size-5 text-primary" />,
+          iconImage: "/images/icons/clock.png",
           className: "rounded-2xl border-border/80 py-0 shadow-sm",
         },
       ]}
