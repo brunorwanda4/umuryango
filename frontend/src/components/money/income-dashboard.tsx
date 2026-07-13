@@ -42,7 +42,7 @@ export function IncomeDashboard({
 
   if (error || !data || !dashboard || !familyId) {
     return (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="flex flex-col gap-4">
         <AlertCircleIcon aria-hidden="true" />
         <AlertTitle>Income could not be loaded</AlertTitle>
         <AlertDescription>
