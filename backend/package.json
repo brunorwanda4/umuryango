@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "vercel-build": "prisma generate && prisma migrate deploy && nest build",
     "format": "biome format --write",
     "start": "nest start",
     "dev": "nest start --watch",
