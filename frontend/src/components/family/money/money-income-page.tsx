@@ -465,7 +465,6 @@ export function MoneyIncomePage({
     >
       <PageTitle
         title="Income"
-        description="Manage all money coming into the family, including salary, business income, farming income, gifts, donations, rent income, and family contributions."
         actions={
           hasCapability(family, "RECORD_INCOME") && (
             <Button size="sm" onClick={() => openGenericCreate(true)}>
@@ -475,8 +474,6 @@ export function MoneyIncomePage({
           )
         }
       />
-
-      <Separator />
 
       {/* Summary Cards */}
       <IncomeMetricCards transactions={transactions} currency={currency} />

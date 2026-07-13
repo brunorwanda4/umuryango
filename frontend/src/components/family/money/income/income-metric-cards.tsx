@@ -1,19 +1,6 @@
-import {
-  AlertCircleIcon,
-  CheckCircleIcon,
-  CoinsIcon,
-  FileTextIcon,
-  TrendingDownIcon,
-  WalletIcon,
-} from "lucide-react";
 import { useMemo } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
 import { normalizeMinorUnitString } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
 
@@ -121,81 +108,65 @@ export function IncomeMetricCards({
 
   const cards = [
     {
-      title: "Total Income",
-      value: summary.totalRecorded,
-      icon: WalletIcon,
-      isMoney: true,
+      description: "Total Income",
+      value: <CompactMoney currency={currency} value={summary.totalRecorded} />,
+      iconImage: "/images/icons/wallet.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Income This Month",
-      value: summary.monthRecorded,
-      icon: CoinsIcon,
-      isMoney: true,
+      description: "Income This Month",
+      value: <CompactMoney currency={currency} value={summary.monthRecorded} />,
+      iconImage: "/images/icons/income.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Income Today",
-      value: summary.todayRecorded,
-      icon: TrendingDownIcon,
-      isMoney: true,
+      description: "Income Today",
+      value: <CompactMoney currency={currency} value={summary.todayRecorded} />,
+      iconImage: "/images/icons/money.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Pending Income",
-      value: summary.pendingAmount,
-      icon: AlertCircleIcon,
-      isMoney: true,
+      description: "Pending Income",
+      value: <CompactMoney currency={currency} value={summary.pendingAmount} />,
+      iconImage: "/images/icons/clock.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Approved Income",
-      value: summary.approvedAmount,
-      icon: CheckCircleIcon,
-      isMoney: true,
+      description: "Approved Income",
+      value: (
+        <CompactMoney currency={currency} value={summary.approvedAmount} />
+      ),
+      iconImage: "/images/icons/approved.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Rent Balance",
-      value: summary.rentBalance,
-      icon: AlertCircleIcon,
-      isMoney: true,
+      description: "Rent Balance",
+      value: <CompactMoney currency={currency} value={summary.rentBalance} />,
+      iconImage: "/images/icons/salary.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Overdue Rent",
+      description: "Overdue Rent",
       value: String(summary.overdueRentCount),
-      icon: FileTextIcon,
+      iconImage: "/images/icons/calendar.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Income Records",
+      description: "Income Records",
       value: String(summary.recordCount),
-      icon: FileTextIcon,
+      iconImage: "/images/icons/transaction.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
   ];
 
   return (
-    <section
-      aria-label="Income metrics"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-    >
-      {cards.map((card) => {
-        const Icon = card.icon;
-        return (
-          <Card key={card.title}>
-            <CardHeader className="flex sm:flex-row flex-row-reverse items-center justify-end sm:justify-between gap-3">
-              <div className="min-w-0 max-sm:flex-row max-sm:flex max-sm:items-center max-sm:gap-4">
-                <CardDescription className="max-sm:font-semibold max-sm:text-lg max-sm:flex">
-                  <span>{card.title}</span>{" "}
-                  <span className="block sm:hidden">:</span>
-                </CardDescription>
-                <CardTitle className="mt-1 truncate text-xl sm:text-2xl font-bold">
-                  {card.isMoney ? (
-                    <CompactMoney currency={currency} value={card.value} />
-                  ) : (
-                    card.value
-                  )}
-                </CardTitle>
-              </div>
-              <Icon className="size-5 shrink-0 text-muted-foreground sm:block hidden" />
-            </CardHeader>
-          </Card>
-        );
-      })}
-    </section>
+    <CommonOverviewCardDisplay
+      className="grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      cardHeaderClassName="min-h-36 flex-col items-start justify-between gap-4 p-5 sm:p-6"
+      cardDescriptionClassName="text-sm font-medium text-muted-foreground"
+      cardTitleClassName="whitespace-normal leading-tight sm:text-2xl"
+      iconPosition="start"
+      cards={cards}
+    />
   );
 }
