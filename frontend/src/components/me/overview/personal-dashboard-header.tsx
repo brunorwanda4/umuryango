@@ -27,10 +27,6 @@ export function PersonalDashboardHeader({ firstName }: { firstName?: string }) {
         <h1 className="font-semibold text-2xl tracking-tight sm:text-3xl">
           Welcome back{firstName ? `, ${firstName}` : ""}
         </h1>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Here is a quick overview of your money, plans, debts, and family
-          activity.
-        </p>
       </div>
       <div className="flex items-center gap-2">
         <Button asChild className="hidden sm:inline-flex">
