@@ -2,6 +2,7 @@
 
 import { AlertCircleIcon, RefreshCwIcon } from "lucide-react";
 import { useMemo } from "react";
+import { CreateCategoryForm } from "@/components/family/money/forms/create-category-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -62,6 +63,25 @@ export function IncomeDashboard({
   }
 
   const periodLabel = formatPeriodLabel(data.period.from, data.period.to);
+
+  if (!categories.length) {
+    return (
+      <Alert>
+        <AlertTitle>Create an income category</AlertTitle>
+        <AlertDescription>
+          Add your first category before recording income, such as Salary,
+          Business, or Gifts.
+        </AlertDescription>
+        <CreateCategoryForm
+          defaultType="INCOME"
+          existingCategories={categories}
+          familyId={familyId}
+          personal
+          onSuccess={onRetry}
+        />
+      </Alert>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

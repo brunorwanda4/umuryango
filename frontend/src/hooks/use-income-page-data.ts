@@ -72,11 +72,23 @@ export function useIncomePageData(period: { from: string; to: string }) {
         ),
       ]);
 
+    const categoriesAreEmpty = categoriesResponse.statusCode === 404;
+
+    setFamily(
+      familyResponse.ok && familyResponse.data ? familyResponse.data : null,
+    );
+    setCategories(categoriesResponse.ok ? (categoriesResponse.data ?? []) : []);
+    setDashboard(
+      dashboardResponse.ok && dashboardResponse.data
+        ? dashboardResponse.data
+        : null,
+    );
+
     if (!familyResponse.ok || !familyResponse.data) {
       setError(
         familyResponse.message ?? "Family workspace could not be loaded.",
       );
-    } else if (!categoriesResponse.ok) {
+    } else if (!categoriesResponse.ok && !categoriesAreEmpty) {
       setError(
         categoriesResponse.message ?? "Income categories could not be loaded.",
       );
@@ -84,10 +96,6 @@ export function useIncomePageData(period: { from: string; to: string }) {
       setError(
         dashboardResponse.message ?? "Income records could not be loaded.",
       );
-    } else {
-      setFamily(familyResponse.data);
-      setCategories(categoriesResponse.data ?? []);
-      setDashboard(dashboardResponse.data);
     }
 
     setIsLoading(false);
