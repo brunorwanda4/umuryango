@@ -35,6 +35,7 @@ import {
 } from "./sidebar-utils";
 import { SidebarViewSwitcher } from "./sidebar-view-switcher";
 import { WorkspaceSwitcher } from "./workspace-switcher";
+import AppNavbar from "./app-navbar";
 
 type AppSidebarShellProps = {
 	children: ReactNode;
@@ -120,7 +121,8 @@ function AppSidebarContent({
 					open &&
 						"md:!border-r-0 md:!bg-transparent md:[&>[data-slot=sidebar-inner]]:!bg-transparent",
 				)}
-			>
+      >
+        <AppNavbar />
 				<SidebarHeader>
 					<div className="flex flex-col gap-2 px-1">
 						<div className="flex items-center justify-between gap-2">
