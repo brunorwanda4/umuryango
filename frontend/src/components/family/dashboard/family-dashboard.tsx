@@ -23,7 +23,6 @@ export function FamilyDashboard({
     <div className="flex flex-col gap-6">
       <PageTitle
         title={`Welcome to ${family.name}`}
-        description="Extended family fund for monthly welfare support, ceremonies, education, and shared projects."
         badge={AUTHORITY_LABELS[family.authority]}
       />
       <Separator />
