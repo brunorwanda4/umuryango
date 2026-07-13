@@ -205,7 +205,7 @@ export function PersonPlanForm({
                 control={form.control}
                 name="dueDate"
                 label="Due date"
-                fieldType="date"
+                fieldType="time"
                 required
               />
               <CommonFormField
