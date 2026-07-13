@@ -163,12 +163,13 @@ export function CreateCategoryForm({
 					)}
 					<CategoryFormFields control={form.control} />
 				</form>
-				<DialogFooter className=" flex flex-row gap-4 ">
+				<DialogFooter className=" flex flex-row gap-4  justify-end">
 					<DialogClose asChild>
 						<Button
 							variant="ghost"
 							type="button"
 							onClick={() => setOpen(false)}
+							className=" w-fit"
 						>
 							Cancel
 						</Button>
@@ -177,7 +178,7 @@ export function CreateCategoryForm({
 						type="submit"
 						form="category-form"
 						disabled={isPending}
-						className="w-full"
+						className="w-fit"
 					>
 						{isPending ? "Creating..." : "Create category"}
 					</Button>

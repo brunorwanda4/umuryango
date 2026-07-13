@@ -66,7 +66,7 @@ export function CategoryFormFields({ control }: CategoryFormFieldsProps) {
         required
       />
 
-      <div className="flex sm:flex-col flex-row gap-4 ">
+      <div className="flex flex-col sm:flex-row gap-4 ">
         <CommonFormField
           control={control}
           name="icon"
