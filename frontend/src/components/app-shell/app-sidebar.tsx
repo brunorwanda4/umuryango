@@ -118,6 +118,10 @@ function AppSidebarContent({
         collapsible="icon"
         className={cn(
           "[&_[data-slot=sidebar-inner]]:bg-background",
+          "[&_[data-slot=sidebar-inner]]:md:top-14",
+          "[&_[data-slot=sidebar-inner]]:md:h-[calc(100vh-3.5rem)]",
+          "[&>div:first-child]:md:h-[calc(100vh-3.5rem)]",
+          "[&>div:first-child]:md:mt-14",
           open &&
             "md:!border-r-0 md:!bg-transparent md:[&>[data-slot=sidebar-inner]]:!bg-transparent",
         )}
@@ -163,7 +167,7 @@ function AppSidebarContent({
         <SidebarRail />
         <SidebarResizeHandle open={open} />
       </Sidebar>
-      <SidebarInset className="flex flex-col">
+      <SidebarInset className="flex flex-col pt-14">
         <AppNavbar sidebarTitle={sidebarTitle} />
         <main className="flex-1 min-w-0 max-w-full p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6">
           <div className="min-h-screen">{children}</div>

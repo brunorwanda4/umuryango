@@ -134,7 +134,7 @@ export default function AppNavbar({ sidebarTitle }: AppNavbarProps) {
 
   return (
     <>
-      <nav className="sticky top-0 z-40 flex h-14 w-full items-center justify-between border-b border-border/50 bg-background/80 px-4 backdrop-blur-md transition-all">
+      <nav className="fixed top-0 left-0 right-0 z-40 flex h-14 w-full items-center justify-between border-b border-border/50 bg-background/80 px-4 backdrop-blur-md transition-all">
         {/* Left Section: Sidebar Trigger & Workspace/Page Title */}
         <div className="flex items-center gap-3">
           <SidebarTrigger className="h-9 w-9 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" />
@@ -144,19 +144,33 @@ export default function AppNavbar({ sidebarTitle }: AppNavbarProps) {
           </span>
         </div>
 
-        {/* Right Section: Search & Notification Dropdown */}
-        <div className="flex items-center gap-3">
-          {/* Search Trigger Button */}
+        {/* Center Section: Search (Large Screens) */}
+        <div className="hidden md:flex flex-1 justify-center max-w-xs md:max-w-md mx-auto">
           <button
             type="button"
             onClick={() => setOpenSearch(true)}
-            className="flex items-center gap-2 rounded-2xl border border-border/30 bg-muted/40 hover:bg-muted/70 px-3 py-1.5 text-xs text-muted-foreground transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex w-full max-w-[240px] lg:max-w-[320px] items-center justify-between gap-2 rounded-2xl border border-border/30 bg-muted/40 hover:bg-muted/70 px-3 py-1.5 text-xs text-muted-foreground transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <SearchIcon className="size-3.5 shrink-0 opacity-70" />
-            <span className="hidden sm:inline">Search...</span>
-            <kbd className="pointer-events-none hidden sm:inline-flex h-4 select-none items-center gap-0.5 rounded border border-border/50 bg-muted px-1.5 font-mono text-[9px] font-medium opacity-100">
+            <div className="flex items-center gap-2">
+              <SearchIcon className="size-3.5 shrink-0 opacity-70" />
+              <span>Search...</span>
+            </div>
+            <kbd className="pointer-events-none inline-flex h-4 select-none items-center gap-0.5 rounded border border-border/50 bg-muted px-1.5 font-mono text-[9px] font-medium opacity-100">
               <span className="text-2xs">⌘</span>K
             </kbd>
+          </button>
+        </div>
+
+        {/* Right Section: Mobile Search & Notification Dropdown */}
+        <div className="flex items-center gap-3">
+          {/* Mobile Search Button (only visible on small screens) */}
+          <button
+            type="button"
+            onClick={() => setOpenSearch(true)}
+            className="md:hidden flex size-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
+          >
+            <SearchIcon className="size-[18px]" />
+            <span className="sr-only">Search</span>
           </button>
 
           {/* Notifications Dropdown */}
