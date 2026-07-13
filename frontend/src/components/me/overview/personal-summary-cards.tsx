@@ -1,23 +1,7 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  CalendarCheckIcon,
-  LandmarkIcon,
-  TrendingDownIcon,
-  TrendingUpIcon,
-  UsersIcon,
-  WalletIcon,
-} from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
 import type { PersonalOverviewData } from "./personal-overview-data";
 import { addMinorUnits } from "./personal-overview-data";
-
-type SummaryItem = {
-  label: string;
-  value: React.ReactNode;
-  helper: string;
-  icon: LucideIcon;
-};
 
 export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
   const allIncome = data.income?.summary.allTimeTotalMinorUnits;
@@ -30,21 +14,23 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
     (loan) => loan.status === "ACTIVE" || loan.status === "OVERDUE",
   ).length;
   const moneyAvailable = Boolean(data.income && data.expenses);
-  const items: SummaryItem[] = [
+
+  const cards = [
     {
-      label: "Total balance",
+      description: "Total balance",
       value: moneyAvailable ? (
         <CompactMoney currency={data.currency} value={balance.toString()} />
       ) : (
         "—"
       ),
-      helper: moneyAvailable
+      footer: moneyAvailable
         ? "Income less expenses"
         : "Money data unavailable",
-      icon: WalletIcon,
+      iconImage: "/images/icons/wallet.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      label: "This month income",
+      description: "This month income",
       value: data.income ? (
         <CompactMoney
           currency={data.currency}
@@ -53,11 +39,12 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
       ) : (
         "—"
       ),
-      helper: `${data.income?.summary.transactionCount ?? 0} records this month`,
-      icon: TrendingUpIcon,
+      footer: `${data.income?.summary.transactionCount ?? 0} records this month`,
+      iconImage: "/images/icons/income.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      label: "This month expenses",
+      description: "This month expenses",
       value: data.expenses ? (
         <CompactMoney
           currency={data.currency}
@@ -66,55 +53,44 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
       ) : (
         "—"
       ),
-      helper: `${data.expenses?.summary.transactionCount ?? 0} records this month`,
-      icon: TrendingDownIcon,
+      footer: `${data.expenses?.summary.transactionCount ?? 0} records this month`,
+      iconImage: "/images/icons/expense.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      label: "Active plans",
+      description: "Active plans",
       value: activePlans.toLocaleString(),
-      helper: `${data.plans.filter((plan) => plan.status === "COMPLETED").length} completed`,
-      icon: CalendarCheckIcon,
+      footer: `${data.plans.filter((plan) => plan.status === "COMPLETED").length} completed`,
+      iconImage: "/images/icons/plan.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      label: "Active loans",
+      description: "Active loans",
       value: activeLoans.toLocaleString(),
-      helper: `${data.loans.filter((loan) => loan.status === "OVERDUE").length} overdue`,
-      icon: LandmarkIcon,
+      footer: `${data.loans.filter((loan) => loan.status === "OVERDUE").length} overdue`,
+      iconImage: "/images/icons/loan.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      label: "Family workspaces",
+      description: "Family workspaces",
       value: data.families.length.toLocaleString(),
-      helper:
+      footer:
         data.families.length === 1
           ? "1 workspace available"
           : "Workspaces available",
-      icon: UsersIcon,
+      iconImage: "/images/icons/family.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
   ];
 
   return (
-    <section
-      aria-label="Personal summary"
-      className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-6"
-    >
-      {items.map((item) => (
-        <Card key={item.label} size="sm">
-          <CardHeader className="grid grid-cols-[1fr_auto] items-start gap-3">
-            <CardTitle className="text-muted-foreground text-xs font-medium">
-              {item.label}
-            </CardTitle>
-            <div className="flex size-8 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <item.icon className="size-4" aria-hidden="true" />
-            </div>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-1">
-            <p className="font-semibold text-xl tracking-tight sm:text-2xl">
-              {item.value}
-            </p>
-            <p className="text-muted-foreground text-xs">{item.helper}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </section>
+    <CommonOverviewCardDisplay
+      className="grid-cols-1 gap-3 lg:grid-cols-3 2xl:grid-cols-6"
+      cardHeaderClassName="min-h-[10.75rem] flex-col items-start justify-between gap-4 p-5 sm:p-6"
+      cardDescriptionClassName="text-sm font-medium text-muted-foreground"
+      cardTitleClassName="whitespace-normal leading-tight sm:text-2xl"
+      iconPosition="start"
+      cards={cards}
+    />
   );
 }

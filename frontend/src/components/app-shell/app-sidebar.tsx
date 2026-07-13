@@ -164,9 +164,7 @@ function AppSidebarContent({
       </Sidebar>
       <SidebarInset>
         <main className=" min-w-0 max-w-full p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6">
-          <div className="min-h-screen">
-            {children}
-         </div>
+          <div className="min-h-screen">{children}</div>
           <AppFooter />
         </main>
       </SidebarInset>
