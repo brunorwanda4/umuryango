@@ -326,7 +326,7 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-[300px] rounded-2xl p-4 bg-popover border border-border shadow-lg"
+          className="w-[300px] rounded-2xl p-4 bg-popover "
         >
           {/* Header */}
           <div className="flex items-center justify-between px-1 py-1 mb-2 select-none">
@@ -398,7 +398,7 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
           </div>
 
           {/* Time Picker Inputs */}
-          <div className="grid grid-cols-2 gap-2 mt-4">
+          <div className="grid grid-cols-2 gap-2 ">
             <div className="flex flex-col gap-1">
               <input
                 type="text"
@@ -422,7 +422,7 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
           </div>
 
           {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-2 mt-4">
+          <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
               variant="ghost"
