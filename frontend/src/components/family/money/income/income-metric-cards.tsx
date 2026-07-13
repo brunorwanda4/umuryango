@@ -162,7 +162,7 @@ export function IncomeMetricCards({
   return (
     <CommonOverviewCardDisplay
       className="grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-      cardHeaderClassName="min-h-36 flex-col items-start justify-between gap-4 p-5 sm:p-6"
+      cardHeaderClassName="min-h-36 flex-col items-start justify-between gap-4 "
       cardDescriptionClassName="text-sm font-medium text-muted-foreground"
       cardTitleClassName="whitespace-normal leading-tight sm:text-2xl"
       iconPosition="start"

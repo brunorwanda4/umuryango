@@ -1,19 +1,6 @@
-import {
-  AlertCircleIcon,
-  CheckCircleIcon,
-  FileTextIcon,
-  ReceiptTextIcon,
-  TrendingDownIcon,
-  WalletCardsIcon,
-} from "lucide-react";
 import { useMemo } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
 import type { ExpenseTransaction } from "./types-and-schemas";
 
 const countedExpenseStatuses = new Set<ExpenseTransaction["status"]>([
@@ -87,77 +74,63 @@ export function ExpenseMetricCards({
 
   const cards = [
     {
-      title: "Total Expenses",
-      value: summary.totalExpenses,
-      icon: WalletCardsIcon,
-      isMoney: true,
+      description: "Total Expenses",
+      value: <CompactMoney currency={currency} value={summary.totalExpenses} />,
+      iconImage: "/images/icons/wallet.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Expenses This Month",
-      value: summary.monthExpenses,
-      icon: TrendingDownIcon,
-      isMoney: true,
+      description: "Expenses This Month",
+      value: <CompactMoney currency={currency} value={summary.monthExpenses} />,
+      iconImage: "/images/icons/expense.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Expenses Today",
-      value: summary.todayExpenses,
-      icon: ReceiptTextIcon,
-      isMoney: true,
+      description: "Expenses Today",
+      value: <CompactMoney currency={currency} value={summary.todayExpenses} />,
+      iconImage: "/images/icons/money.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Pending Approval",
-      value: summary.pendingApproval,
-      icon: AlertCircleIcon,
-      isMoney: true,
+      description: "Pending Approval",
+      value: (
+        <CompactMoney currency={currency} value={summary.pendingApproval} />
+      ),
+      iconImage: "/images/icons/clock.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Approved Expenses",
-      value: summary.approvedExpenses,
-      icon: CheckCircleIcon,
-      isMoney: true,
+      description: "Approved Expenses",
+      value: (
+        <CompactMoney currency={currency} value={summary.approvedExpenses} />
+      ),
+      iconImage: "/images/icons/approved.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Expense Records",
+      description: "Expense Records",
       value: summary.recordCount.toString(),
-      icon: FileTextIcon,
+      iconImage: "/images/icons/transaction.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      title: "Largest This Month",
-      value: summary.largestThisMonth,
-      icon: TrendingDownIcon,
-      isMoney: true,
+      description: "Largest This Month",
+      value: (
+        <CompactMoney currency={currency} value={summary.largestThisMonth} />
+      ),
+      iconImage: "/images/icons/quality.png",
+      className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
   ];
 
   return (
-    <section
-      aria-label="Expense metrics"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7"
-    >
-      {cards.map((card) => {
-        const Icon = card.icon;
-
-        return (
-          <Card key={card.title}>
-            <CardHeader className="flex sm:flex-row flex-row-reverse items-center justify-end sm:justify-between gap-3">
-              <div className="min-w-0 max-sm:flex-row max-sm:flex max-sm:items-center max-sm:gap-4">
-                <CardDescription className="max-sm:font-semibold max-sm:text-lg max-sm:flex">
-                  <span>{card.title}</span>{" "}
-                  <span className="block sm:hidden">:</span>
-                </CardDescription>
-                <CardTitle className="mt-1 truncate text-xl sm:text-2xl font-bold">
-                  {card.isMoney ? (
-                    <CompactMoney currency={currency} value={card.value} />
-                  ) : (
-                    card.value
-                  )}
-                </CardTitle>
-              </div>
-              <Icon className="size-5 shrink-0 text-muted-foreground sm:block hidden" />
-            </CardHeader>
-          </Card>
-        );
-      })}
-    </section>
+    <CommonOverviewCardDisplay
+      className="grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7"
+      cardHeaderClassName="min-h-36 flex-col items-start justify-between gap-4 "
+      cardDescriptionClassName="text-sm font-medium text-muted-foreground"
+      cardTitleClassName="whitespace-normal leading-tight sm:text-2xl"
+      iconPosition="start"
+      cards={cards}
+    />
   );
 }
