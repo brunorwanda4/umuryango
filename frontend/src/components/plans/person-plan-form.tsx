@@ -45,7 +45,6 @@ function defaults(
     title: plan?.title ?? "",
     description: plan?.description ?? "",
     dueDate: toDateInput(plan?.dueDate ?? null) || today(),
-    dueTime: plan?.dueTime ?? "",
     priority: plan?.priority ?? "MEDIUM",
     reminderAt: toDateInput(plan?.reminderAt ?? null),
     note: plan?.note ?? "",
@@ -96,7 +95,7 @@ export function PersonPlanForm({
         values.type === "TASK"
           ? new Date(values.dueDate as string).toISOString()
           : null,
-      dueTime: values.type === "TASK" ? values.dueTime || null : null,
+      dueTime: null,
       priority: values.type === "TASK" ? values.priority : null,
       reminderAt: values.reminderAt
         ? new Date(values.reminderAt).toISOString()
@@ -202,21 +201,13 @@ export function PersonPlanForm({
 
           {type === "TASK" ? (
             <>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <CommonFormField
-                  control={form.control}
-                  name="dueDate"
-                  label="Due date"
-                  fieldType="date"
-                  required
-                />
-                <CommonFormField
-                  control={form.control}
-                  name="dueTime"
-                  label="Time"
-                  fieldType="time"
-                />
-              </div>
+              <CommonFormField
+                control={form.control}
+                name="dueDate"
+                label="Due date"
+                fieldType="date"
+                required
+              />
               <CommonFormField
                 control={form.control}
                 name="priority"
