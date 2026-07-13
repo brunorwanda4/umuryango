@@ -109,7 +109,7 @@ const OverviewCardDisplay = ({
           <Card className={cn("hidden sm:block", data.className)}>
             <CardHeader
               className={cn(
-                "flex flex-col items-center justify-end sm:justify-between md:gap-3 ",
+                "flex flex-col items-center justify-end sm:justify-between md:gap-3 p-4",
                 cardHeaderClassName,
               )}
             >
