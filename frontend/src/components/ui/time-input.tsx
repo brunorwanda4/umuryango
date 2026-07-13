@@ -1,6 +1,6 @@
 "use client";
 
-import { format, isValid, parseISO } from "date-fns";
+import { addHours, format, isValid, parseISO } from "date-fns";
 import { ChevronDown, ChevronUp, ClockIcon } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export interface TimeInputProps {
   name?: string;
   value?: string;
   placeholder?: string;
+  defaultOffsetHours?: number | null;
   disabled?: boolean;
   required?: boolean;
   "aria-invalid"?: boolean;
@@ -32,6 +33,7 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
       name,
       value,
       placeholder = "Pick date & time",
+      defaultOffsetHours = 2,
       disabled,
       required,
       "aria-invalid": invalid,
@@ -43,6 +45,12 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
     ref,
   ) {
     const [open, setOpen] = React.useState(false);
+    const [defaultDate] = React.useState(() =>
+      defaultOffsetHours === null
+        ? new Date()
+        : addHours(new Date(), defaultOffsetHours),
+    );
+    const hasInitializedDefault = React.useRef(false);
 
     // Detect format of initial/incoming value
     const formatType = React.useMemo(() => {
@@ -54,7 +62,7 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
 
     // Parse the current value
     const parsedDate = React.useMemo(() => {
-      if (!value) return new Date();
+      if (!value) return defaultDate;
 
       try {
         const date = parseISO(value);
@@ -76,8 +84,19 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
       const date = new Date(value);
       if (isValid(date)) return date;
 
-      return new Date();
-    }, [value]);
+      return defaultDate;
+    }, [defaultDate, value]);
+
+    // Keep the visible default and the parent form value in sync.
+    React.useEffect(() => {
+      if (value || defaultOffsetHours === null || hasInitializedDefault.current)
+        return;
+
+      hasInitializedDefault.current = true;
+      const defaultValue = defaultDate.toISOString();
+      onChange?.(defaultValue);
+      onValueChange?.(defaultValue);
+    }, [defaultDate, defaultOffsetHours, onChange, onValueChange, value]);
 
     // Local temporary state when popover is open
     const [tempDate, setTempDate] = React.useState<Date>(parsedDate);
@@ -284,7 +303,7 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
 
     // Format display string for Trigger
     const displayLabel = React.useMemo(() => {
-      if (!value) return placeholder;
+      if (!value && defaultOffsetHours === null) return placeholder;
       if (formatType === "time") {
         return format(parsedDate, "HH:mm");
       }
@@ -292,7 +311,7 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
         return format(parsedDate, "PPP");
       }
       return format(parsedDate, "MMM d, yyyy, HH:mm");
-    }, [value, parsedDate, formatType, placeholder]);
+    }, [defaultOffsetHours, formatType, parsedDate, placeholder, value]);
 
     return (
       <Popover
@@ -316,7 +335,7 @@ const TimeInput = React.forwardRef<HTMLButtonElement, TimeInputProps>(
             aria-required={required}
             className={cn(
               "h-8 w-full min-w-0 rounded-2xl border border-transparent bg-input/50 px-2.5 py-1 text-base text-left justify-start font-normal transition-[color,box-shadow] duration-200 outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm gap-2",
-              !value && "text-muted-foreground",
+              !value && defaultOffsetHours === null && "text-muted-foreground",
               className,
             )}
           >
