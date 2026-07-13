@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
+import { DataViewToggle } from "@/components/common/table/data-view-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,11 +32,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
 import { hasCapability } from "@/lib/family-access";
+import { cn } from "@/lib/utils";
 import type { FamilyDetail } from "../../dashboard/types";
 import { formatDate } from "../utils";
 import { formatPaymentMethod } from "./expense-utils";
+import { FamilyExpenseItems } from "./family-expense-items";
 import type { ExpenseTransaction } from "./types-and-schemas";
+
+const FAMILY_EXPENSES_VIEW_MODE_STORAGE_KEY =
+  "rwanda-family-family-expenses-view-mode";
 
 export function ExpenseTable({
   filteredTransactions,
@@ -61,6 +68,10 @@ export function ExpenseTable({
   handleDownloadReceipt: (transaction: ExpenseTransaction) => void;
   setOpenCreate: (open: boolean) => void;
 }) {
+  const [viewMode, setViewMode] = usePersistentViewMode(
+    FAMILY_EXPENSES_VIEW_MODE_STORAGE_KEY,
+  );
+
   const columns: ColumnDef<ExpenseTransaction>[] = [
     {
       accessorKey: "date",
@@ -164,7 +175,12 @@ export function ExpenseTable({
           <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(event) => event.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
                   <MoreVerticalIcon className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -232,15 +248,38 @@ export function ExpenseTable({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle>Expense History</CardTitle>
-        <CardDescription>
-          Every recorded family expense with receipts, approvals, and actions.
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
+        <div className="space-y-1">
+          <CardTitle>Expense History</CardTitle>
+          <CardDescription>
+            Every recorded family expense with receipts, approvals, and actions.
+          </CardDescription>
+        </div>
+        <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
-      <CardContent>
+      <CardContent className={cn(viewMode === "items" && "px-0 pb-0")}>
         {filteredTransactions.length ? (
-          <CommonDataTable columns={columns} data={filteredTransactions} />
+          viewMode === "table" ? (
+            <CommonDataTable
+              columns={columns}
+              data={filteredTransactions}
+              getRowAriaLabel={(row) =>
+                `View details for ${row.original.description || "Expense Transaction"}`
+              }
+              onRowClick={(row) => handleActionClick(row.original, "view")}
+              rowClassName={() => "hover:bg-muted/50 cursor-pointer"}
+            />
+          ) : (
+            <FamilyExpenseItems
+              data={filteredTransactions}
+              currency={currency}
+              isAdmin={isAdmin}
+              handleActionClick={handleActionClick}
+              handleSendApproval={handleSendApproval}
+              handleDuplicate={handleDuplicate}
+              handleDownloadReceipt={handleDownloadReceipt}
+            />
+          )
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">

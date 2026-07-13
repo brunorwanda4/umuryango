@@ -470,7 +470,6 @@ export function MoneyExpensesPage({
 					/>
 				</TabsContent>
 				<TabsContent value="overview">
-					{" "}
 					<ExpenseAnalytics
 						transactions={transactions}
 						budgets={money?.budgets ?? []}
