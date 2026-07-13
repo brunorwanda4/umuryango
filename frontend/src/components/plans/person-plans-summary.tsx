@@ -28,7 +28,7 @@ export function PersonPlansSummary({ plans }: { plans: PersonPlan[] }) {
   return (
     <CommonOverviewCardDisplay
       className="grid-cols-2 gap-3 xl:grid-cols-4"
-      cardHeaderClassName="min-h-32 items-start p-5"
+      cardHeaderClassName=" items-start"
       cardDescriptionClassName="font-medium"
       cardTitleClassName="text-2xl"
       iconPosition="start"
@@ -37,7 +37,7 @@ export function PersonPlansSummary({ plans }: { plans: PersonPlan[] }) {
           description: "Due today",
           value: activeTasks.filter((plan) => sameDay(plan.dueDate, now))
             .length,
-          icon: <CalendarClockIcon aria-hidden="true" />,
+          iconImage: "/images/icons/today.png"
         },
         {
           description: "This week",
@@ -45,17 +45,19 @@ export function PersonPlansSummary({ plans }: { plans: PersonPlan[] }) {
             const due = plan.dueDate ? new Date(plan.dueDate) : null;
             return due && due >= new Date(now.toDateString()) && due <= weekEnd;
           }).length,
-          icon: <CalendarDaysIcon aria-hidden="true" />,
+          iconImage: "/images/icons/week.png"
         },
         {
           description: "In progress",
           value: plans.filter((plan) => plan.status === "IN_PROGRESS").length,
-          icon: <LoaderCircleIcon aria-hidden="true" />,
+          iconImage: "/images/icons/rise.png",
+
         },
         {
           description: "Completed",
           value: plans.filter((plan) => plan.status === "COMPLETED").length,
-          icon: <CheckCircle2Icon aria-hidden="true" />,
+          iconImage: "/images/icons/approved.png",
+
         },
       ]}
     />
