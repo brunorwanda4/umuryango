@@ -66,20 +66,22 @@ export function IncomeDashboard({
 
   if (!categories.length) {
     return (
-      <Alert>
-        <AlertTitle>Create an income category</AlertTitle>
-        <AlertDescription>
-          Add your first category before recording income, such as Salary,
-          Business, or Gifts.
-        </AlertDescription>
-        <CreateCategoryForm
-          defaultType="INCOME"
-          existingCategories={categories}
-          familyId={familyId}
-          personal
-          onSuccess={onRetry}
-        />
-      </Alert>
+      <div className="grid place-content-center w-fill h-screen">
+        <Alert className="flex flex-col gap-4">
+          <AlertTitle>Create an income category</AlertTitle>
+          <AlertDescription>
+            Add your first category before recording income, such as Salary,
+            Business, or Gifts.
+          </AlertDescription>
+          <CreateCategoryForm
+            defaultType="INCOME"
+            existingCategories={categories}
+            familyId={familyId}
+            personal
+            onSuccess={onRetry}
+          />
+        </Alert>
+      </div>
     );
   }
 
