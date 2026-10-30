@@ -2,7 +2,6 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   BadgeDollarSignIcon,
-  BellIcon,
   BookOpenCheckIcon,
   CalendarDaysIcon,
   ClipboardListIcon,
@@ -25,10 +24,7 @@ import {
 } from "lucide-react";
 import type { SidebarIconSource } from "./sidebar-icon";
 
-const sidebarIcon = (
-  imageName: string,
-  lineIcon: LucideIcon,
-): SidebarIconSource => ({
+const sidebarIcon = (imageName: string, lineIcon: LucideIcon): SidebarIconSource => ({
   image: {
     src: `/images/icons/${imageName}.png`,
   },
@@ -268,16 +264,6 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
           icon: sidebarIcon("calendar", CalendarDaysIcon),
         },
         {
-          title: "Announcements",
-          href: `${familyHref}/announcements`,
-          icon: sidebarIcon("announcement", BellIcon),
-        },
-        {
-          title: "Documents",
-          href: `${familyHref}/documents`,
-          icon: sidebarIcon("documents", FileTextIcon),
-        },
-        {
           title: "Contacts",
           href: `${familyHref}/contacts`,
           icon: sidebarIcon("contacts", ContactRoundIcon),
@@ -298,9 +284,7 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
   ];
 };
 
-export const getFamilySettingsNavigation = (
-  familySlug: string,
-): NavigationGroup[] => {
+export const getFamilySettingsNavigation = (familySlug: string): NavigationGroup[] => {
   const familyHref = `/family/${familySlug}`;
 
   return [
@@ -315,11 +299,6 @@ export const getFamilySettingsNavigation = (
           title: "Members",
           href: `${familyHref}/members`,
           icon: sidebarIcon("members", UsersIcon),
-        },
-        {
-          title: "Documents",
-          href: `${familyHref}/documents`,
-          icon: sidebarIcon("documents", FileTextIcon),
         },
       ],
     },
@@ -339,11 +318,7 @@ export const workspaceLinks = [
   },
 ];
 
-export function isSettingsPath(
-  pathname: string,
-  mode: AppSidebarMode,
-  encodedFamilySlug: string,
-) {
+export function isSettingsPath(pathname: string, mode: AppSidebarMode, encodedFamilySlug: string) {
   if (mode === "family" && encodedFamilySlug) {
     const settingsHref = `/family/${encodedFamilySlug}/settings`;
 
@@ -358,12 +333,7 @@ export function isSettingsPath(
   );
 }
 
-export function isActivePath(
-  pathname: string,
-  href: string,
-  currentHash = "",
-  exact = false,
-) {
+export function isActivePath(pathname: string, href: string, currentHash = "", exact = false) {
   const [hrefPath, hrefHash] = href.split("#");
   const targetPath = hrefPath || href;
 

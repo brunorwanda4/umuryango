@@ -75,9 +75,7 @@ export default function AppNavbarNotifications() {
   };
 
   const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, unread: false } : n)),
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, unread: false } : n)));
   };
 
   // Get notification type icon
@@ -111,9 +109,7 @@ export default function AppNavbarNotifications() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-1 md:w-96">
         <div className="flex items-center justify-between px-3 py-2">
-          <DropdownMenuLabel className="p-0 font-semibold text-sm">
-            Notifications
-          </DropdownMenuLabel>
+          <DropdownMenuLabel className="p-0 font-semibold text-sm">Notifications</DropdownMenuLabel>
           {unreadCount > 0 && (
             <button
               type="button"
@@ -150,9 +146,7 @@ export default function AppNavbarNotifications() {
                     <p
                       className={cn(
                         "text-xs truncate font-medium",
-                        notification.unread
-                          ? "text-foreground"
-                          : "text-muted-foreground",
+                        notification.unread ? "text-foreground" : "text-muted-foreground",
                       )}
                     >
                       {notification.title}
@@ -174,9 +168,7 @@ export default function AppNavbarNotifications() {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() =>
-            router.push(isFamilyView ? `${familyHref}/announcements` : "/me")
-          }
+          onClick={() => router.push(isFamilyView ? familyHref : "/me")}
           className="justify-center text-xs text-muted-foreground font-medium py-2 rounded-xl focus:bg-accent"
         >
           View all activity
