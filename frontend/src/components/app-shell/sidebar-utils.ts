@@ -18,13 +18,15 @@ import {
   ReceiptTextIcon,
   SettingsIcon,
   ShieldCheckIcon,
-  TargetIcon,
   UsersIcon,
   WalletCardsIcon,
 } from "lucide-react";
 import type { SidebarIconSource } from "./sidebar-icon";
 
-const sidebarIcon = (imageName: string, lineIcon: LucideIcon): SidebarIconSource => ({
+const sidebarIcon = (
+  imageName: string,
+  lineIcon: LucideIcon,
+): SidebarIconSource => ({
   image: {
     src: `/images/icons/${imageName}.png`,
   },
@@ -113,6 +115,11 @@ export const personalNavigation: NavigationGroup[] = [
         title: "Plans",
         href: "/me/plans",
         icon: sidebarIcon("plan", ListChecksIcon),
+      },
+      {
+        title: "Contacts",
+        href: "/me/contacts",
+        icon: sidebarIcon("contacts", ContactRoundIcon),
       },
       {
         title: "Debts",
@@ -284,7 +291,9 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
   ];
 };
 
-export const getFamilySettingsNavigation = (familySlug: string): NavigationGroup[] => {
+export const getFamilySettingsNavigation = (
+  familySlug: string,
+): NavigationGroup[] => {
   const familyHref = `/family/${familySlug}`;
 
   return [
@@ -318,7 +327,11 @@ export const workspaceLinks = [
   },
 ];
 
-export function isSettingsPath(pathname: string, mode: AppSidebarMode, encodedFamilySlug: string) {
+export function isSettingsPath(
+  pathname: string,
+  mode: AppSidebarMode,
+  encodedFamilySlug: string,
+) {
   if (mode === "family" && encodedFamilySlug) {
     const settingsHref = `/family/${encodedFamilySlug}/settings`;
 
@@ -333,7 +346,12 @@ export function isSettingsPath(pathname: string, mode: AppSidebarMode, encodedFa
   );
 }
 
-export function isActivePath(pathname: string, href: string, currentHash = "", exact = false) {
+export function isActivePath(
+  pathname: string,
+  href: string,
+  currentHash = "",
+  exact = false,
+) {
   const [hrefPath, hrefHash] = href.split("#");
   const targetPath = hrefPath || href;
 

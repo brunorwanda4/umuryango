@@ -531,7 +531,13 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
-export function FamilyContactsPage({ familyName }: { familyName: string }) {
+export function FamilyContactsPage({
+  familyName,
+  personal = false,
+}: {
+  familyName?: string;
+  personal?: boolean;
+}) {
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [contacts, setContacts] = useState<FamilyContact[]>([]);
   const [filters, setFilters] = useState(EMPTY_CONTACT_FILTERS);
@@ -555,7 +561,9 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
 
       const familyResponse = await apiRequest<undefined, FamilyDetail>(
         "get",
-        `/families/${encodeURIComponent(familyName)}`,
+        personal
+          ? "/families/personal-workspace"
+          : `/families/${encodeURIComponent(familyName ?? "")}`,
       );
 
       if (!familyResponse.ok || !familyResponse.data) {
@@ -572,7 +580,8 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
 
       if (!contactsResponse.ok || !contactsResponse.data) {
         throw new Error(
-          contactsResponse.message ?? "Failed to load family contacts.",
+          contactsResponse.message ??
+            `Failed to load ${personal ? "personal" : "family"} contacts.`,
         );
       }
 
@@ -582,7 +591,7 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
     } finally {
       setLoading(false);
     }
-  }, [familyName]);
+  }, [familyName, personal]);
 
   useEffect(() => {
     fetchData();
@@ -613,7 +622,11 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
   );
   const handleDelete = async (contact: FamilyContact) => {
     if (!family) return;
-    if (!window.confirm(`Delete ${contact.fullName} from family contacts?`)) {
+    if (
+      !window.confirm(
+        `Delete ${contact.fullName} from ${personal ? "personal" : "family"} contacts?`,
+      )
+    ) {
       return;
     }
 
@@ -679,7 +692,8 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
           </EmptyMedia>
           <EmptyTitle>Contacts could not load</EmptyTitle>
           <EmptyDescription>
-            {error || "Family workspace not found."}
+            {error ||
+              `${personal ? "Personal" : "Family"} workspace not found.`}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -704,7 +718,7 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
               <UsersRoundIcon className="size-5 text-muted-foreground" />
             </span>
             <h1 className="font-bold text-2xl tracking-tight sm:text-3xl">
-              Family Contacts
+              {personal ? "Personal Contacts" : "Family Contacts"}
             </h1>
           </div>
           <p className="max-w-4xl text-muted-foreground text-sm leading-6">

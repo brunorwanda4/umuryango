@@ -214,6 +214,7 @@ export function LoansPage() {
         currency={family.defaultCurrency}
         familyId={family.id}
         open={openLoan}
+        onContactsImported={() => void load()}
         onOpenChange={setOpenLoan}
         onPersonCreated={handlePersonCreated}
         onSuccess={() => void load()}
@@ -222,6 +223,7 @@ export function LoansPage() {
         familyId={family.id}
         open={openPerson}
         onOpenChange={setOpenPerson}
+        onContactsImported={() => void load()}
         onCreated={handlePersonCreated}
       />
       <RecordPaymentForm

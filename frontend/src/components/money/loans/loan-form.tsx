@@ -36,6 +36,7 @@ export function LoanForm({
   contacts,
   currency,
   familyId,
+  onContactsImported,
   onOpenChange,
   onPersonCreated,
   onSuccess,
@@ -45,6 +46,7 @@ export function LoanForm({
   contacts: FamilyContact[];
   currency: string;
   familyId: string;
+  onContactsImported: () => void;
   onOpenChange: (open: boolean) => void;
   onPersonCreated: (person: FamilyContact) => void;
   onSuccess: () => void;
@@ -162,6 +164,7 @@ export function LoanForm({
             contacts={contacts}
             control={form.control}
             familyId={familyId}
+            onContactsImported={onContactsImported}
             onPersonCreated={(person) => {
               onPersonCreated(person);
               form.setValue("personContactId", person.id, {

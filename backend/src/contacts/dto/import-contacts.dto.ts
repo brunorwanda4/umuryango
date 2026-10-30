@@ -23,6 +23,19 @@ export class ImportContactItemDto {
   @IsOptional()
   @IsString()
   @MaxLength(40)
+  @Transform(({ value }) => {
+    if (typeof value !== 'string') return value;
+    const candidate = value
+      .replace(/^tel:\s*/i, '')
+      .split(/\s*(?:,|;|\||\n|\bor\b)\s*/i)[0]
+      ?.replace(/\s*(?:ext\.?|extension|x)\s*\d+.*$/i, '')
+      .trim();
+    if (!candidate) return undefined;
+    const normalized = candidate.startsWith('+')
+      ? `+${candidate.slice(1).replace(/\D/g, '')}`
+      : candidate.replace(/\D/g, '');
+    return normalized.length <= 40 ? normalized : undefined;
+  })
   phoneNumber?: string;
 
   @ApiProperty({ required: false, maxLength: 180 })
