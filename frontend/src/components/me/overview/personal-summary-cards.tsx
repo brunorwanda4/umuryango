@@ -1,13 +1,22 @@
+import { ArrowDownLeftIcon, ArrowUpRightIcon } from "lucide-react";
+import Link from "next/link";
 import { CompactMoney } from "@/components/common/money/compact-money";
-import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import type { PersonalOverviewData } from "./personal-overview-data";
 import { addMinorUnits } from "./personal-overview-data";
-import { link } from "node:fs/promises";
 
 export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
   const allIncome = data.income?.summary.allTimeTotalMinorUnits;
   const allExpenses = data.expenses?.summary.allTimeTotalMinorUnits;
   const balance = addMinorUnits(allIncome) - addMinorUnits(allExpenses);
+  const income = data.income?.summary.periodTotalMinorUnits ?? "0";
+  const expenses = data.expenses?.summary.periodTotalMinorUnits ?? "0";
   const activePlans = data.plans.filter(
     (plan) => plan.status === "PENDING" || plan.status === "IN_PROGRESS",
   ).length;
@@ -15,89 +24,128 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
     (loan) => loan.status === "ACTIVE" || loan.status === "OVERDUE",
   ).length;
   const moneyAvailable = Boolean(data.income && data.expenses);
-
-  const cards = [
-    {
-      description: "Total balance",
-      value: moneyAvailable ? (
-        <CompactMoney currency={data.currency} value={balance.toString()} />
-      ) : (
-        "—"
-      ),
-      footer: moneyAvailable
-        ? "Income less expenses"
-        : "Money data unavailable",
-      iconImage: "/images/icons/wallet.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      link: "/me/money",
-    },
-    {
-      description: "This month income",
-      value: data.income ? (
-        <CompactMoney
-          currency={data.currency}
-          value={data.income.summary.periodTotalMinorUnits}
-        />
-      ) : (
-        "—"
-      ),
-      footer: `${data.income?.summary.transactionCount ?? 0} records this month`,
-      iconImage: "/images/icons/income.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      link: "/me/money/income",
-    },
-    {
-      description: "This month expenses",
-      value: data.expenses ? (
-        <CompactMoney
-          currency={data.currency}
-          value={data.expenses.summary.periodTotalMinorUnits}
-        />
-      ) : (
-        "—"
-      ),
-      footer: `${data.expenses?.summary.transactionCount ?? 0} records this month`,
-      iconImage: "/images/icons/expense.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      link: "/me/money/expenses",
-    },
-    {
-      description: "Active plans",
-      value: activePlans.toLocaleString(),
-      footer: `${data.plans.filter((plan) => plan.status === "COMPLETED").length} completed`,
-      iconImage: "/images/icons/plan.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      link: "/me/plans",
-    },
-    {
-      description: "Active loans",
-      value: activeLoans.toLocaleString(),
-      footer: `${data.loans.filter((loan) => loan.status === "OVERDUE").length} overdue`,
-      iconImage: "/images/icons/loan.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      link: "/me/money/loans",
-    },
-    {
-      description: "Family workspaces",
-      value: data.families.length.toLocaleString(),
-      footer:
-        data.families.length === 1
-          ? "1 workspace available"
-          : "Workspaces available",
-      iconImage: "/images/icons/family.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      link: "/family",
-    },
-  ];
-
+  const cardClassName = "card card-border gap-0 rounded-[20px] py-5 shadow-sm";
   return (
-    <CommonOverviewCardDisplay
-      className="grid-cols-1 gap-3 lg:grid-cols-3 2xl:grid-cols-6"
-      cardHeaderClassName="min-h-[10.75rem] flex-col items-start justify-between gap-4 p-5 sm:p-6"
-      cardDescriptionClassName="text-sm font-medium text-muted-foreground"
-      cardTitleClassName="whitespace-normal leading-tight sm:text-2xl"
-      iconPosition="start"
-      cards={cards}
-    />
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr]">
+      <Card className="family-balance-card gap-0 rounded-[22px] border py-[22px] text-white shadow-xl">
+        <CardHeader className="px-[22px]">
+          <CardDescription className="font-mono text-[17px] font-semibold uppercase tracking-[0.14em] text-white/90">
+            Total balance ({data.currency})
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="mt-7 flex flex-1 flex-col px-[22px]">
+          <Link href="/me/money" className="block">
+            <CompactMoney
+              className="mt-2 font-mono text-4xl font-semibold tracking-[0.06em] text-white sm:text-5xl"
+              currency={data.currency}
+              value={moneyAvailable ? balance.toString() : 0}
+            />
+            {!moneyAvailable ? (
+              <p className="mt-2 text-sm text-white/70">
+                Money data unavailable
+              </p>
+            ) : null}
+          </Link>
+          <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
+            <BalanceStat
+              currency={data.currency}
+              label="Income this month"
+              value={income}
+            />
+            <BalanceStat
+              currency={data.currency}
+              label="Spent this month"
+              value={expenses}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className={cardClassName}>
+        <CardHeader className="px-5 pb-3.5">
+          <CardTitle className="font-fraunces text-xl">
+            Quick add data
+          </CardTitle>
+          <CardDescription>
+            Add a personal income or expense record.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 px-5">
+          <div className="grid grid-cols-3 gap-2">
+            <SummaryMetric label="Active plans" value={activePlans} />
+            <SummaryMetric label="Active loans" value={activeLoans} />
+            <SummaryMetric label="Workspaces" value={data.families.length} />
+          </div>
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            <QuickAddLink
+              href="/me/money/income"
+              label="Add income"
+              icon={ArrowDownLeftIcon}
+              iconClassName="text-emerald-500"
+            />
+            <QuickAddLink
+              href="/me/money/expenses"
+              label="Add expense"
+              icon={ArrowUpRightIcon}
+              iconClassName="text-destructive"
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function BalanceStat({
+  currency,
+  label,
+  value,
+}: {
+  currency: string;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/6 p-3">
+      <small className="block text-[13px] text-white/70">{label}</small>
+      <CompactMoney
+        className="mt-1 block font-mono text-lg font-semibold text-white"
+        currency={currency}
+        value={value}
+      />
+    </div>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border bg-muted/40 p-2.5">
+      <p className="text-muted-foreground text-[11px] leading-tight">{label}</p>
+      <p className="mt-1 font-mono text-lg font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function QuickAddLink({
+  href,
+  label,
+  icon: Icon,
+  iconClassName,
+}: {
+  href: string;
+  label: string;
+  icon: typeof ArrowDownLeftIcon;
+  iconClassName: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex min-h-[74px] flex-col items-start gap-2.5 rounded-[14px] border p-3.5 transition-colors hover:bg-muted"
+    >
+      <span className="flex size-9 items-center justify-center rounded-[10px] bg-muted">
+        <Icon className={iconClassName} aria-hidden="true" />
+      </span>
+      <span className="font-medium text-sm">{label}</span>
+    </Link>
   );
 }

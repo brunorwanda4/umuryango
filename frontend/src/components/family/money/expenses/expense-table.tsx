@@ -1,18 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  CheckCircleIcon,
-  CopyIcon,
-  DownloadIcon,
-  EyeIcon,
-  LockIcon,
-  MoreVerticalIcon,
-  PencilIcon,
-  PlusIcon,
-  ReceiptTextIcon,
-  SendIcon,
-  Trash2Icon,
-  UploadIcon,
-} from "lucide-react";
+import { PlusIcon, ReceiptTextIcon } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { DataViewToggle } from "@/components/common/table/data-view-toggle";
@@ -25,18 +12,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
 import { hasCapability } from "@/lib/family-access";
 import { cn } from "@/lib/utils";
 import type { FamilyDetail } from "../../dashboard/types";
 import { formatDate } from "../utils";
+import {
+  type ExpenseAction,
+  ExpenseActionsDropdown,
+} from "./expense-actions-dropdown";
 import { formatPaymentMethod } from "./expense-utils";
 import { FamilyExpenseItems } from "./family-expense-items";
 import type { ExpenseTransaction } from "./types-and-schemas";
@@ -61,7 +45,7 @@ export function ExpenseTable({
   family: FamilyDetail;
   handleActionClick: (
     transaction: ExpenseTransaction,
-    action: "view" | "edit" | "delete" | "receipt",
+    action: ExpenseAction,
   ) => void;
   handleSendApproval: (transaction: ExpenseTransaction) => void;
   handleDuplicate: (transaction: ExpenseTransaction) => void;
@@ -165,84 +149,18 @@ export function ExpenseTable({
     {
       id: "actions",
       header: () => <span className="flex justify-end">Actions</span>,
-      cell: ({ row }) => {
-        const transaction = row.original;
-        const isApproved = transaction.status === "APPROVED";
-        const canEdit = !isApproved || isAdmin;
-        const firstReceipt = transaction.receipts?.[0];
-
-        return (
-          <div className="flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(event) => event.stopPropagation()}
-                  onKeyDown={(event) => event.stopPropagation()}
-                >
-                  <MoreVerticalIcon className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="md:min-w-60 min-w-40">
-                <DropdownMenuItem
-                  onClick={() => handleActionClick(transaction, "view")}
-                >
-                  <EyeIcon className="mr-2 size-4" />
-                  View
-                </DropdownMenuItem>
-                {canEdit ? (
-                  <DropdownMenuItem
-                    onClick={() => handleActionClick(transaction, "edit")}
-                  >
-                    <PencilIcon className="mr-2 size-4" />
-                    Edit
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem disabled>
-                    <LockIcon className="mr-2 size-4" />
-                    Locked
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={() => handleActionClick(transaction, "delete")}
-                >
-                  <Trash2Icon className="mr-2 size-4" />
-                  Delete
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => handleActionClick(transaction, "receipt")}
-                >
-                  <UploadIcon className="mr-2 size-4" />
-                  Upload Receipt
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={!firstReceipt}
-                  onClick={() => handleDownloadReceipt(transaction)}
-                >
-                  <DownloadIcon className="mr-2 size-4" />
-                  Download Receipt
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleSendApproval(transaction)}
-                >
-                  {transaction.status === "PENDING" ? (
-                    <CheckCircleIcon className="mr-2 size-4" />
-                  ) : (
-                    <SendIcon className="mr-2 size-4" />
-                  )}
-                  Send for Approval
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleDuplicate(transaction)}>
-                  <CopyIcon className="mr-2 size-4" />
-                  Duplicate
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <ExpenseActionsDropdown
+            tx={row.original}
+            isAdmin={isAdmin}
+            handleActionClick={handleActionClick}
+            handleSendApproval={handleSendApproval}
+            handleDuplicate={handleDuplicate}
+            handleDownloadReceipt={handleDownloadReceipt}
+          />
+        </div>
+      ),
     },
   ];
 

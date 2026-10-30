@@ -72,11 +72,7 @@ export function AppSidebarShell(props: AppSidebarShellProps) {
   );
 }
 
-function AppSidebarContent({
-  children,
-  mode,
-  familySlug,
-}: AppSidebarShellProps) {
+function AppSidebarContent({ children, mode, familySlug }: AppSidebarShellProps) {
   const pathname = usePathname();
   const encodedFamilySlug = encodeURIComponent(familySlug ?? "");
   const { setOpenMobile, open } = useSidebar();
@@ -92,14 +88,9 @@ function AppSidebarContent({
       ? getFamilySettingsNavigation(encodedFamilySlug)
       : personalSettingsNavigation;
   const isSettingsArea = isSettingsPath(pathname, mode, encodedFamilySlug);
-  const [sidebarView, setSidebarView] = useState<SidebarView>(
-    isSettingsArea ? "settings" : "main",
-  );
-  const showingSettingsNavigation =
-    isSettingsArea && sidebarView === "settings";
-  const activeNavigation = showingSettingsNavigation
-    ? settingsNavigation
-    : navigation;
+  const [sidebarView, setSidebarView] = useState<SidebarView>(isSettingsArea ? "settings" : "main");
+  const showingSettingsNavigation = isSettingsArea && sidebarView === "settings";
+  const activeNavigation = showingSettingsNavigation ? settingsNavigation : navigation;
   const sidebarTitle = showingSettingsNavigation
     ? mode === "family"
       ? "Family settings"
@@ -129,10 +120,7 @@ function AppSidebarContent({
         <SidebarHeader>
           <div className="flex flex-col gap-2 px-1">
             {isSettingsArea ? (
-              <SidebarViewSwitcher
-                value={sidebarView}
-                onChange={setSidebarView}
-              />
+              <SidebarViewSwitcher value={sidebarView} onChange={setSidebarView} />
             ) : null}
           </div>
         </SidebarHeader>
@@ -149,9 +137,7 @@ function AppSidebarContent({
             <SidebarMenuItem>
               <WorkspaceSwitcher
                 currentFamilyName={familyName}
-                currentFamilyHref={
-                  encodedFamilySlug ? `/family/${encodedFamilySlug}` : undefined
-                }
+                currentFamilyHref={encodedFamilySlug ? `/family/${encodedFamilySlug}` : undefined}
                 mode={mode}
                 user={user}
               />
@@ -163,7 +149,7 @@ function AppSidebarContent({
       </Sidebar>
       <SidebarInset className="flex flex-col pt-14">
         <AppNavbar sidebarTitle={sidebarTitle} />
-        <main className="flex-1 min-w-0 max-w-full p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6">
+        <main className="flex-1 min-w-0 max-w-full p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6 md:px-16">
           <div className="min-h-screen">{children}</div>
           <AppFooter />
         </main>

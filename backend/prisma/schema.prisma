@@ -23,6 +23,7 @@ enum AuthAuditAction {
   REGISTER
   EMAIL_VERIFICATION
   PASSWORD_RESET
+  PROFILE_UPDATE
 }
 
 enum AuthAuditResult {
@@ -326,6 +327,7 @@ enum FamilyInviteStatus {
 model User {
   id                           String                      @id @default(cuid())
   email                        String                      @unique
+  pendingEmail                 String?                     @unique
   phoneNumber                  String?                     @unique
   fullName                     String
   gender                       String?

@@ -86,13 +86,10 @@ export function FamilyFinanceDashboard({
         <Card className="family-balance-card gap-0 rounded-[22px] border py-[22px] text-white shadow-xl">
           <CardHeader className="px-[22px]">
             <CardDescription className="font-mono font-semibold text-[17px] text-white/90 tracking-[0.14em] uppercase">
-              Rwanda Family
+              Total balance ({currency})
             </CardDescription>
           </CardHeader>
           <CardContent className="mt-7 flex flex-1 flex-col px-[22px]">
-            <p className="font-mono text-white/60 text-xs tracking-[0.12em] uppercase">
-              Total balance ({currency})
-            </p>
             <CompactMoney
               className="mt-2 font-mono font-semibold text-4xl tracking-[0.06em] sm:text-5xl"
               currency={currency}

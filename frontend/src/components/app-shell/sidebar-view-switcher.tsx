@@ -1,18 +1,6 @@
 "use client";
 
-import {
-  ChevronsUpDownIcon,
-  LayoutDashboardIcon,
-  SettingsIcon,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ChevronLeftIcon, SettingsIcon } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -27,34 +15,24 @@ export function SidebarViewSwitcher({
   value: SidebarView;
   onChange: (value: SidebarView) => void;
 }) {
-  const label = value === "settings" ? "Settings sidebar" : "Main sidebar";
-  const Icon = value === "settings" ? SettingsIcon : LayoutDashboardIcon;
+  const showingSettings = value === "settings";
+  const label = showingSettings
+    ? "Back to main sidebar"
+    : "Open settings sidebar";
+  const Icon = showingSettings ? ChevronLeftIcon : SettingsIcon;
 
   return (
     <SidebarMenu className="group-data-[collapsible=icon]:hidden">
       <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton size="sm" tooltip={label}>
-              <Icon aria-hidden="true" />
-              <span>{label}</span>
-              <ChevronsUpDownIcon aria-hidden="true" className="ml-auto" />
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="bottom" align="start">
-            <DropdownMenuLabel>Sidebar</DropdownMenuLabel>
-            <DropdownMenuGroup>
-              <DropdownMenuItem onSelect={() => onChange("main")}>
-                <LayoutDashboardIcon aria-hidden="true" />
-                Main sidebar
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => onChange("settings")}>
-                <SettingsIcon aria-hidden="true" />
-                Settings sidebar
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <SidebarMenuButton
+          className="h-9"
+          tooltip={label}
+          aria-label={label}
+          onClick={() => onChange(showingSettings ? "main" : "settings")}
+        >
+          <Icon aria-hidden="true" />
+          <span>Settings</span>
+        </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>
   );

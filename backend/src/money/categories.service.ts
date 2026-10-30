@@ -322,10 +322,34 @@ export class CategoriesService {
     await this.requireMembership(userId, familyId);
     const existing = await this.findPersonalCategory(userId, familyId, id);
 
+    const [txCount, budgetCount, loanCount] = await Promise.all([
+      this.prisma.familyTransaction.count({ where: { categoryId: id } }),
+      this.prisma.familyBudget.count({ where: { categoryId: id } }),
+      this.prisma.familyLoan.count({ where: { categoryId: id } }),
+    ]);
+
+    const hasUsage = txCount + budgetCount + loanCount > 0;
+
     return this.prisma.$transaction(async (tx) => {
-      const category = await tx.familyTransactionCategory.update({
+      if (hasUsage) {
+        const category = await tx.familyTransactionCategory.update({
+          where: { id },
+          data: { status: CategoryStatus.INACTIVE },
+        });
+        await tx.familyAuditEvent.create({
+          data: {
+            familyId,
+            actorId: userId,
+            action: FamilyAuditAction.CATEGORY_ARCHIVED,
+            before: this.auditSnapshot(existing),
+            after: this.auditSnapshot(category),
+          },
+        });
+        return category;
+      }
+
+      const category = await tx.familyTransactionCategory.delete({
         where: { id },
-        data: { status: CategoryStatus.INACTIVE },
       });
       await tx.familyAuditEvent.create({
         data: {
@@ -333,7 +357,6 @@ export class CategoriesService {
           actorId: userId,
           action: FamilyAuditAction.CATEGORY_ARCHIVED,
           before: this.auditSnapshot(existing),
-          after: this.auditSnapshot(category),
         },
       });
       return category;

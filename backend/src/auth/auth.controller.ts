@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
@@ -22,13 +23,14 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
-import { AuthService, type LoginResult } from './auth.service';
 import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from './auth.constants';
+import { AuthService, type LoginResult } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import type { GoogleUser } from './strategies/google.strategy';
 
@@ -219,6 +221,56 @@ export class AuthController {
     return {
       data: { user },
       message: 'Authenticated user retrieved.',
+    };
+  }
+
+  @Patch('me')
+  @ApiOperation({ summary: 'Update the currently authenticated user profile' })
+  @ApiOkResponse({ description: 'Profile updated successfully.' })
+  @ApiConflictResponse({
+    description: 'The requested email or phone number is already registered.',
+  })
+  @ApiUnauthorizedResponse({ description: 'No valid session was found.' })
+  async updateMe(
+    @Body() updateProfileDto: UpdateProfileDto,
+    @Req() request: Request,
+  ) {
+    const accessToken = request.cookies?.[ACCESS_COOKIE_NAME] as
+      | string
+      | undefined;
+    const result = await this.authService.updateCurrentUser(
+      accessToken,
+      updateProfileDto,
+      {
+        ipAddress: request.ip,
+        userAgent: request.get('user-agent'),
+      },
+    );
+
+    return {
+      data: result,
+      message: result.requiresEmailVerification
+        ? 'Profile updated. Verify your new email address.'
+        : 'Profile updated successfully.',
+    };
+  }
+
+  @Post('me/avatar')
+  @ApiOperation({ summary: 'Generate a new avatar for the current user' })
+  @ApiOkResponse({ description: 'Avatar updated successfully.' })
+  @ApiUnauthorizedResponse({ description: 'No valid session was found.' })
+  async updateMyAvatar(@Req() request: Request) {
+    const accessToken = request.cookies?.[ACCESS_COOKIE_NAME] as
+      | string
+      | undefined;
+    const user = await this.authService.updateCurrentUserAvatar(accessToken, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent'),
+    });
+
+    return {
+      data: { user },
+      message: 'Avatar updated successfully.',
     };
   }
 

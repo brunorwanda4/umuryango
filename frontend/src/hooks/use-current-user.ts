@@ -9,6 +9,10 @@ export type CurrentUser = {
   phoneNumber: string | null;
   fullName: string;
   avatarUrl: string | null;
+  pendingEmail: string | null;
+  gender: string | null;
+  emailVerified: boolean;
+  createdAt: string;
 };
 
 export function useCurrentUser() {

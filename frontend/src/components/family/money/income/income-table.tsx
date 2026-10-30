@@ -1,33 +1,21 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  CheckCircleIcon,
-  CoinsIcon,
-  EyeIcon,
-  LockIcon,
-  MoreVerticalIcon,
-  PencilIcon,
-  PlusIcon,
-  Trash2Icon,
-  UploadIcon,
-} from "lucide-react";
+import { CoinsIcon, PlusIcon } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { DataViewToggle } from "@/components/common/table/data-view-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
 import { hasCapability } from "@/lib/family-access";
 import { cn } from "@/lib/utils";
 import type { FamilyDetail } from "../../dashboard/types";
 import { formatDate } from "../utils";
 import { FamilyIncomeItems } from "./family-income-items";
+import {
+  type IncomeAction,
+  IncomeActionsDropdown,
+} from "./income-actions-dropdown";
 import type { IncomeTransaction } from "./types-and-schemas";
 
 const FAMILY_INCOME_VIEW_MODE_STORAGE_KEY =
@@ -60,10 +48,7 @@ export function IncomeTable({
   currency: string;
   isAdmin: boolean;
   family: FamilyDetail;
-  handleActionClick: (
-    tx: IncomeTransaction,
-    action: "view" | "edit" | "delete" | "receipt",
-  ) => void;
+  handleActionClick: (tx: IncomeTransaction, action: IncomeAction) => void;
   handleSendApproval: (tx: IncomeTransaction) => void;
   setOpenCreate: (open: boolean) => void;
 }) {
@@ -213,74 +198,17 @@ export function IncomeTable({
     {
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => {
-        const tx = row.original;
-        const txIsApproved = tx.status === "APPROVED";
-        const canEditThisTx = !txIsApproved || isAdmin;
-
-        return (
-          <div className="flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={(event) => event.stopPropagation()}
-                  onKeyDown={(event) => event.stopPropagation()}
-                >
-                  <MoreVerticalIcon className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className=" min-w-44">
-                <DropdownMenuItem onClick={() => handleActionClick(tx, "view")}>
-                  <EyeIcon className="size-4 mr-2" />
-                  View Details
-                </DropdownMenuItem>
-
-                {canEditThisTx ? (
-                  <DropdownMenuItem
-                    onClick={() => handleActionClick(tx, "edit")}
-                  >
-                    <PencilIcon className="size-4 mr-2" />
-                    Edit Record
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem disabled className="text-muted-foreground">
-                    <LockIcon className="size-4 mr-2" />
-                    Locked (Approved)
-                  </DropdownMenuItem>
-                )}
-
-                <DropdownMenuItem
-                  onClick={() => handleActionClick(tx, "receipt")}
-                >
-                  <UploadIcon className="size-4 mr-2" />
-                  Attach Receipt
-                </DropdownMenuItem>
-
-                {tx.status === "PENDING" &&
-                  hasCapability(family, "APPROVE_EXPENSE") && (
-                    <DropdownMenuItem
-                      onClick={() => handleSendApproval(tx)}
-                      className="text-primary font-medium"
-                    >
-                      <CheckCircleIcon className="size-4 mr-2" />
-                      Approve Income
-                    </DropdownMenuItem>
-                  )}
-
-                <DropdownMenuItem
-                  onClick={() => handleActionClick(tx, "delete")}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2Icon className="size-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <IncomeActionsDropdown
+            tx={row.original}
+            family={family}
+            isAdmin={isAdmin}
+            handleActionClick={handleActionClick}
+            handleSendApproval={handleSendApproval}
+          />
+        </div>
+      ),
     },
   ];
 

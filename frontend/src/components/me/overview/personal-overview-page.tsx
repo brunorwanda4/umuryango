@@ -7,12 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FamilyWorkspacesCard } from "./family-workspaces-card";
 import { LoansOverviewCard } from "./loans-overview-card";
 import { MoneyOverviewCard } from "./money-overview-card";
-import OverviewQuickActions from "./overview-quick-actions";
 import { PersonalDashboardHeader } from "./personal-dashboard-header";
 import { usePersonalOverviewData } from "./personal-overview-data";
 import { PersonalSummaryCards } from "./personal-summary-cards";
 import { PlansOverviewCard } from "./plans-overview-card";
-import { QuickActionsCard } from "./quick-actions-card";
 import { RecentActivityCard } from "./recent-activity-card";
 
 export function PersonalOverviewPage() {
@@ -27,11 +25,7 @@ export function PersonalOverviewPage() {
           <AlertTitle>Personal overview could not load</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
-        <Button
-          variant="outline"
-          className="w-fit"
-          onClick={() => void reload()}
-        >
+        <Button variant="outline" className="w-fit" onClick={() => void reload()}>
           <RefreshCwIcon data-icon="inline-start" aria-hidden="true" />
           Try again
         </Button>
@@ -41,51 +35,30 @@ export function PersonalOverviewPage() {
 
   const firstName = data.user?.fullName.split(" ")[0] || undefined;
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:gap-5">
       <PersonalDashboardHeader firstName={firstName} />
       {data.warnings.length > 0 ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
           <AlertTitle>Some information needs attention</AlertTitle>
-          <AlertDescription>
-            {[...new Set(data.warnings)].join(" ")}
-          </AlertDescription>
+          <AlertDescription>{[...new Set(data.warnings)].join(" ")}</AlertDescription>
         </Alert>
       ) : null}
       <PersonalSummaryCards data={data} />
-      <OverviewQuickActions
-        familyId={data.families[0]?.id}
-        onSuccess={reload}
-      />
-      <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
         <MoneyOverviewCard data={data} />
         <PlansOverviewCard plans={data.plans} />
-        <LoansOverviewCard currency={data.currency} loans={data.loans} />
         <FamilyWorkspacesCard families={data.families} />
+        <LoansOverviewCard currency={data.currency} loans={data.loans} />
         <RecentActivityCard data={data} />
-        <QuickActionsCard />
       </div>
     </div>
   );
 }
 
 function PersonalOverviewSkeleton() {
-  const summarySkeletons = [
-    "balance",
-    "income",
-    "expenses",
-    "plans",
-    "loans",
-    "families",
-  ];
-  const sectionSkeletons = [
-    "money",
-    "plans",
-    "loans",
-    "families",
-    "activity",
-    "actions",
-  ];
+  const summarySkeletons = ["balance", "income", "expenses", "plans", "loans", "families"];
+  const sectionSkeletons = ["money", "plans", "loans", "families", "activity", "actions"];
 
   return (
     <output

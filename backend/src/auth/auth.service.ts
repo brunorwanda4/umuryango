@@ -16,6 +16,7 @@ import type { LoginDto } from "./dto/login.dto";
 import type { RegisterDto } from "./dto/register.dto";
 import type { ResendVerificationDto } from "./dto/resend-verification.dto";
 import type { ResetPasswordDto } from "./dto/reset-password.dto";
+import type { UpdateProfileDto } from "./dto/update-profile.dto";
 import type { VerifyEmailDto } from "./dto/verify-email.dto";
 import type { GoogleUser } from "./strategies/google.strategy";
 
@@ -33,6 +34,16 @@ type AuthenticatedUser = {
 
 export type CurrentUser = AuthenticatedUser & {
 	avatarUrl: string | null;
+	pendingEmail: string | null;
+	gender: string | null;
+	emailVerified: boolean;
+	createdAt: Date;
+};
+
+export type UpdateProfileResult = {
+	user: CurrentUser;
+	requiresEmailVerification: boolean;
+	verificationEmail: string | null;
 };
 
 export type LoginResult = {
@@ -56,6 +67,11 @@ type AccessTokenPayload = {
 	sessionId?: string;
 	type?: string;
 };
+
+function createDefaultAvatarUrl() {
+	const seed = randomBytes(16).toString("hex");
+	return `https://api.dicebear.com/9.x/lorelei/svg?seed=${seed}`;
+}
 
 @Injectable()
 export class AuthService {
@@ -105,6 +121,7 @@ export class AuthService {
 				fullName,
 				gender: registerDto.gender || null,
 				passwordHash,
+				avatarUrl: createDefaultAvatarUrl(),
 				status: UserStatus.ACTIVE,
 			},
 		});
@@ -132,13 +149,17 @@ export class AuthService {
 		context: RequestContext,
 	): Promise<LoginResult> {
 		const email = verifyEmailDto.email.toLowerCase();
-		const user = await this.prisma.user.findUnique({ where: { email } });
+		const user = await this.prisma.user.findFirst({
+			where: { OR: [{ email }, { pendingEmail: email }] },
+		});
 
 		if (!user || user.status !== UserStatus.ACTIVE) {
 			throw new BadRequestException("Invalid verification request.");
 		}
 
-		if (user.emailVerifiedAt) {
+		const isPendingEmailChange = user.pendingEmail === email;
+
+		if (user.email === email && user.emailVerifiedAt && !isPendingEmailChange) {
 			throw new ConflictException("Email is already verified.");
 		}
 
@@ -190,7 +211,13 @@ export class AuthService {
 			});
 			return tx.user.update({
 				where: { id: user.id },
-				data: { emailVerifiedAt: new Date() },
+				data: isPendingEmailChange
+					? {
+							email,
+							pendingEmail: null,
+							emailVerifiedAt: new Date(),
+						}
+					: { emailVerifiedAt: new Date() },
 			});
 		});
 
@@ -209,11 +236,17 @@ export class AuthService {
 		resendDto: ResendVerificationDto,
 	): Promise<{ requiresEmailVerification: boolean }> {
 		const email = resendDto.email.toLowerCase();
-		const user = await this.prisma.user.findUnique({ where: { email } });
+		const user = await this.prisma.user.findFirst({
+			where: { OR: [{ email }, { pendingEmail: email }] },
+		});
 
 		// Do not reveal whether the account exists.
-		if (user && user.status === UserStatus.ACTIVE && !user.emailVerifiedAt) {
-			await this.issueVerificationCode(user);
+		if (
+			user &&
+			user.status === UserStatus.ACTIVE &&
+			(!user.emailVerifiedAt || user.pendingEmail === email)
+		) {
+			await this.issueVerificationCode(user, email);
 		}
 
 		return { requiresEmailVerification: true };
@@ -428,11 +461,14 @@ export class AuthService {
 
 	// ─── Private helpers ────────────────────────────────────────────────────────
 
-	private async issueVerificationCode(user: {
-		id: string;
-		email: string;
-		fullName: string;
-	}): Promise<void> {
+	private async issueVerificationCode(
+		user: {
+			id: string;
+			email: string;
+			fullName: string;
+		},
+		targetEmail = user.email,
+	): Promise<void> {
 		const mailDevMode =
 			this.configService.get<string>("MAIL_DEV_MODE", "false") === "true";
 		const configuredDevCode = this.configService.get<string>(
@@ -469,7 +505,7 @@ export class AuthService {
 		]);
 
 		await this.mailService.sendVerificationCode({
-			to: user.email,
+			to: targetEmail,
 			fullName: user.fullName,
 			code,
 			expiresInMinutes: this.verificationCodeExpiresInMinutes,
@@ -678,6 +714,133 @@ export class AuthService {
 			phoneNumber: session.user.phoneNumber,
 			fullName: session.user.fullName,
 			avatarUrl: session.user.avatarUrl,
+			pendingEmail: session.user.pendingEmail,
+			gender: session.user.gender,
+			emailVerified: Boolean(session.user.emailVerifiedAt),
+			createdAt: session.user.createdAt,
+		};
+	}
+
+	async updateCurrentUser(
+		accessToken: string | undefined,
+		updateProfileDto: UpdateProfileDto,
+		context: RequestContext,
+	): Promise<UpdateProfileResult> {
+		const currentUser = await this.getCurrentUser(accessToken);
+		const requestedEmail = updateProfileDto.email?.toLowerCase();
+		const requestedPhone = updateProfileDto.phoneNumber || null;
+		const emailChanged = Boolean(
+			requestedEmail &&
+				requestedEmail !== currentUser.email &&
+				requestedEmail !== currentUser.pendingEmail,
+		);
+
+		if (emailChanged && requestedEmail) {
+			const existingEmail = await this.prisma.user.findFirst({
+				where: {
+					id: { not: currentUser.id },
+					OR: [{ email: requestedEmail }, { pendingEmail: requestedEmail }],
+				},
+				select: { id: true },
+			});
+
+			if (existingEmail) {
+				throw new ConflictException("Email is already registered.");
+			}
+		}
+
+		if (requestedPhone && requestedPhone !== currentUser.phoneNumber) {
+			const existingPhone = await this.prisma.user.findFirst({
+				where: {
+					id: { not: currentUser.id },
+					phoneNumber: requestedPhone,
+				},
+				select: { id: true },
+			});
+
+			if (existingPhone) {
+				throw new ConflictException("Phone number is already registered.");
+			}
+		}
+
+		const updatedUser = await this.prisma.user.update({
+			where: { id: currentUser.id },
+			data: {
+				fullName: updateProfileDto.fullName,
+				phoneNumber:
+					updateProfileDto.phoneNumber === undefined
+						? undefined
+						: requestedPhone,
+				gender:
+					updateProfileDto.gender === undefined
+						? undefined
+						: updateProfileDto.gender,
+				pendingEmail:
+					requestedEmail === undefined
+						? undefined
+						: requestedEmail === currentUser.email
+							? null
+							: requestedEmail,
+			},
+		});
+
+		if (emailChanged && requestedEmail) {
+			await this.issueVerificationCode(updatedUser, requestedEmail);
+		}
+
+		await this.writeLoginAudit({
+			emailOrMobile: currentUser.email,
+			result: AuthAuditResult.SUCCESS,
+			context,
+			userId: currentUser.id,
+			action: AuthAuditAction.PROFILE_UPDATE,
+		});
+
+		return {
+			user: {
+				id: updatedUser.id,
+				email: updatedUser.email,
+				phoneNumber: updatedUser.phoneNumber,
+				fullName: updatedUser.fullName,
+				avatarUrl: updatedUser.avatarUrl,
+				pendingEmail: updatedUser.pendingEmail,
+				gender: updatedUser.gender,
+				emailVerified: Boolean(updatedUser.emailVerifiedAt),
+				createdAt: updatedUser.createdAt,
+			},
+			requiresEmailVerification: Boolean(updatedUser.pendingEmail),
+			verificationEmail: updatedUser.pendingEmail,
+		};
+	}
+
+	async updateCurrentUserAvatar(
+		accessToken: string | undefined,
+		context: RequestContext,
+	): Promise<CurrentUser> {
+		const currentUser = await this.getCurrentUser(accessToken);
+		const updatedUser = await this.prisma.user.update({
+			where: { id: currentUser.id },
+			data: { avatarUrl: createDefaultAvatarUrl() },
+		});
+
+		await this.writeLoginAudit({
+			emailOrMobile: currentUser.email,
+			result: AuthAuditResult.SUCCESS,
+			context,
+			userId: currentUser.id,
+			action: AuthAuditAction.PROFILE_UPDATE,
+		});
+
+		return {
+			id: updatedUser.id,
+			email: updatedUser.email,
+			phoneNumber: updatedUser.phoneNumber,
+			fullName: updatedUser.fullName,
+			avatarUrl: updatedUser.avatarUrl,
+			pendingEmail: updatedUser.pendingEmail,
+			gender: updatedUser.gender,
+			emailVerified: Boolean(updatedUser.emailVerifiedAt),
+			createdAt: updatedUser.createdAt,
 		};
 	}
 

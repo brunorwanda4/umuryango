@@ -1,14 +1,14 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
-import { AuthAuditAction, UserStatus } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { plainToInstance } from 'class-transformer';
+import { Test } from '@nestjs/testing';
+import { AuthAuditAction, UserStatus } from '@prisma/client';
 import { hash as bcryptHash } from 'bcryptjs';
+import { plainToInstance } from 'class-transformer';
+import { MailService } from '../mail/mail.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { PrismaService } from '../prisma/prisma.service';
-import { MailService } from '../mail/mail.service';
 import type { GoogleUser } from './strategies/google.strategy';
 
 const googleUser: GoogleUser = {
@@ -21,13 +21,16 @@ const googleUser: GoogleUser = {
 const baseUser = {
   id: 'u-1',
   email: 'new.user@example.com',
+  pendingEmail: null,
   phoneNumber: null,
   fullName: 'New User',
+  gender: null,
   passwordHash: null,
   googleId: 'g-123',
   avatarUrl: 'https://img/avatar.png',
   status: UserStatus.ACTIVE,
   emailVerifiedAt: new Date(),
+  createdAt: new Date('2026-01-01T00:00:00.000Z'),
 };
 
 describe('LoginDto', () => {
@@ -60,7 +63,10 @@ describe('AuthService Google login', () => {
       findFirst: jest.Mock;
     };
     authAuditEvent: { create: jest.Mock };
+    emailVerification: { updateMany: jest.Mock; create: jest.Mock };
+    $transaction: jest.Mock;
   };
+  let mailService: { sendVerificationCode: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
@@ -78,7 +84,19 @@ describe('AuthService Google login', () => {
         findFirst: jest.fn(),
       },
       authAuditEvent: { create: jest.fn().mockResolvedValue({}) },
+      emailVerification: {
+        updateMany: jest.fn().mockResolvedValue({}),
+        create: jest.fn().mockResolvedValue({}),
+      },
+      $transaction: jest
+        .fn()
+        .mockImplementation((operations) =>
+          Array.isArray(operations)
+            ? Promise.all(operations)
+            : operations(prisma),
+        ),
     };
+    mailService = { sendVerificationCode: jest.fn().mockResolvedValue({}) };
     jwtService = {
       signAsync: jest.fn().mockResolvedValue('access-token'),
       verifyAsync: jest.fn(),
@@ -96,7 +114,7 @@ describe('AuthService Google login', () => {
           provide: ConfigService,
           useValue: { get: jest.fn().mockReturnValue('30') },
         },
-        { provide: MailService, useValue: {} },
+        { provide: MailService, useValue: mailService },
       ],
     }).compile();
 
@@ -224,6 +242,43 @@ describe('AuthService Google login', () => {
     expect(prisma.authSession.updateMany).toHaveBeenCalledWith({
       where: { id: 's-1', revokedAt: null },
       data: { revokedAt: expect.any(Date) },
+    });
+  });
+
+  it('keeps a changed email pending until it is verified', async () => {
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: 'u-1',
+      sessionId: 's-1',
+      type: 'access',
+    });
+    prisma.authSession.findFirst.mockResolvedValue({ user: baseUser });
+    prisma.user.findFirst.mockResolvedValue(null);
+    prisma.user.update.mockResolvedValue({
+      ...baseUser,
+      fullName: 'Updated User',
+      pendingEmail: 'updated@example.com',
+    });
+
+    const result = await service.updateCurrentUser(
+      'access-token',
+      {
+        fullName: 'Updated User',
+        email: 'updated@example.com',
+      },
+      { ipAddress: '127.0.0.1', userAgent: 'jest' },
+    );
+
+    expect(result.requiresEmailVerification).toBe(true);
+    expect(result.user.email).toBe('new.user@example.com');
+    expect(result.user.pendingEmail).toBe('updated@example.com');
+    expect(mailService.sendVerificationCode).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'updated@example.com' }),
+    );
+    expect(prisma.authAuditEvent.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: AuthAuditAction.PROFILE_UPDATE,
+        userId: 'u-1',
+      }),
     });
   });
 });
