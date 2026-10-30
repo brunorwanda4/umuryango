@@ -17,9 +17,7 @@ export function IncomeMonthPicker({
   period,
   onPeriodChange,
 }: {
-  /** Currently selected dashboard period as ISO date strings. */
   period: { from: string; to: string };
-  /** Called with the new ISO date range when the user picks a period. */
   onPeriodChange: (period: { from: string; to: string }) => void;
 }) {
   const periodLabel = useMemo(
@@ -44,7 +42,7 @@ export function IncomeMonthPicker({
           onPeriodChange({ from: value.from, to: value.to });
         }
       }}
-      className="max-w-60"
+      className="w-full max-w-60 sm:w-60"
     />
   );
 }

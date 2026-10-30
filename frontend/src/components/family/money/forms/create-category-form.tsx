@@ -143,7 +143,7 @@ export function CreateCategoryForm({
           )}
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-2xl md:max-w-xl overflow-y-auto max-h-[96vh]">
+      <DialogContent className="max-h-[96vh] overflow-y-auto lg:max-h-[calc(100vh-2rem)] lg:max-w-4xl lg:overflow-y-hidden">
         <DialogHeader>
           <DialogTitle>Create Category</DialogTitle>
           <DialogDescription>
@@ -161,7 +161,7 @@ export function CreateCategoryForm({
               {error}
             </div>
           )}
-          <CategoryFormFields control={form.control} />
+          <CategoryFormFields control={form.control} showStatus={false} />
         </form>
         <DialogFooter className=" flex flex-row gap-4  justify-end">
           <DialogClose asChild>

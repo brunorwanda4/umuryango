@@ -33,6 +33,7 @@ function isHexColor(value: unknown): value is string {
 
 type CategoryFormFieldsProps = {
   control: Control<EditCategoryFormValues>;
+  showStatus?: boolean;
 };
 
 /**
@@ -43,7 +44,10 @@ type CategoryFormFieldsProps = {
  *
  * Status and Description span full width via col-span-full.
  */
-export function CategoryFormFields({ control }: CategoryFormFieldsProps) {
+export function CategoryFormFields({
+  control,
+  showStatus = true,
+}: CategoryFormFieldsProps) {
   return (
     <>
       <CommonFormField
@@ -66,7 +70,7 @@ export function CategoryFormFields({ control }: CategoryFormFieldsProps) {
         required
       />
 
-      <div className="flex flex-col sm:flex-row gap-4 ">
+      <div className="flex flex-col gap-4 sm:flex-row">
         <CommonFormField
           control={control}
           name="icon"
@@ -76,19 +80,21 @@ export function CategoryFormFields({ control }: CategoryFormFieldsProps) {
           required
         />
 
-        <CommonFormField
-          control={control}
-          name="status"
-          label="Status"
-          fieldType="select"
-          selectOptions={[
-            { label: "Active", value: "ACTIVE" },
-            { label: "Inactive", value: "INACTIVE" },
-          ]}
-          required
-          description="Inactive categories stay in history but should not be selected for new transactions."
-          fieldClassName="col-span-full"
-        />
+        {showStatus ? (
+          <CommonFormField
+            control={control}
+            name="status"
+            label="Status"
+            fieldType="select"
+            selectOptions={[
+              { label: "Active", value: "ACTIVE" },
+              { label: "Inactive", value: "INACTIVE" },
+            ]}
+            required
+            description="Inactive categories stay in history but should not be selected for new transactions."
+            fieldClassName="col-span-full"
+          />
+        ) : null}
       </div>
       <CommonFormField
         control={control}

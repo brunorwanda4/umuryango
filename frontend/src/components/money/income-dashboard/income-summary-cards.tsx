@@ -1,12 +1,10 @@
-import { ArrowDownIcon, ArrowUpRightIcon, InfoIcon } from "lucide-react";
+import { ArrowUpRightIcon, CalendarDaysIcon, TrophyIcon, WalletCardsIcon } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
 
 export function IncomeSummaryCards({
-  periodLabel,
   summary,
 }: {
-  periodLabel: string;
   summary: {
     allTimeTotalMinorUnits: string;
     transactionCount: number;
@@ -18,74 +16,48 @@ export function IncomeSummaryCards({
     periodTotalMinorUnits: string;
   };
 }) {
-  const descriptionWithInfo = (label: string) => (
-    <span className="inline-flex items-center gap-2">
-      {label}
-      <InfoIcon className="size-3.5" aria-hidden="true" />
-    </span>
-  );
-
   return (
     <CommonOverviewCardDisplay
       cardDescriptionClassName="flex items-center text-sm font-medium leading-5 text-muted-foreground max-sm:text-sm max-sm:font-medium "
-      cardFooterClassName="sm:mt-4 font-semibold text-sm"
-      cardHeaderClassName="min-h-[10.75rem] flex-col items-start justify-between gap-4 p-5 sm:p-6"
-      cardTitleClassName="sm:mt-2 whitespace-normal  leading-tight tracking-normal sm:text-3xl"
-      className="grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4"
+      cardHeaderClassName="flex-col items-start justify-between gap-4 py-4"
+      cardTitleClassName="whitespace-normal leading-tight tracking-normal sm:text-3xl"
+      className="grid-cols-1 gap-4 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4"
       iconPosition="start"
       cards={[
         {
-          className: "rounded-2xl border-border/80 py-0 shadow-sm",
-          description: descriptionWithInfo("Total income"),
-          footer: (
-            <span className="flex items-center gap-2 text-chart-2">
-              All time
-              <ArrowDownIcon className="size-4" aria-hidden="true" />
-            </span>
-          ),
-          iconImage: "/images/icons/wallet.png",
-          value: (
-            <CompactMoney
-              currency="RWF"
-              value={summary.allTimeTotalMinorUnits}
-            />
-          ),
+          className: " border-border/80 py-0 shadow-sm",
+          description: "Total income",
+          iconSource: {
+            image: { src: "/images/icons/wallet.png" },
+            line: WalletCardsIcon,
+          },
+          value: <CompactMoney currency="RWF" value={summary.allTimeTotalMinorUnits} />,
         },
         {
-          className: "rounded-2xl border-border/80 py-0 shadow-sm",
-          description: descriptionWithInfo("Income transactions"),
-          footer: (
-            <span className="flex items-center gap-2 text-chart-2">
-              All time
-              <ArrowUpRightIcon className="size-4" aria-hidden="true" />
-            </span>
-          ),
-          iconImage: "/images/icons/transaction.png",
+          className: " border-border/80 py-0 shadow-sm",
+          description: "Income transactions",
+          iconSource: {
+            image: { src: "/images/icons/transaction.png" },
+            line: ArrowUpRightIcon,
+          },
           value: summary.transactionCount.toString(),
         },
         {
-          className: "rounded-2xl border-border/80 py-0 shadow-sm",
-          description: descriptionWithInfo("This month's income"),
-          footer: <span className="text-chart-2">{periodLabel}</span>,
-          iconImage: "/images/icons/calendar.png",
-          value: (
-            <CompactMoney
-              currency="RWF"
-              value={summary.periodTotalMinorUnits}
-            />
-          ),
+          className: " border-border/80 py-0 shadow-sm",
+          description: "This month's",
+          iconSource: {
+            image: { src: "/images/icons/calendar.png" },
+            line: CalendarDaysIcon,
+          },
+          value: <CompactMoney currency="RWF" value={summary.periodTotalMinorUnits} />,
         },
         {
-          className: "rounded-2xl border-border/80 py-0 shadow-sm",
-          description: descriptionWithInfo("Largest income"),
-          footer: (
-            <span className="text-chart-2">
-              {summary.largestIncome?.description ??
-                summary.largestIncome?.category ??
-                "No income recorded"}
-            </span>
-          ),
-          iconImage: "/images/icons/quality.png",
+          className: " border-border/80 py-0 shadow-sm",
+          description: "Largest income",
+          iconSource: {
+            image: { src: "/images/icons/quality.png" },
+            line: TrophyIcon,
+          },
           value: (
             <CompactMoney
               currency="RWF"

@@ -1,3 +1,8 @@
+import {
+  type AuthRefreshResult,
+  classifyAuthRefreshResponse,
+} from "@/service/auth-refresh";
+
 type HttpMethod = "get" | "post" | "put" | "patch" | "delete";
 
 type ApiEnvelope<T> = {
@@ -276,8 +281,3 @@ async function apiRequest<TRequest = unknown, TResponse = unknown>(
 }
 
 export default apiRequest;
-
-import {
-  type AuthRefreshResult,
-  classifyAuthRefreshResponse,
-} from "@/service/auth-refresh";

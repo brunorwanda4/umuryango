@@ -16,10 +16,8 @@ import {
   ItemActions,
   ItemContent,
   ItemDescription,
-  ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
-import { cn } from "@/lib/utils";
 import type {
   IncomeCategory,
   RecentIncomeRecord,
@@ -85,7 +83,6 @@ function RecentIncomeItem({
   onSuccess: () => void | Promise<void>;
 }) {
   const [isViewOpen, setIsViewOpen] = useState(false);
-  const SourceIcon = income.icon;
   const PaymentIcon = income.paymentIcon;
 
   return (
@@ -102,12 +99,6 @@ function RecentIncomeItem({
             onClick={() => setIsViewOpen(true)}
             type="button"
           />
-          <ItemMedia
-            variant="icon"
-            className={cn("size-9 rounded-full", income.sourceClassName)}
-          >
-            <SourceIcon aria-hidden="true" />
-          </ItemMedia>
           <ItemContent className="min-w-0">
             <ItemTitle className="max-w-full">
               <span className="truncate">{income.source}</span>

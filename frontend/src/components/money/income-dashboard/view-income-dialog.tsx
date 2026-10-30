@@ -10,6 +10,7 @@ import {
 import type * as React from "react";
 import { useState } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { DeleteIncomeDialog } from "./delete-income-dialog";
 import type {
   IncomeCategory,
@@ -54,7 +56,7 @@ export function ViewIncomeDialog({
   const [internalOpen, setInternalOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  const IncomeIcon = income.icon;
+  const { user: currentUser } = useCurrentUser();
   const PaymentIcon = income.paymentIcon;
   const isOpen = open ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
@@ -93,9 +95,15 @@ export function ViewIncomeDialog({
           <div className="flex flex-col gap-6 px-6 py-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-3">
-                <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                  <IncomeIcon aria-hidden="true" className="size-5" />
-                </div>
+                <Avatar className="size-11 shrink-0 rounded-lg">
+                  <AvatarImage
+                    src={currentUser?.avatarUrl ?? undefined}
+                    alt={
+                      currentUser?.fullName ?? "Person who recorded this income"
+                    }
+                  />
+                  <AvatarFallback name={currentUser?.fullName ?? "User"} />
+                </Avatar>
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className="font-medium leading-5">{income.source}</span>
                   <span className="text-sm leading-5 text-muted-foreground">

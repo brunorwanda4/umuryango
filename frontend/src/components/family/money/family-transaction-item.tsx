@@ -101,9 +101,12 @@ export function FamilyTransactionItem({
             {paymentMethod && (
               <>
                 <span aria-hidden="true">/</span>
-                <span className="inline-flex items-center gap-1">
+                <span className="inline-flex items-center gap-0.5">
                   {PaymentIcon && (
-                    <PaymentIcon aria-hidden="true" className="size-3.5" />
+                    <PaymentIcon
+                      aria-hidden="true"
+                      className="!size-2 shrink-0"
+                    />
                   )}
                   {paymentMethod}
                 </span>

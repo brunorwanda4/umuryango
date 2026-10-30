@@ -15,12 +15,7 @@ const MeMoneyIncomeCard = ({ currency, summary }: MoneySummaryCardsProps) => {
       description: "Total income",
       // icon: <ArrowDownIcon className={iconClassName} />,
       iconImage: "/images/icons/money.png",
-      value: (
-        <CompactMoney
-          currency={currency}
-          value={summary.totalIncomeMinorUnits}
-        />
-      ),
+      value: <CompactMoney currency={currency} value={summary.totalIncomeMinorUnits} />,
     },
     {
       description: "Income Transactions",
@@ -29,7 +24,7 @@ const MeMoneyIncomeCard = ({ currency, summary }: MoneySummaryCardsProps) => {
     },
 
     {
-      description: "This Month's Income",
+      description: "This Month's",
       icon: <Calendar className={iconClassName} />,
       value: 9000,
     },

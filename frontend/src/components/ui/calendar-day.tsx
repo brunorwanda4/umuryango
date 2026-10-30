@@ -501,16 +501,16 @@ const DateRangePickerInput = forwardRef<
 
         <PopoverContent
           align={align}
-          className=" overflow-x-auto rounded-md p-0"
+          className="w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden rounded-md p-0 sm:w-auto sm:max-w-none"
         >
-          <div className="flex max-sm:flex-col">
-            <div className="border-b p-2 sm:w-44 sm:border-r sm:border-b-0">
-              <div className="grid gap-1">
+          <div className="flex min-w-0 max-sm:flex-col">
+            <div className="min-w-0 border-b p-2 sm:w-44 sm:border-r sm:border-b-0">
+              <div className="grid gap-1 max-sm:grid-cols-2">
                 <Button
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="w-full justify-start"
+                  className="w-full justify-start max-sm:px-2"
                   onClick={selectToday}
                 >
                   Today
@@ -520,7 +520,7 @@ const DateRangePickerInput = forwardRef<
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="w-full justify-start"
+                  className="w-full justify-start max-sm:px-2"
                   onClick={selectYesterday}
                 >
                   Yesterday
@@ -530,7 +530,7 @@ const DateRangePickerInput = forwardRef<
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="w-full justify-start"
+                  className="w-full justify-start max-sm:px-2"
                   onClick={selectLastWeek}
                 >
                   Last week
@@ -540,7 +540,7 @@ const DateRangePickerInput = forwardRef<
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="w-full justify-start"
+                  className="w-full justify-start max-sm:px-2"
                   onClick={selectLastMonth}
                 >
                   Last month
@@ -550,19 +550,19 @@ const DateRangePickerInput = forwardRef<
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="w-full justify-start"
+                  className="w-full justify-start max-sm:px-2"
                   onClick={selectLastYear}
                 >
                   Last year
                 </Button>
               </div>
 
-              <div className="mt-2 border-t pt-3">
+              <div className="mt-2 border-t pt-3 max-sm:mt-1 max-sm:pt-2">
                 <p className="mb-2 text-xs font-medium">
                   Last number of months
                 </p>
 
-                <div className="flex gap-1">
+                <div className="flex min-w-0 gap-1">
                   <Input
                     type="number"
                     min={1}
@@ -598,7 +598,7 @@ const DateRangePickerInput = forwardRef<
               </div>
             </div>
 
-            <div>
+            <div className="min-w-0 max-sm:w-full">
               <Calendar
                 mode="range"
                 captionLayout="dropdown"
@@ -610,15 +610,15 @@ const DateRangePickerInput = forwardRef<
                 selected={draftRange}
                 disabled={disabledDates}
                 onSelect={setDraftRange}
-                className="p-2"
+                className="w-full p-2"
               />
 
-              <div className="flex items-center justify-between gap-2 border-t p-2">
+              <div className="flex items-center justify-between gap-2 border-t p-2 max-sm:px-3">
                 <p className="hidden text-xs text-muted-foreground sm:block">
                   Select one date or a start and end date.
                 </p>
 
-                <div className="ml-auto flex gap-2">
+                <div className="ml-auto flex flex-wrap justify-end gap-2">
                   <Button
                     type="button"
                     size="sm"

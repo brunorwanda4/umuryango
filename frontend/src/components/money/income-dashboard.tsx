@@ -7,7 +7,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatPeriodLabel } from "@/lib/format-period-label";
 import { IncomeChartsSection } from "./income-dashboard/income-charts-section";
 import {
   type IncomeCategory,
@@ -62,8 +61,6 @@ export function IncomeDashboard({
     );
   }
 
-  const periodLabel = formatPeriodLabel(data.period.from, data.period.to);
-
   if (!categories.length) {
     return (
       <div className="grid place-content-center w-fill h-screen">
@@ -87,7 +84,7 @@ export function IncomeDashboard({
 
   return (
     <div className="flex flex-col gap-4">
-      <IncomeSummaryCards periodLabel={periodLabel} summary={data.summary} />
+      <IncomeSummaryCards summary={data.summary} />
       <Tabs defaultValue="data">
         <TabsList>
           <TabsTrigger value="data">Data</TabsTrigger>

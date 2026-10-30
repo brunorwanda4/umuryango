@@ -34,18 +34,8 @@ function getRecentIncomeColumns({
       accessorKey: "source",
       header: "Source",
       cell: ({ row }) => {
-        const SourceIcon = row.original.icon;
-
         return (
-          <div className="flex min-w-44 items-center gap-3">
-            <span
-              className={cn(
-                "flex size-9 shrink-0 items-center justify-center rounded-full",
-                row.original.sourceClassName,
-              )}
-            >
-              <SourceIcon className="size-4" aria-hidden="true" />
-            </span>
+          <div className="flex min-w-44 items-center">
             <span className="font-medium text-muted-foreground">
               {row.original.source}
             </span>
@@ -142,6 +132,8 @@ export function RecentIncomeTable({
   onSuccess: () => void | Promise<void>;
 }) {
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [paymentMethod, setPaymentMethod] = useState("all");
   const [viewIncomeId, setViewIncomeId] = useState<string | null>(null);
   const [viewMode, setViewMode] = usePersistentViewMode(
     RECENT_INCOME_VIEW_MODE_STORAGE_KEY,
@@ -149,24 +141,24 @@ export function RecentIncomeTable({
   const filteredIncomeData = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    if (!query) {
-      return data;
-    }
-
-    return data.filter((income) =>
-      [
-        income.source,
-        income.description,
-        income.category,
-        income.date,
-        income.paymentMethod,
-        income.amountMinorUnits.toString(),
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(query),
+    return data.filter(
+      (income) =>
+        (category === "all" || income.categoryId === category) &&
+        (paymentMethod === "all" || income.account === paymentMethod) &&
+        (!query ||
+          [
+            income.source,
+            income.description,
+            income.category,
+            income.date,
+            income.paymentMethod,
+            income.amountMinorUnits.toString(),
+          ]
+            .join(" ")
+            .toLowerCase()
+            .includes(query)),
     );
-  }, [data, search]);
+  }, [category, data, paymentMethod, search]);
   const recentIncomeColumns = useMemo(
     () => getRecentIncomeColumns({ categories, familyId, onSuccess }),
     [categories, familyId, onSuccess],
@@ -184,9 +176,14 @@ export function RecentIncomeTable({
       </CardHeader>
       <CardContent className="px-0 pb-0">
         <RecentIncomeFilter
+          category={category}
+          categoryOptions={categories}
+          paymentMethod={paymentMethod}
           resultCount={filteredIncomeData.length}
           search={search}
           totalCount={data.length}
+          onCategoryChange={setCategory}
+          onPaymentMethodChange={setPaymentMethod}
           onSearchChange={setSearch}
         />
         {viewMode === "table" ? (

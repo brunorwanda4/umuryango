@@ -3,6 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
+  SidebarIcon,
+  type SidebarIconSource,
+} from "@/components/app-shell/sidebar-icon";
+import {
   Card,
   CardDescription,
   CardHeader,
@@ -22,6 +26,7 @@ interface OverviewCard {
   value?: ReactNode;
   icon?: ReactNode;
   iconImage?: string;
+  iconSource?: SidebarIconSource;
   footer?: ReactNode;
   className?: string;
   link?: string;
@@ -49,26 +54,31 @@ const OverviewCardDisplay = ({
   return (
     <div
       className={cn(
-        "grid gap-3 grid-cols-1 lg:grid-cols-4 2xl:grid-cols-6",
+        "grid grid-cols-2 gap-3 max-sm:grid-cols-2! lg:grid-cols-4 2xl:grid-cols-6",
         className,
       )}
     >
       {cards.map((data, index) => {
         const key =
           typeof data.description === "string" ? data.description : index;
-        const cardIcon = data.iconImage ? (
+        const cardIcon = data.iconSource ? (
+          <SidebarIcon icon={data.iconSource} className="size-7" />
+        ) : data.iconImage ? (
           <Image
             alt=""
             aria-hidden="true"
-            height={40}
+            height={28}
             src={data.iconImage}
-            width={40}
+            width={28}
           />
         ) : (
           (data.icon ?? null)
         );
         const mobileItem = (
-          <Item variant="muted" className="border border-border sm:hidden">
+          <Item
+            variant="muted"
+            className="min-h-28 border border-border sm:hidden"
+          >
             <ItemContent>
               <ItemHeader>
                 <div className="flex min-w-0 flex-row items-center gap-4">
@@ -106,18 +116,18 @@ const OverviewCardDisplay = ({
           </Item>
         );
         const card = (
-          <Card className={cn("hidden sm:block", data.className)}>
+          <Card className={cn("hidden min-h-32 sm:block", data.className)}>
             <CardHeader
               className={cn(
-                "flex flex-col items-center justify-end sm:justify-between md:gap-3 p-4",
+                "flex flex-col items-center  sm:justify-between md:gap-3 justify-between",
                 cardHeaderClassName,
               )}
             >
-              <div className=" flex flex-row gap-4 items-center">
+              <div className=" flex flex-row gap-2 items-center">
                 {iconPosition === "start" && cardIcon}
                 <CardDescription
                   className={cn(
-                    "max-sm:font-semibold max-sm:text-lg max-sm:flex",
+                    "max-sm:font-semibold max-sm:text-lg max-sm:flex  w-full",
                     cardDescriptionClassName,
                   )}
                 >
@@ -128,7 +138,7 @@ const OverviewCardDisplay = ({
               <div className="min-w-0 max-sm:flex-row-reverse max-sm:flex max-sm:items-center max-sm:gap-4">
                 <CardTitle
                   className={cn(
-                    "sm:mt-1 truncate text-xl sm:text-2xl font-bold",
+                    "truncate text-xl sm:text-2xl font-bold",
                     cardTitleClassName,
                   )}
                 >

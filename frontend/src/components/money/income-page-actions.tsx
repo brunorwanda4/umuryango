@@ -32,19 +32,14 @@ export function IncomePageActions({
 }: {
   /** Whether the current user has permission to record income. */
   canRecordIncome: boolean;
-  /** Full category list (filtered to INCOME+ACTIVE inside MoneyFormDialog). */
   categories: IncomeCategory[];
-  /** Resolved family detail; null while loading or on error. */
   family: FamilyDetail | null;
-  /** Currently selected dashboard period as ISO date strings. */
   period: { from: string; to: string };
-  /** Called with the new ISO date range when the user picks a period. */
   onPeriodChange: (period: { from: string; to: string }) => void;
-  /** Called after a successful income record or category creation. */
   onSuccess: () => void | Promise<void>;
 }) {
   return (
-    <div className="mt-4 flex w-full flex-col gap-3 sm:w-auto sm:flex-row lg:mt-0">
+    <div className="mt-4 flex w-full gap-3 sm:w-auto flex-row lg:mt-0">
       <IncomeMonthPicker period={period} onPeriodChange={onPeriodChange} />
 
       {canRecordIncome && family ? (

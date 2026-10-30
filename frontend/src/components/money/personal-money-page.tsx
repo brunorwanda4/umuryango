@@ -4,7 +4,6 @@ import {
   CoinsIcon,
   LandmarkIcon,
   PlusIcon,
-  SearchIcon,
   TrendingDownIcon,
   TrendingUpIcon,
   UsersIcon,
@@ -32,14 +31,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import apiRequest from "@/service/api";
 
-export type MoneyTabKey =
-  | "all"
-  | "income"
-  | "expenses"
-  | "savings"
-  | "debts"
-  | "transactions";
-
 export type RealTransaction = {
   id: string;
   type: "in" | "out" | "save";
@@ -51,15 +42,6 @@ export type RealTransaction = {
   status: string;
   amount: number;
 };
-
-const TABS: { id: MoneyTabKey; label: string }[] = [
-  { id: "all", label: "Overview" },
-  { id: "income", label: "Income" },
-  { id: "expenses", label: "Expenses" },
-  { id: "savings", label: "Savings" },
-  { id: "debts", label: "Debts" },
-  { id: "transactions", label: "Transactions" },
-];
 
 function formatCompactRwf(
   amountMinorUnits: number | bigint | string,
@@ -124,7 +106,6 @@ function paymentMethodLabel(method: string | null | undefined): string {
 }
 
 export function PersonalMoneyPage() {
-  const [activeTab, setActiveTab] = useState<MoneyTabKey>("all");
   const [familyId, setFamilyId] = useState<string | null>(null);
   const [currency, setCurrency] = useState("RWF");
   const [loading, setLoading] = useState(true);
@@ -144,12 +125,6 @@ export function PersonalMoneyPage() {
     "income" | "expense" | "savings" | "debt"
   >("income");
   const [planFormOpen, setPlanFormOpen] = useState(false);
-
-  // Transactions search & chip filter
-  const [transactionChip, setTransactionChip] = useState<
-    "all" | "in" | "out" | "save"
-  >("all");
-  const [transactionQuery, setTransactionQuery] = useState("");
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -328,101 +303,42 @@ export function PersonalMoneyPage() {
     );
   }, [borrowedLoans]);
 
-  const totalBorrowedOriginal = useMemo(() => {
-    return borrowedLoans.reduce(
-      (sum, l) => sum + Number(l.originalAmountMinorUnits || 0),
-      0,
-    );
-  }, [borrowedLoans]);
-
   const activeDebt = useMemo(() => {
     return borrowedLoans.find((l) => l.status === "ACTIVE") || borrowedLoans[0];
   }, [borrowedLoans]);
 
-  // Category aggregations for bars
-  const incomeCategoryBars = useMemo(() => {
-    const incomeItems = allTransactions.filter((x) => x.type === "in");
-    const m: Record<string, number> = {};
-    for (const x of incomeItems) {
-      const cat = x.category || "Other";
-      m[cat] = (m[cat] || 0) + x.amount;
-    }
-    const total = Object.values(m).reduce((a, b) => a + b, 0) || 1;
-    const max = Math.max(1, ...Object.values(m));
-    return Object.entries(m)
-      .sort((a, b) => b[1] - a[1])
-      .map(([cat, amount]) => ({
-        category: cat,
-        amount,
-        pct: Math.round((amount / total) * 100),
-        barWidth: Math.round((amount / max) * 100),
-      }));
-  }, [allTransactions]);
-
-  const expenseCategoryBars = useMemo(() => {
-    const expenseItems = allTransactions.filter((x) => x.type === "out");
-    const m: Record<string, number> = {};
-    for (const x of expenseItems) {
-      const cat = x.category || "Other";
-      m[cat] = (m[cat] || 0) + x.amount;
-    }
-    const total = Object.values(m).reduce((a, b) => a + b, 0) || 1;
-    const max = Math.max(1, ...Object.values(m));
-    return Object.entries(m)
-      .sort((a, b) => b[1] - a[1])
-      .map(([cat, amount]) => ({
-        category: cat,
-        amount,
-        pct: Math.round((amount / total) * 100),
-        barWidth: Math.round((amount / max) * 100),
-      }));
-  }, [allTransactions]);
-
-  // Filtered transactions for the Transactions tab
-  const filteredTransactions = useMemo(() => {
-    const q = transactionQuery.trim().toLowerCase();
-    return allTransactions.filter((x) => {
-      const matchesChip =
-        transactionChip === "all" || x.type === transactionChip;
-      const matchesSearch =
-        !q ||
-        x.title.toLowerCase().includes(q) ||
-        x.category.toLowerCase().includes(q) ||
-        x.source.toLowerCase().includes(q);
-      return matchesChip && matchesSearch;
-    });
-  }, [allTransactions, transactionChip, transactionQuery]);
-
-  // Open add transaction dialog with type matching active tab
   const handleOpenAddTransaction = () => {
-    if (activeTab === "expenses") {
-      setMoneyFormType("expense");
-    } else if (activeTab === "savings") {
-      setMoneyFormType("savings");
-    } else if (activeTab === "debts") {
-      setMoneyFormType("debt");
-    } else {
-      setMoneyFormType("income");
-    }
+    setMoneyFormType("income");
     setMoneyFormOpen(true);
   };
 
   return (
-    <div className="flex flex-col">
-      {/* Page Title */}
-      <div className="flex flex-col gap-1">
-        <h1 className="font-fraunces text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          My Money
-        </h1>
-        <p className="mt-1 text-[15px] text-muted-foreground">
-          Manage income, expenses, savings, debts, and recent money activity in
-          one place.
-        </p>
+    <div className="flex flex-col gap-4">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-1">
+          <h1 className="font-fraunces text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            My Money
+          </h1>
+          <p className="mt-1 text-[15px] text-muted-foreground">
+            Manage income, expenses, savings, debts, and recent money activity
+            in one place.
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          onClick={handleOpenAddTransaction}
+          className="h-9 w-fit gap-1.5 rounded-full bg-foreground px-4 text-sm font-semibold text-background shadow-sm hover:bg-foreground/90"
+        >
+          <PlusIcon className="size-4" aria-hidden="true" />
+          Add transaction
+        </Button>
       </div>
 
       {/* No Family Alert */}
       {!familyId && !loading ? (
-        <div className="my-4 flex flex-wrap items-center justify-between gap-4 rounded-[16px] border border-border bg-card p-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-[16px] border border-border bg-card p-4">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <UsersIcon className="size-5 flex-none text-foreground" />
             <span>
@@ -435,434 +351,118 @@ export function PersonalMoneyPage() {
         </div>
       ) : null}
 
-      {/* Tabs navigation row */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <div
-          role="tablist"
-          aria-label="Money views"
-          className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-border bg-muted p-1"
-        >
-          {TABS.map((t) => {
-            const isSelected = activeTab === t.id;
-            return (
-              <button
-                key={t.id}
-                type="button"
-                role="tab"
-                aria-selected={isSelected}
-                onClick={() => setActiveTab(t.id)}
-                className={cn(
-                  "rounded-full px-3.5 py-1.5 text-sm font-semibold whitespace-nowrap transition-all sm:px-4 sm:py-2",
-                  isSelected
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {t.label}
-              </button>
-            );
-          })}
+      {/* Main Content */}
+      {loading ? (
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+            <Skeleton className="h-24 rounded-[18px]" />
+            <Skeleton className="h-24 rounded-[18px]" />
+            <Skeleton className="col-span-2 h-24 rounded-[20px] lg:col-span-1" />
+            <Skeleton className="h-24 rounded-[18px]" />
+            <Skeleton className="h-24 rounded-[18px]" />
+          </div>
+          <Skeleton className="h-64 rounded-[20px]" />
         </div>
-
-        {/* Toolbar + Add transaction button */}
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            onClick={handleOpenAddTransaction}
-            className="h-9 gap-1.5 rounded-full bg-foreground px-4 text-sm font-semibold text-background shadow-sm hover:bg-foreground/90"
-          >
-            <PlusIcon className="size-4" aria-hidden="true" />
-            Add transaction
-          </Button>
-        </div>
-      </div>
-
-      {/* Main tab content */}
-      <div className="mt-4 flex flex-col gap-4">
-        {loading ? (
-          <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-              <Skeleton className="h-24 rounded-[18px]" />
-              <Skeleton className="h-24 rounded-[18px]" />
-              <Skeleton className="col-span-2 h-24 rounded-[20px] lg:col-span-1" />
-              <Skeleton className="h-24 rounded-[18px]" />
-              <Skeleton className="h-24 rounded-[18px]" />
-            </div>
-            <Skeleton className="h-64 rounded-[20px]" />
-          </div>
-        ) : activeTab === "all" ? (
-          /* OVERVIEW TAB */
-          <div className="flex flex-col gap-4">
-            {/* 5 KPI Cards Grid */}
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
-              {/* Total Income */}
-              <div className="flex flex-col justify-between rounded-[18px] border border-border bg-card p-3.5 shadow-sm sm:p-4">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Total income</span>
-                  <TrendingDownIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div className="mt-2 font-fraunces text-2xl font-semibold text-emerald-700 dark:text-emerald-400">
-                  {formatCompactRwf(totalIncome, currency)}
-                </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {/* 5 KPI Cards Grid */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-5">
+            {/* Total Income */}
+            <div className="flex flex-col justify-between rounded-[18px] border border-border bg-card p-3.5 shadow-sm sm:p-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Total income</span>
+                <TrendingDownIcon className="size-4 text-emerald-600 dark:text-emerald-400" />
               </div>
-
-              {/* Total Expenses */}
-              <div className="flex flex-col justify-between rounded-[18px] border border-border bg-card p-3.5 shadow-sm sm:p-4">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Total expenses</span>
-                  <TrendingUpIcon className="size-4 text-red-600 dark:text-red-400" />
-                </div>
-                <div className="mt-2 font-fraunces text-2xl font-semibold text-red-700 dark:text-red-400">
-                  {formatCompactRwf(totalExpenses, currency)}
-                </div>
-              </div>
-
-              {/* Balance Card (Bank Card Aesthetic) */}
-              <div className="col-span-2 flex flex-col justify-between rounded-[20px] border border-neutral-300 bg-gradient-to-br from-white via-neutral-100 to-neutral-200 p-4 text-neutral-900 shadow-md sm:p-5 dark:border-neutral-800 dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-950 dark:text-neutral-100 lg:col-span-1">
-                <div className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400">
-                  Balance
-                </div>
-                <div className="mt-2 font-mono text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white">
-                  {formatCompactRwf(balance, currency)}
-                </div>
-              </div>
-
-              {/* Savings */}
-              <div className="flex flex-col justify-between rounded-[18px] border border-border bg-card p-3.5 shadow-sm sm:p-4">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Savings</span>
-                  <CoinsIcon className="size-4 text-violet-600 dark:text-violet-400" />
-                </div>
-                <div className="mt-2 font-fraunces text-2xl font-semibold text-violet-700 dark:text-violet-400">
-                  {formatCompactRwf(totalSavings, currency)}
-                </div>
-              </div>
-
-              {/* Debts */}
-              <div className="flex flex-col justify-between rounded-[18px] border border-border bg-card p-3.5 shadow-sm sm:p-4">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Debts</span>
-                  <LandmarkIcon className="size-4 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div className="mt-2 font-fraunces text-2xl font-semibold text-amber-700 dark:text-amber-400">
-                  {formatCompactRwf(totalDebt, currency)}
-                </div>
+              <div className="mt-2 font-fraunces text-2xl font-semibold text-emerald-700 dark:text-emerald-400">
+                {formatCompactRwf(totalIncome, currency)}
               </div>
             </div>
 
-            {/* Recent Transactions Card */}
-            <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
-              <div className="mb-4 flex flex-col gap-0.5">
-                <h2 className="font-fraunces text-xl font-semibold tracking-tight text-foreground">
-                  Recent transactions
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Latest money activity across personal and family records.
-                </p>
+            {/* Total Expenses */}
+            <div className="flex flex-col justify-between rounded-[18px] border border-border bg-card p-3.5 shadow-sm sm:p-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Total expenses</span>
+                <TrendingUpIcon className="size-4 text-red-600 dark:text-red-400" />
               </div>
+              <div className="mt-2 font-fraunces text-2xl font-semibold text-red-700 dark:text-red-400">
+                {formatCompactRwf(totalExpenses, currency)}
+              </div>
+            </div>
 
-              {allTransactions.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
-                  No records in this view yet.
-                </div>
-              ) : (
-                <TransactionsTable items={allTransactions.slice(0, 8)} />
-              )}
-            </section>
+            {/* Balance Card (Bank Card Aesthetic) */}
+            <div className="col-span-2 flex flex-col justify-between rounded-[20px] border border-neutral-300 bg-gradient-to-br from-white via-neutral-100 to-neutral-200 p-4 text-neutral-900 shadow-md sm:p-5 dark:border-neutral-800 dark:from-neutral-800 dark:via-neutral-900 dark:to-neutral-950 dark:text-neutral-100 lg:col-span-1">
+              <div className="font-mono text-xs uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400">
+                Balance
+              </div>
+              <div className="mt-2 font-mono text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white">
+                {formatCompactRwf(balance, currency)}
+              </div>
+            </div>
 
-            {/* Bottom 2 Cards Grid */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {/* Next Savings Goal */}
-              <SavingsGoalSnapshot
-                goal={nextSavingsGoal}
-                currency={currency}
-                onAddGoal={() => setPlanFormOpen(true)}
-              />
+            {/* Savings */}
+            <div className="flex flex-col justify-between rounded-[18px] border border-border bg-card p-3.5 shadow-sm sm:p-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Savings</span>
+                <CoinsIcon className="size-4 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div className="mt-2 font-fraunces text-2xl font-semibold text-violet-700 dark:text-violet-400">
+                {formatCompactRwf(totalSavings, currency)}
+              </div>
+            </div>
 
-              {/* Debt Snapshot */}
-              <DebtSnapshotCard
-                loan={activeDebt}
-                currency={currency}
-                onAddLoan={() => {
-                  setMoneyFormType("debt");
-                  setMoneyFormOpen(true);
-                }}
-              />
+            {/* Debts */}
+            <div className="flex flex-col justify-between rounded-[18px] border border-border bg-card p-3.5 shadow-sm sm:p-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Debts</span>
+                <LandmarkIcon className="size-4 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="mt-2 font-fraunces text-2xl font-semibold text-amber-700 dark:text-amber-400">
+                {formatCompactRwf(totalDebt, currency)}
+              </div>
             </div>
           </div>
-        ) : activeTab === "income" ? (
-          /* INCOME TAB */
-          <div className="flex flex-col gap-4">
-            {/* Top KPI Card */}
-            <div className="rounded-[18px] border border-border bg-card p-5 shadow-sm">
-              <div className="text-sm font-medium text-muted-foreground">
-                Total income
-              </div>
-              <div className="mt-1 font-fraunces text-3xl font-semibold text-emerald-700 dark:text-emerald-400">
-                {formatFullRwf(totalIncome, currency)}
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {allTransactions.filter((x) => x.type === "in").length} income
-                records
-              </p>
-            </div>
 
-            {/* 2 Column Grid */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {/* Income by category */}
-              <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
-                <div className="mb-3.5">
-                  <h2 className="font-fraunces text-xl font-semibold text-foreground">
-                    Income by category
-                  </h2>
-                </div>
-                {incomeCategoryBars.length === 0 ? (
-                  <p className="py-4 text-sm text-muted-foreground">
-                    No income categories yet.
-                  </p>
-                ) : (
-                  incomeCategoryBars.map((b) => (
-                    <div
-                      key={b.category}
-                      className="my-3 grid grid-cols-[110px_1fr_44px] items-center gap-3 text-sm"
-                    >
-                      <span className="truncate font-medium text-foreground">
-                        {b.category}
-                      </span>
-                      <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full bg-emerald-600 dark:bg-emerald-400"
-                          style={{ width: `${b.barWidth}%` }}
-                        />
-                      </div>
-                      <b className="text-right text-xs font-semibold">
-                        {b.pct}%
-                      </b>
-                    </div>
-                  ))
-                )}
-              </section>
-
-              {/* Income records */}
-              <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
-                <div className="mb-3.5">
-                  <h2 className="font-fraunces text-xl font-semibold text-foreground">
-                    Income records
-                  </h2>
-                </div>
-                <TransactionsTable
-                  items={allTransactions.filter((x) => x.type === "in")}
-                />
-              </section>
-            </div>
-          </div>
-        ) : activeTab === "expenses" ? (
-          /* EXPENSES TAB */
-          <div className="flex flex-col gap-4">
-            {/* Top KPI Card */}
-            <div className="rounded-[18px] border border-border bg-card p-5 shadow-sm">
-              <div className="text-sm font-medium text-muted-foreground">
-                Total expenses
-              </div>
-              <div className="mt-1 font-fraunces text-3xl font-semibold text-red-700 dark:text-red-400">
-                {formatFullRwf(totalExpenses, currency)}
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {allTransactions.filter((x) => x.type === "out").length} expense
-                records
-              </p>
-            </div>
-
-            {/* 2 Column Grid */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {/* Spending by category */}
-              <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
-                <div className="mb-3.5">
-                  <h2 className="font-fraunces text-xl font-semibold text-foreground">
-                    Spending by category
-                  </h2>
-                </div>
-                {expenseCategoryBars.length === 0 ? (
-                  <p className="py-4 text-sm text-muted-foreground">
-                    No expense categories yet.
-                  </p>
-                ) : (
-                  expenseCategoryBars.map((b) => (
-                    <div
-                      key={b.category}
-                      className="my-3 grid grid-cols-[110px_1fr_44px] items-center gap-3 text-sm"
-                    >
-                      <span className="truncate font-medium text-foreground">
-                        {b.category}
-                      </span>
-                      <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                        <div
-                          className="h-full rounded-full bg-red-600 dark:bg-red-400"
-                          style={{ width: `${b.barWidth}%` }}
-                        />
-                      </div>
-                      <b className="text-right text-xs font-semibold">
-                        {b.pct}%
-                      </b>
-                    </div>
-                  ))
-                )}
-              </section>
-
-              {/* Expense records */}
-              <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
-                <div className="mb-3.5">
-                  <h2 className="font-fraunces text-xl font-semibold text-foreground">
-                    Expense records
-                  </h2>
-                </div>
-                <TransactionsTable
-                  items={allTransactions.filter((x) => x.type === "out")}
-                />
-              </section>
-            </div>
-          </div>
-        ) : activeTab === "savings" ? (
-          /* SAVINGS TAB */
-          <div className="flex flex-col gap-4">
-            {/* Top KPI Card */}
-            <div className="rounded-[18px] border border-border bg-card p-5 shadow-sm">
-              <div className="text-sm font-medium text-muted-foreground">
-                Total savings
-              </div>
-              <div className="mt-1 font-fraunces text-3xl font-semibold text-violet-700 dark:text-violet-400">
-                {formatFullRwf(totalSavings, currency)}
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Savings goals and deposits
-              </p>
-            </div>
-
-            {/* 2 Column Grid */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <SavingsGoalSnapshot
-                goal={nextSavingsGoal}
-                currency={currency}
-                onAddGoal={() => setPlanFormOpen(true)}
-              />
-
-              <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
-                <div className="mb-3.5">
-                  <h2 className="font-fraunces text-xl font-semibold text-foreground">
-                    Savings deposits
-                  </h2>
-                </div>
-                <TransactionsTable
-                  items={allTransactions.filter((x) => x.type === "save")}
-                  emptyMessage="No savings deposits recorded yet."
-                />
-              </section>
-            </div>
-          </div>
-        ) : activeTab === "debts" ? (
-          /* DEBTS TAB */
-          <div className="flex flex-col gap-4">
-            {/* Top KPI Card */}
-            <div className="rounded-[18px] border border-border bg-card p-5 shadow-sm">
-              <div className="text-sm font-medium text-muted-foreground">
-                Outstanding debt
-              </div>
-              <div className="mt-1 font-fraunces text-3xl font-semibold text-amber-700 dark:text-amber-400">
-                {formatFullRwf(totalDebt, currency)}
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                of {formatFullRwf(totalBorrowedOriginal, currency)} borrowed
-              </p>
-            </div>
-
-            {/* 2 Column Grid */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <DebtSnapshotCard
-                loan={activeDebt}
-                currency={currency}
-                onAddLoan={() => {
-                  setMoneyFormType("debt");
-                  setMoneyFormOpen(true);
-                }}
-              />
-
-              <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
-                <div className="mb-3.5 flex flex-col gap-0.5">
-                  <h2 className="font-fraunces text-xl font-semibold text-foreground">
-                    Repayments
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Payments made toward your debts.
-                  </p>
-                </div>
-                <div className="rounded-xl border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
-                  No repayments recorded yet. Add an expense to record one.
-                </div>
-              </section>
-            </div>
-          </div>
-        ) : (
-          /* TRANSACTIONS TAB */
+          {/* Recent Transactions Card */}
           <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
-            {/* Header: Title on left, Search on right */}
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="mb-4 flex flex-col gap-0.5">
               <h2 className="font-fraunces text-xl font-semibold tracking-tight text-foreground">
-                All transactions
+                Recent transactions
               </h2>
-              <div className="flex h-10 min-w-[220px] items-center gap-2 rounded-xl border border-border bg-muted/60 px-3.5">
-                <SearchIcon
-                  className="size-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <input
-                  type="search"
-                  value={transactionQuery}
-                  onChange={(e) => setTransactionQuery(e.target.value)}
-                  placeholder="Search records..."
-                  aria-label="Search records"
-                  className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                />
+              <p className="text-sm text-muted-foreground">
+                Latest money activity across personal and family records.
+              </p>
+            </div>
+
+            {allTransactions.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
+                No records in this view yet.
               </div>
-            </div>
-
-            {/* Filter chips */}
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              {[
-                { key: "all", label: "All" },
-                { key: "in", label: "Income" },
-                { key: "out", label: "Expenses" },
-                { key: "save", label: "Savings" },
-              ].map(({ key, label }) => {
-                const isSelected = transactionChip === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    aria-pressed={isSelected}
-                    onClick={() =>
-                      setTransactionChip(key as "all" | "in" | "out" | "save")
-                    }
-                    className={cn(
-                      "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
-                      isSelected
-                        ? "bg-foreground text-background shadow-sm"
-                        : "border border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-                    )}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Filtered Table */}
-            <TransactionsTable
-              items={filteredTransactions}
-              emptyMessage="No records match this search or filter."
-            />
+            ) : (
+              <TransactionsTable items={allTransactions.slice(0, 8)} />
+            )}
           </section>
-        )}
-      </div>
+
+          {/* Bottom 2 Cards Grid */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Next Savings Goal */}
+            <SavingsGoalSnapshot
+              goal={nextSavingsGoal}
+              currency={currency}
+              onAddGoal={() => setPlanFormOpen(true)}
+            />
+
+            {/* Debt Snapshot */}
+            <DebtSnapshotCard
+              loan={activeDebt}
+              currency={currency}
+              onAddLoan={() => {
+                setMoneyFormType("debt");
+                setMoneyFormOpen(true);
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* MoneyFormDialog for adding transactions */}
       {familyId ? (
