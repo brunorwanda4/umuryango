@@ -15,6 +15,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ContactQueryDto } from './dto/contact-query.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
+import { ImportContactsDto } from './dto/import-contacts.dto';
 
 type Membership = {
   id: string;
@@ -25,6 +26,7 @@ type Membership = {
 
 const CONTACT_INCLUDE = Prisma.validator<Prisma.FamilyContactInclude>()({
   createdBy: { select: { fullName: true } },
+  displayNames: true,
 });
 
 type ContactWithCreator = Prisma.FamilyContactGetPayload<{
@@ -70,7 +72,7 @@ export class ContactsService {
       return created;
     });
 
-    return this.serialize(contact);
+    return this.serialize(contact, userId);
   }
 
   async findMany(userId: string, familyId: string, query: ContactQueryDto) {
@@ -96,6 +98,14 @@ export class ContactsService {
         { relationshipToFamily: { contains: search, mode: 'insensitive' } },
         { organization: { contains: search, mode: 'insensitive' } },
         { notes: { contains: search, mode: 'insensitive' } },
+        {
+          displayNames: {
+            some: {
+              userId,
+              fullName: { contains: search, mode: 'insensitive' },
+            },
+          },
+        },
       ];
     }
 
@@ -115,7 +125,7 @@ export class ContactsService {
     ]);
 
     return {
-      items: items.map((contact) => this.serialize(contact)),
+      items: items.map((contact) => this.serialize(contact, userId)),
       page,
       limit,
       total,
@@ -126,7 +136,7 @@ export class ContactsService {
   async findOne(userId: string, familyId: string, id: string) {
     await this.requireMembership(userId, familyId);
     const contact = await this.findContact(familyId, id);
-    return this.serialize(contact);
+    return this.serialize(contact, userId);
   }
 
   async update(
@@ -143,7 +153,6 @@ export class ContactsService {
       const saved = await tx.familyContact.update({
         where: { id },
         data: {
-          ...(dto.fullName !== undefined ? { fullName: dto.fullName } : {}),
           ...(dto.contactType !== undefined
             ? { contactType: dto.contactType }
             : {}),
@@ -182,10 +191,87 @@ export class ContactsService {
         },
       });
 
+      if (dto.fullName !== undefined) {
+        await tx.familyContactDisplayName.upsert({
+          where: { contactId_userId: { contactId: id, userId } },
+          create: { contactId: id, userId, fullName: dto.fullName },
+          update: { fullName: dto.fullName },
+        });
+      }
+
       return saved;
     });
 
-    return this.serialize(updated);
+    const refreshed = await this.findContact(familyId, id);
+    return this.serialize(refreshed, userId);
+  }
+
+  async importMany(userId: string, familyId: string, dto: ImportContactsDto) {
+    await this.requireMembership(userId, familyId);
+
+    const existing = await this.prisma.familyContact.findMany({
+      where: { familyId, deletedAt: null },
+      include: CONTACT_INCLUDE,
+    });
+    const byPhone = new Map<string, ContactWithCreator>();
+    const byEmail = new Map<string, ContactWithCreator>();
+    for (const contact of existing) {
+      const phone = this.normalizePhone(contact.phoneNumber);
+      const email = this.normalizeEmail(contact.email);
+      if (phone) byPhone.set(phone, contact);
+      if (email) byEmail.set(email, contact);
+    }
+
+    let created = 0;
+    let merged = 0;
+    const imported = await this.prisma.$transaction(async (tx) => {
+      for (const item of dto.contacts) {
+        const phone = this.normalizePhone(item.phoneNumber);
+        const email = this.normalizeEmail(item.email);
+        const contact =
+          (phone && byPhone.get(phone)) || (email && byEmail.get(email));
+
+        if (contact) {
+          await tx.familyContactDisplayName.upsert({
+            where: { contactId_userId: { contactId: contact.id, userId } },
+            create: { contactId: contact.id, userId, fullName: item.fullName },
+            update: { fullName: item.fullName },
+          });
+          merged++;
+          continue;
+        }
+
+        const createdContact = await tx.familyContact.create({
+          data: {
+            familyId,
+            fullName: item.fullName,
+            contactType: 'OTHER',
+            phoneNumber: item.phoneNumber || null,
+            email: item.email || null,
+            address: item.address || null,
+            organization: item.organization || null,
+            notes: item.notes || null,
+            createdById: userId,
+          },
+          include: CONTACT_INCLUDE,
+        });
+        existing.push(createdContact);
+        if (phone) byPhone.set(phone, createdContact);
+        if (email) byEmail.set(email, createdContact);
+        created++;
+      }
+      await tx.familyAuditEvent.create({
+        data: {
+          familyId,
+          actorId: userId,
+          action: FamilyAuditAction.CONTACT_IMPORTED,
+          after: { created, merged, total: dto.contacts.length },
+        },
+      });
+      return { created, merged };
+    });
+
+    return imported;
   }
 
   async delete(userId: string, familyId: string, id: string) {
@@ -213,7 +299,7 @@ export class ContactsService {
       return saved;
     });
 
-    return this.serialize(deleted);
+    return this.serialize(deleted, userId);
   }
 
   private async requireMembership(
@@ -261,11 +347,14 @@ export class ContactsService {
     throw new ForbiddenException('You cannot manage this contact.');
   }
 
-  private serialize(contact: ContactWithCreator) {
+  private serialize(contact: ContactWithCreator, userId: string) {
+    const displayName = contact.displayNames.find(
+      (entry) => entry.userId === userId,
+    )?.fullName;
     return {
       id: contact.id,
       familyId: contact.familyId,
-      fullName: contact.fullName,
+      fullName: displayName ?? contact.fullName,
       contactType: contact.contactType,
       phoneNumber: contact.phoneNumber,
       email: contact.email,
@@ -282,6 +371,15 @@ export class ContactsService {
       createdAt: contact.createdAt.toISOString(),
       updatedAt: contact.updatedAt.toISOString(),
     };
+  }
+
+  private normalizePhone(value?: string | null) {
+    const digits = value?.replace(/\D/g, '') ?? '';
+    return digits.length >= 7 ? digits : '';
+  }
+
+  private normalizeEmail(value?: string | null) {
+    return value?.trim().toLowerCase() ?? '';
   }
 
   private contactSnapshot(contact: FamilyContact): Prisma.InputJsonObject {

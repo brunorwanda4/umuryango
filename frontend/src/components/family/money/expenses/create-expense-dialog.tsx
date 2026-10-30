@@ -91,6 +91,9 @@ export function CreateExpenseDialog({
     onSuccessMessage: "Expense recorded successfully",
     toastOnSuccess: true,
     onSuccess: async (data, values) => {
+      onOpenChange(false);
+      form.reset();
+
       if (values.fileName && data?.id) {
         await apiRequest(
           "post",
@@ -105,8 +108,6 @@ export function CreateExpenseDialog({
         );
       }
 
-      onOpenChange(false);
-      form.reset();
       onSuccess();
     },
   });

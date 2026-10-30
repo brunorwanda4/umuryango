@@ -127,6 +127,7 @@ export function CreateCategoryForm({
 
   return (
     <Dialog
+      syncWithSearchParams={false}
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen);

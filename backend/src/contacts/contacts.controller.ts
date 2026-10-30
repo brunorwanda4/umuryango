@@ -23,6 +23,7 @@ import { ContactsService } from './contacts.service';
 import { ContactQueryDto } from './dto/contact-query.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
+import { ImportContactsDto } from './dto/import-contacts.dto';
 
 @ApiTags('family-contacts')
 @ApiCookieAuth(ACCESS_COOKIE_NAME)
@@ -65,6 +66,18 @@ export class ContactsController {
   ) {
     const data = await this.contactsService.create(userId, familyId, dto);
     return { data, message: 'Contact created successfully.' };
+  }
+
+  @Post('import')
+  @ApiOperation({ summary: 'Import family contacts and merge duplicates' })
+  @ApiOkResponse({ description: 'Contacts imported successfully.' })
+  async importMany(
+    @CurrentUserId() userId: string,
+    @Param('familyId') familyId: string,
+    @Body() dto: ImportContactsDto,
+  ) {
+    const data = await this.contactsService.importMany(userId, familyId, dto);
+    return { data, message: 'Contacts imported successfully.' };
   }
 
   @Patch(':id')

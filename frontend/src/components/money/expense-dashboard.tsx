@@ -6,7 +6,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatPeriodLabel } from "@/lib/format-period-label";
 import { ExpenseChartsSection } from "./expense-dashboard/expense-charts-section";
 import {
   type ExpenseCategory,
@@ -61,11 +60,9 @@ export function ExpenseDashboard({
     );
   }
 
-  const periodLabel = formatPeriodLabel(data.period.from, data.period.to);
-
   return (
     <div className="flex flex-col gap-4">
-      <ExpenseSummaryCards periodLabel={periodLabel} summary={data.summary} />
+      <ExpenseSummaryCards summary={data.summary} />
       <Tabs defaultValue="data">
         <TabsList>
           <TabsTrigger value="data">Data</TabsTrigger>

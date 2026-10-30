@@ -92,6 +92,7 @@ enum FamilyAuditAction {
   CONTACT_CREATED
   CONTACT_UPDATED
   CONTACT_DELETED
+  CONTACT_IMPORTED
   CONTRIBUTION_PLAN_CREATED
   CONTRIBUTION_RECORDED
   CONTRIBUTION_VERIFIED
@@ -356,6 +357,7 @@ model User {
   createdCategories            FamilyTransactionCategory[] @relation("CategoryCreatedBy")
   ownedCategories              FamilyTransactionCategory[] @relation("CategoryOwner")
   createdFamilyContacts        FamilyContact[]             @relation("FamilyContactsCreated")
+  contactDisplayNames          FamilyContactDisplayName[]
   createdLoans                 FamilyLoan[]                @relation("LoansCreated")
   updatedLoans                 FamilyLoan[]                @relation("LoansUpdated")
   approvedLoans                FamilyLoan[]                @relation("LoansApproved")
@@ -779,6 +781,7 @@ model FamilyContact {
   updatedAt            DateTime            @updatedAt
   family               Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
   createdBy            User                @relation("FamilyContactsCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  displayNames         FamilyContactDisplayName[]
   borrowerLoans        FamilyLoan[]        @relation("LoanBorrowerContact")
   lenderLoans          FamilyLoan[]        @relation("LoanLenderContact")
   paidTransactions     FamilyTransaction[] @relation("TransactionReceivedFromContact")
@@ -788,6 +791,20 @@ model FamilyContact {
   @@index([familyId, isEmergencyContact])
   @@index([familyId, isLoanContact])
   @@index([createdById])
+}
+
+model FamilyContactDisplayName {
+  id        String        @id @default(cuid())
+  contactId String
+  userId    String
+  fullName  String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  contact   FamilyContact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([contactId, userId])
+  @@index([userId])
 }
 
 model FamilyTransactionCategory {

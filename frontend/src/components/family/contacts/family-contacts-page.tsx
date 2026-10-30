@@ -3,6 +3,7 @@
 import {
   AlertCircleIcon,
   EyeIcon,
+  FileUpIcon,
   MessageCircleIcon,
   MoreVerticalIcon,
   PencilIcon,
@@ -13,7 +14,7 @@ import {
   Trash2Icon,
   UsersRoundIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
@@ -102,6 +103,112 @@ function getDefaultValues(contact?: FamilyContact | null): ContactFormValues {
 
 function normalizePhoneForWhatsApp(phone: string) {
   return phone.replace(/[^\d]/g, "");
+}
+
+type ImportedContact = {
+  fullName: string;
+  phoneNumber?: string;
+  email?: string;
+  address?: string;
+  organization?: string;
+  notes?: string;
+};
+
+function parseDelimitedLine(line: string) {
+  const values: string[] = [];
+  let value = "";
+  let quoted = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    if (character === '"') {
+      if (quoted && line[index + 1] === '"') {
+        value += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (character === "," && !quoted) {
+      values.push(value.trim());
+      value = "";
+    } else {
+      value += character;
+    }
+  }
+  values.push(value.trim());
+  return values;
+}
+
+function firstValue(row: Record<string, string>, names: string[]) {
+  const key = names.find((name) => row[name]?.trim());
+  return key ? row[key]?.trim() : undefined;
+}
+
+function parseGoogleCsv(text: string): ImportedContact[] {
+  const lines = text.split(/\r?\n/).filter((line) => line.trim());
+  if (lines.length < 2) return [];
+  const headers = parseDelimitedLine(lines[0] ?? "");
+  return lines.slice(1).flatMap((line) => {
+    const values = parseDelimitedLine(line);
+    const row = Object.fromEntries(
+      headers.map((header, index) => [header, values[index] ?? ""]),
+    );
+    const fullName =
+      firstValue(row, ["Name", "First Name", "Given Name"]) ?? "";
+    const phoneNumber = firstValue(row, [
+      "Phone 1 - Value",
+      "Phone 2 - Value",
+      "Phone 3 - Value",
+    ]);
+    const email = firstValue(row, ["E-mail 1 - Value", "E-mail 2 - Value"]);
+    return fullName || phoneNumber || email
+      ? [
+          {
+            fullName: fullName || phoneNumber || email || "Imported contact",
+            phoneNumber,
+            email,
+            address: firstValue(row, ["Address 1 - Formatted", "Address"]),
+            organization: firstValue(row, [
+              "Organization Name",
+              "Organization 1 - Name",
+            ]),
+            notes: firstValue(row, ["Notes"]),
+          },
+        ]
+      : [];
+  });
+}
+
+function parseVcard(text: string): ImportedContact[] {
+  return text
+    .split(/BEGIN:VCARD/i)
+    .slice(1)
+    .map((card): ImportedContact | null => {
+      const get = (prefix: string) =>
+        card
+          .split(/\r?\n/)
+          .find((line) => line.toUpperCase().startsWith(prefix))
+          ?.split(":")
+          .slice(1)
+          .join(":")
+          .trim()
+          .replace(/\\n/g, "\n")
+          .replace(/\\,/g, ",");
+      const fullName = get("FN") ?? get("N") ?? "";
+      const phoneNumber = get("TEL");
+      const email = get("EMAIL");
+      const organization = get("ORG");
+      const notes = get("NOTE");
+      return fullName || phoneNumber || email
+        ? {
+            fullName: fullName || phoneNumber || email || "Imported contact",
+            phoneNumber,
+            email,
+            organization,
+            notes,
+          }
+        : null;
+    })
+    .filter((contact): contact is ImportedContact => Boolean(contact));
 }
 
 function filterContacts(
@@ -438,6 +545,8 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
   const [detailsContact, setDetailsContact] = useState<FamilyContact | null>(
     null,
   );
+  const [importing, setImporting] = useState(false);
+  const importInputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -523,6 +632,42 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
     }
   };
 
+  const handleImport = async (file: File) => {
+    if (!family) return;
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const imported = file.name.toLowerCase().endsWith(".vcf")
+        ? parseVcard(text)
+        : parseGoogleCsv(text);
+      if (!imported.length) {
+        toast.error("No contacts were found in that file.");
+        return;
+      }
+
+      const response = await apiRequest<
+        { contacts: ImportedContact[] },
+        { created: number; merged: number }
+      >("post", `/families/${encodeURIComponent(family.id)}/contacts/import`, {
+        contacts: imported.slice(0, 1000),
+      });
+      if (!response.ok || !response.data) {
+        toast.error(response.message ?? "Contacts could not be imported.");
+        return;
+      }
+
+      toast.success(
+        `${response.data.created} added, ${response.data.merged} matched existing contacts.`,
+      );
+      await fetchData();
+    } catch {
+      toast.error("The contact file could not be read.");
+    } finally {
+      setImporting(false);
+      if (importInputRef.current) importInputRef.current.value = "";
+    }
+  };
+
   if (loading) return <FamilyMoneySkeleton />;
 
   if (error || !family) {
@@ -567,13 +712,34 @@ export function FamilyContactsPage({ familyName }: { familyName: string }) {
             SACCOs, banks, business partners, and loan contacts.
           </p>
         </div>
-        <ContactFormDialog
-          family={family}
-          mode="create"
-          open={openCreate}
-          onOpenChange={setOpenCreate}
-          onSuccess={fetchData}
-        />
+        <div className="flex flex-wrap gap-2">
+          <input
+            ref={importInputRef}
+            className="hidden"
+            accept=".csv,.vcf,text/csv,text/vcard"
+            type="file"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) void handleImport(file);
+            }}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={importing}
+            onClick={() => importInputRef.current?.click()}
+          >
+            <FileUpIcon aria-hidden="true" data-icon="inline-start" />
+            {importing ? "Importing..." : "Import contacts"}
+          </Button>
+          <ContactFormDialog
+            family={family}
+            mode="create"
+            open={openCreate}
+            onOpenChange={setOpenCreate}
+            onSuccess={fetchData}
+          />
+        </div>
       </header>
 
       {emergencyContacts.length ? (
