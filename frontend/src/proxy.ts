@@ -1,6 +1,10 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { defaultLocale, isSupportedLocale } from "@/i18n/config";
+import {
+  type AuthRefreshResult,
+  classifyAuthRefreshResponse,
+} from "@/service/auth-refresh";
 
 const LANGUAGE_COOKIE = "rf_language";
 const LANGUAGE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
@@ -58,11 +62,21 @@ function mergeCookies(cookieHeader: string, setCookieHeaders: string[]) {
   return Array.from(cookies, ([name, value]) => `${name}=${value}`).join("; ");
 }
 
-async function refreshSessionCookies(request: NextRequest) {
+type SessionRefresh =
+  | { status: Exclude<AuthRefreshResult, "refreshed"> }
+  | {
+      status: "refreshed";
+      cookieHeader: string;
+      setCookieHeaders: string[];
+    };
+
+async function refreshSessionCookies(
+  request: NextRequest,
+): Promise<SessionRefresh> {
   const cookieHeader = request.headers.get("cookie") ?? "";
 
   if (!cookieHeader) {
-    return null;
+    return { status: "unauthorized" };
   }
 
   const response = await fetch(`${API_PROXY_URL}/api/v1/auth/refresh`, {
@@ -72,21 +86,36 @@ async function refreshSessionCookies(request: NextRequest) {
       Cookie: cookieHeader,
     },
     cache: "no-store",
-  }).catch(() => null);
+  }).catch(() => undefined);
 
-  if (!response?.ok) {
-    return null;
+  if (!response) {
+    return { status: "unavailable" };
+  }
+
+  const refreshResult = classifyAuthRefreshResponse(response);
+  if (refreshResult !== "refreshed") {
+    return { status: refreshResult };
   }
 
   const setCookieHeaders = getSetCookieHeaders(response.headers);
   if (setCookieHeaders.length === 0) {
-    return null;
+    return { status: "unavailable" };
   }
 
   return {
+    status: "refreshed",
     cookieHeader: mergeCookies(cookieHeader, setCookieHeaders),
     setCookieHeaders,
   };
+}
+
+function appendSessionCookies(
+  response: NextResponse,
+  sessionRefresh: Extract<SessionRefresh, { status: "refreshed" }>,
+) {
+  for (const setCookieHeader of sessionRefresh.setCookieHeaders) {
+    response.headers.append("Set-Cookie", setCookieHeader);
+  }
 }
 
 function redirectToLogin(request: NextRequest, locale: string) {
@@ -157,12 +186,13 @@ export async function proxy(request: NextRequest) {
   const hasRefreshCookie = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
   const canEnterProtectedRoute = hasAccessCookie || hasRefreshCookie;
   const isProtectedRoute = isProtectedPath(request.nextUrl.pathname);
+  const isAuthRoute = request.nextUrl.pathname.startsWith("/auth");
 
   if (isProtectedRoute && !canEnterProtectedRoute) {
     return redirectToLogin(request, locale);
   }
 
-  if (request.nextUrl.pathname.startsWith("/auth") && hasAccessCookie) {
+  if (isAuthRoute && hasAccessCookie) {
     return redirectWithLocale(request, "/me", locale);
   }
 
@@ -172,17 +202,25 @@ export async function proxy(request: NextRequest) {
     request.nextUrl.pathname + request.nextUrl.search,
   );
 
-  const refreshedSession =
-    isProtectedRoute && !hasAccessCookie && hasRefreshCookie
+  const sessionRefresh =
+    (isProtectedRoute || isAuthRoute) && !hasAccessCookie && hasRefreshCookie
       ? await refreshSessionCookies(request)
-      : null;
+      : undefined;
 
   if (isProtectedRoute && !hasAccessCookie && hasRefreshCookie) {
-    if (!refreshedSession) {
+    if (sessionRefresh?.status === "unauthorized") {
       return redirectToLogin(request, locale);
     }
 
-    requestHeaders.set("cookie", refreshedSession.cookieHeader);
+    if (sessionRefresh?.status === "refreshed") {
+      requestHeaders.set("cookie", sessionRefresh.cookieHeader);
+    }
+  }
+
+  if (isAuthRoute && sessionRefresh?.status === "refreshed") {
+    const response = redirectWithLocale(request, "/me", locale);
+    appendSessionCookies(response, sessionRefresh);
+    return response;
   }
 
   const response = NextResponse.next({
@@ -192,10 +230,8 @@ export async function proxy(request: NextRequest) {
   });
   setLanguageCookie(response, locale);
 
-  if (refreshedSession) {
-    for (const setCookieHeader of refreshedSession.setCookieHeaders) {
-      response.headers.append("Set-Cookie", setCookieHeader);
-    }
+  if (sessionRefresh?.status === "refreshed") {
+    appendSessionCookies(response, sessionRefresh);
   }
 
   return response;

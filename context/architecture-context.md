@@ -21,8 +21,8 @@ Use this file for system design, module boundaries, database, API, jobs, storage
 
 ## Backend
 
-- `backend/`: pnpm only, NestJS, TypeScript, Prisma, PostgreSQL, Redis, BullMQ.
-- Use `pnpm install`, `pnpm <script>`, `pnpm dlx <pkg>`.
+- `backend/`: Bun, NestJS, TypeScript, Prisma, PostgreSQL, Redis, BullMQ.
+- Use `bun install`, `bun run <script>`, and `bunx <pkg>`.
 - Modules should be domain-based: auth, users, families, members, permissions, finance, contributions, savings, debts, budgets, projects, announcements, events, documents, reports, notifications, audit, common.
 - Controllers map HTTP only. Services enforce rules. Guards enforce auth. DTOs validate input. Events/jobs handle side effects.
 

@@ -1,6 +1,7 @@
 {
   "name": "frontend",
   "version": "0.1.0",
+  "packageManager": "bun@1.4.2",
   "private": true,
   "scripts": {
     "dev": "bun next dev -p 4914",
@@ -24,12 +25,12 @@
     "emblor": "^1.4.8",
     "input-otp": "^1.4.2",
     "lucide-react": "^1.18.0",
-    "next": "16.2.9",
+    "next": "^16.4.3",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.5.0",
-    "react": "19.2.4",
+    "react": "^19.3.1",
     "react-day-picker": "^10.0.1",
-    "react-dom": "19.2.4",
+    "react-dom": "^19.3.1",
     "react-hook-form": "^7.80.0",
     "react-resizable-panels": "^4.11.2",
     "recharts": "3.8.0",

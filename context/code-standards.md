@@ -13,8 +13,7 @@ Use this file when writing or reviewing code.
 
 ## Package Managers
 
-- `frontend/`: Bun only. Use `bun install`, `bun run <script>`, `bunx <pkg>`. Lockfile: `bun.lock`.
-- `backend/`: pnpm only. Use `pnpm install`, `pnpm <script>`, `pnpm dlx <pkg>`. Lockfile: `pnpm-lock.yaml`.
+- `frontend/` and `backend/`: Bun only. Use `bun install`, `bun run <script>`, and `bunx <pkg>`. Each app owns a `bun.lock`.
 - Do not create wrong package-manager lockfiles.
 
 ## Frontend

@@ -24,14 +24,14 @@ Rwanda Family is a family management platform for money, contributions, expenses
 Frontend:
 
 - App: `frontend/`, Next.js 15 App Router, TypeScript, Tailwind CSS, shadcn/ui, DaisyUI for styling-only work, TanStack Query, Zustand only for local non-authoritative state.
-- Package manager: Bun only. Use `bun install`, `bun run <script>`, `bunx <pkg>`. Do not use npm, pnpm, or yarn in `frontend/`.
+- Package manager/runtime: Bun only. Use `bun install`, `bun run <script>`, and `bunx <pkg>`. Do not use npm, pnpm, or yarn in `frontend/` or `backend/`.
 - API calls go through `frontend/src/service/api.ts`; it builds `/api/v1`, sends cookies, and reads the backend `{ data, message }` envelope.
 - Zod/RHF forms should use `frontend/src/hooks/use-zod-form-submit.ts` and `frontend/src/components/common/form/common-form-field.tsx`.
 
 Backend:
 
 - App: `backend/`, NestJS, TypeScript, Prisma, PostgreSQL, Redis, BullMQ.
-- Package manager: pnpm only. Use `pnpm <script>`, `pnpm install`, `pnpm dlx <pkg>`. Do not use npm, yarn, or bun in `backend/`.
+- Backend package manager/runtime: Bun only. Use `bun install`, `bun run <script>`, and `bunx <pkg>`.
 - Keep controllers thin; put business rules in services/domain helpers.
 - Use transactions for multi-step financial changes.
 - Use migrations for schema changes; never edit production schema manually.

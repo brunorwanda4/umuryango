@@ -106,7 +106,7 @@ async function parseJson<T>(response: Response) {
   }
 }
 
-let authRefreshPromise: Promise<boolean> | null = null;
+let authRefreshPromise: Promise<AuthRefreshResult> | null = null;
 
 function shouldAttemptAuthRefresh(url: string) {
   const path = /^https?:\/\//.test(url) ? new URL(url).pathname : url;
@@ -167,8 +167,8 @@ async function refreshAuthSession(
       credentials,
       headers: { Accept: "application/json" },
     })
-      .then((response) => response.ok)
-      .catch(() => false)
+      .then(classifyAuthRefreshResponse)
+      .catch(() => "unavailable" as const)
       .finally(() => {
         authRefreshPromise = null;
       });
@@ -222,20 +222,25 @@ async function apiRequest<TRequest = unknown, TResponse = unknown>(
     const payload = await parseJson<TResponse>(response);
 
     if (!response.ok) {
-      if (
-        response.status === 401 &&
-        !skipAuthRefresh &&
-        shouldAttemptAuthRefresh(url) &&
-        (await refreshAuthSession(baseUrl, credentials))
-      ) {
-        return apiRequest<TRequest, TResponse>(method, url, data, {
-          ...options,
-          skipAuthRefresh: true,
-        });
-      }
-
       if (response.status === 401 && shouldAttemptAuthRefresh(url)) {
-        redirectBrowserToLogin();
+        let shouldRedirect = Boolean(skipAuthRefresh);
+
+        if (!skipAuthRefresh) {
+          const refreshResult = await refreshAuthSession(baseUrl, credentials);
+
+          if (refreshResult === "refreshed") {
+            return apiRequest<TRequest, TResponse>(method, url, data, {
+              ...options,
+              skipAuthRefresh: true,
+            });
+          }
+
+          shouldRedirect = refreshResult === "unauthorized";
+        }
+
+        if (shouldRedirect) {
+          redirectBrowserToLogin();
+        }
       }
 
       const message = getMessage(payload, response.statusText);
@@ -271,3 +276,8 @@ async function apiRequest<TRequest = unknown, TResponse = unknown>(
 }
 
 export default apiRequest;
+
+import {
+  type AuthRefreshResult,
+  classifyAuthRefreshResponse,
+} from "@/service/auth-refresh";
