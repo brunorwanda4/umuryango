@@ -72,7 +72,11 @@ export function AppSidebarShell(props: AppSidebarShellProps) {
   );
 }
 
-function AppSidebarContent({ children, mode, familySlug }: AppSidebarShellProps) {
+function AppSidebarContent({
+  children,
+  mode,
+  familySlug,
+}: AppSidebarShellProps) {
   const pathname = usePathname();
   const encodedFamilySlug = encodeURIComponent(familySlug ?? "");
   const { setOpenMobile, open } = useSidebar();
@@ -88,9 +92,12 @@ function AppSidebarContent({ children, mode, familySlug }: AppSidebarShellProps)
       ? getFamilySettingsNavigation(encodedFamilySlug)
       : personalSettingsNavigation;
   const isSettingsArea = isSettingsPath(pathname, mode, encodedFamilySlug);
-  const [sidebarView, setSidebarView] = useState<SidebarView>(isSettingsArea ? "settings" : "main");
-  const showingSettingsNavigation = isSettingsArea && sidebarView === "settings";
-  const activeNavigation = showingSettingsNavigation ? settingsNavigation : navigation;
+  const [sidebarView, setSidebarView] = useState<SidebarView>("main");
+  const showingSettingsNavigation =
+    isSettingsArea && sidebarView === "settings";
+  const activeNavigation = showingSettingsNavigation
+    ? settingsNavigation
+    : navigation;
   const sidebarTitle = showingSettingsNavigation
     ? mode === "family"
       ? "Family settings"
@@ -100,7 +107,20 @@ function AppSidebarContent({ children, mode, familySlug }: AppSidebarShellProps)
       : "Personal workspace";
 
   useEffect(() => {
-    setSidebarView(isSettingsArea ? "settings" : "main");
+    const syncSidebarView = () => {
+      if (window.matchMedia("(min-width: 768px)").matches) {
+        setSidebarView(isSettingsArea ? "settings" : "main");
+      } else {
+        setSidebarView("main");
+      }
+    };
+
+    syncSidebarView();
+    window.addEventListener("resize", syncSidebarView);
+
+    return () => {
+      window.removeEventListener("resize", syncSidebarView);
+    };
   }, [isSettingsArea]);
 
   return (
@@ -120,7 +140,10 @@ function AppSidebarContent({ children, mode, familySlug }: AppSidebarShellProps)
         <SidebarHeader>
           <div className="flex flex-col gap-2 px-1">
             {isSettingsArea ? (
-              <SidebarViewSwitcher value={sidebarView} onChange={setSidebarView} />
+              <SidebarViewSwitcher
+                value={sidebarView}
+                onChange={setSidebarView}
+              />
             ) : null}
           </div>
         </SidebarHeader>
@@ -137,7 +160,9 @@ function AppSidebarContent({ children, mode, familySlug }: AppSidebarShellProps)
             <SidebarMenuItem>
               <WorkspaceSwitcher
                 currentFamilyName={familyName}
-                currentFamilyHref={encodedFamilySlug ? `/family/${encodedFamilySlug}` : undefined}
+                currentFamilyHref={
+                  encodedFamilySlug ? `/family/${encodedFamilySlug}` : undefined
+                }
                 mode={mode}
                 user={user}
               />

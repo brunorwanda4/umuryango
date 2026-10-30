@@ -40,7 +40,10 @@ import {
 } from "@/components/ui/input-otp";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import type { CurrentUser } from "@/hooks/use-current-user";
+import {
+  type CurrentUser,
+  publishCurrentUserUpdate,
+} from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
 
@@ -173,6 +176,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
     }
 
     setAvatarUrl(response.data.user.avatarUrl);
+    publishCurrentUserUpdate(response.data.user);
     toast.success("Avatar updated.");
     setIsUpdatingAvatar(false);
     router.refresh();
@@ -196,7 +200,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
             onSubmit={form.handleSubmit(onSubmit)}
           >
             <div className="flex flex-wrap items-center gap-4 rounded-xl border bg-muted/30 p-4">
-              <Avatar size="lg">
+              <Avatar size="xl">
                 <AvatarImage src={avatarUrl ?? undefined} alt={user.fullName} />
                 <AvatarFallback name={user.fullName} />
               </Avatar>

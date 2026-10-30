@@ -15,12 +15,31 @@ export type CurrentUser = {
   createdAt: string;
 };
 
+export const CURRENT_USER_UPDATED_EVENT = "rwanda-family:current-user-updated";
+
+export function publishCurrentUserUpdate(user: CurrentUser) {
+  window.dispatchEvent(
+    new CustomEvent<CurrentUser>(CURRENT_USER_UPDATED_EVENT, {
+      detail: user,
+    }),
+  );
+}
+
 export function useCurrentUser() {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
+
+    const handleUserUpdate = (event: Event) => {
+      const user = (event as CustomEvent<CurrentUser>).detail;
+      if (active && user) {
+        setUser(user);
+      }
+    };
+
+    window.addEventListener(CURRENT_USER_UPDATED_EVENT, handleUserUpdate);
 
     (async () => {
       const response = await apiRequest<undefined, { user?: CurrentUser }>(
@@ -36,6 +55,7 @@ export function useCurrentUser() {
 
     return () => {
       active = false;
+      window.removeEventListener(CURRENT_USER_UPDATED_EVENT, handleUserUpdate);
     };
   }, []);
 
