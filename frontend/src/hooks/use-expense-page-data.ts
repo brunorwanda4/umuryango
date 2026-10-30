@@ -6,7 +6,6 @@ import type {
   ExpenseCategory,
   ExpenseDashboardResponse,
 } from "@/components/money/expense-dashboard/expense-dashboard-data";
-import type { FamilySummary } from "@/components/money/types";
 import apiRequest from "@/service/api";
 
 /**
@@ -32,51 +31,38 @@ export function useExpensePageData(period: { from: string; to: string }) {
     setIsLoading(true);
     setError(null);
 
-    // Step 1 – resolve the user's first family workspace.
-    const familiesResponse = await apiRequest<undefined, FamilySummary[]>(
+    const workspaceResponse = await apiRequest<undefined, FamilyDetail>(
       "get",
-      "/families?limit=1",
+      "/families/personal-workspace",
     );
-    const familySummary = familiesResponse.data?.[0];
+    const workspace = workspaceResponse.data;
 
-    if (!familiesResponse.ok || !familySummary) {
+    if (!workspaceResponse.ok || !workspace) {
       setFamily(null);
       setCategories([]);
       setDashboard(null);
       setError(
-        familiesResponse.ok
-          ? "Create or join a family workspace before recording expenses."
-          : (familiesResponse.message ??
-              "Family workspace could not be loaded."),
+        workspaceResponse.message ??
+          "Your personal money workspace could not be loaded.",
       );
       setIsLoading(false);
       return;
     }
 
-    // Step 2 – fetch full family detail, categories, and dashboard in parallel.
-    const [familyResponse, categoriesResponse, dashboardResponse] =
-      await Promise.all([
-        apiRequest<undefined, FamilyDetail>(
-          "get",
-          `/families/${encodeURIComponent(familySummary.slug)}`,
-        ),
-        apiRequest<undefined, ExpenseCategory[]>(
-          "get",
-          `/families/${encodeURIComponent(familySummary.id)}/money/categories/mine`,
-        ),
-        apiRequest<undefined, ExpenseDashboardResponse>(
-          "get",
-          `/families/${encodeURIComponent(
-            familySummary.id,
-          )}/money/transactions/mine/dashboard?type=EXPENSE&from=${period.from}&to=${period.to}`,
-        ),
-      ]);
+    const [categoriesResponse, dashboardResponse] = await Promise.all([
+      apiRequest<undefined, ExpenseCategory[]>(
+        "get",
+        `/families/${encodeURIComponent(workspace.id)}/money/categories/mine`,
+      ),
+      apiRequest<undefined, ExpenseDashboardResponse>(
+        "get",
+        `/families/${encodeURIComponent(
+          workspace.id,
+        )}/money/transactions/mine/dashboard?type=EXPENSE&from=${period.from}&to=${period.to}`,
+      ),
+    ]);
 
-    if (!familyResponse.ok || !familyResponse.data) {
-      setError(
-        familyResponse.message ?? "Family workspace could not be loaded.",
-      );
-    } else if (!categoriesResponse.ok) {
+    if (!categoriesResponse.ok) {
       setError(
         categoriesResponse.message ?? "Expense categories could not be loaded.",
       );
@@ -85,7 +71,7 @@ export function useExpensePageData(period: { from: string; to: string }) {
         dashboardResponse.message ?? "Expense records could not be loaded.",
       );
     } else {
-      setFamily(familyResponse.data);
+      setFamily(workspace);
       setCategories(categoriesResponse.data ?? []);
       setDashboard(dashboardResponse.data);
     }

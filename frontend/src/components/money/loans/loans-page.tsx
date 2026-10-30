@@ -7,7 +7,6 @@ import type {
   FamilyContact,
 } from "@/components/family/contacts/types-and-schemas";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
-import type { FamilySummary } from "@/components/money/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,52 +73,40 @@ export function LoansPage() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const familiesResponse = await apiRequest<undefined, FamilySummary[]>(
+    const workspaceResponse = await apiRequest<undefined, FamilyDetail>(
       "get",
-      "/families?limit=1",
+      "/families/personal-workspace",
     );
-    const summary = familiesResponse.data?.[0];
-    if (!familiesResponse.ok || !summary) {
+    const workspace = workspaceResponse.data;
+    if (!workspaceResponse.ok || !workspace) {
       setError(
-        familiesResponse.message ??
-          "Create or join a family workspace before managing loans.",
+        workspaceResponse.message ??
+          "Your personal money workspace could not be loaded.",
       );
       setLoading(false);
       return;
     }
 
-    const [
-      familyResponse,
-      contactsResponse,
-      loansResponse,
-      categoriesResponse,
-    ] = await Promise.all([
-      apiRequest<undefined, FamilyDetail>(
-        "get",
-        `/families/${encodeURIComponent(summary.slug)}`,
-      ),
-      apiRequest<undefined, ContactListResponse>(
-        "get",
-        `/families/${encodeURIComponent(summary.id)}/contacts?limit=100&status=ACTIVE`,
-      ),
-      apiRequest<undefined, unknown>(
-        "get",
-        `/families/${encodeURIComponent(summary.id)}/money/loans/personal?limit=100`,
-      ),
-      apiRequest<undefined, LoanCategory[]>(
-        "get",
-        `/families/${encodeURIComponent(summary.id)}/money/categories/mine`,
-      ),
-    ]);
+    const [contactsResponse, loansResponse, categoriesResponse] =
+      await Promise.all([
+        apiRequest<undefined, ContactListResponse>(
+          "get",
+          `/families/${encodeURIComponent(workspace.id)}/contacts?limit=100&status=ACTIVE`,
+        ),
+        apiRequest<undefined, unknown>(
+          "get",
+          `/families/${encodeURIComponent(workspace.id)}/money/loans/personal?limit=100`,
+        ),
+        apiRequest<undefined, LoanCategory[]>(
+          "get",
+          `/families/${encodeURIComponent(workspace.id)}/money/categories/mine`,
+        ),
+      ]);
 
-    if (!familyResponse.ok || !familyResponse.data) {
-      setError(
-        familyResponse.message ?? "Family workspace could not be loaded.",
-      );
-    } else if (!loansResponse.ok) {
+    if (!loansResponse.ok) {
       setError(loansResponse.message ?? "Personal loans could not be loaded.");
     } else {
-      setFamily(familyResponse.data);
+      setFamily(workspace);
       setContacts((contactsResponse.data?.items ?? []).filter(isTrustedPerson));
       setCategories(categoriesResponse.data ?? []);
       setLoans(normalizePersonalLoans(loansResponse.data));

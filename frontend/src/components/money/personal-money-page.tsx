@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { FamilyDetail } from "@/components/family/dashboard/types";
 import type { ExpenseDashboardResponse } from "@/components/money/expense-dashboard/expense-dashboard-data";
 import type { IncomeDashboardResponse } from "@/components/money/income-dashboard/income-dashboard-data";
 import {
@@ -21,7 +22,6 @@ import {
   type MoneyFormCategory,
   MoneyFormDialog,
 } from "@/components/money/money-form-dialog";
-import type { FamilySummary } from "@/components/money/types";
 import { PersonPlanForm } from "@/components/plans/person-plan-form";
 import type {
   PersonalPlansResponse,
@@ -154,20 +154,20 @@ export function PersonalMoneyPage() {
   const loadData = useCallback(async () => {
     setLoading(true);
 
-    const familiesResponse = await apiRequest<undefined, FamilySummary[]>(
+    const workspaceResponse = await apiRequest<undefined, FamilyDetail>(
       "get",
-      "/families?limit=1",
+      "/families/personal-workspace",
     );
-    const family = familiesResponse.data?.[0];
+    const family = workspaceResponse.data;
 
-    if (!familiesResponse.ok || !family) {
+    if (!workspaceResponse.ok || !family) {
       setFamilyId(null);
       setLoading(false);
       return;
     }
 
     setFamilyId(family.id);
-    setCurrency("RWF");
+    setCurrency(family.defaultCurrency);
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -426,8 +426,7 @@ export function PersonalMoneyPage() {
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <UsersIcon className="size-5 flex-none text-foreground" />
             <span>
-              Create or join a family workspace before recording money
-              transactions.
+              Your personal money workspace could not be loaded transactions.
             </span>
           </div>
           <Button asChild size="sm">

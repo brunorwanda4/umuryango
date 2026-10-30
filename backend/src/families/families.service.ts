@@ -232,7 +232,11 @@ export class FamiliesService {
 
   async listForUser(userId: string, limit?: number): Promise<UserFamily[]> {
     const memberships = await this.prisma.familyMember.findMany({
-      where: { userId, removedAt: null },
+      where: {
+        userId,
+        removedAt: null,
+        family: { personalOwnerId: null },
+      },
       orderBy: { createdAt: 'desc' },
       take: limit,
       include: { family: true },
@@ -244,6 +248,46 @@ export class FamiliesService {
       slug: membership.family.slug,
       authority: membership.authority,
     }));
+  }
+
+  async getOrCreatePersonalWorkspace(userId: string): Promise<FamilyDetail> {
+    const existingWorkspace = await this.prisma.family.findUnique({
+      where: { personalOwnerId: userId },
+      select: { slug: true },
+    });
+
+    if (existingWorkspace) {
+      return this.getBySlugForUser(userId, existingWorkspace.slug);
+    }
+
+    const existingFamily = (await this.listForUser(userId, 1))[0];
+    if (existingFamily) {
+      return this.getBySlugForUser(userId, existingFamily.slug);
+    }
+
+    const family = await this.prisma.family.upsert({
+      where: { personalOwnerId: userId },
+      update: {},
+      create: {
+        name: 'Personal workspace',
+        slug: `personal-${userId}`,
+        country: 'RW',
+        defaultCurrency: 'RWF',
+        contributionCadence: 'monthly',
+        type: FamilyType.NUCLEAR,
+        createdById: userId,
+        personalOwnerId: userId,
+        members: {
+          create: {
+            userId,
+            authority: FamilyAuthority.HEAD,
+            capabilities: DEFAULT_CAPABILITIES[FamilyAuthority.HEAD],
+          },
+        },
+      },
+    });
+
+    return this.getBySlugForUser(userId, family.slug);
   }
 
   async getBySlugForUser(userId: string, slug: string): Promise<FamilyDetail> {

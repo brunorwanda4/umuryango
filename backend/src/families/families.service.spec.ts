@@ -73,7 +73,12 @@ const familyRecord = {
 describe('FamiliesService', () => {
   let service: FamiliesService;
   let prisma: {
-    family: { create: jest.Mock; findUnique: jest.Mock; update: jest.Mock };
+    family: {
+      create: jest.Mock;
+      findUnique: jest.Mock;
+      update: jest.Mock;
+      upsert: jest.Mock;
+    };
     familyMember: { findMany: jest.Mock; update: jest.Mock };
     familyInvite: { upsert: jest.Mock };
     familyAuditEvent: { create: jest.Mock; findMany: jest.Mock };
@@ -84,7 +89,12 @@ describe('FamiliesService', () => {
 
   beforeEach(async () => {
     prisma = {
-      family: { create: jest.fn(), findUnique: jest.fn(), update: jest.fn() },
+      family: {
+        create: jest.fn(),
+        findUnique: jest.fn(),
+        update: jest.fn(),
+        upsert: jest.fn(),
+      },
       familyMember: { findMany: jest.fn(), update: jest.fn() },
       familyInvite: { upsert: jest.fn() },
       familyAuditEvent: { create: jest.fn(), findMany: jest.fn() },
@@ -208,6 +218,49 @@ describe('FamiliesService', () => {
       await expect(
         service.getBySlugForUser('stranger', 'mutesi-family'),
       ).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('getOrCreatePersonalWorkspace', () => {
+    it('creates a hidden personal workspace when the user has no family', async () => {
+      prisma.family.findUnique
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(familyRecord);
+      prisma.familyMember.findMany.mockResolvedValue([]);
+      prisma.family.upsert.mockResolvedValue({
+        ...familyRecord,
+        slug: 'personal-u-1',
+        personalOwnerId: 'u-1',
+      });
+
+      const result = await service.getOrCreatePersonalWorkspace('u-1');
+
+      expect(result.id).toBe('fam-1');
+      expect(prisma.family.upsert).toHaveBeenCalledWith({
+        where: { personalOwnerId: 'u-1' },
+        update: {},
+        create: expect.objectContaining({
+          slug: 'personal-u-1',
+          personalOwnerId: 'u-1',
+          createdById: 'u-1',
+        }),
+      });
+    });
+
+    it('keeps personal workspaces out of the family list', async () => {
+      prisma.familyMember.findMany.mockResolvedValue([]);
+
+      await service.listForUser('u-1', 1);
+
+      expect(prisma.familyMember.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            userId: 'u-1',
+            removedAt: null,
+            family: { personalOwnerId: null },
+          },
+        }),
+      );
     });
   });
 

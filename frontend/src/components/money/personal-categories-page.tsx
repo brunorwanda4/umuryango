@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import type { FamilyDetail } from "@/components/family/dashboard/types";
 import {
   type ApiCategory,
   type CategoryStatus,
@@ -17,7 +18,6 @@ import {
   type MoneyCategory,
 } from "@/components/family/money/categories/types-and-constants";
 import { PersonalCategoryDialog } from "@/components/money/personal-category-dialog";
-import type { FamilySummary } from "@/components/money/types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -37,13 +37,13 @@ export function PersonalCategoriesPage() {
   const loadCategories = useCallback(async () => {
     setLoading(true);
 
-    const familiesResponse = await apiRequest<undefined, FamilySummary[]>(
+    const workspaceResponse = await apiRequest<undefined, FamilyDetail>(
       "get",
-      "/families?limit=1",
+      "/families/personal-workspace",
     );
-    const family = familiesResponse.data?.[0];
+    const family = workspaceResponse.data;
 
-    if (!familiesResponse.ok || !family) {
+    if (!workspaceResponse.ok || !family) {
       setFamilyId(null);
       setCategories([]);
       setLoading(false);
@@ -168,8 +168,7 @@ export function PersonalCategoriesPage() {
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <UsersIcon className="size-5 flex-none text-foreground" />
             <span>
-              Create or join a family workspace before creating personal money
-              categories.
+              Your personal money workspace could not be loaded categories.
             </span>
           </div>
           <Button asChild size="sm">

@@ -10,7 +10,7 @@ Use this file when changing product behavior, domain models, workflows, permissi
 
 ## Financial Rules
 
-- Money records require `familyId`, amount, currency, date, category, creator, and status.
+- Family money records require `familyId`; personal money records are owned by the authenticated user and may use a hidden private workspace as their persistence boundary. All records require amount, currency, date, category, creator, and status.
 - Do not store money as floating point.
 - Keep approval status separate from payment status when both matter.
 - Approved records are auditable. Rejected records keep reviewer and reason.

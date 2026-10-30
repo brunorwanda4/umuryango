@@ -63,11 +63,16 @@ export function usePersonalOverviewData() {
   const load = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    const [userResponse, familiesResponse, plansResponse] = await Promise.all([
-      apiRequest<undefined, { user?: CurrentUser }>("get", "/auth/me"),
-      apiRequest<undefined, FamilySummary[]>("get", "/families"),
-      apiRequest<undefined, PersonalPlansResponse>("get", "/personal-plans"),
-    ]);
+    const [userResponse, familiesResponse, plansResponse, workspaceResponse] =
+      await Promise.all([
+        apiRequest<undefined, { user?: CurrentUser }>("get", "/auth/me"),
+        apiRequest<undefined, FamilySummary[]>("get", "/families"),
+        apiRequest<undefined, PersonalPlansResponse>("get", "/personal-plans"),
+        apiRequest<undefined, FamilyDetail>(
+          "get",
+          "/families/personal-workspace",
+        ),
+      ]);
 
     if (!userResponse.ok || !familiesResponse.ok) {
       setError(
@@ -98,27 +103,27 @@ export function usePersonalOverviewData() {
       };
     });
 
-    const primaryFamily = families[0];
+    const moneyWorkspace = workspaceResponse.data;
     let income: IncomeDashboardResponse | null = null;
     let expenses: ExpenseDashboardResponse | null = null;
     let loans: PersonalLoan[] = [];
     const warnings: string[] = [];
 
-    if (primaryFamily) {
+    if (workspaceResponse.ok && moneyWorkspace) {
       const range = currentMonthRange();
       const [incomeResponse, expenseResponse, loansResponse] =
         await Promise.all([
           apiRequest<undefined, IncomeDashboardResponse>(
             "get",
-            `/families/${encodeURIComponent(primaryFamily.id)}/money/transactions/mine/dashboard?type=INCOME&from=${range.from}&to=${range.to}`,
+            `/families/${encodeURIComponent(moneyWorkspace.id)}/money/transactions/mine/dashboard?type=INCOME&from=${range.from}&to=${range.to}`,
           ),
           apiRequest<undefined, ExpenseDashboardResponse>(
             "get",
-            `/families/${encodeURIComponent(primaryFamily.id)}/money/transactions/mine/dashboard?type=EXPENSE&from=${range.from}&to=${range.to}`,
+            `/families/${encodeURIComponent(moneyWorkspace.id)}/money/transactions/mine/dashboard?type=EXPENSE&from=${range.from}&to=${range.to}`,
           ),
           apiRequest<undefined, unknown>(
             "get",
-            `/families/${encodeURIComponent(primaryFamily.id)}/money/loans/personal?limit=100`,
+            `/families/${encodeURIComponent(moneyWorkspace.id)}/money/loans/personal?limit=100`,
           ),
         ]);
       income = incomeResponse.data ?? null;
@@ -132,6 +137,8 @@ export function usePersonalOverviewData() {
       if (!loansResponse.ok) {
         warnings.push("Loans and debts could not be loaded.");
       }
+    } else {
+      warnings.push("Personal money information could not be loaded.");
     }
 
     if (!plansResponse.ok) {
@@ -148,7 +155,7 @@ export function usePersonalOverviewData() {
       loans,
       income,
       expenses,
-      currency: primaryFamily?.defaultCurrency ?? "RWF",
+      currency: moneyWorkspace?.defaultCurrency ?? "RWF",
       warnings,
     });
     setIsLoading(false);

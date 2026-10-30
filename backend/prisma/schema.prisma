@@ -343,6 +343,7 @@ model User {
   emailVerifications           EmailVerification[]
   passwordResets               PasswordReset[]
   createdFamilies              Family[]                    @relation("FamiliesCreated")
+  personalWorkspace            Family?                     @relation("PersonalWorkspaceOwner")
   familyMemberships            FamilyMember[]
   createdFamilyProjects        FamilyProject[]             @relation("FamilyProjectsCreated")
   recordedProjectContributions FamilyProjectContribution[] @relation("ProjectContributionsRecorded")
@@ -475,9 +476,11 @@ model Family {
   type                  FamilyType                  @default(NUCLEAR)
   description           String?
   createdById           String
+  personalOwnerId       String?                     @unique
   createdAt             DateTime                    @default(now())
   updatedAt             DateTime                    @updatedAt
   createdBy             User                        @relation("FamiliesCreated", fields: [createdById], references: [id], onDelete: Cascade)
+  personalOwner         User?                       @relation("PersonalWorkspaceOwner", fields: [personalOwnerId], references: [id], onDelete: SetNull)
   members               FamilyMember[]
   invites               FamilyInvite[]
   auditEvents           FamilyAuditEvent[]

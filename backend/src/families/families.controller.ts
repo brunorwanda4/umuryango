@@ -21,9 +21,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ACCESS_COOKIE_NAME } from '../auth/auth.constants';
 import { CurrentUserId } from '../auth/decorators/current-user-id.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ACCESS_COOKIE_NAME } from '../auth/auth.constants';
 import { CreateFamilyDto } from './dto/create-family.dto';
 import { InviteMemberDto } from './dto/invite-member.dto';
 import { UpdateFamilySettingsDto } from './dto/update-family-settings.dto';
@@ -110,6 +110,23 @@ export class FamiliesController {
     return {
       data: families,
       message: 'Families retrieved successfully.',
+    };
+  }
+
+  @Get('personal-workspace')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get or create the current user personal money workspace',
+  })
+  @ApiOkResponse({ description: 'Personal money workspace retrieved.' })
+  @ApiUnauthorizedResponse({ description: 'No valid session was found.' })
+  async getPersonalWorkspace(@CurrentUserId() userId: string) {
+    const workspace =
+      await this.familiesService.getOrCreatePersonalWorkspace(userId);
+
+    return {
+      data: workspace,
+      message: 'Personal money workspace retrieved successfully.',
     };
   }
 
