@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import {
   Bricolage_Grotesque,
+  Fraunces,
   Geist,
   Geist_Mono,
   Inter,
@@ -18,6 +19,12 @@ export const fontBricolage = Bricolage_Grotesque({
 });
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
+  subsets: ["latin"],
+  weight: ["500", "600"],
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -112,6 +119,7 @@ export default function RootLayout({
         geistMono.variable,
         "font-sans",
         inter.variable,
+        fraunces.variable,
         fontBricolage.variable,
       )}
     >

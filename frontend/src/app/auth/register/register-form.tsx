@@ -12,6 +12,8 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
+  FieldLegend,
+  FieldSet,
 } from "@/components/ui/field";
 import { FloatingField } from "@/components/ui/floating-field";
 import {
@@ -20,22 +22,13 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Spinner } from "@/components/ui/spinner";
 import apiRequest, { getApiAuthUrl } from "@/service/api";
 
 export type RegisterFormCopy = {
-  firstNameLabel: string;
-  lastNameLabel: string;
+  fullNameLabel: string;
   genderLabel: string;
-  genderPlaceholder: string;
   emailLabel: string;
   phoneLabel: string;
   contactHint: string;
@@ -67,20 +60,13 @@ export type RegisterFormCopy = {
   }>;
 };
 
-const inputClassName =
-  "h-14 rounded-[1.125rem] border-input/80 bg-background/70 px-5 text-[0.95rem] shadow-none placeholder:text-muted-foreground";
-
 type RegisterFormProps = {
   copy: RegisterFormCopy;
   loginHref: string;
   verifiedHref: string;
 };
 
-export const RegisterForm = ({
-  copy,
-  loginHref,
-  verifiedHref,
-}: RegisterFormProps) => {
+export const RegisterForm = ({ copy, loginHref, verifiedHref }: RegisterFormProps) => {
   const router = useRouter();
   const [step, setStep] = useState<"register" | "verify">("register");
   const [registeredEmail, setRegisteredEmail] = useState("");
@@ -92,9 +78,7 @@ export const RegisterForm = ({
   const [isResending, setIsResending] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const passwordToggleLabel = isPasswordVisible
-    ? copy.hidePasswordLabel
-    : copy.showPasswordLabel;
+  const passwordToggleLabel = isPasswordVisible ? copy.hidePasswordLabel : copy.showPasswordLabel;
   const PasswordIcon = isPasswordVisible ? EyeOffIcon : EyeIcon;
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
@@ -104,8 +88,9 @@ export const RegisterForm = ({
     setIsPending(true);
 
     const formData = new FormData(event.currentTarget);
-    const firstName = String(formData.get("firstName") ?? "").trim();
-    const lastName = String(formData.get("lastName") ?? "").trim();
+    const fullName = String(formData.get("fullName") ?? "").trim();
+    const [firstName, ...lastNameParts] = fullName.split(/\s+/);
+    const lastName = lastNameParts.join(" ");
     const email = String(formData.get("email") ?? "").trim();
     const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
     const password = String(formData.get("password") ?? "");
@@ -121,9 +106,7 @@ export const RegisterForm = ({
 
     if (!response.ok) {
       setError(
-        response.statusCode === 0
-          ? copy.networkError
-          : (response.message ?? copy.genericError),
+        response.statusCode === 0 ? copy.networkError : (response.message ?? copy.genericError),
       );
       setIsPending(false);
       return;
@@ -227,9 +210,7 @@ export const RegisterForm = ({
                 </InputOTPGroup>
               </InputOTP>
               <FieldError>{error}</FieldError>
-              <p className="text-xs text-muted-foreground text-center">
-                {copy.spamHint}
-              </p>
+              <p className="text-xs text-muted-foreground text-center">{copy.spamHint}</p>
             </Field>
           </div>
         </FieldGroup>
@@ -279,58 +260,49 @@ export const RegisterForm = ({
   return (
     <form className="flex flex-col gap-6" onSubmit={handleRegister}>
       <FieldGroup className="gap-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FloatingField
-            id="firstName"
-            name="firstName"
-            type="text"
-            label={copy.firstNameLabel}
-            autoComplete="given-name"
-            required
-            maxLength={80}
-            aria-invalid={Boolean(error)}
-          />
+        <FloatingField
+          id="fullName"
+          name="fullName"
+          type="text"
+          label={copy.fullNameLabel}
+          autoComplete="name"
+          required
+          minLength={3}
+          maxLength={161}
+          pattern=".*\S+\s+\S+.*"
+          className="input"
+          aria-invalid={Boolean(error)}
+        />
 
-          <FloatingField
-            id="lastName"
-            name="lastName"
-            type="text"
-            label={copy.lastNameLabel}
-            autoComplete="family-name"
-            required
-            maxLength={80}
-            aria-invalid={Boolean(error)}
-          />
-        </div>
-
-        <Field data-invalid={Boolean(error)}>
-          <FieldLabel htmlFor="gender" className="sr-only">
-            {copy.genderLabel}
-          </FieldLabel>
-          <Select
+        <FieldSet data-invalid={Boolean(error)} className="gap-3">
+          <FieldLegend variant="label">{copy.genderLabel}</FieldLegend>
+          <RadioGroup
             value={gender}
             onValueChange={setGender}
             name="gender"
             required
+            aria-invalid={Boolean(error)}
+            className="grid-cols-3"
           >
-            <SelectTrigger
-              id="gender"
-              aria-invalid={Boolean(error)}
-              className={`w-full justify-between h-14 ${inputClassName}`}
-            >
-              <SelectValue placeholder={copy.genderPlaceholder} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {copy.genderOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+            {copy.genderOptions.map((option) => {
+              const id = `gender-${option.value}`;
+
+              return (
+                <FieldLabel htmlFor={id} key={option.value}>
+                  <Field orientation="horizontal">
+                    <RadioGroupItem
+                      id={id}
+                      value={option.value}
+                      className="radio"
+                      aria-invalid={Boolean(error)}
+                    />
                     {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </Field>
+                  </Field>
+                </FieldLabel>
+              );
+            })}
+          </RadioGroup>
+        </FieldSet>
 
         <FloatingField
           id="email"
@@ -387,9 +359,7 @@ export const RegisterForm = ({
         </div>
       </FieldGroup>
 
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        {copy.legal}
-      </p>
+      <p className="text-xs leading-relaxed text-muted-foreground">{copy.legal}</p>
 
       <div className="flex flex-col items-center gap-3">
         <Button

@@ -1,13 +1,14 @@
 import { InfoIcon } from "lucide-react";
-import { PageTitle } from "@/components/common/pages/page-title";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
 import type { MoneyOverview } from "../money/types";
 import { FamilyActivityFeed } from "./family-activity-feed";
 import { FamilyDashboardSkeleton } from "./family-dashboard-skeleton";
-import { FamilyFinanceDashboard } from "./family-finance-dashboard";
-import { FamilyMembersOverview } from "./family-members-overview";
+import {
+  FamilyFinanceDashboard,
+  FamilyQuickActions,
+} from "./family-finance-dashboard";
 import type { FamilyDetail } from "./types";
 
 export function FamilyDashboard({
@@ -19,13 +20,24 @@ export function FamilyDashboard({
   money: MoneyOverview | null;
   moneyMessage?: string;
 }) {
+  const currentMember = family.members.find(
+    (member) => member.authority === family.authority,
+  );
+  const greetingName = currentMember?.fullName.split(" ")[0] ?? family.name;
+
   return (
-    <div className="flex flex-col gap-6">
-      <PageTitle
-        title={`Welcome to ${family.name}`}
-        badge={AUTHORITY_LABELS[family.authority]}
-      />
-      <Separator />
+    <div className="mx-auto flex w-full max-w-[1040px] flex-col gap-4 pb-6">
+      <header className="px-1 pb-1">
+        <p className="text-muted-foreground text-sm">Good to see you</p>
+        <div className="mt-1 flex flex-wrap items-center gap-3">
+          <h1 className="font-fraunces font-semibold text-[clamp(28px,6vw,40px)] leading-[1.1] tracking-[-0.01em]">
+            Welcome back, {greetingName}
+          </h1>
+          <Badge variant="secondary">
+            {AUTHORITY_LABELS[family.authority]}
+          </Badge>
+        </div>
+      </header>
 
       {moneyMessage ? (
         <Alert>
@@ -39,10 +51,8 @@ export function FamilyDashboard({
       ) : null}
 
       <FamilyFinanceDashboard family={family} money={money} />
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
-        <FamilyActivityFeed family={family} money={money} />
-      </div>
-      <FamilyMembersOverview family={family} />
+      <FamilyActivityFeed family={family} money={money} />
+      <FamilyQuickActions family={family} />
     </div>
   );
 }

@@ -42,11 +42,7 @@
     "privacyLink": "Read the privacy policy.",
     "trustTitle": "Built for trust",
     "trustDescription": "Family records should stay accurate, permission-aware, and easy to explain.",
-    "trustItems": [
-      "Free access",
-      "Private family workspace",
-      "Auditable records"
-    ],
+    "trustItems": ["Free access", "Private family workspace", "Auditable records"],
     "highlights": [
       {
         "id": "money",
@@ -122,10 +118,8 @@
     "backAriaLabel": "Go back"
   },
   "RegisterForm": {
-    "firstNameLabel": "First name",
-    "lastNameLabel": "Last name",
+    "fullNameLabel": "Full name",
     "genderLabel": "Gender",
-    "genderPlaceholder": "Select your gender",
     "emailLabel": "Email",
     "phoneLabel": "Mobile number",
     "contactHint": "You may receive notifications from us.",
@@ -163,10 +157,6 @@
       {
         "value": "custom",
         "label": "Custom"
-      },
-      {
-        "value": "prefer-not-to-say",
-        "label": "Prefer not to say"
       }
     ]
   },
