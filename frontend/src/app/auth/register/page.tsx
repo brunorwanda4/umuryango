@@ -1,6 +1,5 @@
 import { ChevronLeftIcon } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import {
   getLocalizedHref,
@@ -18,13 +17,40 @@ export const metadata: Metadata = {
 };
 
 type RegisterPageProps = {
-  searchParams?: Promise<LocaleSearchParams>;
+  searchParams?: Promise<LocaleSearchParams & { redirect?: string | string[] }>;
 };
 
+function resolvePostRegisterHref(
+  searchParams:
+    | (LocaleSearchParams & { redirect?: string | string[] })
+    | undefined,
+  locale: Parameters<typeof getLocalizedHref>[1],
+) {
+  const redirect = Array.isArray(searchParams?.redirect)
+    ? searchParams?.redirect[0]
+    : searchParams?.redirect;
+
+  if (
+    redirect?.startsWith("/") &&
+    !redirect.startsWith("//") &&
+    !redirect.startsWith("/auth/login") &&
+    !redirect.startsWith("/auth/register")
+  ) {
+    return redirect;
+  }
+
+  return getLocalizedHref("/me", locale);
+}
+
 const RegisterPage = async ({ searchParams }: RegisterPageProps) => {
-  const locale = resolveLocaleFromSearchParams(await searchParams);
+  const resolvedSearchParams = await searchParams;
+  const locale = resolveLocaleFromSearchParams(resolvedSearchParams);
   const messages = getMessages(locale);
   const register = createTranslator(messages, "RegisterPage");
+  const postRegisterHref = resolvePostRegisterHref(
+    resolvedSearchParams,
+    locale,
+  );
 
   return (
     <main className="flex min-h-dvh justify-center bg-background px-6 py-10 text-foreground sm:px-8">
@@ -42,13 +68,15 @@ const RegisterPage = async ({ searchParams }: RegisterPageProps) => {
               {register("heading")}
             </h1>
           </div>
-          <p className="text-sm leading-relaxed text-muted-foreground">{register("subheading")}</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {register("subheading")}
+          </p>
         </div>
 
         <RegisterForm
           copy={messages.RegisterForm}
           loginHref={getLocalizedHref("/auth/login", locale)}
-          verifiedHref={getLocalizedHref("/", locale)}
+          verifiedHref={postRegisterHref}
         />
       </div>
     </main>

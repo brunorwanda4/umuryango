@@ -66,10 +66,14 @@ export type RegisterFormCopy = {
 type RegisterFormProps = {
   copy: RegisterFormCopy;
   loginHref: string;
-  verifiedHref: string;
+  verifiedHref?: string;
 };
 
-export const RegisterForm = ({ copy, loginHref, verifiedHref }: RegisterFormProps) => {
+export const RegisterForm = ({
+  copy,
+  loginHref,
+  verifiedHref = "/me",
+}: RegisterFormProps) => {
   const router = useRouter();
   const [step, setStep] = useState<"register" | "verify">("register");
   const [registeredEmail, setRegisteredEmail] = useState("");
@@ -81,7 +85,9 @@ export const RegisterForm = ({ copy, loginHref, verifiedHref }: RegisterFormProp
   const [isResending, setIsResending] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const passwordToggleLabel = isPasswordVisible ? copy.hidePasswordLabel : copy.showPasswordLabel;
+  const passwordToggleLabel = isPasswordVisible
+    ? copy.hidePasswordLabel
+    : copy.showPasswordLabel;
   const PasswordIcon = isPasswordVisible ? EyeOffIcon : EyeIcon;
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
@@ -109,7 +115,9 @@ export const RegisterForm = ({ copy, loginHref, verifiedHref }: RegisterFormProp
 
     if (!response.ok) {
       setError(
-        response.statusCode === 0 ? copy.networkError : (response.message ?? copy.genericError),
+        response.statusCode === 0
+          ? copy.networkError
+          : (response.message ?? copy.genericError),
       );
       setIsPending(false);
       return;
@@ -146,6 +154,7 @@ export const RegisterForm = ({ copy, loginHref, verifiedHref }: RegisterFormProp
 
     setSuccessMessage(copy.verifySuccess);
     router.push(verifiedHref);
+    router.refresh();
     setIsPending(false);
   };
 
@@ -178,7 +187,19 @@ export const RegisterForm = ({ copy, loginHref, verifiedHref }: RegisterFormProp
         <div className="flex flex-col gap-2">
           <h2 className="text-xl font-semibold">{copy.verifyHeading}</h2>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {copy.verifyDescription.replace("{email}", registeredEmail)}
+            {copy.verifyDescription.split("{email}").flatMap((part, i, arr) =>
+              i < arr.length - 1
+                ? [
+                    part,
+                    <span
+                      key="registered-email"
+                      className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs font-semibold break-all text-foreground"
+                    >
+                      {registeredEmail}
+                    </span>,
+                  ]
+                : [part],
+            )}
           </p>
         </div>
 
@@ -213,7 +234,9 @@ export const RegisterForm = ({ copy, loginHref, verifiedHref }: RegisterFormProp
                 </InputOTPGroup>
               </InputOTP>
               <FieldError>{error}</FieldError>
-              <p className="text-xs text-muted-foreground text-center">{copy.spamHint}</p>
+              <p className="text-xs text-muted-foreground text-center">
+                {copy.spamHint}
+              </p>
             </Field>
           </div>
         </FieldGroup>
@@ -362,7 +385,9 @@ export const RegisterForm = ({ copy, loginHref, verifiedHref }: RegisterFormProp
         </div>
       </FieldGroup>
 
-      <p className="text-xs leading-relaxed text-muted-foreground">{copy.legal}</p>
+      <p className="text-xs leading-relaxed text-muted-foreground">
+        {copy.legal}
+      </p>
 
       <div className="flex flex-col items-center gap-3">
         <Button
