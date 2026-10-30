@@ -2,7 +2,7 @@
 
 import { ChevronDownIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { useWatch } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyContact } from "@/components/family/contacts/types-and-schemas";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  FieldError,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from "@/components/ui/field";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import { PersonSelector } from "./person-selector";
@@ -30,6 +37,11 @@ import {
 } from "./types-and-schemas";
 
 const today = () => new Date().toISOString().slice(0, 10);
+const oneWeekFromToday = () => {
+  const date = new Date();
+  date.setDate(date.getDate() + 7);
+  return date.toISOString().slice(0, 10);
+};
 
 export function LoanForm({
   categories,
@@ -65,7 +77,7 @@ export function LoanForm({
         personContactId: "",
         amountMinorUnits: 0,
         startDate: today(),
-        dueDate: "",
+        dueDate: oneWeekFromToday(),
         notes: "",
         repaymentFrequency: "ONCE",
         useInterest: false,
@@ -113,6 +125,7 @@ export function LoanForm({
 
   return (
     <Dialog
+      syncWithSearchParams={false}
       open={open}
       onOpenChange={(nextOpen) => {
         onOpenChange(nextOpen);
@@ -143,16 +156,44 @@ export function LoanForm({
               required
             />
           </div>
-          <CommonFormField
+          <Controller
             control={form.control}
             name="type"
-            label="Loan type"
-            fieldType="select"
-            selectOptions={[
-              { label: "Borrowed", value: "BORROWED" },
-              { label: "Lent", value: "LENT" },
-            ]}
-            required
+            render={({ field, fieldState }) => (
+              <FieldSet data-invalid={Boolean(fieldState.error)}>
+                <FieldLegend variant="label">
+                  Loan type <span className="text-destructive">*</span>
+                </FieldLegend>
+                <RadioGroup
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                  required
+                  aria-invalid={Boolean(fieldState.error)}
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {[
+                    { label: "Borrowed", value: "BORROWED" },
+                    { label: "Lent", value: "LENT" },
+                  ].map((option) => {
+                    const id = `loan-type-${option.value.toLowerCase()}`;
+
+                    return (
+                      <FieldLabel
+                        key={option.value}
+                        htmlFor={id}
+                        className="cursor-pointer items-center"
+                      >
+                        <RadioGroupItem id={id} value={option.value} />
+                        {option.label}
+                      </FieldLabel>
+                    );
+                  })}
+                </RadioGroup>
+                <FieldError errors={[fieldState.error]} />
+              </FieldSet>
+            )}
           />
           <CommonFormField
             control={form.control}

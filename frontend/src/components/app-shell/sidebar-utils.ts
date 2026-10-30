@@ -7,7 +7,6 @@ import {
   ClipboardListIcon,
   ContactRoundIcon,
   FileClockIcon,
-  FileTextIcon,
   FolderKanbanIcon,
   FolderTreeIcon,
   HomeIcon,
@@ -121,21 +120,11 @@ export const personalNavigation: NavigationGroup[] = [
         href: "/me/contacts",
         icon: sidebarIcon("contacts", ContactRoundIcon),
       },
-      {
-        title: "Debts",
-        href: "/me/debts",
-        icon: sidebarIcon("debt", LandmarkIcon),
-      },
     ],
   },
   {
     label: "Workspace",
     items: [
-      {
-        title: "Documents",
-        href: "/me/documents",
-        icon: sidebarIcon("documents", FileTextIcon),
-      },
       {
         title: "Family workspaces",
         href: "/family",

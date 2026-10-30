@@ -1,4 +1,11 @@
-import { HeartHandshakeIcon, UserRoundIcon } from "lucide-react";
+import {
+  ContactRoundIcon,
+  HeartHandshakeIcon,
+  PencilIcon,
+  Trash2Icon,
+} from "lucide-react";
+import { SidebarIcon } from "@/components/app-shell/sidebar-icon";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +21,8 @@ import { contactTypeLabel, type FamilyContact } from "./types-and-schemas";
 export interface ContactDetailsDialogProps {
   contact: FamilyContact | null;
   onOpenChange: (open: boolean) => void;
+  onEdit: (contact: FamilyContact) => void;
+  onDelete: (contact: FamilyContact) => void;
 }
 
 function DetailRow({ label, value }: { label: string; value?: string | null }) {
@@ -32,14 +41,26 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
 export function ContactDetailsDialog({
   contact,
   onOpenChange,
+  onEdit,
+  onDelete,
 }: ContactDetailsDialogProps) {
   return (
-    <Dialog open={Boolean(contact)} onOpenChange={onOpenChange}>
+    <Dialog
+      syncWithSearchParams={false}
+      open={Boolean(contact)}
+      onOpenChange={onOpenChange}
+    >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <div className="flex items-start gap-3 pr-8">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <UserRoundIcon aria-hidden="true" className="size-5" />
+              <SidebarIcon
+                className="size-6"
+                icon={{
+                  image: { src: "/images/icons/contacts.png" },
+                  line: ContactRoundIcon,
+                }}
+              />
             </div>
             <div className="min-w-0">
               <DialogTitle className="truncate">
@@ -84,7 +105,29 @@ export function ContactDetailsDialog({
                 </p>
               </div>
             ) : null}
-            <ContactActions contact={contact} className="border-t pt-4" />
+            <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <ContactActions contact={contact} />
+              <div className="flex gap-2 sm:ml-auto">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onEdit(contact)}
+                >
+                  <PencilIcon aria-hidden="true" data-icon="inline-start" />
+                  Update
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => onDelete(contact)}
+                >
+                  <Trash2Icon aria-hidden="true" data-icon="inline-start" />
+                  Delete
+                </Button>
+              </div>
+            </div>
           </div>
         ) : null}
       </DialogContent>

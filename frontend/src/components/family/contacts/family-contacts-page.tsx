@@ -292,6 +292,15 @@ export function FamilyContactsPage({
         onOpenChange={(open) => {
           if (!open) setDetailsContact(null);
         }}
+        onEdit={(contact) => {
+          setDetailsContact(null);
+          setSelectedContact(contact);
+          setOpenEdit(true);
+        }}
+        onDelete={(contact) => {
+          setDetailsContact(null);
+          void handleDelete(contact);
+        }}
       />
     </div>
   );

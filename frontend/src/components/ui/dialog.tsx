@@ -23,7 +23,7 @@ function Dialog({
   searchParamName = "dialog",
   searchParamSegment,
   searchParamValue,
-  syncWithSearchParams = true,
+  syncWithSearchParams = false,
   ...props
 }: DialogProps) {
   const {

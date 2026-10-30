@@ -12,7 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { ContactImportPanel } from "./contact-import-panel";
 import { getDefaultValues } from "./contact-utils";
 import {
   type ContactFormValues,
@@ -82,6 +84,7 @@ export function ContactFormDialog({
 
   return (
     <Dialog
+      syncWithSearchParams={false}
       open={open}
       onOpenChange={(nextOpen) => {
         onOpenChange(nextOpen);
@@ -98,107 +101,126 @@ export function ContactFormDialog({
             Save trusted people and organizations connected to this family.
           </DialogDescription>
         </DialogHeader>
-        <form
-          id={`${mode}-contact-form`}
-          className="flex flex-col gap-4 py-4"
-          onSubmit={form.handleSubmit(onSubmit)}
-        >
-          {error ? (
-            <div className="text-destructive text-sm font-medium">{error}</div>
-          ) : null}
-          <CommonFormField
-            control={form.control}
-            name="fullName"
-            label="Full name"
-            placeholder="e.g. Dr. Aline Uwase"
-            required
-          />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CommonFormField
-              control={form.control}
-              name="contactType"
-              label="Contact type"
-              fieldType="select"
-              selectOptions={contactTypeOptions}
-              required
+        <Tabs defaultValue="form" className="gap-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="form">Add manually</TabsTrigger>
+            <TabsTrigger value="file">Upload file</TabsTrigger>
+          </TabsList>
+          <TabsContent value="form">
+            <form
+              id={`${mode}-contact-form`}
+              className="flex flex-col gap-4 py-4"
+              onSubmit={form.handleSubmit(onSubmit)}
+            >
+              {error ? (
+                <div className="text-destructive text-sm font-medium">
+                  {error}
+                </div>
+              ) : null}
+              <CommonFormField
+                control={form.control}
+                name="fullName"
+                label="Full name"
+                placeholder="e.g. Dr. Aline Uwase"
+                required
+              />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <CommonFormField
+                  control={form.control}
+                  name="contactType"
+                  label="Contact type"
+                  fieldType="select"
+                  selectOptions={contactTypeOptions}
+                  required
+                />
+                <CommonFormField
+                  control={form.control}
+                  name="status"
+                  label="Status"
+                  fieldType="select"
+                  selectOptions={contactStatusOptions}
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <CommonFormField
+                  control={form.control}
+                  name="phoneNumber"
+                  label="Phone number"
+                  fieldType="phone"
+                  placeholder="+250 788 000 000"
+                />
+                <CommonFormField
+                  control={form.control}
+                  name="email"
+                  label="Email"
+                  type="email"
+                  placeholder="name@example.com"
+                />
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <CommonFormField
+                  control={form.control}
+                  name="relationshipToFamily"
+                  label="Relationship to family"
+                  placeholder="Family doctor, neighbor, aunt, lender"
+                />
+                <CommonFormField
+                  control={form.control}
+                  name="organization"
+                  label="Organization/company"
+                  placeholder="Clinic, bank, SACCO, school, business"
+                />
+              </div>
+              <CommonFormField
+                control={form.control}
+                name="address"
+                label="Address"
+                placeholder="Street, cell, sector, district, or city"
+              />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <CommonFormField
+                  control={form.control}
+                  name="isEmergencyContact"
+                  label="Emergency contact"
+                  fieldType="checkbox"
+                />
+                <CommonFormField
+                  control={form.control}
+                  name="isLoanContact"
+                  label="Loan contact"
+                  fieldType="checkbox"
+                />
+              </div>
+              <CommonFormField
+                control={form.control}
+                name="notes"
+                label="Notes"
+                fieldType="textarea"
+                placeholder="Useful context, availability, lending terms, or emergency notes"
+              />
+            </form>
+            <DialogFooter>
+              <Button
+                type="submit"
+                form={`${mode}-contact-form`}
+                disabled={isPending}
+                className="w-full sm:w-auto"
+              >
+                {isPending ? "Saving..." : "Save Contact"}
+              </Button>
+            </DialogFooter>
+          </TabsContent>
+          <TabsContent value="file">
+            <ContactImportPanel
+              familyId={family.id}
+              onImported={() => {
+                onOpenChange(false);
+                onSuccess();
+              }}
             />
-            <CommonFormField
-              control={form.control}
-              name="status"
-              label="Status"
-              fieldType="select"
-              selectOptions={contactStatusOptions}
-              required
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CommonFormField
-              control={form.control}
-              name="phoneNumber"
-              label="Phone number"
-              fieldType="phone"
-              placeholder="+250 788 000 000"
-            />
-            <CommonFormField
-              control={form.control}
-              name="email"
-              label="Email"
-              type="email"
-              placeholder="name@example.com"
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CommonFormField
-              control={form.control}
-              name="relationshipToFamily"
-              label="Relationship to family"
-              placeholder="Family doctor, neighbor, aunt, lender"
-            />
-            <CommonFormField
-              control={form.control}
-              name="organization"
-              label="Organization/company"
-              placeholder="Clinic, bank, SACCO, school, business"
-            />
-          </div>
-          <CommonFormField
-            control={form.control}
-            name="address"
-            label="Address"
-            placeholder="Street, cell, sector, district, or city"
-          />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CommonFormField
-              control={form.control}
-              name="isEmergencyContact"
-              label="Emergency contact"
-              fieldType="checkbox"
-            />
-            <CommonFormField
-              control={form.control}
-              name="isLoanContact"
-              label="Loan contact"
-              fieldType="checkbox"
-            />
-          </div>
-          <CommonFormField
-            control={form.control}
-            name="notes"
-            label="Notes"
-            fieldType="textarea"
-            placeholder="Useful context, availability, lending terms, or emergency notes"
-          />
-        </form>
-        <DialogFooter>
-          <Button
-            type="submit"
-            form={`${mode}-contact-form`}
-            disabled={isPending}
-            className="w-full sm:w-auto"
-          >
-            {isPending ? "Saving..." : "Save Contact"}
-          </Button>
-        </DialogFooter>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

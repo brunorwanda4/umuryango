@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  AlertCircleIcon,
-  FileClockIcon,
-  LandmarkIcon,
-  PlusIcon,
-} from "lucide-react";
+import { AlertCircleIcon, PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/common/pages/page-title";
@@ -15,7 +10,6 @@ import type {
 } from "@/components/family/contacts/types-and-schemas";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -256,11 +250,7 @@ export function MoneyLoansPage({
   return (
     <div className="flex min-w-0 flex-col gap-6">
       <PageTitle
-        icon={
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background">
-            <LandmarkIcon className="size-5 text-muted-foreground" />
-          </span>
-        }
+        iconImage="/images/icons/loan.png"
         actions={
           canManageLoans ? (
             <CreateLoanDialog

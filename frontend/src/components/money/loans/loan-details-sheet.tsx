@@ -7,14 +7,14 @@ import { formatDate } from "@/components/family/money/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import apiRequest from "@/service/api";
 import { LoanPaymentHistory } from "./loan-payment-history";
@@ -75,20 +75,20 @@ export function LoanDetailsSheet({
   }, [familyId, loan]);
 
   return (
-    <Sheet open={Boolean(loan)} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle>{loan?.title ?? "Loan details"}</SheetTitle>
-          <SheetDescription>
+    <Dialog open={Boolean(loan)} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>{loan?.title ?? "Loan details"}</DialogTitle>
+          <DialogDescription>
             {loan
               ? loan.type === "BORROWED"
                 ? `Borrowed from ${loan.person.name}`
                 : `Lent to ${loan.person.name}`
               : "Personal loan details"}
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         {loan ? (
-          <div className="flex flex-col gap-6 px-4 pb-6">
+          <div className="flex flex-col gap-6">
             <div className="flex items-center gap-3">
               <Avatar className="size-12">
                 <AvatarFallback>{initials(loan.person.name)}</AvatarFallback>
@@ -171,7 +171,7 @@ export function LoanDetailsSheet({
             </div>
           </div>
         ) : null}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
