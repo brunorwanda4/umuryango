@@ -128,79 +128,83 @@ export function LoanForm({
         </DialogHeader>
         <form
           id="personal-loan-form"
-          className="flex flex-col gap-5"
+          className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-4"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {error ? (
+            <p className="text-sm text-destructive lg:col-span-2">{error}</p>
+          ) : null}
+          <div className="lg:col-span-2">
+            <CommonFormField
+              control={form.control}
+              name="title"
+              label="Loan title"
+              placeholder="e.g. School fees support"
+              required
+            />
+          </div>
           <CommonFormField
             control={form.control}
-            name="title"
-            label="Loan title"
-            placeholder="e.g. School fees support"
+            name="type"
+            label="Loan type"
+            fieldType="select"
+            selectOptions={[
+              { label: "Borrowed", value: "BORROWED" },
+              { label: "Lent", value: "LENT" },
+            ]}
             required
           />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CommonFormField
-              control={form.control}
-              name="type"
-              label="Loan type"
-              fieldType="select"
-              selectOptions={[
-                { label: "Borrowed", value: "BORROWED" },
-                { label: "Lent", value: "LENT" },
-              ]}
-              required
-            />
-            <CommonFormField
-              control={form.control}
-              name="amountMinorUnits"
-              label="Amount"
-              fieldType="money"
-              currency={currency}
-              required
-            />
-          </div>
-          <PersonSelector
-            contacts={contacts}
+          <CommonFormField
             control={form.control}
-            familyId={familyId}
-            onContactsImported={onContactsImported}
-            onPersonCreated={(person) => {
-              onPersonCreated(person);
-              form.setValue("personContactId", person.id, {
-                shouldValidate: true,
-              });
-            }}
+            name="amountMinorUnits"
+            label="Amount"
+            fieldType="money"
+            currency={currency}
+            required
           />
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <CommonFormField
+          <div className="lg:col-span-2">
+            <PersonSelector
+              contacts={contacts}
               control={form.control}
-              name="startDate"
-              label="Start date"
-              fieldType="date"
-              required
-            />
-            <CommonFormField
-              control={form.control}
-              name="dueDate"
-              label="Due date"
-              fieldType="date"
-              inputProps={{ min: form.watch("startDate") }}
-              required
+              familyId={familyId}
+              onContactsImported={onContactsImported}
+              onPersonCreated={(person) => {
+                onPersonCreated(person);
+                form.setValue("personContactId", person.id, {
+                  shouldValidate: true,
+                });
+              }}
             />
           </div>
           <CommonFormField
             control={form.control}
-            name="notes"
-            label="Note"
-            fieldType="textarea"
-            placeholder="Optional context or repayment agreement"
+            name="startDate"
+            label="Start date"
+            fieldType="date"
+            required
           />
+          <CommonFormField
+            control={form.control}
+            name="dueDate"
+            label="Due date"
+            fieldType="date"
+            inputProps={{ min: form.watch("startDate") }}
+            required
+          />
+          <div className="lg:col-span-2">
+            <CommonFormField
+              control={form.control}
+              name="notes"
+              label="Note"
+              fieldType="textarea"
+              placeholder="Optional context or repayment agreement"
+            />
+          </div>
 
           <Collapsible
             open={additionalOpen}
             onOpenChange={setAdditionalOpen}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-4 lg:col-span-2"
           >
             <CollapsibleTrigger asChild>
               <Button

@@ -283,6 +283,7 @@ export function MoneyFormDialog({
 
   return (
     <Dialog
+      syncWithSearchParams={false}
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);

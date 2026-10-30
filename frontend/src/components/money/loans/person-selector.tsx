@@ -1,6 +1,6 @@
 "use client";
 
-import { FileUpIcon, PlusIcon, UserPlusIcon } from "lucide-react";
+import { CheckIcon, FileUpIcon, PlusIcon, UserPlusIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import type { Control } from "react-hook-form";
 import { toast } from "sonner";
@@ -12,6 +12,13 @@ import {
 } from "@/components/family/contacts/types-and-schemas";
 import { Button } from "@/components/ui/button";
 import {
+  Command,
+  CommandEmpty,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -19,21 +26,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import apiRequest from "@/service/api";
-import {
-  getPersonRelationship,
-  type PersonalLoanFormValues,
-} from "./types-and-schemas";
+import { getPersonRelationship, type PersonalLoanFormValues } from "./types-and-schemas";
 
 type ImportedContact = {
   fullName: string;
@@ -126,17 +123,10 @@ function parseContactFile(text: string, isVcard: boolean): ImportedContact[] {
   const headers = parseDelimitedLine(lines[0] ?? "");
   return lines.slice(1).flatMap((line) => {
     const values = parseDelimitedLine(line);
-    const row = Object.fromEntries(
-      headers.map((header, index) => [header, values[index] ?? ""]),
-    );
-    const fullName =
-      firstValue(row, ["Name", "First Name", "Given Name"]) ?? "";
+    const row = Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""]));
+    const fullName = firstValue(row, ["Name", "First Name", "Given Name"]) ?? "";
     const phoneNumber = normalizeImportedPhone(
-      firstValue(row, [
-        "Phone 1 - Value",
-        "Phone 2 - Value",
-        "Phone 3 - Value",
-      ]),
+      firstValue(row, ["Phone 1 - Value", "Phone 2 - Value", "Phone 3 - Value"]),
     );
     const email = firstValue(row, ["E-mail 1 - Value", "E-mail 2 - Value"]);
     return fullName || phoneNumber || email
@@ -146,10 +136,7 @@ function parseContactFile(text: string, isVcard: boolean): ImportedContact[] {
             phoneNumber,
             email,
             address: firstValue(row, ["Address 1 - Formatted", "Address"]),
-            organization: firstValue(row, [
-              "Organization Name",
-              "Organization 1 - Name",
-            ]),
+            organization: firstValue(row, ["Organization Name", "Organization 1 - Name"]),
             notes: firstValue(row, ["Notes"]),
           },
         ]
@@ -162,13 +149,7 @@ function formatFileSize(bytes: number) {
   return `${(bytes / 1024).toFixed(bytes < 10240 ? 1 : 0)} KB`;
 }
 
-function ContactFilePreview({
-  file,
-  contacts,
-}: {
-  file: File;
-  contacts: ImportedContact[];
-}) {
+function ContactFilePreview({ file, contacts }: { file: File; contacts: ImportedContact[] }) {
   const withPhone = contacts.filter((contact) => contact.phoneNumber).length;
   const withEmail = contacts.filter((contact) => contact.email).length;
 
@@ -178,8 +159,8 @@ function ContactFilePreview({
         {file.name}
       </p>
       <p className="mt-1 text-muted-foreground">
-        {formatFileSize(file.size)} ·{" "}
-        {file.name.toLowerCase().endsWith(".vcf") ? "vCard" : "CSV"} file
+        {formatFileSize(file.size)} · {file.name.toLowerCase().endsWith(".vcf") ? "vCard" : "CSV"}{" "}
+        file
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         <div className="rounded-md border bg-background p-2">
@@ -354,9 +335,7 @@ export function AddTrustedPersonDialog({
               className="flex flex-col gap-4"
               onSubmit={form.handleSubmit(onSubmit)}
             >
-              {error ? (
-                <p className="text-sm text-destructive">{error}</p>
-              ) : null}
+              {error ? <p className="text-sm text-destructive">{error}</p> : null}
               <CommonFormField
                 control={form.control}
                 name="fullName"
@@ -391,11 +370,7 @@ export function AddTrustedPersonDialog({
                 placeholder="e.g. Aunt, cousin, close friend"
               />
               <DialogFooter>
-                <Button
-                  type="submit"
-                  disabled={isPending}
-                  className="w-full sm:w-auto"
-                >
+                <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
                   <UserPlusIcon aria-hidden="true" data-icon="inline-start" />
                   {isPending ? "Adding..." : "Add person"}
                 </Button>
@@ -404,9 +379,8 @@ export function AddTrustedPersonDialog({
           </TabsContent>
           <TabsContent value="file" className="flex flex-col gap-3 min-h-60">
             <p className="text-muted-foreground text-sm">
-              Import a Google Contacts CSV or vCard file directly into your
-              personal workspace. Existing contacts are matched by phone or
-              email.
+              Import a Google Contacts CSV or vCard file directly into your personal workspace.
+              Existing contacts are matched by phone or email.
             </p>
             <input
               ref={importInputRef}
@@ -420,10 +394,7 @@ export function AddTrustedPersonDialog({
             />
             {selectedImport ? (
               <>
-                <ContactFilePreview
-                  file={selectedImport.file}
-                  contacts={selectedImport.contacts}
-                />
+                <ContactFilePreview file={selectedImport.file} contacts={selectedImport.contacts} />
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <Button
                     type="button"
@@ -475,169 +446,72 @@ export function PersonSelector({
   onPersonCreated: (person: FamilyContact) => void;
 }) {
   const [openPerson, setOpenPerson] = useState(false);
-  const [importing, setImporting] = useState(false);
-  const [selectedImport, setSelectedImport] = useState<{
-    file: File;
-    contacts: ImportedContact[];
-  } | null>(null);
-  const importInputRef = useRef<HTMLInputElement>(null);
-
-  const handleImport = async (file: File) => {
-    setImporting(true);
-    try {
-      const imported = parseContactFile(
-        await file.text(),
-        file.name.toLowerCase().endsWith(".vcf"),
-      );
-      if (!imported.length) {
-        toast.error("No contacts were found in that file.");
-        return;
-      }
-
-      const response = await apiRequest<
-        { contacts: ImportedContact[] },
-        { created: number; merged: number }
-      >("post", `/families/${encodeURIComponent(familyId)}/contacts/import`, {
-        contacts: imported.slice(0, 1000),
-      });
-      if (!response.ok || !response.data) {
-        toast.error(response.message ?? "Contacts could not be imported.");
-        return;
-      }
-
-      toast.success(
-        `${response.data.created} added, ${response.data.merged} matched existing contacts.`,
-      );
-      onContactsImported();
-      setSelectedImport(null);
-    } catch {
-      toast.error("The contact file could not be read.");
-    } finally {
-      setImporting(false);
-      if (importInputRef.current) importInputRef.current.value = "";
-    }
-  };
-
-  const handleFileSelected = async (file: File) => {
-    try {
-      const contacts = parseContactFile(
-        await file.text(),
-        file.name.toLowerCase().endsWith(".vcf"),
-      );
-      if (!contacts.length) {
-        setSelectedImport(null);
-        toast.error("No contacts were found in that file.");
-        return;
-      }
-      setSelectedImport({ file, contacts });
-    } catch {
-      setSelectedImport(null);
-      toast.error("The contact file could not be read.");
-    }
-  };
+  const [personPickerOpen, setPersonPickerOpen] = useState(false);
 
   return (
     <>
-      <Tabs defaultValue="form" className="gap-4">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="form">Add manually</TabsTrigger>
-          <TabsTrigger value="file">Upload file</TabsTrigger>
-        </TabsList>
-        <TabsContent value="form" className="flex flex-col gap-4">
-          <CommonFormField
-            control={control}
-            name="personContactId"
-            label="Person"
-            fieldType="custom"
-            required
-            render={({ field, id, invalid }) => (
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Select
-                  value={String(field.value ?? "")}
-                  onValueChange={field.onChange}
+      <CommonFormField
+        control={control}
+        name="personContactId"
+        label="Person"
+        fieldType="custom"
+        required
+        render={({ field, id, invalid }) => (
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Popover open={personPickerOpen} onOpenChange={setPersonPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  aria-expanded={personPickerOpen}
+                  aria-invalid={invalid}
+                  className=" justify-between font-normal"
+                  id={id}
+                  type="button"
+                  variant="outline"
                 >
-                  <SelectTrigger
-                    id={id}
-                    aria-invalid={invalid}
-                    className="w-full"
-                  >
-                    <SelectValue placeholder="Choose a saved person" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {contacts.map((contact) => (
-                        <SelectItem key={contact.id} value={contact.id}>
+                  {contacts.find((contact) => contact.id === field.value)?.fullName ??
+                    "Choose a saved person"}
+                  <span className="text-muted-foreground text-xs">
+                    {contacts.find((contact) => contact.id === field.value)?.phoneNumber ?? ""}
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                <Command className="h-auto min-h-0">
+                  <CommandInput placeholder="Search by name or phone..." />
+                  <CommandList>
+                    <CommandEmpty>No person found.</CommandEmpty>
+                    {contacts.map((contact) => (
+                      <CommandItem
+                        key={contact.id}
+                        className="min-w-0"
+                        value={`${contact.fullName} ${contact.phoneNumber ?? ""} ${getPersonRelationship(contact)}`}
+                        onSelect={() => {
+                          field.onChange(contact.id);
+                          setPersonPickerOpen(false);
+                        }}
+                      >
+                        <CheckIcon
+                          className={`mr-2 size-4 ${
+                            field.value === contact.id ? "opacity-100" : "opacity-0"
+                          }`}
+                        />
+                        <span className="min-w-0 truncate">
                           {contact.fullName} · {getPersonRelationship(contact)}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setOpenPerson(true)}
-                >
-                  <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                  Add new person
-                </Button>
-              </div>
-            )}
-          />
-        </TabsContent>
-        <TabsContent value="file" className="flex flex-col gap-3">
-          <p className="text-muted-foreground text-sm">
-            Import a Google Contacts CSV or vCard file. Existing contacts are
-            matched by phone number or email.
-          </p>
-          <input
-            ref={importInputRef}
-            className="hidden"
-            accept=".csv,.vcf,text/csv,text/vcard"
-            type="file"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) void handleFileSelected(file);
-            }}
-          />
-          {selectedImport ? (
-            <>
-              <ContactFilePreview
-                file={selectedImport.file}
-                contacts={selectedImport.contacts}
-              />
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Button
-                  type="button"
-                  disabled={importing}
-                  onClick={() => void handleImport(selectedImport.file)}
-                >
-                  <FileUpIcon aria-hidden="true" data-icon="inline-start" />
-                  {importing ? "Uploading..." : "Upload contacts"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={importing}
-                  onClick={() => importInputRef.current?.click()}
-                >
-                  Choose another file
-                </Button>
-              </div>
-            </>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={importing}
-              onClick={() => importInputRef.current?.click()}
-            >
-              <FileUpIcon aria-hidden="true" data-icon="inline-start" />
-              Choose contact file
+                          {contact.phoneNumber ? ` · ${contact.phoneNumber}` : ""}
+                        </span>
+                      </CommandItem>
+                    ))}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            <Button type="button" variant="outline" onClick={() => setOpenPerson(true)}>
+              <PlusIcon aria-hidden="true" data-icon="inline-start" />
+              Add new person
             </Button>
-          )}
-        </TabsContent>
-      </Tabs>
+          </div>
+        )}
+      />
       <AddTrustedPersonDialog
         familyId={familyId}
         open={openPerson}

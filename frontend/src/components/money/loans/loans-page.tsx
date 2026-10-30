@@ -25,7 +25,6 @@ import { LoanForm } from "./loan-form";
 import { LoanPageHeader } from "./loan-page-header";
 import { LoanSummary } from "./loan-summary";
 import { LoanTabs } from "./loan-tabs";
-import { ManagePeopleCard } from "./manage-people-card";
 import { AddTrustedPersonDialog } from "./person-selector";
 import { RecordPaymentForm } from "./record-payment-form";
 import {
@@ -207,7 +206,6 @@ export function LoansPage() {
         </>
       )}
 
-      <ManagePeopleCard familySlug={family.slug} />
       <LoanForm
         categories={categories}
         contacts={contacts}
