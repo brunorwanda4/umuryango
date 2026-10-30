@@ -433,7 +433,22 @@ export class AuthService {
 		email: string;
 		fullName: string;
 	}): Promise<void> {
-		const code = randomInt(0, 1_000_000).toString().padStart(6, "0");
+		const mailDevMode =
+			this.configService.get<string>("MAIL_DEV_MODE", "false") === "true";
+		const configuredDevCode = this.configService.get<string>(
+			"DEV_VERIFICATION_CODE",
+			"678901",
+		);
+
+		if (mailDevMode && !/^\d{6}$/.test(configuredDevCode)) {
+			throw new Error(
+				"DEV_VERIFICATION_CODE must contain exactly six digits when MAIL_DEV_MODE is enabled.",
+			);
+		}
+
+		const code = mailDevMode
+			? configuredDevCode
+			: randomInt(0, 1_000_000).toString().padStart(6, "0");
 		const codeHash = await hash(code, 10);
 		const expiresAt = new Date(
 			Date.now() + this.verificationCodeExpiresInMinutes * 60 * 1000,

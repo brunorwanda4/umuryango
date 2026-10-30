@@ -26,6 +26,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Spinner } from "@/components/ui/spinner";
 import apiRequest, { getApiAuthUrl } from "@/service/api";
 
+const defaultDevelopmentVerificationCode =
+  process.env.NODE_ENV === "development" ? "678901" : "";
+
 export type RegisterFormCopy = {
   fullNameLabel: string;
   genderLabel: string;
@@ -113,7 +116,7 @@ export const RegisterForm = ({ copy, loginHref, verifiedHref }: RegisterFormProp
     }
 
     setRegisteredEmail(email);
-    setOtpValue("");
+    setOtpValue(defaultDevelopmentVerificationCode);
     setStep("verify");
     setIsPending(false);
   };
