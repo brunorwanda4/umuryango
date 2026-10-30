@@ -1,6 +1,8 @@
 "use client";
 
+import { ArrowUpIcon } from "lucide-react";
 import { useState } from "react";
+import { SidebarIcon } from "@/components/app-shell/sidebar-icon";
 import { PageTitle } from "@/components/common/pages/page-title";
 import { ExpenseDashboard } from "@/components/money/expense-dashboard";
 import { useExpensePageData } from "@/hooks/use-expense-page-data";
@@ -23,7 +25,15 @@ export function PersonalExpensePage() {
     <div className="flex flex-col gap-5">
       <PageTitle
         title="Expenses"
-        iconImage="/images/icons/expense.png"
+        icon={
+          <SidebarIcon
+            className="size-6"
+            icon={{
+              image: { src: "/images/icons/expense.png" },
+              line: ArrowUpIcon,
+            }}
+          />
+        }
         description="Track your personal spending on food, transport, health, rent, and other costs."
         actions={
           <ExpensePageActions

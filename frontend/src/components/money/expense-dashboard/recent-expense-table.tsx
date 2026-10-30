@@ -142,6 +142,8 @@ export function RecentExpenseTable({
   onSuccess: () => void | Promise<void>;
 }) {
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [paymentMethod, setPaymentMethod] = useState("all");
   const [viewExpenseId, setViewExpenseId] = useState<string | null>(null);
   const [viewMode, setViewMode] = usePersistentViewMode(
     RECENT_EXPENSE_VIEW_MODE_STORAGE_KEY,
@@ -149,24 +151,24 @@ export function RecentExpenseTable({
   const filteredExpenseData = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    if (!query) {
-      return data;
-    }
-
-    return data.filter((expense) =>
-      [
-        expense.source,
-        expense.description,
-        expense.category,
-        expense.date,
-        expense.paymentMethod,
-        expense.amountMinorUnits.toString(),
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(query),
+    return data.filter(
+      (expense) =>
+        (category === "all" || expense.categoryId === category) &&
+        (paymentMethod === "all" || expense.account === paymentMethod) &&
+        (!query ||
+          [
+            expense.source,
+            expense.description,
+            expense.category,
+            expense.date,
+            expense.paymentMethod,
+            expense.amountMinorUnits.toString(),
+          ]
+            .join(" ")
+            .toLowerCase()
+            .includes(query)),
     );
-  }, [data, search]);
+  }, [category, data, paymentMethod, search]);
   const recentExpenseColumns = useMemo(
     () => getRecentExpenseColumns({ categories, familyId, onSuccess }),
     [categories, familyId, onSuccess],
@@ -184,9 +186,14 @@ export function RecentExpenseTable({
       </CardHeader>
       <CardContent className="px-0 pb-0">
         <RecentExpenseFilter
+          category={category}
+          categoryOptions={categories}
+          paymentMethod={paymentMethod}
           resultCount={filteredExpenseData.length}
           search={search}
           totalCount={data.length}
+          onCategoryChange={setCategory}
+          onPaymentMethodChange={setPaymentMethod}
           onSearchChange={setSearch}
         />
         {viewMode === "table" ? (
