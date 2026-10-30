@@ -1,7 +1,6 @@
 import { SearchIcon } from "lucide-react";
 import type * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,73 +29,76 @@ export function ContactFilters({
   onReset,
 }: ContactFiltersProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Search and filters</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_14rem_10rem]">
-        <div className="relative">
-          <SearchIcon className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
-          <Input
-            value={filters.search}
-            onChange={(event) =>
+    <div className="border-b px-3 py-3 sm:px-6 sm:py-4">
+      <div className="flex flex-col gap-3 sm:gap-4">
+        <div className="flex flex-wrap gap-2 md:gap-3">
+          <div className="relative min-w-0 flex-1 basis-full md:basis-64">
+            <SearchIcon className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
+            <Input
+              value={filters.search}
+              onChange={(event) =>
+                onFiltersChange((current) => ({
+                  ...current,
+                  search: event.target.value,
+                }))
+              }
+              placeholder="Search contacts"
+              className="pl-9"
+            />
+          </div>
+
+          <Select
+            value={filters.contactType}
+            onValueChange={(value) =>
               onFiltersChange((current) => ({
                 ...current,
-                search: event.target.value,
+                contactType: value as ContactFiltersState["contactType"],
               }))
             }
-            placeholder="Search contacts"
-            className="pl-9"
-          />
+          >
+            <SelectTrigger className="min-w-0 flex-1 basis-32 md:w-52 md:flex-none">
+              <SelectValue placeholder="Contact type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All types</SelectItem>
+              {contactTypeOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={filters.status}
+            onValueChange={(value) =>
+              onFiltersChange((current) => ({
+                ...current,
+                status: value as ContactFiltersState["status"],
+              }))
+            }
+          >
+            <SelectTrigger className="min-w-0 flex-1 basis-32 md:w-44 md:flex-none">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              {contactStatusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <Select
-          value={filters.contactType}
-          onValueChange={(value) =>
-            onFiltersChange((current) => ({
-              ...current,
-              contactType: value as ContactFiltersState["contactType"],
-            }))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Contact type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All types</SelectItem>
-            {contactTypeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={filters.status}
-          onValueChange={(value) =>
-            onFiltersChange((current) => ({
-              ...current,
-              status: value as ContactFiltersState["status"],
-            }))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All statuses</SelectItem>
-            {contactStatusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <div className="flex flex-wrap gap-4 lg:col-span-3">
-          <Label className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Label
+            htmlFor="contacts-emergency-only"
+            className="flex items-center gap-2"
+          >
             <Checkbox
+              id="contacts-emergency-only"
               checked={filters.emergencyOnly}
               onCheckedChange={(checked) =>
                 onFiltersChange((current) => ({
@@ -107,8 +109,12 @@ export function ContactFilters({
             />
             Emergency only
           </Label>
-          <Label className="flex items-center gap-2">
+          <Label
+            htmlFor="contacts-loan-only"
+            className="flex items-center gap-2"
+          >
             <Checkbox
+              id="contacts-loan-only"
               checked={filters.loanOnly}
               onCheckedChange={(checked) =>
                 onFiltersChange((current) => ({
@@ -123,7 +129,7 @@ export function ContactFilters({
             Reset
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

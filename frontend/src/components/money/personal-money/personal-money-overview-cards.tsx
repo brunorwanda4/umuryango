@@ -55,6 +55,7 @@ export function PersonalMoneyOverviewCards({
             image: { src: "/images/icons/income.png" },
             line: TrendingDownIcon,
           },
+          link: "/me/money/income",
           value: formatCompactRwf(totalIncome, currency),
         },
         {
@@ -64,6 +65,7 @@ export function PersonalMoneyOverviewCards({
             image: { src: "/images/icons/expense.png" },
             line: TrendingUpIcon,
           },
+          link: "/me/money/expenses",
           value: formatCompactRwf(totalExpenses, currency),
         },
         {
@@ -73,6 +75,7 @@ export function PersonalMoneyOverviewCards({
             image: { src: "/images/icons/wallet.png" },
             line: WalletCardsIcon,
           },
+          link: "/me/money",
           value: formatCompactRwf(balance, currency),
         },
         {
@@ -82,6 +85,7 @@ export function PersonalMoneyOverviewCards({
             image: { src: "/images/icons/savings.png" },
             line: CoinsIcon,
           },
+          link: "/me/savings",
           value: formatCompactRwf(totalSavings, currency),
         },
         {
@@ -91,6 +95,7 @@ export function PersonalMoneyOverviewCards({
             image: { src: "/images/icons/debt.png" },
             line: LandmarkIcon,
           },
+          link: "/me/debts",
           value: formatCompactRwf(totalDebt, currency),
         },
       ]}

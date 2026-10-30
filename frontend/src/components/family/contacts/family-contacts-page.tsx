@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertCircleIcon } from "lucide-react";
+import type * as React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
@@ -15,18 +16,17 @@ import { Separator } from "@/components/ui/separator";
 import apiRequest from "@/service/api";
 import { FamilyMoneySkeleton } from "../money/family-money-skeleton";
 import { ContactDetailsDialog } from "./contact-details-dialog";
-import { ContactFilters } from "./contact-filters";
 import { ContactFormDialog } from "./contact-form-dialog";
 import { ContactList } from "./contact-list";
 import { ContactPageHeader } from "./contact-page-header";
 import {
-  filterContacts,
   type ImportedContact,
   parseGoogleCsv,
   parseVcard,
 } from "./contact-utils";
 import { EmergencyContactsCard } from "./emergency-contacts-card";
 import {
+  type ContactFiltersState,
   type ContactListResponse,
   EMPTY_CONTACT_FILTERS,
   type FamilyContact,
@@ -42,6 +42,9 @@ export function FamilyContactsPage({
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [contacts, setContacts] = useState<FamilyContact[]>([]);
   const [filters, setFilters] = useState(EMPTY_CONTACT_FILTERS);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [totalContacts, setTotalContacts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openCreate, setOpenCreate] = useState(false);
@@ -87,9 +90,21 @@ export function FamilyContactsPage({
       const familyData = familyResponse.data;
       setFamily(familyData);
 
+      const params = new URLSearchParams({
+        limit: "20",
+        page: String(pageIndex + 1),
+      });
+      if (filters.search.trim()) params.set("search", filters.search.trim());
+      if (filters.contactType !== "all") {
+        params.set("contactType", filters.contactType);
+      }
+      if (filters.status !== "all") params.set("status", filters.status);
+      if (filters.emergencyOnly) params.set("emergencyOnly", "true");
+      if (filters.loanOnly) params.set("loanOnly", "true");
+
       const contactsResponse = await apiRequest<undefined, ContactListResponse>(
         "get",
-        `/families/${encodeURIComponent(familyData.id)}/contacts?limit=100`,
+        `/families/${encodeURIComponent(familyData.id)}/contacts?${params.toString()}`,
       );
 
       if (!contactsResponse.ok || !contactsResponse.data) {
@@ -100,12 +115,14 @@ export function FamilyContactsPage({
       }
 
       setContacts(contactsResponse.data.items);
+      setTotalContacts(contactsResponse.data.total);
+      setTotalPages(Math.max(contactsResponse.data.totalPages, 1));
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred.");
     } finally {
       setLoading(false);
     }
-  }, [familyName, personal]);
+  }, [familyName, personal, pageIndex, filters]);
 
   useEffect(() => {
     fetchData();
@@ -126,15 +143,17 @@ export function FamilyContactsPage({
     if (contact) setDetailsContact(contact);
   }, [contacts, detailsContact]);
 
-  const filteredContacts = useMemo(
-    () => filterContacts(contacts, filters),
-    [contacts, filters],
-  );
-
   const emergencyContacts = useMemo(
     () => contacts.filter((contact) => contact.isEmergencyContact),
     [contacts],
   );
+
+  const updateFilters = (
+    nextFilters: React.SetStateAction<ContactFiltersState>,
+  ) => {
+    setPageIndex(0);
+    setFilters(nextFilters);
+  };
 
   const handleDelete = async (contact: FamilyContact) => {
     if (!family) return;
@@ -217,7 +236,7 @@ export function FamilyContactsPage({
     <div className="flex min-w-0 flex-col gap-6">
       <ContactPageHeader
         personal={personal}
-        totalCount={contacts.length}
+        totalCount={totalContacts}
         emergencyCount={emergencyContacts.length}
         importing={importing}
         onImportFile={handleImport}
@@ -226,15 +245,8 @@ export function FamilyContactsPage({
 
       <EmergencyContactsCard emergencyContacts={emergencyContacts} />
 
-      <ContactFilters
-        filters={filters}
-        onFiltersChange={setFilters}
-        onReset={() => setFilters(EMPTY_CONTACT_FILTERS)}
-      />
-
       <ContactList
-        familyName={family.name}
-        contacts={filteredContacts}
+        contacts={contacts}
         onView={setDetailsContact}
         onEdit={(contact) => {
           setSelectedContact(contact);
@@ -242,6 +254,15 @@ export function FamilyContactsPage({
         }}
         onDelete={handleDelete}
         onAddContact={() => setOpenCreate(true)}
+        filters={filters}
+        onFiltersChange={updateFilters}
+        onResetFilters={() => {
+          setPageIndex(0);
+          setFilters(EMPTY_CONTACT_FILTERS);
+        }}
+        pageIndex={pageIndex}
+        totalPages={totalPages}
+        onPageChange={setPageIndex}
       />
 
       <Separator />

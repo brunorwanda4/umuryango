@@ -1,5 +1,7 @@
-import { FileUpIcon, PlusIcon, UsersRoundIcon } from "lucide-react";
+import { ContactRoundIcon, FileUpIcon, PlusIcon } from "lucide-react";
 import { useRef } from "react";
+import { SidebarIcon } from "@/components/app-shell/sidebar-icon";
+import { PageTitle } from "@/components/common/pages/page-title";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -33,51 +35,46 @@ export function ContactPageHeader({
   };
 
   return (
-    <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-      <div className="flex min-w-0 flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">Trusted contacts</Badge>
-          <Badge variant="secondary">{totalCount} saved</Badge>
+    <PageTitle
+      title={personal ? "Personal Contacts" : "Family Contacts"}
+      badge={`${totalCount} saved`}
+      icon={
+        <SidebarIcon
+          className="size-6"
+          icon={{
+            image: { src: "/images/icons/contacts.png" },
+            line: ContactRoundIcon,
+          }}
+        />
+      }
+      description="Save relatives, neighbors, doctors, lawyers, schools, churches, SACCOs, banks, business partners, and loan contacts."
+      actions={
+        <>
           {emergencyCount > 0 ? (
             <Badge variant="destructive">{emergencyCount} emergency</Badge>
           ) : null}
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background">
-            <UsersRoundIcon className="size-5 text-muted-foreground" />
-          </span>
-          <h1 className="font-bold text-2xl tracking-tight sm:text-3xl">
-            {personal ? "Personal Contacts" : "Family Contacts"}
-          </h1>
-        </div>
-        <p className="max-w-4xl text-muted-foreground text-sm leading-6">
-          Save relatives, neighbors, doctors, lawyers, schools, churches,
-          SACCOs, banks, business partners, and loan contacts.
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <input
-          ref={fileInputRef}
-          className="hidden"
-          accept=".csv,.vcf,text/csv,text/vcard"
-          type="file"
-          onChange={handleFileChange}
-        />
-        <Button
-          size="sm"
-          variant="outline"
-          disabled={importing}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <FileUpIcon aria-hidden="true" data-icon="inline-start" />
-          {importing ? "Importing..." : "Import contacts"}
-        </Button>
-        <Button size="sm" onClick={onAddContact}>
-          <PlusIcon aria-hidden="true" data-icon="inline-start" />
-          Add Contact
-        </Button>
-      </div>
-    </header>
+          <input
+            ref={fileInputRef}
+            className="hidden"
+            accept=".csv,.vcf,text/csv,text/vcard"
+            type="file"
+            onChange={handleFileChange}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={importing}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <FileUpIcon aria-hidden="true" data-icon="inline-start" />
+            {importing ? "Importing..." : "Import contacts"}
+          </Button>
+          <Button size="sm" onClick={onAddContact}>
+            <PlusIcon aria-hidden="true" data-icon="inline-start" />
+            Add Contact
+          </Button>
+        </>
+      }
+    />
   );
 }

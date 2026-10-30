@@ -36,6 +36,7 @@ interface DataTableProps<TData, TValue> {
   pageIndex?: number;
   setPageIndex?: (i: number) => void;
   pageSize?: number;
+  totalPages?: number;
   noFooter?: boolean;
   loading?: boolean;
   className?: string;
@@ -53,6 +54,7 @@ export function CommonDataTable<TData, TValue>({
   setPageIndex,
   noFooter = true,
   pageSize = 10,
+  totalPages,
   loading = false,
   className,
 }: DataTableProps<TData, TValue>) {
@@ -190,7 +192,19 @@ export function CommonDataTable<TData, TValue>({
                           "cursor-pointer focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                         rowClassName?.(row),
                       )}
-                      onClick={onRowClick ? () => onRowClick(row) : undefined}
+                      onClick={
+                        onRowClick
+                          ? (event) => {
+                              if (
+                                event.target instanceof HTMLElement &&
+                                event.target.closest("button, a")
+                              ) {
+                                return;
+                              }
+                              onRowClick(row);
+                            }
+                          : undefined
+                      }
                       onKeyDown={
                         onRowClick
                           ? (event) => {
@@ -289,7 +303,11 @@ export function CommonDataTable<TData, TValue>({
               table.nextPage();
             }}
             disabled={
-              serverMode ? data.length < pageSize : !table.getCanNextPage()
+              serverMode
+                ? totalPages !== undefined
+                  ? (pageIndex ?? 0) + 1 >= totalPages
+                  : data.length < pageSize
+                : !table.getCanNextPage()
             }
           >
             Next
