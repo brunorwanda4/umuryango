@@ -39,9 +39,16 @@ function getMobileNavigationItems(
 
 function getMobileNavigationLabel(title: string) {
   const tNav = createTranslator("AppShell.navigation.items");
-  if (title === tNav("overview") || title === "Overview") return tNav("home");
-  if (title === tNav("familyWorkspaces") || title === "Family workspaces")
-    return tNav("families");
+  if (
+    title === tNav((m) => m.AppShell.navigation.items.overview) ||
+    title === "Overview"
+  )
+    return tNav((m) => m.AppShell.navigation.items.home);
+  if (
+    title === tNav((m) => m.AppShell.navigation.items.familyWorkspaces) ||
+    title === "Family workspaces"
+  )
+    return tNav((m) => m.AppShell.navigation.items.families);
 
   return title;
 }
@@ -93,7 +100,7 @@ export function MobileBottomNavigation({
 
   return (
     <nav
-      aria-label={t("primaryMobileNavigation")}
+      aria-label={t((m) => m.AppShell.sidebar.primaryMobileNavigation)}
       className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
     >
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
@@ -123,7 +130,7 @@ export function MobileBottomNavigation({
         })}
         <button
           type="button"
-          aria-label={t("openAllNavigationLinks")}
+          aria-label={t((m) => m.AppShell.sidebar.openAllNavigationLinks)}
           aria-current={!hasActiveItem ? "page" : undefined}
           className={cn(
             "flex min-h-14 min-w-0 flex-col items-center justify-center gap-1  px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
@@ -134,7 +141,7 @@ export function MobileBottomNavigation({
         >
           <MenuIcon aria-hidden="true" className="size-5 shrink-0" />
           <span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
-            {t("more")}
+            {t((m) => m.AppShell.sidebar.more)}
           </span>
         </button>
       </div>

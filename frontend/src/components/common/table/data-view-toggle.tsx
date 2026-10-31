@@ -15,7 +15,7 @@ export function DataViewToggle({ value, onValueChange }: DataViewToggleProps) {
   const t = createTranslator("Common");
 
   return (
-    <ButtonGroup aria-label={t("chooseView")}>
+    <ButtonGroup aria-label={t((m) => m.Common.chooseView)}>
       <Button
         aria-pressed={value === "table"}
         size="sm"
@@ -24,7 +24,7 @@ export function DataViewToggle({ value, onValueChange }: DataViewToggleProps) {
         onClick={() => onValueChange("table")}
       >
         <TableIcon aria-hidden="true" data-icon="inline-start" />
-        {t("tableView")}
+        {t((m) => m.Common.tableView)}
       </Button>
       <Button
         aria-pressed={value === "items"}
@@ -34,7 +34,7 @@ export function DataViewToggle({ value, onValueChange }: DataViewToggleProps) {
         onClick={() => onValueChange("items")}
       >
         <ListIcon aria-hidden="true" data-icon="inline-start" />
-        {t("itemsView")}
+        {t((m) => m.Common.itemsView)}
       </Button>
     </ButtonGroup>
   );

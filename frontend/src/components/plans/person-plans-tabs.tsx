@@ -60,10 +60,10 @@ function TabEmpty({
   const isGoal = tab === "long-term";
   const periodLabel =
     tab === "week"
-      ? t("tabs.thisWeekPeriod")
+      ? t((m) => m.PersonalPlans.tabs.thisWeekPeriod)
       : tab === "month"
-        ? t("tabs.thisMonthPeriod")
-        : t("tabs.completedPeriod");
+        ? t((m) => m.PersonalPlans.tabs.thisMonthPeriod)
+        : t((m) => m.PersonalPlans.tabs.completedPeriod);
 
   return (
     <Empty className="min-h-64 border bg-card">
@@ -77,26 +77,34 @@ function TabEmpty({
         </EmptyMedia>
         <EmptyTitle>
           {tab === "today"
-            ? t("tabs.nothingPlannedToday")
+            ? t((m) => m.PersonalPlans.tabs.nothingPlannedToday)
             : isGoal
-              ? t("tabs.noLongTermGoals")
-              : t("tabs.noPlansIn", { period: periodLabel })}
+              ? t((m) => m.PersonalPlans.tabs.noLongTermGoals)
+              : t((m) => m.PersonalPlans.tabs.noPlansIn, {
+                  period: periodLabel,
+                })}
         </EmptyTitle>
         <EmptyDescription>
           {tab === "today"
-            ? t("tabs.noTasksTodayFor", { name: firstName })
+            ? t((m) => m.PersonalPlans.tabs.noTasksTodayFor, {
+                name: firstName,
+              })
             : isGoal
-              ? t("tabs.createFutureGoalFor", { name: firstName })
+              ? t((m) => m.PersonalPlans.tabs.createFutureGoalFor, {
+                  name: firstName,
+                })
               : tab === "completed"
-                ? t("tabs.noCompletedPlans")
-                : t("tabs.noTasksScheduled")}
+                ? t((m) => m.PersonalPlans.tabs.noCompletedPlans)
+                : t((m) => m.PersonalPlans.tabs.noTasksScheduled)}
         </EmptyDescription>
       </EmptyHeader>
       {tab !== "completed" ? (
         <EmptyContent>
           <Button onClick={() => onAdd(isGoal ? "LONG_TERM_GOAL" : "TASK")}>
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            {isGoal ? t("tabs.createGoal") : t("tabs.addPlan")}
+            {isGoal
+              ? t((m) => m.PersonalPlans.tabs.createGoal)
+              : t((m) => m.PersonalPlans.tabs.addPlan)}
           </Button>
         </EmptyContent>
       ) : null}
@@ -117,11 +125,11 @@ export function PersonPlansTabs({
 }) {
   const t = createTranslator("PersonalPlans");
   const tabs: Array<{ value: PlansTab; label: string }> = [
-    { value: "today", label: t("tabs.today") },
-    { value: "week", label: t("tabs.week") },
-    { value: "month", label: t("tabs.month") },
-    { value: "long-term", label: t("tabs.longTerm") },
-    { value: "completed", label: t("tabs.completed") },
+    { value: "today", label: t((m) => m.PersonalPlans.tabs.today) },
+    { value: "week", label: t((m) => m.PersonalPlans.tabs.week) },
+    { value: "month", label: t((m) => m.PersonalPlans.tabs.month) },
+    { value: "long-term", label: t((m) => m.PersonalPlans.tabs.longTerm) },
+    { value: "completed", label: t((m) => m.PersonalPlans.tabs.completed) },
   ];
 
   return (

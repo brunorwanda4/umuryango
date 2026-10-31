@@ -97,7 +97,7 @@ export function CreateLoanDialog({
       method: "post",
       url: `/families/${encodeURIComponent(family.id)}/money/loans`,
     },
-    onSuccessMessage: t("toasts.loanRecorded"),
+    onSuccessMessage: t((m) => m.FamilyLoans.toasts.loanRecorded),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -118,13 +118,15 @@ export function CreateLoanDialog({
       <DialogTrigger asChild>
         <Button size="sm">
           <PlusIcon aria-hidden="true" data-icon="inline-start" />
-          {t("createTitle")}
+          {t((m) => m.FamilyLoans.createTitle)}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{t("createTitle")}</DialogTitle>
-          <DialogDescription>{t("createDesc")}</DialogDescription>
+          <DialogTitle>{t((m) => m.FamilyLoans.createTitle)}</DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyLoans.createDesc)}
+          </DialogDescription>
         </DialogHeader>
         <form
           id="create-loan-form"
@@ -147,7 +149,9 @@ export function CreateLoanDialog({
             disabled={isPending}
             className="w-full sm:w-auto"
           >
-            {isPending ? t("saving") : t("saveLoan")}
+            {isPending
+              ? t((m) => m.FamilyLoans.saving)
+              : t((m) => m.FamilyLoans.saveLoan)}
           </Button>
         </DialogFooter>
       </DialogContent>

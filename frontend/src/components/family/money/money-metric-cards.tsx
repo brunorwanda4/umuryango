@@ -1,3 +1,10 @@
+import {
+  CoinsIcon,
+  LandmarkIcon,
+  TrendingDownIcon,
+  TrendingUpIcon,
+  WalletCardsIcon,
+} from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
 import { createTranslator } from "@/i18n/translate";
@@ -17,7 +24,7 @@ export function MoneyMetricCards({
   const moneyHref = `/family/${encodeURIComponent(familySlug)}/money`;
   const cards = [
     {
-      description: t("cashBalance"),
+      description: t((m) => m.FamilyMoney.cashBalance),
       value: (
         <CompactMoney
           currency={currency}
@@ -25,12 +32,15 @@ export function MoneyMetricCards({
           value={totals?.cashBalanceMinorUnits}
         />
       ),
-      iconImage: "/images/icons/wallet.png",
+      iconSource: {
+        image: { src: "/images/icons/wallet.png" },
+        line: WalletCardsIcon,
+      },
       link: moneyHref,
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: t("income"),
+      description: t((m) => m.FamilyMoney.income),
       value: (
         <CompactMoney
           currency={currency}
@@ -38,12 +48,15 @@ export function MoneyMetricCards({
           value={totals?.incomeMinorUnits}
         />
       ),
-      iconImage: "/images/icons/income.png",
+      iconSource: {
+        image: { src: "/images/icons/income.png" },
+        line: TrendingDownIcon,
+      },
       link: `${moneyHref}/income`,
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: t("expenses"),
+      description: t((m) => m.FamilyMoney.expenses),
       value: (
         <CompactMoney
           currency={currency}
@@ -51,12 +64,15 @@ export function MoneyMetricCards({
           value={totals?.expenseMinorUnits}
         />
       ),
-      iconImage: "/images/icons/expense.png",
+      iconSource: {
+        image: { src: "/images/icons/expense.png" },
+        line: TrendingUpIcon,
+      },
       link: `${moneyHref}/expenses`,
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: t("savings"),
+      description: t((m) => m.FamilyMoney.savings),
       value: (
         <CompactMoney
           currency={currency}
@@ -64,11 +80,14 @@ export function MoneyMetricCards({
           value={totals?.savingsMinorUnits}
         />
       ),
-      iconImage: "/images/icons/savings.png",
+      iconSource: {
+        image: { src: "/images/icons/savings.png" },
+        line: CoinsIcon,
+      },
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: t("debts"),
+      description: t((m) => m.FamilyMoney.debts),
       value: (
         <CompactMoney
           currency={currency}
@@ -76,7 +95,10 @@ export function MoneyMetricCards({
           value={totals?.debtOutstandingMinorUnits}
         />
       ),
-      iconImage: "/images/icons/debt.png",
+      iconSource: {
+        image: { src: "/images/icons/debt.png" },
+        line: LandmarkIcon,
+      },
       link: `${moneyHref}/loans`,
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
@@ -84,10 +106,10 @@ export function MoneyMetricCards({
 
   return (
     <CommonOverviewCardDisplay
-      className="grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5"
-      cardHeaderClassName=" flex-col items-start justify-between gap-4 "
-      cardDescriptionClassName="text-sm font-medium text-muted-foreground"
-      cardTitleClassName="whitespace-normal leading-tight sm:text-2xl"
+      cardDescriptionClassName="flex items-center text-sm font-medium leading-5 text-muted-foreground max-sm:text-sm max-sm:font-medium "
+      cardHeaderClassName="flex-col items-start justify-between gap-4 py-4"
+      cardTitleClassName="whitespace-normal leading-tight tracking-normal sm:text-3xl"
+      className="grid-cols-1 gap-4 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4"
       iconPosition="start"
       cards={cards}
     />

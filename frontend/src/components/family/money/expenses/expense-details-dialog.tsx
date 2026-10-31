@@ -35,7 +35,7 @@ export function ExpenseDetailsDialog({
   const project = getNoteLinkValue(transaction.notes, "Linked project");
   const timeline = [
     {
-      label: t("dialogs.expenseCreated"),
+      label: t((m) => m.FamilyExpenses.dialogs.expenseCreated),
       value: formatDate(transaction.createdAt),
       actor: transaction.createdBy.fullName,
     },
@@ -48,13 +48,13 @@ export function ExpenseDetailsDialog({
       : null,
     transaction.reversedAt
       ? {
-          label: t("dialogs.reversed"),
+          label: t((m) => m.FamilyExpenses.dialogs.reversed),
           value: formatDate(transaction.reversedAt),
           actor: "Family audit",
         }
       : null,
     {
-      label: t("dialogs.lastUpdated"),
+      label: t((m) => m.FamilyExpenses.dialogs.lastUpdated),
       value: formatDate(transaction.updatedAt),
       actor: "Family audit",
     },
@@ -64,19 +64,26 @@ export function ExpenseDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{t("dialogs.detailsTitle")}</DialogTitle>
-          <DialogDescription>{t("dialogs.detailsDesc")}</DialogDescription>
+          <DialogTitle>
+            {t((m) => m.FamilyExpenses.dialogs.detailsTitle)}
+          </DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyExpenses.dialogs.detailsDesc)}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4 lg:grid-cols-[1fr_0.9fr]">
           <section className="space-y-3 text-sm">
             <DetailRow
-              label={t("form.titleLabel")}
-              value={transaction.description || t("dialogs.addTitle")}
+              label={t((m) => m.FamilyExpenses.form.titleLabel)}
+              value={
+                transaction.description ||
+                t((m) => m.FamilyExpenses.dialogs.addTitle)
+              }
               strong
             />
             <DetailRow
-              label={t("analytics.amount")}
+              label={t((m) => m.FamilyExpenses.analytics.amount)}
               value={
                 <CompactMoney
                   currency={currency}
@@ -87,55 +94,62 @@ export function ExpenseDetailsDialog({
               mono
             />
             <DetailRow
-              label={t("form.categoryLabel")}
+              label={t((m) => m.FamilyExpenses.form.categoryLabel)}
               value={transaction.category.name}
             />
             <DetailRow
-              label={t("form.dateLabel")}
+              label={t((m) => m.FamilyExpenses.form.dateLabel)}
               value={formatDate(transaction.date)}
             />
             <DetailRow
-              label={t("form.paidToLabel")}
-              value={transaction.receivedFrom || t("table.notRecorded")}
+              label={t((m) => m.FamilyExpenses.form.paidToLabel)}
+              value={
+                transaction.receivedFrom ||
+                t((m) => m.FamilyExpenses.table.notRecorded)
+              }
             />
             <DetailRow
-              label={t("form.paidByLabel")}
-              value={transaction.receivedBy || t("table.notRecorded")}
+              label={t((m) => m.FamilyExpenses.form.paidByLabel)}
+              value={
+                transaction.receivedBy ||
+                t((m) => m.FamilyExpenses.table.notRecorded)
+              }
             />
             <DetailRow
-              label={t("form.paymentMethodLabel")}
+              label={t((m) => m.FamilyExpenses.form.paymentMethodLabel)}
               value={formatPaymentMethod(transaction.paymentMethod)}
             />
             <DetailRow
-              label={t("form.budgetLabel")}
-              value={budget || t("dialogs.notLinked")}
+              label={t((m) => m.FamilyExpenses.form.budgetLabel)}
+              value={budget || t((m) => m.FamilyExpenses.dialogs.notLinked)}
             />
             <DetailRow
-              label={t("form.projectLabel")}
-              value={project || t("dialogs.notLinked")}
+              label={t((m) => m.FamilyExpenses.form.projectLabel)}
+              value={project || t((m) => m.FamilyExpenses.dialogs.notLinked)}
             />
             <div className="grid grid-cols-2 border-b pb-2">
               <span className="font-medium text-muted-foreground">
-                {t("form.statusLabel")}
+                {t((m) => m.FamilyExpenses.form.statusLabel)}
               </span>
               <div className="text-right">
                 <ExpenseStatusBadge status={transaction.status} />
               </div>
             </div>
             <DetailRow
-              label={t("dialogs.createdBy")}
+              label={t((m) => m.FamilyExpenses.dialogs.createdBy)}
               value={transaction.createdBy.fullName}
             />
             <DetailRow
-              label={t("dialogs.approvedBy")}
+              label={t((m) => m.FamilyExpenses.dialogs.approvedBy)}
               value={
-                transaction.approvedBy?.fullName || t("dialogs.notApproved")
+                transaction.approvedBy?.fullName ||
+                t((m) => m.FamilyExpenses.dialogs.notApproved)
               }
             />
             {transaction.notes ? (
               <div className="border-b pb-2">
                 <span className="mb-1 block font-medium text-muted-foreground">
-                  {t("form.notesLabel")}
+                  {t((m) => m.FamilyExpenses.form.notesLabel)}
                 </span>
                 <p className="whitespace-pre-wrap rounded-md bg-muted p-3 text-xs leading-5">
                   {transaction.notes}
@@ -147,7 +161,7 @@ export function ExpenseDetailsDialog({
           <aside className="space-y-4">
             <section className="rounded-md border p-3">
               <h3 className="font-semibold text-sm">
-                {t("dialogs.receiptSection")}
+                {t((m) => m.FamilyExpenses.dialogs.receiptSection)}
               </h3>
               {transaction.receipts?.length ? (
                 <div className="mt-3 space-y-2">
@@ -170,14 +184,14 @@ export function ExpenseDetailsDialog({
                 </div>
               ) : (
                 <p className="mt-2 text-muted-foreground text-xs">
-                  {t("dialogs.noReceiptAttached")}
+                  {t((m) => m.FamilyExpenses.dialogs.noReceiptAttached)}
                 </p>
               )}
             </section>
 
             <section className="rounded-md border p-3">
               <h3 className="font-semibold text-sm">
-                {t("dialogs.approvalTimeline")}
+                {t((m) => m.FamilyExpenses.dialogs.approvalTimeline)}
               </h3>
               <div className="mt-3 space-y-3">
                 {timeline.map((item) => (
@@ -189,7 +203,7 @@ export function ExpenseDetailsDialog({
                     <div>
                       <p className="font-medium text-sm">{item.label}</p>
                       <p className="text-muted-foreground text-xs">
-                        {t("dialogs.byActor", {
+                        {t((m) => m.FamilyExpenses.dialogs.byActor, {
                           date: item.value,
                           actor: item.actor,
                         })}
@@ -202,7 +216,7 @@ export function ExpenseDetailsDialog({
 
             <section className="rounded-md border p-3">
               <h3 className="font-semibold text-sm">
-                {t("dialogs.auditHistory")}
+                {t((m) => m.FamilyExpenses.dialogs.auditHistory)}
               </h3>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Badge variant="outline">TRANSACTION_CREATED</Badge>

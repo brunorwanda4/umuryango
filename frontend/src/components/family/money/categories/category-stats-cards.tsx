@@ -12,31 +12,31 @@ export function CategoryStatsCards({
   const cards = [
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: t("stats.totalCategories"),
+      description: t((m) => m.FamilyCategories.stats.totalCategories),
       iconImage: "/images/icons/application.png",
       value: <span className="tabular-nums"> {stats.total}</span>,
     },
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: t("stats.incomeCategories"),
+      description: t((m) => m.FamilyCategories.stats.incomeCategories),
       iconImage: "/images/icons/income.png",
       value: <span className="tabular-nums"> {stats.income}</span>,
     },
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: t("stats.expenseCategories"),
+      description: t((m) => m.FamilyCategories.stats.expenseCategories),
       iconImage: "/images/icons/expense.png",
       value: <span className="tabular-nums"> {stats.expense}</span>,
     },
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: t("statsActiveCategories"),
+      description: t((m) => m.FamilyCategories.statsActiveCategories),
       iconImage: "/images/icons/checklist.png",
       value: <span className="tabular-nums"> {stats.active}</span>,
     },
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: t("statsInactiveCategories"),
+      description: t((m) => m.FamilyCategories.statsInactiveCategories),
       iconImage: "/images/icons/sleep.png",
       value: <span className="tabular-nums"> {stats.inactive}</span>,
     },

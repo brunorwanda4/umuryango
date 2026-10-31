@@ -38,13 +38,15 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
         <div>
           <CardTitle className="flex items-center gap-2">
             <UsersIcon className="size-4" aria-hidden="true" />
-            {t("peopleInFamily")}
+            {t((m) => m.FamilyDashboard.peopleInFamily)}
           </CardTitle>
-          <CardDescription>{t("peopleInFamilyDesc")}</CardDescription>
+          <CardDescription>
+            {t((m) => m.FamilyDashboard.peopleInFamilyDesc)}
+          </CardDescription>
         </div>
         <Button asChild variant="outline" size="sm">
           <Link href={`/family/${family.slug}/members`}>
-            {t("viewMembers")}
+            {t((m) => m.FamilyDashboard.viewMembers)}
             <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
           </Link>
         </Button>
@@ -91,7 +93,7 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
                   </p>
                   <p className="text-muted-foreground text-xs">
                     {getKinshipLabel(member)} -{" "}
-                    {t("joinedDate", {
+                    {t((m) => m.FamilyDashboard.joinedDate, {
                       date: joinedDateFormatter.format(
                         new Date(member.joinedAt),
                       ),
@@ -110,7 +112,7 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
         </div>
         {hiddenCount > 0 ? (
           <div className="mt-3 rounded-lg border border-dashed bg-muted/30 p-3 text-center text-muted-foreground text-sm">
-            {t("moreMembers", { count: hiddenCount })}
+            {t((m) => m.FamilyDashboard.moreMembers, { count: hiddenCount })}
           </div>
         ) : null}
       </CardContent>

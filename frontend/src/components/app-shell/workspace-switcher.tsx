@@ -93,10 +93,15 @@ export function WorkspaceSwitcher({
   const recentFamilies = useRecentFamilies();
   const t = createTranslator("AppShell.workspaceSwitcher");
   const workspaceTitle =
-    mode === "family" ? currentFamilyName : t("personalWorkspace");
+    mode === "family"
+      ? currentFamilyName
+      : t((m) => m.AppShell.workspaceSwitcher.personalWorkspace);
   const title = user?.fullName ?? workspaceTitle;
   const description =
-    user?.email ?? (mode === "family" ? t("familyWorkspace") : t("yourMoney"));
+    user?.email ??
+    (mode === "family"
+      ? t((m) => m.AppShell.workspaceSwitcher.familyWorkspace)
+      : t((m) => m.AppShell.workspaceSwitcher.yourMoney));
 
   async function handleLogout() {
     await apiRequest("post", "/auth/logout");
@@ -125,7 +130,9 @@ export function WorkspaceSwitcher({
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="start">
-        <DropdownMenuLabel>{t("workspaces")}</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          {t((m) => m.AppShell.workspaceSwitcher.workspaces)}
+        </DropdownMenuLabel>
         <DropdownMenuGroup>
           {currentFamilyHref ? (
             <DropdownMenuItem asChild>
@@ -147,7 +154,9 @@ export function WorkspaceSwitcher({
         {recentFamilies.length ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>{t("recentFamilies")}</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {t((m) => m.AppShell.workspaceSwitcher.recentFamilies)}
+            </DropdownMenuLabel>
             <DropdownMenuGroup>
               {recentFamilies.map((family) => (
                 <DropdownMenuItem key={family.id} asChild>
@@ -165,20 +174,20 @@ export function WorkspaceSwitcher({
           <DropdownMenuItem asChild>
             <Link href="/family">
               <SidebarIcon icon={menuIcons.members} className="size-4" />
-              {t("manageFamilyAccess")}
+              {t((m) => m.AppShell.workspaceSwitcher.manageFamilyAccess)}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/family/new">
               <SidebarIcon icon={menuIcons.createFamily} className="size-4" />
-              {t("createFamily")}
+              {t((m) => m.AppShell.workspaceSwitcher.createFamily)}
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
           <LogOutIcon aria-hidden="true" />
-          {t("logOut")}
+          {t((m) => m.AppShell.workspaceSwitcher.logOut)}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

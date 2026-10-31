@@ -53,7 +53,7 @@ export function PersonalMoneyOverviewCards({
       cards={[
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: t("cards.totalIncome"),
+          description: t((m) => m.PersonalMoney.cards.totalIncome),
           iconSource: {
             image: { src: "/images/icons/income.png" },
             line: TrendingDownIcon,
@@ -63,7 +63,7 @@ export function PersonalMoneyOverviewCards({
         },
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: t("cards.totalExpenses"),
+          description: t((m) => m.PersonalMoney.cards.totalExpenses),
           iconSource: {
             image: { src: "/images/icons/expense.png" },
             line: TrendingUpIcon,
@@ -73,7 +73,7 @@ export function PersonalMoneyOverviewCards({
         },
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: t("cards.balance"),
+          description: t((m) => m.PersonalMoney.cards.balance),
           iconSource: {
             image: { src: "/images/icons/wallet.png" },
             line: WalletCardsIcon,
@@ -83,7 +83,7 @@ export function PersonalMoneyOverviewCards({
         },
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: t("cards.savings"),
+          description: t((m) => m.PersonalMoney.cards.savings),
           iconSource: {
             image: { src: "/images/icons/savings.png" },
             line: CoinsIcon,
@@ -93,7 +93,7 @@ export function PersonalMoneyOverviewCards({
         },
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: t("cards.debts"),
+          description: t((m) => m.PersonalMoney.cards.debts),
           iconSource: {
             image: { src: "/images/icons/debt.png" },
             line: LandmarkIcon,

@@ -240,8 +240,10 @@ export function MoneyLoansPage({
           <EmptyMedia variant="icon">
             <AlertCircleIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>{t("failedToLoad")}</EmptyTitle>
-          <EmptyDescription>{error || t("workspaceNotFound")}</EmptyDescription>
+          <EmptyTitle>{t((m) => m.FamilyLoans.failedToLoad)}</EmptyTitle>
+          <EmptyDescription>
+            {error || t((m) => m.FamilyLoans.workspaceNotFound)}
+          </EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -263,8 +265,8 @@ export function MoneyLoansPage({
           ) : null
         }
         badge={canManageLoans ? "Manager access" : "View access"}
-        title={t("pageTitle")}
-        description={t("pageDescription")}
+        title={t((m) => m.FamilyLoans.pageTitle)}
+        description={t((m) => m.FamilyLoans.pageDescription)}
       />
 
       <Separator />

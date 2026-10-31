@@ -29,14 +29,14 @@ export default async function TermsPage({ searchParams }: TermsPageProps) {
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-10 px-5 py-12 sm:px-6 lg:px-8">
         <section className="flex flex-col gap-5">
           <Badge variant="outline" className="w-fit">
-            {t("badge")}
+            {t((m) => m.TermsPage.badge)}
           </Badge>
           <div className="flex flex-col gap-4">
             <h1 className="text-4xl font-semibold leading-tight tracking-normal text-balance sm:text-5xl">
-              {t("title")}
+              {t((m) => m.TermsPage.title)}
             </h1>
             <p className="text-lg leading-8 text-muted-foreground">
-              {t("description")}
+              {t((m) => m.TermsPage.description)}
             </p>
           </div>
         </section>

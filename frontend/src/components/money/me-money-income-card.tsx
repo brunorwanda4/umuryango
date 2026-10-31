@@ -14,7 +14,7 @@ const MeMoneyIncomeCard = ({ currency, summary }: MoneySummaryCardsProps) => {
   const iconClassName = "size-5 shrink-0 text-muted-foreground";
   const cards = [
     {
-      description: t("summary.totalIncome"),
+      description: t((m) => m.PersonalMoney.personalIncome.summary.totalIncome),
       // icon: <ArrowDownIcon className={iconClassName} />,
       iconImage: "/images/icons/money.png",
       value: (
@@ -25,18 +25,22 @@ const MeMoneyIncomeCard = ({ currency, summary }: MoneySummaryCardsProps) => {
       ),
     },
     {
-      description: t("summary.incomeTransactions"),
+      description: t(
+        (m) => m.PersonalMoney.personalIncome.summary.incomeTransactions,
+      ),
       icon: <Pen className={iconClassName} />,
       value: 90,
     },
 
     {
-      description: t("summary.thisMonth"),
+      description: t((m) => m.PersonalMoney.personalIncome.summary.thisMonth),
       icon: <Calendar className={iconClassName} />,
       value: 9000,
     },
     {
-      description: t("summary.largestIncome"),
+      description: t(
+        (m) => m.PersonalMoney.personalIncome.summary.largestIncome,
+      ),
       icon: <PiggyBankIcon className={iconClassName} />,
       value: 9000,
     },

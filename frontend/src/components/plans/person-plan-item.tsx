@@ -60,14 +60,14 @@ function formatMoney(value: string | null, currency: string) {
 function StatusBadge({ plan }: { plan: PersonPlan }) {
   const t = createTranslator("PersonalPlans");
   const label = isOverdue(plan)
-    ? t("items.overdue")
+    ? t((m) => m.PersonalPlans.items.overdue)
     : plan.status === "COMPLETED"
-      ? t("filters.completed")
+      ? t((m) => m.PersonalPlans.filters.completed)
       : plan.status === "IN_PROGRESS"
-        ? t("filters.inProgress")
+        ? t((m) => m.PersonalPlans.filters.inProgress)
         : plan.status === "CANCELLED"
-          ? t("filters.cancelled")
-          : t("filters.pending");
+          ? t((m) => m.PersonalPlans.filters.cancelled)
+          : t((m) => m.PersonalPlans.filters.pending);
 
   return (
     <Badge variant={plan.status === "COMPLETED" ? "default" : "secondary"}>
@@ -91,7 +91,9 @@ function PlanActions({
         <Button
           size="icon"
           variant="ghost"
-          aria-label={t("items.actionsFor", { title: plan.title })}
+          aria-label={t((m) => m.PersonalPlans.items.actionsFor, {
+            title: plan.title,
+          })}
         >
           <MoreHorizontalIcon aria-hidden="true" />
         </Button>
@@ -99,10 +101,12 @@ function PlanActions({
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={() => onView(plan)}>
-            <EyeIcon aria-hidden="true" /> {t("items.view")}
+            <EyeIcon aria-hidden="true" />{" "}
+            {t((m) => m.PersonalPlans.items.view)}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onEdit(plan)}>
-            <Edit3Icon aria-hidden="true" /> {t("items.edit")}
+            <Edit3Icon aria-hidden="true" />{" "}
+            {t((m) => m.PersonalPlans.items.edit)}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => onStatus(plan, completed ? "PENDING" : "COMPLETED")}
@@ -112,11 +116,14 @@ function PlanActions({
             ) : (
               <CheckCircle2Icon aria-hidden="true" />
             )}
-            {completed ? t("items.markIncomplete") : t("items.markComplete")}
+            {completed
+              ? t((m) => m.PersonalPlans.items.markIncomplete)
+              : t((m) => m.PersonalPlans.items.markComplete)}
           </DropdownMenuItem>
           {plan.type === "TASK" ? (
             <DropdownMenuItem onSelect={() => onEdit(plan)}>
-              <CalendarClockIcon aria-hidden="true" /> {t("items.reschedule")}
+              <CalendarClockIcon aria-hidden="true" />{" "}
+              {t((m) => m.PersonalPlans.items.reschedule)}
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuGroup>
@@ -126,7 +133,8 @@ function PlanActions({
             variant="destructive"
             onSelect={() => onDelete(plan)}
           >
-            <Trash2Icon aria-hidden="true" /> {t("items.delete")}
+            <Trash2Icon aria-hidden="true" />{" "}
+            {t((m) => m.PersonalPlans.items.delete)}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -149,11 +157,11 @@ export function PersonTaskItem(props: PlanItemProps) {
 
   const priorityLabel = plan.priority
     ? plan.priority === "LOW"
-      ? t("items.low")
+      ? t((m) => m.PersonalPlans.items.low)
       : plan.priority === "MEDIUM"
-        ? t("items.medium")
-        : t("items.high")
-    : t("items.noPriority");
+        ? t((m) => m.PersonalPlans.items.medium)
+        : t((m) => m.PersonalPlans.items.high)
+    : t((m) => m.PersonalPlans.items.noPriority);
 
   return (
     <Item
@@ -166,8 +174,12 @@ export function PersonTaskItem(props: PlanItemProps) {
           <Checkbox
             aria-label={
               completed
-                ? t("items.markTitleIncomplete", { title: plan.title })
-                : t("items.markTitleComplete", { title: plan.title })
+                ? t((m) => m.PersonalPlans.items.markTitleIncomplete, {
+                    title: plan.title,
+                  })
+                : t((m) => m.PersonalPlans.items.markTitleComplete, {
+                    title: plan.title,
+                  })
             }
             checked={completed}
             onCheckedChange={(checked) =>
@@ -184,7 +196,10 @@ export function PersonTaskItem(props: PlanItemProps) {
           <ItemDescription className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="inline-flex items-center gap-1">
               <CalendarDaysIcon aria-hidden="true" />
-              {formatDate(plan.dueDate, t("items.noDate"))}
+              {formatDate(
+                plan.dueDate,
+                t((m) => m.PersonalPlans.items.noDate),
+              )}
             </span>
             {plan.dueTime ? (
               <span className="inline-flex items-center gap-1">
@@ -195,7 +210,7 @@ export function PersonTaskItem(props: PlanItemProps) {
             {plan.reminderAt ? (
               <span className="inline-flex items-center gap-1">
                 <BellIcon aria-hidden="true" />
-                {t("items.reminderSet")}
+                {t((m) => m.PersonalPlans.items.reminderSet)}
               </span>
             ) : null}
           </ItemDescription>
@@ -243,17 +258,24 @@ export function PersonGoalItem(props: PlanItemProps) {
           ) : null}
           <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
             <span>
-              {t("items.targetDate", {
-                date: formatDate(plan.targetDate, t("items.noDate")),
+              {t((m) => m.PersonalPlans.items.targetDate, {
+                date: formatDate(
+                  plan.targetDate,
+                  t((m) => m.PersonalPlans.items.noDate),
+                ),
               })}
             </span>
             <span>
-              {t("items.completedPercent", { progress: plan.progress })}
+              {t((m) => m.PersonalPlans.items.completedPercent, {
+                progress: plan.progress,
+              })}
             </span>
           </div>
           <Progress
             value={plan.progress}
-            aria-label={t("items.progressAria", { title: plan.title })}
+            aria-label={t((m) => m.PersonalPlans.items.progressAria, {
+              title: plan.title,
+            })}
           />
         </ItemContent>
         <ItemActions className="ml-auto">
@@ -266,14 +288,14 @@ export function PersonGoalItem(props: PlanItemProps) {
             ) : (
               <CircleIcon aria-hidden="true" />
             )}
-            {t("items.milestonesProgress", {
+            {t((m) => m.PersonalPlans.items.milestonesProgress, {
               completed: completedMilestones,
               total: plan.milestones.length,
             })}
           </span>
           {plan.needsMoney ? (
             <span>
-              {t("items.financialProgress", {
+              {t((m) => m.PersonalPlans.items.financialProgress, {
                 current: formatMoney(
                   plan.currentAmountMinorUnits,
                   plan.currency,

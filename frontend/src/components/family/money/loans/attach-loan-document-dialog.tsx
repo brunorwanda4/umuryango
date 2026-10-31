@@ -58,7 +58,7 @@ export function AttachLoanDocumentDialog({
         family.id,
       )}/money/loans/${encodeURIComponent(loan?.id ?? "")}/documents`,
     },
-    onSuccessMessage: t("toasts.documentAttached"),
+    onSuccessMessage: t((m) => m.FamilyLoans.toasts.documentAttached),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -78,8 +78,10 @@ export function AttachLoanDocumentDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("attachDocTitle")}</DialogTitle>
-          <DialogDescription>{t("attachDocDesc")}</DialogDescription>
+          <DialogTitle>{t((m) => m.FamilyLoans.attachDocTitle)}</DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyLoans.attachDocDesc)}
+          </DialogDescription>
         </DialogHeader>
         <form
           id="attach-loan-document-form"
@@ -92,16 +94,16 @@ export function AttachLoanDocumentDialog({
           <CommonFormField
             control={form.control}
             name="fileName"
-            label={t("docFileLabel")}
+            label={t((m) => m.FamilyLoans.docFileLabel)}
             type="file"
-            description={t("docFileDesc")}
+            description={t((m) => m.FamilyLoans.docFileDesc)}
           />
           <CommonFormField
             control={form.control}
             name="notes"
-            label={t("notesLabel")}
+            label={t((m) => m.FamilyLoans.notesLabel)}
             fieldType="textarea"
-            placeholder={t("notesPlaceholder")}
+            placeholder={t((m) => m.FamilyLoans.notesPlaceholder)}
           />
         </form>
         <DialogFooter>
@@ -111,7 +113,9 @@ export function AttachLoanDocumentDialog({
             disabled={isPending || !loan}
             className="w-full sm:w-auto"
           >
-            {isPending ? t("saving") : t("attachDocBtn")}
+            {isPending
+              ? t((m) => m.FamilyLoans.saving)
+              : t((m) => m.FamilyLoans.attachDocBtn)}
           </Button>
         </DialogFooter>
       </DialogContent>

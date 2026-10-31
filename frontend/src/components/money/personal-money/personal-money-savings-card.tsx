@@ -23,11 +23,11 @@ export function PersonalMoneySavingsCard({
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-fraunces text-xl font-semibold text-foreground">
-              {t("savingsSnapshot.title")}
+              {t((m) => m.PersonalMoney.savingsSnapshot.title)}
             </h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            {t("savingsSnapshot.noGoals")}
+            {t((m) => m.PersonalMoney.savingsSnapshot.noGoals)}
           </p>
         </div>
         <div className="mt-4">
@@ -39,7 +39,7 @@ export function PersonalMoneySavingsCard({
             className="rounded-full font-semibold"
           >
             <PlusIcon className="size-4" data-icon="inline-start" />
-            {t("savingsSnapshot.createGoal")}
+            {t((m) => m.PersonalMoney.savingsSnapshot.createGoal)}
           </Button>
         </div>
       </section>
@@ -55,7 +55,7 @@ export function PersonalMoneySavingsCard({
     <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
       <div className="mb-3.5">
         <h2 className="font-fraunces text-xl font-semibold text-foreground">
-          {t("savingsSnapshot.title")}
+          {t((m) => m.PersonalMoney.savingsSnapshot.title)}
         </h2>
         <p className="text-sm text-muted-foreground">{goal.title}</p>
       </div>
@@ -63,7 +63,7 @@ export function PersonalMoneySavingsCard({
       <div className="flex flex-col">
         <div className="flex justify-between py-2 text-[15px]">
           <span className="text-muted-foreground">
-            {t("savingsSnapshot.saved")}
+            {t((m) => m.PersonalMoney.savingsSnapshot.saved)}
           </span>
           <b className="font-semibold text-foreground">
             {formatFullRwf(saved, currency)}
@@ -71,7 +71,7 @@ export function PersonalMoneySavingsCard({
         </div>
         <div className="flex justify-between border-t border-border py-2 text-[15px]">
           <span className="text-muted-foreground">
-            {t("savingsSnapshot.target")}
+            {t((m) => m.PersonalMoney.savingsSnapshot.target)}
           </span>
           <b className="font-semibold text-foreground">
             {formatFullRwf(target, currency)}
@@ -79,7 +79,7 @@ export function PersonalMoneySavingsCard({
         </div>
         <div className="flex justify-between border-t border-border py-2 text-[15px]">
           <span className="text-muted-foreground">
-            {t("savingsSnapshot.remaining")}
+            {t((m) => m.PersonalMoney.savingsSnapshot.remaining)}
           </span>
           <b className="font-semibold text-foreground">
             {formatFullRwf(remaining, currency)}

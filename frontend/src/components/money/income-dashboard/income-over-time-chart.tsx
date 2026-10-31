@@ -23,7 +23,7 @@ export function IncomeOverTimeChart({ data }: { data: IncomeOverTimeDatum[] }) {
       ({
         amount: {
           color: "var(--chart-2)",
-          label: t("charts.income"),
+          label: t((m) => m.PersonalMoney.personalIncome.charts.income),
         },
       }) satisfies ChartConfig,
     [t],
@@ -33,13 +33,13 @@ export function IncomeOverTimeChart({ data }: { data: IncomeOverTimeDatum[] }) {
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between gap-4 px-5 pt-5 pb-1 sm:px-6 sm:pt-6">
         <CardTitle className="font-bold text-base">
-          {t("charts.overTimeTitle")}
+          {t((m) => m.PersonalMoney.personalIncome.charts.overTimeTitle)}
         </CardTitle>
         <button
           type="button"
           className="inline-flex h-10 items-center gap-3 rounded-lg border bg-background px-4 font-medium text-sm shadow-xs"
         >
-          {t("charts.thisMonth")}
+          {t((m) => m.PersonalMoney.personalIncome.charts.thisMonth)}
           <ChevronDownIcon className="size-4 text-muted-foreground" />
         </button>
       </CardHeader>

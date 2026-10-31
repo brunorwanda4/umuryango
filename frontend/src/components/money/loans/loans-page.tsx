@@ -80,7 +80,10 @@ export function LoansPage() {
     );
     const workspace = workspaceResponse.data;
     if (!workspaceResponse.ok || !workspace) {
-      setError(workspaceResponse.message ?? t("page.workspaceNotFound"));
+      setError(
+        workspaceResponse.message ??
+          t((m) => m.PersonalLoans.page.workspaceNotFound),
+      );
       setLoading(false);
       return;
     }
@@ -102,7 +105,9 @@ export function LoansPage() {
       ]);
 
     if (!loansResponse.ok) {
-      setError(loansResponse.message ?? t("page.loadErrorTitle"));
+      setError(
+        loansResponse.message ?? t((m) => m.PersonalLoans.page.loadErrorTitle),
+      );
     } else {
       setFamily(workspace);
       setContacts((contactsResponse.data?.items ?? []).filter(isTrustedPerson));
@@ -146,13 +151,15 @@ export function LoansPage() {
       <div className="flex flex-col gap-4">
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>{t("page.loadErrorTitle")}</AlertTitle>
+          <AlertTitle>
+            {t((m) => m.PersonalLoans.page.loadErrorTitle)}
+          </AlertTitle>
           <AlertDescription>
-            {error ?? t("page.workspaceNotFound")}
+            {error ?? t((m) => m.PersonalLoans.page.workspaceNotFound)}
           </AlertDescription>
         </Alert>
         <Button variant="outline" onClick={() => void load()}>
-          {t("page.tryAgain")}
+          {t((m) => m.PersonalLoans.page.tryAgain)}
         </Button>
       </div>
     );
@@ -175,13 +182,17 @@ export function LoansPage() {
             <EmptyMedia variant="icon">
               <UserPlusIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>{t("person.emptyTitle")}</EmptyTitle>
-            <EmptyDescription>{t("person.emptyDesc")}</EmptyDescription>
+            <EmptyTitle>
+              {t((m) => m.PersonalLoans.person.emptyTitle)}
+            </EmptyTitle>
+            <EmptyDescription>
+              {t((m) => m.PersonalLoans.person.emptyDesc)}
+            </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button onClick={() => setOpenPerson(true)}>
               <UserPlusIcon aria-hidden="true" data-icon="inline-start" />
-              {t("person.addPerson")}
+              {t((m) => m.PersonalLoans.person.addPerson)}
             </Button>
           </EmptyContent>
         </Empty>

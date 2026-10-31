@@ -34,14 +34,14 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
     .slice(0, 3);
   const stats = [
     {
-      label: t("dueToday"),
+      label: t((m) => m.PersonalOverview.plansCard.dueToday),
       value: plans.filter(
         (plan) =>
           plan.dueDate?.slice(0, 10) === today && plan.status !== "COMPLETED",
       ).length,
     },
     {
-      label: t("dueThisWeek"),
+      label: t((m) => m.PersonalOverview.plansCard.dueThisWeek),
       value: plans.filter((plan) => {
         const date = plan.dueDate ? new Date(plan.dueDate) : null;
         return (
@@ -50,7 +50,7 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
       }).length,
     },
     {
-      label: t("longTermGoals"),
+      label: t((m) => m.PersonalOverview.plansCard.longTermGoals),
       value: plans.filter(
         (plan) =>
           plan.type === "LONG_TERM_GOAL" &&
@@ -59,7 +59,7 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
       ).length,
     },
     {
-      label: t("completed"),
+      label: t((m) => m.PersonalOverview.plansCard.completed),
       value: plans.filter((plan) => plan.status === "COMPLETED").length,
     },
   ];
@@ -67,12 +67,14 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
+        <CardTitle>{t((m) => m.PersonalOverview.plansCard.title)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.PersonalOverview.plansCard.description)}
+        </CardDescription>
         <CardAction>
           <Button asChild size="sm" variant="ghost">
             <Link href="/me/plans">
-              {t("viewAll")}
+              {t((m) => m.PersonalOverview.plansCard.viewAll)}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
@@ -93,13 +95,19 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
               <EmptyMedia variant="icon">
                 <CalendarDaysIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>{t("noPlansYet")}</EmptyTitle>
-              <EmptyDescription>{t("noPlansYetDesc")}</EmptyDescription>
+              <EmptyTitle>
+                {t((m) => m.PersonalOverview.plansCard.noPlansYet)}
+              </EmptyTitle>
+              <EmptyDescription>
+                {t((m) => m.PersonalOverview.plansCard.noPlansYetDesc)}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
           <div className="flex flex-col gap-3">
-            <p className="font-medium text-sm">{t("upcoming")}</p>
+            <p className="font-medium text-sm">
+              {t((m) => m.PersonalOverview.plansCard.upcoming)}
+            </p>
             {upcoming.map((plan) => (
               <div
                 key={plan.id}
@@ -112,7 +120,9 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
                   </p>
                 </div>
                 <Badge variant="outline">
-                  {plan.type === "TASK" ? t("task") : `${plan.progress}%`}
+                  {plan.type === "TASK"
+                    ? t((m) => m.PersonalOverview.plansCard.task)
+                    : `${plan.progress}%`}
                 </Badge>
               </div>
             ))}
@@ -137,12 +147,14 @@ function toLocalDate(date: Date) {
 
 function formatPlanDate(plan: PersonPlan, t: Translator) {
   const value = plan.dueDate ?? plan.targetDate;
-  if (!value) return t("noDateSet");
+  if (!value) return t((m) => m.PersonalOverview.plansCard.noDateSet);
   const date = new Date(value);
   const today = toLocalDate(new Date());
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  if (value.slice(0, 10) === today) return t("today");
-  if (value.slice(0, 10) === toLocalDate(tomorrow)) return t("tomorrow");
+  if (value.slice(0, 10) === today)
+    return t((m) => m.PersonalOverview.plansCard.today);
+  if (value.slice(0, 10) === toLocalDate(tomorrow))
+    return t((m) => m.PersonalOverview.plansCard.tomorrow);
   return date.toLocaleDateString("en", { month: "short", day: "numeric" });
 }

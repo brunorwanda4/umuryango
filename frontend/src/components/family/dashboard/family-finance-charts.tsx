@@ -41,11 +41,11 @@ const COLORS = [
 
 const barChartConfig = {
   income: {
-    label: t("income"),
+    label: t((m) => m.FamilyDashboard.income),
     color: "var(--chart-4)",
   },
   expenses: {
-    label: t("expenses"),
+    label: t((m) => m.FamilyDashboard.expenses),
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
@@ -123,13 +123,17 @@ export function FamilyFinanceCharts({
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>{t("cashFlowAnalyticsTitle")}</CardTitle>
-          <CardDescription>{t("cashFlowAnalyticsDesc")}</CardDescription>
+          <CardTitle>
+            {t((m) => m.FamilyDashboard.cashFlowAnalyticsTitle)}
+          </CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyDashboard.cashFlowAnalyticsDesc)}
+          </CardDescription>
         </CardHeader>
 
         <CardContent>
           {!hasCashFlowData ? (
-            <EmptyChart message={t("noCashFlowData")} />
+            <EmptyChart message={t((m) => m.FamilyDashboard.noCashFlowData)} />
           ) : (
             <ChartContainer
               config={barChartConfig}
@@ -171,7 +175,7 @@ export function FamilyFinanceCharts({
 
                 <Bar
                   dataKey="income"
-                  name={t("income")}
+                  name={t((m) => m.FamilyDashboard.income)}
                   fill="var(--color-income)"
                   radius={[8, 8, 0, 0]}
                   maxBarSize={44}
@@ -179,7 +183,7 @@ export function FamilyFinanceCharts({
 
                 <Bar
                   dataKey="expenses"
-                  name={t("expenses")}
+                  name={t((m) => m.FamilyDashboard.expenses)}
                   fill="var(--color-expenses)"
                   radius={[8, 8, 0, 0]}
                   maxBarSize={44}
@@ -193,13 +197,19 @@ export function FamilyFinanceCharts({
       <div className=" flex flex-col lg:flex-row gap-6">
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>{t("expenseBreakdownTitle")}</CardTitle>
-            <CardDescription>{t("expenseBreakdownDesc")}</CardDescription>
+            <CardTitle>
+              {t((m) => m.FamilyDashboard.expenseBreakdownTitle)}
+            </CardTitle>
+            <CardDescription>
+              {t((m) => m.FamilyDashboard.expenseBreakdownDesc)}
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
             {!hasPieData ? (
-              <EmptyChart message={t("noExpenseBreakdownData")} />
+              <EmptyChart
+                message={t((m) => m.FamilyDashboard.noExpenseBreakdownData)}
+              />
             ) : (
               <ChartContainer
                 config={{ ...barChartConfig, ...pieChartConfig }}
@@ -241,7 +251,7 @@ export function FamilyFinanceCharts({
                     dominantBaseline="middle"
                     className="fill-muted-foreground text-xs"
                   >
-                    {t("totalExpenses")}
+                    {t((m) => m.FamilyDashboard.totalExpenses)}
                   </text>
 
                   <ChartTooltip
@@ -269,13 +279,19 @@ export function FamilyFinanceCharts({
         {/* ── Income breakdown donut ── */}
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>{t("incomeBreakdownTitle")}</CardTitle>
-            <CardDescription>{t("incomeBreakdownDesc")}</CardDescription>
+            <CardTitle>
+              {t((m) => m.FamilyDashboard.incomeBreakdownTitle)}
+            </CardTitle>
+            <CardDescription>
+              {t((m) => m.FamilyDashboard.incomeBreakdownDesc)}
+            </CardDescription>
           </CardHeader>
 
           <CardContent>
             {!hasIncomePieData ? (
-              <EmptyChart message={t("noIncomeBreakdownData")} />
+              <EmptyChart
+                message={t((m) => m.FamilyDashboard.noIncomeBreakdownData)}
+              />
             ) : (
               <ChartContainer
                 config={{ ...barChartConfig, ...incomePieChartConfig }}
@@ -317,7 +333,7 @@ export function FamilyFinanceCharts({
                     dominantBaseline="middle"
                     className="fill-muted-foreground text-xs"
                   >
-                    {t("totalIncome")}
+                    {t((m) => m.FamilyDashboard.totalIncome)}
                   </text>
 
                   <ChartTooltip

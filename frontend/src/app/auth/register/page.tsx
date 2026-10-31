@@ -60,16 +60,16 @@ const RegisterPage = async ({ searchParams }: RegisterPageProps) => {
             <Link
               href={getLocalizedHref("/auth/login", locale)}
               className="inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label={register("backAriaLabel")}
+              aria-label={register((m) => m.RegisterPage.backAriaLabel)}
             >
               <ChevronLeftIcon aria-hidden="true" className="size-5" />
             </Link>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              {register("heading")}
+              {register((m) => m.RegisterPage.heading)}
             </h1>
           </div>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {register("subheading")}
+            {register((m) => m.RegisterPage.subheading)}
           </p>
         </div>
 

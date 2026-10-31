@@ -35,34 +35,38 @@ export function MoneyOperationsGrid({
     capability?: FamilyCapability;
   }[] = [
     {
-      title: t("pendingApprovalsTitle"),
-      description: t("pendingApprovalsDesc"),
+      title: t((m) => m.FamilyMoney.pendingApprovalsTitle),
+      description: t((m) => m.FamilyMoney.pendingApprovalsDesc),
       value:
         typeof pendingApprovalCount === "number"
           ? pendingApprovalCount.toLocaleString()
-          : t("noQueue"),
+          : t((m) => m.FamilyMoney.noQueue),
       icon: FileClockIcon,
       capability: "APPROVE_EXPENSE",
     },
     {
-      title: t("overdueWorkTitle"),
-      description: t("overdueWorkDesc"),
+      title: t((m) => m.FamilyMoney.overdueWorkTitle),
+      description: t((m) => m.FamilyMoney.overdueWorkDesc),
       value:
         typeof overdueCount === "number"
           ? overdueCount.toLocaleString()
-          : t("none"),
+          : t((m) => m.FamilyMoney.none),
       icon: AlertCircleIcon,
     },
     {
-      title: t("auditReadinessTitle"),
-      description: t("auditReadinessDesc"),
-      value: money?.generatedAt ? t("traceable") : t("pendingApi"),
+      title: t((m) => m.FamilyMoney.auditReadinessTitle),
+      description: t((m) => m.FamilyMoney.auditReadinessDesc),
+      value: money?.generatedAt
+        ? t((m) => m.FamilyMoney.traceable)
+        : t((m) => m.FamilyMoney.pendingApi),
       icon: ShieldCheckIcon,
     },
     {
-      title: t("reportSourceTitle"),
-      description: t("reportSourceDesc"),
-      value: t("recordsCount", { count: money?.sourceRecordCount ?? 0 }),
+      title: t((m) => m.FamilyMoney.reportSourceTitle),
+      description: t((m) => m.FamilyMoney.reportSourceDesc),
+      value: t((m) => m.FamilyMoney.recordsCount, {
+        count: money?.sourceRecordCount ?? 0,
+      }),
       icon: CheckCircle2Icon,
       capability: "VIEW_REPORTS",
     },
@@ -70,7 +74,7 @@ export function MoneyOperationsGrid({
 
   return (
     <section
-      aria-label={t("operationsAria")}
+      aria-label={t((m) => m.FamilyMoney.operationsAria)}
       className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       {items

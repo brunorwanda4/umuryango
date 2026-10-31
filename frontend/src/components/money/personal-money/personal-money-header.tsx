@@ -21,10 +21,10 @@ export function PersonalMoneyHeader({
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-col gap-1">
         <h1 className="font-fraunces text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          {t("pageTitle")}
+          {t((m) => m.PersonalMoney.pageTitle)}
         </h1>
         <p className="mt-1 text-[15px] text-muted-foreground">
-          {t("pageDescription")}
+          {t((m) => m.PersonalMoney.pageDescription)}
         </p>
       </div>
 

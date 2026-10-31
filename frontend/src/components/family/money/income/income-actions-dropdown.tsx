@@ -62,7 +62,7 @@ export function IncomeActionsDropdown({
           }}
         >
           <EyeIcon className="size-4 mr-2" />
-          {t("actions.view")}
+          {t((m) => m.FamilyIncome.actions.view)}
         </DropdownMenuItem>
 
         {canEdit ? (
@@ -73,7 +73,7 @@ export function IncomeActionsDropdown({
             }}
           >
             <PencilIcon className="size-4 mr-2" />
-            {t("actions.edit")}
+            {t((m) => m.FamilyIncome.actions.edit)}
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem disabled className="text-muted-foreground">
@@ -89,7 +89,7 @@ export function IncomeActionsDropdown({
           }}
         >
           <UploadIcon className="size-4 mr-2" />
-          {t("dialogs.attachReceiptTitle")}
+          {t((m) => m.FamilyIncome.dialogs.attachReceiptTitle)}
         </DropdownMenuItem>
 
         {tx.status === "PENDING" &&
@@ -102,7 +102,7 @@ export function IncomeActionsDropdown({
               className="text-primary font-medium"
             >
               <CheckCircleIcon className="size-4 mr-2" />
-              {t("actions.sendForApproval")}
+              {t((m) => m.FamilyIncome.actions.sendForApproval)}
             </DropdownMenuItem>
           )}
 
@@ -114,7 +114,7 @@ export function IncomeActionsDropdown({
           className="text-destructive focus:text-destructive"
         >
           <Trash2Icon className="size-4 mr-2" />
-          {t("actions.delete")}
+          {t((m) => m.FamilyIncome.actions.delete)}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

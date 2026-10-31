@@ -175,7 +175,7 @@ export function CommonDataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center text-muted-foreground text-sm"
                   >
-                    {t("loading")}
+                    {t((m) => m.Common.loading)}
                   </TableCell>
                 </TableRow>
               ) : table.getRowModel().rows?.length ? (
@@ -235,7 +235,7 @@ export function CommonDataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center text-muted-foreground text-sm"
                   >
-                    {t("noItemsFound")}
+                    {t((m) => m.Common.noItemsFound)}
                   </TableCell>
                 </TableRow>
               )}
@@ -244,7 +244,7 @@ export function CommonDataTable<TData, TValue>({
         </div>
         <div className="flex justify-end gap-1 border-t bg-muted/20 p-1">
           <Button
-            aria-label={t("scrollTableLeft")}
+            aria-label={t((m) => m.Common.scrollTableLeft)}
             size="icon"
             type="button"
             variant="ghost"
@@ -253,7 +253,7 @@ export function CommonDataTable<TData, TValue>({
             <ChevronLeftIcon aria-hidden="true" />
           </Button>
           <Button
-            aria-label={t("scrollTableRight")}
+            aria-label={t((m) => m.Common.scrollTableRight)}
             size="icon"
             type="button"
             variant="ghost"
@@ -282,11 +282,11 @@ export function CommonDataTable<TData, TValue>({
             }
           >
             <ChevronLeftIcon aria-hidden="true" data-icon="inline-start" />
-            {t("previous")}
+            {t((m) => m.Common.previous)}
           </Button>
 
           <span className="text-sm">
-            {t("pageIndicator", {
+            {t((m) => m.Common.pageIndicator, {
               page: serverMode
                 ? (pageIndex ?? 0) + 1
                 : table.getState().pagination.pageIndex + 1,
@@ -312,7 +312,7 @@ export function CommonDataTable<TData, TValue>({
                 : !table.getCanNextPage()
             }
           >
-            {t("next")}
+            {t((m) => m.Common.next)}
             <ChevronRightIcon aria-hidden="true" data-icon="inline-end" />
           </Button>
         </div>

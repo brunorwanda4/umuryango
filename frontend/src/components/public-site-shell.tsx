@@ -39,7 +39,7 @@ export function PublicSiteShell({
           <Link
             href={getLocalizedHref("/", locale)}
             className="flex w-fit items-center gap-3"
-            aria-label={t("homeAriaLabel")}
+            aria-label={t((m) => m.Shared.homeAriaLabel)}
           >
             <Image
               src="/logo.svg"
@@ -49,11 +49,13 @@ export function PublicSiteShell({
               className="rounded-xl"
               priority
             />
-            <span className="text-base font-semibold">{t("brand")}</span>
+            <span className="text-base font-semibold">
+              {t((m) => m.Shared.brand)}
+            </span>
           </Link>
 
           <nav
-            aria-label={t("navigationAriaLabel")}
+            aria-label={t((m) => m.Shared.navigationAriaLabel)}
             className="flex flex-wrap items-center gap-2"
           >
             {navigationLinks.map((link) => (
@@ -73,7 +75,7 @@ export function PublicSiteShell({
               size="sm"
               className="rounded-full"
             >
-              {t("nav.login")}
+              {t((m) => m.Shared.nav.login)}
             </Button>
           </nav>
         </div>
@@ -86,7 +88,7 @@ export function PublicSiteShell({
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3 text-sm font-medium">
               <Image src="/logo.svg" alt="" width={28} height={28} />
-              <span>{t("brand")}</span>
+              <span>{t((m) => m.Shared.brand)}</span>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               {navigationLinks.map((link) => (
@@ -102,7 +104,7 @@ export function PublicSiteShell({
           </div>
           <Separator />
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-            {t("footer.privacy")}
+            {t((m) => m.Shared.footer.privacy)}
           </p>
         </div>
       </footer>

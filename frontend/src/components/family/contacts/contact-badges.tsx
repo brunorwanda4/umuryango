@@ -17,10 +17,14 @@ export function ContactBadges({ contact, className }: ContactBadgesProps) {
         {t(`statuses.${contact.status}`)}
       </Badge>
       {contact.isEmergencyContact ? (
-        <Badge variant="destructive">{t("badgeEmergency")}</Badge>
+        <Badge variant="destructive">
+          {t((m) => m.FamilyContacts.badgeEmergency)}
+        </Badge>
       ) : null}
       {contact.isLoanContact ? (
-        <Badge variant="secondary">{t("badgeLoan")}</Badge>
+        <Badge variant="secondary">
+          {t((m) => m.FamilyContacts.badgeLoan)}
+        </Badge>
       ) : null}
     </div>
   );

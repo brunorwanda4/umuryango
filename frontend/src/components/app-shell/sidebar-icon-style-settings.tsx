@@ -32,20 +32,20 @@ export function SidebarIconStyleSettings() {
   }[] = [
     {
       value: "light",
-      title: t("themeLightTitle"),
-      description: t("themeLightDesc"),
+      title: t((m) => m.AppShell.appearance.themeLightTitle),
+      description: t((m) => m.AppShell.appearance.themeLightDesc),
       icon: SunIcon,
     },
     {
       value: "dark",
-      title: t("themeDarkTitle"),
-      description: t("themeDarkDesc"),
+      title: t((m) => m.AppShell.appearance.themeDarkTitle),
+      description: t((m) => m.AppShell.appearance.themeDarkDesc),
       icon: MoonIcon,
     },
     {
       value: "system",
-      title: t("themeSystemTitle"),
-      description: t("themeSystemDesc"),
+      title: t((m) => m.AppShell.appearance.themeSystemTitle),
+      description: t((m) => m.AppShell.appearance.themeSystemDesc),
       icon: MonitorIcon,
     },
   ];
@@ -57,13 +57,13 @@ export function SidebarIconStyleSettings() {
   }[] = [
     {
       value: "line",
-      title: t("iconLineTitle"),
-      description: t("iconLineDesc"),
+      title: t((m) => m.AppShell.appearance.iconLineTitle),
+      description: t((m) => m.AppShell.appearance.iconLineDesc),
     },
     {
       value: "image",
-      title: t("iconImageTitle"),
-      description: t("iconImageDesc"),
+      title: t((m) => m.AppShell.appearance.iconImageTitle),
+      description: t((m) => m.AppShell.appearance.iconImageDesc),
     },
   ];
 
@@ -76,22 +76,28 @@ export function SidebarIconStyleSettings() {
   return (
     <Card id="appearance">
       <CardHeader>
-        <CardTitle className="text-base">{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
+        <CardTitle className="text-base">
+          {t((m) => m.AppShell.appearance.title)}
+        </CardTitle>
+        <CardDescription>
+          {t((m) => m.AppShell.appearance.description)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-3">
           <div>
-            <h3 className="font-medium text-sm">{t("themeHeading")}</h3>
+            <h3 className="font-medium text-sm">
+              {t((m) => m.AppShell.appearance.themeHeading)}
+            </h3>
             <p className="text-muted-foreground text-sm">
-              {t("themeSubheading")}
+              {t((m) => m.AppShell.appearance.themeSubheading)}
             </p>
           </div>
           <RadioGroup
             value={activeTheme}
             onValueChange={setTheme}
             className="grid gap-3 sm:grid-cols-3"
-            aria-label={t("themeAriaLabel")}
+            aria-label={t((m) => m.AppShell.appearance.themeAriaLabel)}
           >
             {themeOptions.map((option) => (
               <label
@@ -128,16 +134,18 @@ export function SidebarIconStyleSettings() {
 
         <div className="space-y-3">
           <div>
-            <h3 className="font-medium text-sm">{t("iconsHeading")}</h3>
+            <h3 className="font-medium text-sm">
+              {t((m) => m.AppShell.appearance.iconsHeading)}
+            </h3>
             <p className="text-muted-foreground text-sm">
-              {t("iconsSubheading")}
+              {t((m) => m.AppShell.appearance.iconsSubheading)}
             </p>
           </div>
           <RadioGroup
             value={style}
             onValueChange={(value) => setStyle(value as SidebarIconStyle)}
             className="grid gap-3 sm:grid-cols-2"
-            aria-label={t("iconsAriaLabel")}
+            aria-label={t((m) => m.AppShell.appearance.iconsAriaLabel)}
           >
             {iconOptions.map((option) => (
               <label

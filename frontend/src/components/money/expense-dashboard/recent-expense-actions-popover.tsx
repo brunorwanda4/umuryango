@@ -35,7 +35,10 @@ export function RecentExpenseActionsPopover({
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          aria-label={t("actions.openActionsAria", { source: expense.source })}
+          aria-label={t(
+            (m) => m.PersonalMoney.personalExpenses.actions.openActionsAria,
+            { source: expense.source },
+          )}
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
           size="icon-sm"

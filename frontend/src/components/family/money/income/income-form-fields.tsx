@@ -129,8 +129,8 @@ export function IncomeFormFields({
           {
             label:
               categories.length === 0
-                ? t("form.otherCreateCategory")
-                : t("form.createAnotherCategory"),
+                ? t((m) => m.FamilyIncome.form.otherCreateCategory)
+                : t((m) => m.FamilyIncome.form.createAnotherCategory),
             value: CREATE_INCOME_CATEGORY_VALUE,
           },
         ]
@@ -149,7 +149,7 @@ export function IncomeFormFields({
           {
             label:
               activeContacts.length === 0
-                ? t("form.payerPlaceholderCreate")
+                ? t((m) => m.FamilyIncome.form.payerPlaceholderCreate)
                 : t("form.createAnotherPayer"),
             name: "",
             value: CREATE_PAYER_CONTACT_VALUE,
@@ -161,7 +161,7 @@ export function IncomeFormFields({
   const handleCreatePayer = async () => {
     const fullName = payerName.trim();
     if (!fullName) {
-      setPayerCreateError(t("form.payerRequired"));
+      setPayerCreateError(t((m) => m.FamilyIncome.form.payerRequired));
       return;
     }
 
@@ -188,7 +188,9 @@ export function IncomeFormFields({
       );
 
       if (!response.ok || !response.data) {
-        setPayerCreateError(response.message ?? t("form.payerError"));
+        setPayerCreateError(
+          response.message ?? t((m) => m.FamilyIncome.form.payerError),
+        );
         return;
       }
 
@@ -205,7 +207,7 @@ export function IncomeFormFields({
       setPayerPhone("");
       setOpenCreatePayer(false);
     } catch {
-      setPayerCreateError(t("form.payerError"));
+      setPayerCreateError(t((m) => m.FamilyIncome.form.payerError));
     } finally {
       setIsCreatingPayer(false);
     }
@@ -254,8 +256,8 @@ export function IncomeFormFields({
       <CommonFormField
         control={control}
         name="title"
-        label={t("form.titleLabel")}
-        placeholder={t("form.titlePlaceholder")}
+        label={t((m) => m.FamilyIncome.form.titleLabel)}
+        placeholder={t((m) => m.FamilyIncome.form.titlePlaceholder)}
         required
       />
 
@@ -265,19 +267,23 @@ export function IncomeFormFields({
           name="amountMinorUnits"
           label={
             incomeRecurrence === "MONTHLY"
-              ? t("form.amountLabelPaid", { currency: family.defaultCurrency })
-              : t("form.amountLabel", { currency: family.defaultCurrency })
+              ? t((m) => m.FamilyIncome.form.amountLabelPaid, {
+                  currency: family.defaultCurrency,
+                })
+              : t((m) => m.FamilyIncome.form.amountLabel, {
+                  currency: family.defaultCurrency,
+                })
           }
           fieldType="money"
           currency={family.defaultCurrency}
-          placeholder={t("form.amountPlaceholder")}
+          placeholder={t((m) => m.FamilyIncome.form.amountPlaceholder)}
           required
         />
 
         <CommonFormField
           control={control}
           name="date"
-          label={t("form.dateReceivedLabel")}
+          label={t((m) => m.FamilyIncome.form.dateReceivedLabel)}
           fieldType="date"
           required
         />
@@ -286,13 +292,19 @@ export function IncomeFormFields({
       <CommonFormField
         control={control}
         name="incomeRecurrence"
-        label={t("form.scheduleLabel")}
+        label={t((m) => m.FamilyIncome.form.scheduleLabel)}
         fieldType="select"
         selectOptions={[
-          { label: t("form.oneTimeSchedule"), value: "ONE_TIME" },
-          { label: t("form.monthlySchedule"), value: "MONTHLY" },
+          {
+            label: t((m) => m.FamilyIncome.form.oneTimeSchedule),
+            value: "ONE_TIME",
+          },
+          {
+            label: t((m) => m.FamilyIncome.form.monthlySchedule),
+            value: "MONTHLY",
+          },
         ]}
-        placeholder={t("form.schedulePlaceholder")}
+        placeholder={t((m) => m.FamilyIncome.form.schedulePlaceholder)}
         required
       />
 
@@ -300,10 +312,10 @@ export function IncomeFormFields({
         <div className="rounded-md border bg-muted/30 p-4">
           <div className="mb-4">
             <h3 className="text-sm font-medium">
-              {t("form.monthlyTrackingTitle")}
+              {t((m) => m.FamilyIncome.form.monthlyTrackingTitle)}
             </h3>
             <p className="text-xs text-muted-foreground">
-              {t("form.monthlyTrackingDesc")}
+              {t((m) => m.FamilyIncome.form.monthlyTrackingDesc)}
             </p>
           </div>
 
@@ -311,19 +323,21 @@ export function IncomeFormFields({
             <CommonFormField
               control={control}
               name="expectedAmountMinorUnits"
-              label={t("form.expectedAmountLabel", {
+              label={t((m) => m.FamilyIncome.form.expectedAmountLabel, {
                 currency: family.defaultCurrency,
               })}
               fieldType="money"
               currency={family.defaultCurrency}
-              placeholder={t("form.expectedAmountPlaceholder")}
+              placeholder={t(
+                (m) => m.FamilyIncome.form.expectedAmountPlaceholder,
+              )}
               required
             />
 
             <CommonFormField
               control={control}
               name="dueDate"
-              label={t("form.dueDateLabel")}
+              label={t((m) => m.FamilyIncome.form.dueDateLabel)}
               fieldType="date"
               required
             />
@@ -331,14 +345,14 @@ export function IncomeFormFields({
             <CommonFormField
               control={control}
               name="periodStart"
-              label={t("form.periodStartLabel")}
+              label={t((m) => m.FamilyIncome.form.periodStartLabel)}
               fieldType="date"
             />
 
             <CommonFormField
               control={control}
               name="periodEnd"
-              label={t("form.periodEndLabel")}
+              label={t((m) => m.FamilyIncome.form.periodEndLabel)}
               fieldType="date"
             />
           </div>
@@ -346,8 +360,8 @@ export function IncomeFormFields({
           <CommonFormField
             control={control}
             name="propertyName"
-            label={t("form.propertyNameLabel")}
-            placeholder={t("form.propertyNamePlaceholder")}
+            label={t((m) => m.FamilyIncome.form.propertyNameLabel)}
+            placeholder={t((m) => m.FamilyIncome.form.propertyNamePlaceholder)}
             fieldClassName="mt-4"
           />
         </div>
@@ -357,13 +371,13 @@ export function IncomeFormFields({
         <CommonFormField
           control={control}
           name="categoryId"
-          label={t("form.categoryLabel")}
+          label={t((m) => m.FamilyIncome.form.categoryLabel)}
           fieldType="custom"
           disabled={categories.length === 0 && !canCreateCategoryInline}
           placeholder={
             categories.length === 0
-              ? t("form.categoryPlaceholderOther")
-              : t("form.categoryPlaceholder")
+              ? t((m) => m.FamilyIncome.form.categoryPlaceholderOther)
+              : t((m) => m.FamilyIncome.form.categoryPlaceholder)
           }
           required
           render={({ field, id, invalid, disabled }) => (
@@ -392,8 +406,8 @@ export function IncomeFormFields({
                   <SelectValue
                     placeholder={
                       categories.length === 0
-                        ? t("form.categoryPlaceholderOther")
-                        : t("form.categoryPlaceholder")
+                        ? t((m) => m.FamilyIncome.form.categoryPlaceholderOther)
+                        : t((m) => m.FamilyIncome.form.categoryPlaceholder)
                     }
                   />
                 </SelectTrigger>
@@ -447,7 +461,7 @@ export function IncomeFormFields({
                       href={`/family/${family.slug}/money/categories`}
                       className="underline hover:opacity-80 font-semibold"
                     >
-                      {t("form.manageCategoriesLink")}
+                      {t((m) => m.FamilyIncome.form.manageCategoriesLink)}
                     </Link>{" "}
                     on the categories page.
                   </>
@@ -458,7 +472,7 @@ export function IncomeFormFields({
                       href={`/family/${family.slug}/money/categories`}
                       className="underline hover:opacity-80 font-semibold"
                     >
-                      {t("form.createCategoryLink")}
+                      {t((m) => m.FamilyIncome.form.createCategoryLink)}
                     </Link>{" "}
                     first.
                   </>
@@ -471,7 +485,7 @@ export function IncomeFormFields({
         <CommonFormField
           control={control}
           name="paymentMethod"
-          label={t("form.paymentMethodLabel")}
+          label={t((m) => m.FamilyIncome.form.paymentMethodLabel)}
           fieldType="select"
           selectOptions={[
             { label: "Cash", value: "CASH" },
@@ -481,7 +495,7 @@ export function IncomeFormFields({
             { label: "Cheque", value: "CHEQUE" },
             { label: "Other", value: "OTHER" },
           ]}
-          placeholder={t("form.paymentMethodPlaceholder")}
+          placeholder={t((m) => m.FamilyIncome.form.paymentMethodPlaceholder)}
           required
         />
       </div>
@@ -492,14 +506,14 @@ export function IncomeFormFields({
           name="receivedFromContactId"
           label={
             incomeRecurrence === "MONTHLY"
-              ? t("form.tenantPayerLabel")
-              : t("form.paidByLabel")
+              ? t((m) => m.FamilyIncome.form.tenantPayerLabel)
+              : t((m) => m.FamilyIncome.form.paidByLabel)
           }
           fieldType="custom"
           placeholder={
             activeContacts.length === 0
-              ? t("form.payerPlaceholderCreate")
-              : t("form.payerPlaceholder")
+              ? t((m) => m.FamilyIncome.form.payerPlaceholderCreate)
+              : t((m) => m.FamilyIncome.form.payerPlaceholder)
           }
           render={({ field, id, invalid, disabled }) => (
             <>
@@ -534,8 +548,8 @@ export function IncomeFormFields({
                   <SelectValue
                     placeholder={
                       activeContacts.length === 0
-                        ? t("form.payerPlaceholderCreate")
-                        : t("form.payerPlaceholder")
+                        ? t((m) => m.FamilyIncome.form.payerPlaceholderCreate)
+                        : t((m) => m.FamilyIncome.form.payerPlaceholder)
                     }
                   />
                 </SelectTrigger>
@@ -560,9 +574,11 @@ export function IncomeFormFields({
                 >
                   <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                      <DialogTitle>{t("form.createPayerTitle")}</DialogTitle>
+                      <DialogTitle>
+                        {t((m) => m.FamilyIncome.form.createPayerTitle)}
+                      </DialogTitle>
                       <DialogDescription>
-                        {t("form.createPayerDesc")}
+                        {t((m) => m.FamilyIncome.form.createPayerDesc)}
                       </DialogDescription>
                     </DialogHeader>
 
@@ -578,7 +594,7 @@ export function IncomeFormFields({
                           htmlFor="payer-contact-name"
                           className="text-sm font-medium"
                         >
-                          {t("form.payerNameLabel")}
+                          {t((m) => m.FamilyIncome.form.payerNameLabel)}
                         </label>
                         <Input
                           id="payer-contact-name"
@@ -590,7 +606,9 @@ export function IncomeFormFields({
                               handleCreatePayer();
                             }
                           }}
-                          placeholder={t("form.payerNamePlaceholder")}
+                          placeholder={t(
+                            (m) => m.FamilyIncome.form.payerNamePlaceholder,
+                          )}
                         />
                       </div>
 
@@ -599,7 +617,7 @@ export function IncomeFormFields({
                           htmlFor="payer-contact-phone"
                           className="text-sm font-medium"
                         >
-                          {t("form.payerPhoneLabel")}
+                          {t((m) => m.FamilyIncome.form.payerPhoneLabel)}
                         </label>
                         <Input
                           id="payer-contact-phone"
@@ -613,7 +631,9 @@ export function IncomeFormFields({
                               handleCreatePayer();
                             }
                           }}
-                          placeholder={t("form.payerPhonePlaceholder")}
+                          placeholder={t(
+                            (m) => m.FamilyIncome.form.payerPhonePlaceholder,
+                          )}
                         />
                       </div>
                     </div>
@@ -626,8 +646,8 @@ export function IncomeFormFields({
                         className="w-full"
                       >
                         {isCreatingPayer
-                          ? t("form.savingPayer")
-                          : t("form.savePayer")}
+                          ? t((m) => m.FamilyIncome.form.savingPayer)
+                          : t((m) => m.FamilyIncome.form.savePayer)}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -640,22 +660,22 @@ export function IncomeFormFields({
         <CommonFormField
           control={control}
           name="receivedBy"
-          label={t("form.receivedByLabel")}
+          label={t((m) => m.FamilyIncome.form.receivedByLabel)}
           fieldType="select"
           selectOptions={family.members.map((m) => ({
             label: m.fullName,
             value: m.fullName,
           }))}
-          placeholder={t("form.receivedByPlaceholder")}
+          placeholder={t((m) => m.FamilyIncome.form.receivedByPlaceholder)}
         />
       </div>
 
       <CommonFormField
         control={control}
         name="notes"
-        label={t("form.notesLabel")}
+        label={t((m) => m.FamilyIncome.form.notesLabel)}
         fieldType="textarea"
-        placeholder={t("form.notesPlaceholder")}
+        placeholder={t((m) => m.FamilyIncome.form.notesPlaceholder)}
       />
 
       {showReceiptUpload ? (
@@ -663,7 +683,7 @@ export function IncomeFormFields({
           <CommonFormField
             control={control}
             name="status"
-            label={t("form.statusLabel")}
+            label={t((m) => m.FamilyIncome.form.statusLabel)}
             fieldType="select"
             selectOptions={[
               { label: "Pending Approval", value: "PENDING" },
@@ -676,16 +696,16 @@ export function IncomeFormFields({
           <CommonFormField
             control={control}
             name="fileName"
-            label={t("form.receiptLabel")}
+            label={t((m) => m.FamilyIncome.form.receiptLabel)}
             type="file"
-            description={t("form.receiptDesc")}
+            description={t((m) => m.FamilyIncome.form.receiptDesc)}
           />
         </div>
       ) : (
         <CommonFormField
           control={control}
           name="status"
-          label={t("form.statusLabel")}
+          label={t((m) => m.FamilyIncome.form.statusLabel)}
           fieldType="select"
           selectOptions={[
             { label: "Pending Approval", value: "PENDING" },

@@ -97,7 +97,7 @@ export function EventsPopup({
       <div className="sticky top-0 flex items-center justify-between border-b bg-background p-3">
         <h3 className="font-medium">{format(date, "d MMMM yyyy")}</h3>
         <button
-          aria-label={t("close")}
+          aria-label={t((m) => m.EventCalendar.close)}
           className="rounded-full p-1 hover:bg-muted"
           onClick={onClose}
           type="button"
@@ -109,7 +109,7 @@ export function EventsPopup({
       <div className="flex flex-col gap-2 p-3">
         {events.length === 0 ? (
           <div className="py-2 text-muted-foreground text-sm">
-            {t("noEvents")}
+            {t((m) => m.EventCalendar.noEvents)}
           </div>
         ) : (
           events.map((event) => {

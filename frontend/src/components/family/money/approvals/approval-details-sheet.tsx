@@ -63,7 +63,9 @@ export function ApprovalDetailsSheet({
           <>
             <SheetHeader>
               <SheetTitle>{approval.title}</SheetTitle>
-              <SheetDescription>{t("detailsSheetDesc")}</SheetDescription>
+              <SheetDescription>
+                {t((m) => m.FamilyApprovals.detailsSheetDesc)}
+              </SheetDescription>
             </SheetHeader>
             <div className="flex flex-col gap-4 px-6 pb-6">
               <div className="flex flex-wrap gap-2">
@@ -72,22 +74,25 @@ export function ApprovalDetailsSheet({
                 <PriorityBadge priority={approval.priority} />
               </div>
 
-              <DetailSection title={t("sectionGeneral")}>
+              <DetailSection title={t((m) => m.FamilyApprovals.sectionGeneral)}>
                 <DetailRow
-                  label={t("transactionType")}
+                  label={t((m) => m.FamilyApprovals.transactionType)}
                   value={formatTitle(approval.type)}
                 />
-                <DetailRow label={t("titleColumn")} value={approval.title} />
                 <DetailRow
-                  label={t("categoryColumn")}
+                  label={t((m) => m.FamilyApprovals.titleColumn)}
+                  value={approval.title}
+                />
+                <DetailRow
+                  label={t((m) => m.FamilyApprovals.categoryColumn)}
                   value={approval.category}
                 />
                 <DetailRow
-                  label={t("amountColumn")}
+                  label={t((m) => m.FamilyApprovals.amountColumn)}
                   value={
                     <CompactMoney
                       currency={currency}
-                      emptyLabel={tCommon("notRecorded")}
+                      emptyLabel={tCommon((m) => m.Common.notRecorded)}
                       value={approval.amountMinorUnits}
                     />
                   }
@@ -101,7 +106,7 @@ export function ApprovalDetailsSheet({
                 />
                 <div className="rounded-md border p-3">
                   <p className="font-medium text-muted-foreground text-xs">
-                    {tCommon("description")}
+                    {tCommon((m) => m.Common.description)}
                   </p>
                   <p className="mt-1 whitespace-pre-wrap text-sm leading-6">
                     {approval.description}
@@ -109,46 +114,59 @@ export function ApprovalDetailsSheet({
                 </div>
               </DetailSection>
 
-              <DetailSection title={t("sectionFinancial")}>
+              <DetailSection
+                title={t((m) => m.FamilyApprovals.sectionFinancial)}
+              >
                 <DetailRow
-                  label={t("paymentMethod")}
+                  label={t((m) => m.FamilyApprovals.paymentMethod)}
                   value={approval.paymentMethod}
                 />
-                <DetailRow label={t("receipt")} value={approval.receipt} />
-                <DetailRow label={t("budget")} value={approval.budget} />
                 <DetailRow
-                  label={t("relatedProject")}
+                  label={t((m) => m.FamilyApprovals.receipt)}
+                  value={approval.receipt}
+                />
+                <DetailRow
+                  label={t((m) => m.FamilyApprovals.budget)}
+                  value={approval.budget}
+                />
+                <DetailRow
+                  label={t((m) => m.FamilyApprovals.relatedProject)}
                   value={approval.relatedProject}
                 />
               </DetailSection>
 
-              <DetailSection title={t("sectionPeople")}>
+              <DetailSection title={t((m) => m.FamilyApprovals.sectionPeople)}>
                 <DetailRow
-                  label={t("requestedBy")}
+                  label={t((m) => m.FamilyApprovals.requestedBy)}
                   value={approval.requestedBy}
                 />
                 <DetailRow
-                  label={t("currentApprover")}
+                  label={t((m) => m.FamilyApprovals.currentApprover)}
                   value={approval.currentApprover}
                 />
                 <DetailRow
-                  label={t("previousApprovers")}
+                  label={t((m) => m.FamilyApprovals.previousApprovers)}
                   value={
                     approval.previousApprovers.length
                       ? approval.previousApprovers.join(", ")
-                      : t("noneYet")
+                      : t((m) => m.FamilyApprovals.noneYet)
                   }
                 />
               </DetailSection>
 
-              <DetailSection title={t("sectionComments")}>
-                <Textarea disabled placeholder={t("commentsPlaceholder")} />
+              <DetailSection
+                title={t((m) => m.FamilyApprovals.sectionComments)}
+              >
+                <Textarea
+                  disabled
+                  placeholder={t((m) => m.FamilyApprovals.commentsPlaceholder)}
+                />
                 <p className="text-muted-foreground text-xs leading-5">
-                  {t("commentsNote")}
+                  {t((m) => m.FamilyApprovals.commentsNote)}
                 </p>
               </DetailSection>
 
-              <DetailSection title={t("sectionActions")}>
+              <DetailSection title={t((m) => m.FamilyApprovals.sectionActions)}>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <Button
                     disabled={
@@ -160,7 +178,7 @@ export function ApprovalDetailsSheet({
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    {t("approve")}
+                    {t((m) => m.FamilyApprovals.approve)}
                   </Button>
                   <Button
                     disabled={
@@ -170,48 +188,50 @@ export function ApprovalDetailsSheet({
                     onClick={() => onAction(approval, "reject")}
                   >
                     <XCircleIcon aria-hidden="true" data-icon="inline-start" />
-                    {t("reject")}
+                    {t((m) => m.FamilyApprovals.reject)}
                   </Button>
                   <Button disabled variant="outline">
                     <MessageSquareIcon
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    {t("requestChanges")}
+                    {t((m) => m.FamilyApprovals.requestChanges)}
                   </Button>
                   <Button disabled variant="outline">
                     <ArrowLeftIcon
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    {t("returnToDraft")}
+                    {t((m) => m.FamilyApprovals.returnToDraft)}
                   </Button>
                   <Button disabled={!canAssign} variant="outline">
                     <UserRoundPlusIcon
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    {t("assignApprover")}
+                    {t((m) => m.FamilyApprovals.assignApprover)}
                   </Button>
                   <Button disabled variant="outline">
                     <ReceiptTextIcon
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    {t("viewReceipt")}
+                    {t((m) => m.FamilyApprovals.viewReceipt)}
                   </Button>
                   <Button disabled variant="outline">
                     <DownloadIcon aria-hidden="true" data-icon="inline-start" />
-                    {t("downloadAttachment")}
+                    {t((m) => m.FamilyApprovals.downloadAttachment)}
                   </Button>
                 </div>
               </DetailSection>
 
-              <DetailSection title={t("sectionHistory")}>
+              <DetailSection title={t((m) => m.FamilyApprovals.sectionHistory)}>
                 <ApprovalTimeline approval={approval} />
               </DetailSection>
 
-              <DetailSection title={t("sectionNotifications")}>
+              <DetailSection
+                title={t((m) => m.FamilyApprovals.sectionNotifications)}
+              >
                 <div className="grid gap-2">
                   {[
                     "Creator is notified when approved.",

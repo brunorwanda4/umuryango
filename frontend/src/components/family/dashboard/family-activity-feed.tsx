@@ -60,7 +60,10 @@ function buildActivityEntries(
       type: "member_joined",
       name: member.fullName,
       avatarUrl: member.avatarUrl,
-      description: t("memberJoined", { role: roleLabel, kinship }),
+      description: t((m) => m.FamilyDashboard.memberJoined, {
+        role: roleLabel,
+        kinship,
+      }),
       timestamp: joinedAt,
     });
   }
@@ -73,7 +76,7 @@ function buildActivityEntries(
       type: "family_created",
       name: family.name,
       avatarUrl: null,
-      description: t("familyCreated"),
+      description: t((m) => m.FamilyDashboard.familyCreated),
       timestamp: createdAt,
     });
   }
@@ -103,10 +106,13 @@ function buildActivityEntries(
       name: record.createdBy ?? family.name,
       avatarUrl: null,
       description: isIncome
-        ? t("recordedIncome", { amount, category })
+        ? t((m) => m.FamilyDashboard.recordedIncome, { amount, category })
         : isExpense
-          ? t("recordedExpense", { amount, category })
-          : t("recordedTransaction", { amount, category }),
+          ? t((m) => m.FamilyDashboard.recordedExpense, { amount, category })
+          : t((m) => m.FamilyDashboard.recordedTransaction, {
+              amount,
+              category,
+            }),
       timestamp,
     });
   }
@@ -130,9 +136,11 @@ export function FamilyActivityFeed({
     <Card className="card card-border gap-0 rounded-[20px] py-5 shadow-sm">
       <CardHeader className="px-5 pb-3.5">
         <CardTitle className="font-fraunces text-xl">
-          {t("recentActivityTitle")}
+          {t((m) => m.FamilyDashboard.recentActivityTitle)}
         </CardTitle>
-        <CardDescription>{t("recentActivityDesc")}</CardDescription>
+        <CardDescription>
+          {t((m) => m.FamilyDashboard.recentActivityDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="px-5">
         <div className="flex flex-col">

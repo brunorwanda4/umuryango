@@ -41,77 +41,77 @@ export function ReportMetricCards({
   const totals = reports?.totals;
   const cards = [
     {
-      title: t("cashBalanceTitle"),
+      title: t((m) => m.FamilyReports.cashBalanceTitle),
       value:
         totals?.cashBalanceMinorUnits ?? money?.totals?.cashBalanceMinorUnits,
-      description: t("cashBalanceDesc"),
+      description: t((m) => m.FamilyReports.cashBalanceDesc),
       icon: WalletCardsIcon,
       isMoney: true,
     },
     {
-      title: t("incomeTitle"),
+      title: t((m) => m.FamilyReports.incomeTitle),
       value: totals?.incomeMinorUnits ?? money?.totals?.incomeMinorUnits,
-      description: t("incomeDesc"),
+      description: t((m) => m.FamilyReports.incomeDesc),
       icon: ReceiptTextIcon,
       isMoney: true,
     },
     {
-      title: t("expensesTitle"),
+      title: t((m) => m.FamilyReports.expensesTitle),
       value: totals?.expenseMinorUnits ?? money?.totals?.expenseMinorUnits,
-      description: t("expensesDesc"),
+      description: t((m) => m.FamilyReports.expensesDesc),
       icon: PieChartIcon,
       isMoney: true,
     },
     {
-      title: t("contributionsTitle"),
+      title: t((m) => m.FamilyReports.contributionsTitle),
       value:
         totals?.contributionsPaidMinorUnits ??
         money?.totals?.contributionsPaidMinorUnits ??
         contributions?.totals?.collectedMinorUnits,
-      description: t("contributionsDesc"),
+      description: t((m) => m.FamilyReports.contributionsDesc),
       icon: HandCoinsIcon,
       isMoney: true,
     },
     {
-      title: t("savingsTitle"),
+      title: t((m) => m.FamilyReports.savingsTitle),
       value: totals?.savingsMinorUnits ?? money?.totals?.savingsMinorUnits,
-      description: t("savingsDesc"),
+      description: t((m) => m.FamilyReports.savingsDesc),
       icon: TargetIcon,
       isMoney: true,
     },
     {
-      title: t("debtsTitle"),
+      title: t((m) => m.FamilyReports.debtsTitle),
       value:
         totals?.debtOutstandingMinorUnits ??
         money?.totals?.debtOutstandingMinorUnits,
-      description: t("debtsDesc"),
+      description: t((m) => m.FamilyReports.debtsDesc),
       icon: LandmarkIcon,
       isMoney: true,
     },
     {
-      title: t("projectBudgetsTitle"),
+      title: t((m) => m.FamilyReports.projectBudgetsTitle),
       value:
         totals?.projectPlannedMinorUnits ?? projects?.totals?.plannedMinorUnits,
-      description: t("projectBudgetsDesc"),
+      description: t((m) => m.FamilyReports.projectBudgetsDesc),
       icon: FolderKanbanIcon,
       isMoney: true,
     },
     {
-      title: t("generatedReportsTitle"),
+      title: t((m) => m.FamilyReports.generatedReportsTitle),
       value:
         typeof totals?.reportCount === "number"
           ? totals.reportCount.toLocaleString()
           : typeof reports?.reports?.length === "number"
             ? reports.reports.length.toLocaleString()
-            : t("noSourceRecords"),
-      description: t("generatedReportsDesc"),
+            : t((m) => m.FamilyReports.noSourceRecords),
+      description: t((m) => m.FamilyReports.generatedReportsDesc),
       icon: FileBarChartIcon,
     },
   ];
 
   return (
     <section
-      aria-label={t("reportsSummaryAria")}
+      aria-label={t((m) => m.FamilyReports.reportsSummaryAria)}
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
     >
       {cards.map((card) => {

@@ -37,22 +37,26 @@ const CreateFamilyPage = async ({ searchParams }: CreateFamilyPageProps) => {
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <div className="flex flex-col gap-3">
           <Badge variant="outline" className="w-fit">
-            {createFamily("badge")}
+            {createFamily((m) => m.CreateFamilyPage.badge)}
           </Badge>
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              {createFamily("heading")}
+              {createFamily((m) => m.CreateFamilyPage.heading)}
             </h2>
             <p className="max-w-2xl text-muted-foreground text-sm leading-relaxed">
-              {createFamily("description")}
+              {createFamily((m) => m.CreateFamilyPage.description)}
             </p>
           </div>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>{createFamily("formTitle")}</CardTitle>
-            <CardDescription>{createFamily("formDescription")}</CardDescription>
+            <CardTitle>
+              {createFamily((m) => m.CreateFamilyPage.formTitle)}
+            </CardTitle>
+            <CardDescription>
+              {createFamily((m) => m.CreateFamilyPage.formDescription)}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <CreateFamilyForm

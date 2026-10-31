@@ -78,7 +78,7 @@ export function EditExpenseDialog({
         family.id,
       )}/money/transactions/${transaction?.id}`,
     },
-    onSuccessMessage: t("toasts.updatedSuccess"),
+    onSuccessMessage: t((m) => m.FamilyExpenses.toasts.updatedSuccess),
     toastOnSuccess: true,
     onSuccess: () => {
       onOpenChange(false);
@@ -115,8 +115,12 @@ export function EditExpenseDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{t("dialogs.editTitle")}</DialogTitle>
-          <DialogDescription>{t("dialogs.editDesc")}</DialogDescription>
+          <DialogTitle>
+            {t((m) => m.FamilyExpenses.dialogs.editTitle)}
+          </DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyExpenses.dialogs.editDesc)}
+          </DialogDescription>
         </DialogHeader>
 
         <form
@@ -142,7 +146,9 @@ export function EditExpenseDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending ? t("dialogs.saving") : t("dialogs.saveChanges")}
+            {isPending
+              ? t((m) => m.FamilyExpenses.dialogs.saving)
+              : t((m) => m.FamilyExpenses.dialogs.saveChanges)}
           </Button>
         </DialogFooter>
       </DialogContent>

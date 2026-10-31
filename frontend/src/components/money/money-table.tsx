@@ -49,12 +49,26 @@ export function MoneyTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>{t("record")}</TableHead>
-          {showType && <TableHead>{t("type")}</TableHead>}
-          <TableHead>{t("category")}</TableHead>
-          <TableHead>{t("date")}</TableHead>
-          <TableHead>{t("status")}</TableHead>
-          <TableHead className="text-right">{t("amount")}</TableHead>
+          <TableHead>
+            {t((m) => m.PersonalMoney.transactionsTable.record)}
+          </TableHead>
+          {showType && (
+            <TableHead>
+              {t((m) => m.PersonalMoney.transactionsTable.type)}
+            </TableHead>
+          )}
+          <TableHead>
+            {t((m) => m.PersonalMoney.transactionsTable.category)}
+          </TableHead>
+          <TableHead>
+            {t((m) => m.PersonalMoney.transactionsTable.date)}
+          </TableHead>
+          <TableHead>
+            {t((m) => m.PersonalMoney.transactionsTable.status)}
+          </TableHead>
+          <TableHead className="text-right">
+            {t((m) => m.PersonalMoney.transactionsTable.amount)}
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

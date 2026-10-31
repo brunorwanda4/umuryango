@@ -30,9 +30,15 @@ export function LoanTabs({
   return (
     <Tabs defaultValue="all" className="gap-4">
       <TabsList className="w-full sm:w-auto">
-        <TabsTrigger value="all">{t("tabs.all")}</TabsTrigger>
-        <TabsTrigger value="borrowed">{t("tabs.borrowed")}</TabsTrigger>
-        <TabsTrigger value="lent">{t("tabs.lent")}</TabsTrigger>
+        <TabsTrigger value="all">
+          {t((m) => m.PersonalLoans.tabs.all)}
+        </TabsTrigger>
+        <TabsTrigger value="borrowed">
+          {t((m) => m.PersonalLoans.tabs.borrowed)}
+        </TabsTrigger>
+        <TabsTrigger value="lent">
+          {t((m) => m.PersonalLoans.tabs.lent)}
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="all">{render(loans)}</TabsContent>
       <TabsContent value="borrowed">

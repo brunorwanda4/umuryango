@@ -51,8 +51,12 @@ export function RecentExpenseItems({
             <EmptyMedia variant="icon">
               <SearchIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>{t("items.noExpensesTitle")}</EmptyTitle>
-            <EmptyDescription>{t("items.noExpensesDesc")}</EmptyDescription>
+            <EmptyTitle>
+              {t((m) => m.PersonalMoney.personalExpenses.items.noExpensesTitle)}
+            </EmptyTitle>
+            <EmptyDescription>
+              {t((m) => m.PersonalMoney.personalExpenses.items.noExpensesDesc)}
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>
@@ -99,7 +103,10 @@ function RecentExpenseItem({
           variant="outline"
         >
           <button
-            aria-label={t("table.viewExpenseAria", { source: expense.source })}
+            aria-label={t(
+              (m) => m.PersonalMoney.personalExpenses.table.viewExpenseAria,
+              { source: expense.source },
+            )}
             className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             onClick={() => setIsViewOpen(true)}
             type="button"

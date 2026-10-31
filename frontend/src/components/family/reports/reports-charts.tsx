@@ -54,8 +54,10 @@ export function ReportsCharts({
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
       <Card>
         <CardHeader>
-          <CardTitle>{t("moneyMovementTitle")}</CardTitle>
-          <CardDescription>{t("moneyMovementDesc")}</CardDescription>
+          <CardTitle>{t((m) => m.FamilyReports.moneyMovementTitle)}</CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyReports.moneyMovementDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {trend.length ? (
@@ -120,9 +122,9 @@ export function ReportsCharts({
             </ChartContainer>
           ) : (
             <ChartEmptyState
-              description={t("noReportTrendDataDesc")}
+              description={t((m) => m.FamilyReports.noReportTrendDataDesc)}
               icon={BarChart3Icon}
-              title={t("noReportTrendData")}
+              title={t((m) => m.FamilyReports.noReportTrendData)}
             />
           )}
         </CardContent>
@@ -130,8 +132,12 @@ export function ReportsCharts({
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("reportBreakdownTitle")}</CardTitle>
-          <CardDescription>{t("reportBreakdownDesc")}</CardDescription>
+          <CardTitle>
+            {t((m) => m.FamilyReports.reportBreakdownTitle)}
+          </CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyReports.reportBreakdownDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {breakdown.length ? (
@@ -159,7 +165,7 @@ export function ReportsCharts({
                       formatter={(value) => (
                         <>
                           <span className="text-muted-foreground">
-                            {t("amountLabel")}
+                            {t((m) => m.FamilyReports.amountLabel)}
                           </span>
                           <span className="font-mono font-medium">
                             {formatFullMinorUnits(value, currency)}
@@ -178,9 +184,9 @@ export function ReportsCharts({
             </ChartContainer>
           ) : (
             <ChartEmptyState
-              description={t("noBreakdownDataDesc")}
+              description={t((m) => m.FamilyReports.noBreakdownDataDesc)}
               icon={PieChartIcon}
-              title={t("noBreakdownData")}
+              title={t((m) => m.FamilyReports.noBreakdownData)}
             />
           )}
         </CardContent>

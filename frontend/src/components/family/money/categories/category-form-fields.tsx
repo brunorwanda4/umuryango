@@ -56,7 +56,7 @@ export function CategoryFormFields({
       <CommonFormField
         control={control}
         name="name"
-        label={t("categoryName")}
+        label={t((m) => m.FamilyCategories.categoryName)}
         placeholder="e.g. Food"
         required
       />
@@ -64,11 +64,11 @@ export function CategoryFormFields({
       <CommonFormField
         control={control}
         name="type"
-        label={t("categoryType")}
+        label={t((m) => m.FamilyCategories.categoryType)}
         fieldType="select"
         selectOptions={[
-          { label: t("expense"), value: "EXPENSE" },
-          { label: t("income"), value: "INCOME" },
+          { label: t((m) => m.FamilyCategories.expense), value: "EXPENSE" },
+          { label: t((m) => m.FamilyCategories.income), value: "INCOME" },
         ]}
         required
       />
@@ -77,9 +77,9 @@ export function CategoryFormFields({
         <CommonFormField
           control={control}
           name="icon"
-          label={t("icon")}
+          label={t((m) => m.FamilyCategories.icon)}
           fieldType="lucide-icon"
-          placeholder={t("searchPlaceholder")}
+          placeholder={t((m) => m.FamilyCategories.searchPlaceholder)}
           required
         />
 
@@ -87,11 +87,14 @@ export function CategoryFormFields({
           <CommonFormField
             control={control}
             name="status"
-            label={t("table.status")}
+            label={t((m) => m.FamilyCategories.table.status)}
             fieldType="select"
             selectOptions={[
-              { label: t("active"), value: "ACTIVE" },
-              { label: t("inactive"), value: "INACTIVE" },
+              { label: t((m) => m.FamilyCategories.active), value: "ACTIVE" },
+              {
+                label: t((m) => m.FamilyCategories.inactive),
+                value: "INACTIVE",
+              },
             ]}
             required
             description="Inactive categories stay in history but should not be selected for new transactions."
@@ -102,7 +105,7 @@ export function CategoryFormFields({
       <CommonFormField
         control={control}
         name="color"
-        label={t("color")}
+        label={t((m) => m.FamilyCategories.color)}
         fieldType="custom"
         required
         description="Choose a preset or use a custom color for category lists and future reports."
@@ -119,7 +122,9 @@ export function CategoryFormFields({
 
                   return (
                     <Button
-                      aria-label={t("useColorAria", { label: option.label })}
+                      aria-label={t((m) => m.FamilyCategories.useColorAria, {
+                        label: option.label,
+                      })}
                       aria-pressed={selected}
                       className={cn(
                         "size-8 rounded-full border-border p-0",
@@ -155,10 +160,10 @@ export function CategoryFormFields({
                 />
                 <span className="text-muted-foreground text-xs">
                   {isPreset
-                    ? t("colorPresetSelected")
+                    ? t((m) => m.FamilyCategories.colorPresetSelected)
                     : isHex
                       ? selectedColor
-                      : t("colorCustomPick")}
+                      : t((m) => m.FamilyCategories.colorCustomPick)}
                 </span>
               </div>
             </div>
@@ -169,7 +174,7 @@ export function CategoryFormFields({
       <CommonFormField
         control={control}
         name="description"
-        label={t("table.category")}
+        label={t((m) => m.FamilyCategories.table.category)}
         fieldType="textarea"
         placeholder="How administrators should use this category"
         fieldClassName="col-span-full"

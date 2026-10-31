@@ -35,7 +35,7 @@ function getRecentExpenseColumns({
   return [
     {
       accessorKey: "source",
-      header: t("table.source"),
+      header: t((m) => m.PersonalMoney.personalExpenses.table.source),
       cell: ({ row }) => {
         const SourceIcon = row.original.icon;
 
@@ -58,7 +58,7 @@ function getRecentExpenseColumns({
     },
     {
       accessorKey: "description",
-      header: t("table.description"),
+      header: t((m) => m.PersonalMoney.personalExpenses.table.description),
       cell: ({ row }) => (
         <span className="block min-w-60 text-muted-foreground">
           {row.original.description}
@@ -67,7 +67,7 @@ function getRecentExpenseColumns({
     },
     {
       accessorKey: "category",
-      header: t("table.category"),
+      header: t((m) => m.PersonalMoney.personalExpenses.table.category),
       cell: ({ row }) => (
         <span
           className={cn(
@@ -81,7 +81,7 @@ function getRecentExpenseColumns({
     },
     {
       accessorKey: "amountMinorUnits",
-      header: t("table.amount"),
+      header: t((m) => m.PersonalMoney.personalExpenses.table.amount),
       cell: ({ row }) => (
         <span className="font-bold text-chart-1">
           <CompactMoney currency="RWF" value={row.original.amountMinorUnits} />
@@ -90,14 +90,14 @@ function getRecentExpenseColumns({
     },
     {
       accessorKey: "date",
-      header: t("table.date"),
+      header: t((m) => m.PersonalMoney.personalExpenses.table.date),
       cell: ({ row }) => (
         <span className="text-muted-foreground">{row.original.date}</span>
       ),
     },
     {
       accessorKey: "paymentMethod",
-      header: t("table.paymentMethod"),
+      header: t((m) => m.PersonalMoney.personalExpenses.table.paymentMethod),
       cell: ({ row }) => {
         const PaymentIcon = row.original.paymentIcon;
 
@@ -118,7 +118,11 @@ function getRecentExpenseColumns({
     },
     {
       id: "actions",
-      header: () => <div className="text-right">{t("table.actions")}</div>,
+      header: () => (
+        <div className="text-right">
+          {t((m) => m.PersonalMoney.personalExpenses.table.actions)}
+        </div>
+      ),
       cell: ({ row }) => (
         <div className="flex justify-end">
           <RecentExpenseActionsPopover
@@ -186,7 +190,7 @@ export function RecentExpenseTable({
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="flex items-center justify-between px-5 pt-5 pb-2 sm:px-6">
         <CardTitle className="font-bold text-base">
-          {t("table.recentExpenses")}
+          {t((m) => m.PersonalMoney.personalExpenses.table.recentExpenses)}
         </CardTitle>
         <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
@@ -207,7 +211,9 @@ export function RecentExpenseTable({
             columns={recentExpenseColumns}
             data={filteredExpenseData}
             getRowAriaLabel={(row) =>
-              t("table.viewExpenseAria", { source: row.original.source })
+              t((m) => m.PersonalMoney.personalExpenses.table.viewExpenseAria, {
+                source: row.original.source,
+              })
             }
             onRowClick={(row) => setViewExpenseId(row.original.id)}
             rowClassName={() => "hover:bg-muted/50"}

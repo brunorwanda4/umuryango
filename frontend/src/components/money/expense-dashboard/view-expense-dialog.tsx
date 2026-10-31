@@ -36,16 +36,26 @@ export function ViewExpenseDialog({
 
   return (
     <ViewTransactionDialog
-      amountLabel={t("viewDialog.amountSpent")}
+      amountLabel={t(
+        (m) => m.PersonalMoney.personalExpenses.viewDialog.amountSpent,
+      )}
       amountMinorUnits={expense.amountMinorUnits}
       category={expense.category}
       categoryClassName={expense.categoryClassName}
       currency={expense.currency}
       date={expense.date}
-      dateLabel={t("viewDialog.dateSpent")}
-      deleteLabel={t("viewDialog.deleteExpense")}
-      detailsDescription={t("viewDialog.detailsDesc")}
-      detailsTitle={t("viewDialog.detailsTitle")}
+      dateLabel={t(
+        (m) => m.PersonalMoney.personalExpenses.viewDialog.dateSpent,
+      )}
+      deleteLabel={t(
+        (m) => m.PersonalMoney.personalExpenses.viewDialog.deleteExpense,
+      )}
+      detailsDescription={t(
+        (m) => m.PersonalMoney.personalExpenses.viewDialog.detailsDesc,
+      )}
+      detailsTitle={t(
+        (m) => m.PersonalMoney.personalExpenses.viewDialog.detailsTitle,
+      )}
       description={expense.description}
       leading={
         <div className="bg-muted text-muted-foreground flex size-11 shrink-0 items-center justify-center rounded-lg">
@@ -80,7 +90,9 @@ export function ViewExpenseDialog({
       searchParamValue={searchParamValue ?? `view-expense-${expense.id}`}
       title={expense.source}
       trigger={trigger}
-      updateLabel={t("viewDialog.updateExpense")}
+      updateLabel={t(
+        (m) => m.PersonalMoney.personalExpenses.viewDialog.updateExpense,
+      )}
     />
   );
 }

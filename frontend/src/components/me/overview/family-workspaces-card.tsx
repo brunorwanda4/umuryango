@@ -32,12 +32,16 @@ export function FamilyWorkspacesCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
+        <CardTitle>
+          {t((m) => m.PersonalOverview.familyWorkspaces.title)}
+        </CardTitle>
+        <CardDescription>
+          {t((m) => m.PersonalOverview.familyWorkspaces.description)}
+        </CardDescription>
         <CardAction>
           <Button asChild size="sm" variant="ghost">
             <Link href="/family">
-              {t("viewAll")}
+              {t((m) => m.PersonalOverview.familyWorkspaces.viewAll)}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
@@ -50,8 +54,12 @@ export function FamilyWorkspacesCard({
               <EmptyMedia variant="icon">
                 <UsersIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
-              <EmptyDescription>{t("emptyDesc")}</EmptyDescription>
+              <EmptyTitle>
+                {t((m) => m.PersonalOverview.familyWorkspaces.emptyTitle)}
+              </EmptyTitle>
+              <EmptyDescription>
+                {t((m) => m.PersonalOverview.familyWorkspaces.emptyDesc)}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
@@ -76,13 +84,20 @@ export function FamilyWorkspacesCard({
                   </div>
                   <p className="truncate text-muted-foreground text-xs">
                     {family.memberCount === null
-                      ? (family.description ?? t("workspace"))
-                      : t("memberCount", { count: family.memberCount })}
+                      ? (family.description ??
+                        t((m) => m.PersonalOverview.familyWorkspaces.workspace))
+                      : t(
+                          (m) =>
+                            m.PersonalOverview.familyWorkspaces.memberCount,
+                          { count: family.memberCount },
+                        )}
                   </p>
                 </div>
                 <Button asChild size="sm" variant="outline">
                   <Link href={`/family/${encodeURIComponent(family.slug)}`}>
-                    {t("openWorkspace")}
+                    {t(
+                      (m) => m.PersonalOverview.familyWorkspaces.openWorkspace,
+                    )}
                   </Link>
                 </Button>
               </div>
@@ -94,7 +109,7 @@ export function FamilyWorkspacesCard({
         <Button asChild size="sm" variant="outline">
           <Link href="/family/new">
             <PlusIcon data-icon="inline-start" aria-hidden="true" />
-            {t("createWorkspace")}
+            {t((m) => m.PersonalOverview.familyWorkspaces.createWorkspace)}
           </Link>
         </Button>
       </CardFooter>

@@ -71,7 +71,10 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
       );
 
       if (!familyResponse.ok || !familyResponse.data) {
-        throw new Error(familyResponse.message ?? t("workspaceNotFound"));
+        throw new Error(
+          familyResponse.message ??
+            t((m) => m.FamilyApprovals.workspaceNotFound),
+        );
       }
 
       const familyData = familyResponse.data;
@@ -96,7 +99,8 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
       setMoneyMessage(
         overviewResponse.ok
           ? null
-          : (overviewResponse.message ?? t("approvalSourceUnavailable")),
+          : (overviewResponse.message ??
+              t((m) => m.FamilyApprovals.approvalSourceUnavailable)),
       );
       setTransactions(
         transactionResponse.ok && transactionResponse.data
@@ -104,7 +108,11 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
           : [],
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("toastError"));
+      setError(
+        err instanceof Error
+          ? err.message
+          : t((m) => m.FamilyApprovals.toastError),
+      );
     } finally {
       setLoading(false);
     }
@@ -180,12 +188,12 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
     action: "approve" | "reject",
   ) => {
     if (!family || approval.source !== "transaction") {
-      toast.error(t("toastDedicatedBackend"));
+      toast.error(t((m) => m.FamilyApprovals.toastDedicatedBackend));
       return;
     }
 
     if (!canApprove) {
-      toast.error(t("toastNoPermission"));
+      toast.error(t((m) => m.FamilyApprovals.toastNoPermission));
       return;
     }
 
@@ -201,15 +209,19 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
 
       if (response.ok) {
         toast.success(
-          action === "approve" ? t("toastApproved") : t("toastRejected"),
+          action === "approve"
+            ? t((m) => m.FamilyApprovals.toastApproved)
+            : t((m) => m.FamilyApprovals.toastRejected),
         );
         await fetchData();
         setSelectedApproval(null);
       } else {
-        toast.error(response.message ?? t("toastFailed"));
+        toast.error(
+          response.message ?? t((m) => m.FamilyApprovals.toastFailed),
+        );
       }
     } catch {
-      toast.error(t("toastError"));
+      toast.error(t((m) => m.FamilyApprovals.toastError));
     } finally {
       setProcessingId(null);
     }
@@ -226,8 +238,10 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
           <EmptyMedia variant="icon">
             <AlertCircleIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
-          <EmptyDescription>{error || t("workspaceNotFound")}</EmptyDescription>
+          <EmptyTitle>{t((m) => m.FamilyApprovals.loadErrorTitle)}</EmptyTitle>
+          <EmptyDescription>
+            {error || t((m) => m.FamilyApprovals.workspaceNotFound)}
+          </EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -238,57 +252,19 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
       <header className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">{t("reviewCenterBadge")}</Badge>
-              <Badge variant="secondary">{currency}</Badge>
-              <Badge variant={canApprove ? "default" : "outline"}>
-                {canApprove
-                  ? t("approverAccessBadge")
-                  : t("limitedAccessBadge")}
-              </Badge>
-            </div>
             <div className="flex items-center gap-3">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background">
                 <ShieldCheckIcon className="size-5 text-muted-foreground" />
               </span>
               <h1 className="font-bold text-2xl tracking-tight sm:text-3xl">
-                {t("pageTitle")}
+                {t((m) => m.FamilyApprovals.pageTitle)}
               </h1>
             </div>
             <p className="max-w-4xl text-muted-foreground text-sm leading-6">
-              {t("pageDesc")}
+              {t((m) => m.FamilyApprovals.pageDesc)}
             </p>
           </div>
-          <Button
-            href={`/family/${encodeURIComponent(family.slug)}/money`}
-            size="sm"
-            variant="outline"
-          >
-            <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-            {t("moneyOverviewButton")}
-          </Button>
         </div>
-        <nav
-          aria-label={t("approvalLinksAria")}
-          className="flex gap-2 overflow-x-auto pb-1"
-        >
-          <Button
-            href={`/family/${encodeURIComponent(family.slug)}/money/income`}
-            size="sm"
-            variant="outline"
-            className="shrink-0"
-          >
-            {t("incomeButton")}
-          </Button>
-          <Button
-            href={`/family/${encodeURIComponent(family.slug)}/money/expenses`}
-            size="sm"
-            variant="outline"
-            className="shrink-0"
-          >
-            {t("expensesButton")}
-          </Button>
-        </nav>
       </header>
 
       <Separator />
@@ -298,10 +274,12 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <AlertCircleIcon className="size-4 text-muted-foreground" />
-              {t("approvalSourceUnavailable")}
+              {t((m) => m.FamilyApprovals.approvalSourceUnavailable)}
             </CardTitle>
             <CardDescription>
-              {t("approvalSourceUnavailableDesc", { message: moneyMessage })}
+              {t((m) => m.FamilyApprovals.approvalSourceUnavailableDesc, {
+                message: moneyMessage,
+              })}
             </CardDescription>
           </CardHeader>
         </Card>

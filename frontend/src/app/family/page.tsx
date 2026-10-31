@@ -64,7 +64,8 @@ async function getFamilyListItems(): Promise<{
   if (!familiesResponse.ok || !familiesResponse.data) {
     return {
       items: [],
-      error: familiesResponse.message ?? t("loadFamiliesError"),
+      error:
+        familiesResponse.message ?? t((m) => m.FamilyPage.loadFamiliesError),
     };
   }
 
@@ -83,7 +84,8 @@ async function getFamilyListItems(): Promise<{
 
       return {
         family,
-        error: detailResponse.message ?? t("loadMembersError"),
+        error:
+          detailResponse.message ?? t((m) => m.FamilyPage.loadMembersError),
       };
     }),
   );
@@ -101,21 +103,21 @@ export default async function FamilyPage() {
         <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex flex-col gap-2">
             <Badge variant="outline" className="w-fit">
-              {t("badge")}
+              {t((m) => m.FamilyPage.badge)}
             </Badge>
             <div className="flex flex-col gap-1">
               <h1 className="font-semibold text-2xl tracking-tight sm:text-3xl">
-                {t("heading")}
+                {t((m) => m.FamilyPage.heading)}
               </h1>
               <p className="max-w-2xl text-muted-foreground text-sm leading-relaxed">
-                {t("description")}
+                {t((m) => m.FamilyPage.description)}
               </p>
             </div>
           </div>
           <Button asChild>
             <Link href="/family/new">
               <PlusIcon data-icon="inline-start" aria-hidden="true" />
-              {t("createFamily")}
+              {t((m) => m.FamilyPage.createFamily)}
             </Link>
           </Button>
         </header>
@@ -146,7 +148,7 @@ function FamilyError({ message }: { message: string }) {
         <EmptyMedia variant="icon">
           <UsersIcon aria-hidden="true" />
         </EmptyMedia>
-        <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
+        <EmptyTitle>{t((m) => m.FamilyPage.loadErrorTitle)}</EmptyTitle>
         <EmptyDescription>{message}</EmptyDescription>
       </EmptyHeader>
     </Empty>
@@ -161,11 +163,13 @@ function NoFamilies() {
         <EmptyMedia variant="icon">
           <UsersIcon aria-hidden="true" />
         </EmptyMedia>
-        <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
-        <EmptyDescription>{t("emptyDescription")}</EmptyDescription>
+        <EmptyTitle>{t((m) => m.FamilyPage.emptyTitle)}</EmptyTitle>
+        <EmptyDescription>
+          {t((m) => m.FamilyPage.emptyDescription)}
+        </EmptyDescription>
       </EmptyHeader>
       <Button asChild>
-        <Link href="/family/new">{t("createFamily")}</Link>
+        <Link href="/family/new">{t((m) => m.FamilyPage.createFamily)}</Link>
       </Button>
     </Empty>
   );
@@ -186,8 +190,8 @@ function FamilyCard({ item }: { item: FamilyListItem }) {
             <CardTitle className="truncate">{family.name}</CardTitle>
             <CardDescription>
               {detail
-                ? t("membersCount", { count: memberCount })
-                : t("membersUnavailable")}
+                ? t((m) => m.FamilyPage.membersCount, { count: memberCount })
+                : t((m) => m.FamilyPage.membersUnavailable)}
             </CardDescription>
           </div>
           <Badge variant="outline">{AUTHORITY_LABELS[family.authority]}</Badge>
@@ -195,13 +199,13 @@ function FamilyCard({ item }: { item: FamilyListItem }) {
         <div className="flex flex-wrap gap-2">
           <Button asChild size="sm">
             <Link href={`/family/${encodeURIComponent(family.slug)}`}>
-              {t("openWorkspace")}
+              {t((m) => m.FamilyPage.openWorkspace)}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
           <Button asChild size="sm" variant="outline">
             <Link href={`/family/${encodeURIComponent(family.slug)}/members`}>
-              {t("viewMembers")}
+              {t((m) => m.FamilyPage.viewMembers)}
             </Link>
           </Button>
         </div>
@@ -220,7 +224,7 @@ function FamilyCard({ item }: { item: FamilyListItem }) {
           </div>
         ) : (
           <p className="rounded-lg border border-dashed p-3 text-muted-foreground text-sm">
-            {t("noActiveMembers")}
+            {t((m) => m.FamilyPage.noActiveMembers)}
           </p>
         )}
       </CardContent>
@@ -242,7 +246,7 @@ function MemberRow({ member }: { member: FamilyMemberSummary }) {
         <p className="truncate font-medium text-sm">{member.fullName}</p>
         <p className="text-muted-foreground text-xs">
           {getKinshipLabel(member)} -{" "}
-          {t("joinedDate", {
+          {t((m) => m.FamilyPage.joinedDate, {
             date: joinedDateFormatter.format(new Date(member.joinedAt)),
           })}
         </p>

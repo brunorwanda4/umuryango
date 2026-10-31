@@ -60,14 +60,14 @@ export default async function ItemsPage({ searchParams }: ItemsPageProps) {
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 px-5 py-12 sm:px-6 lg:px-8">
         <section className="flex max-w-3xl flex-col gap-5">
           <Badge variant="outline" className="w-fit">
-            {t("badge")}
+            {t((m) => m.ItemsPage.badge)}
           </Badge>
           <div className="flex flex-col gap-4">
             <h1 className="text-4xl font-semibold leading-tight tracking-normal text-balance sm:text-5xl">
-              {t("title")}
+              {t((m) => m.ItemsPage.title)}
             </h1>
             <p className="text-lg leading-8 text-muted-foreground">
-              {t("description")}
+              {t((m) => m.ItemsPage.description)}
             </p>
           </div>
         </section>
@@ -93,7 +93,7 @@ export default async function ItemsPage({ searchParams }: ItemsPageProps) {
         <Card className="rounded-lg">
           <CardContent className="py-6">
             <p className="text-base leading-7 text-muted-foreground">
-              {t("freeNote")}
+              {t((m) => m.ItemsPage.freeNote)}
             </p>
           </CardContent>
         </Card>

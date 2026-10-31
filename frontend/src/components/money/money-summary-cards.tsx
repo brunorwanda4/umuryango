@@ -28,27 +28,31 @@ export function MoneySummaryCards({
 
   const cards = [
     {
-      description: t("totalIncome"),
+      description: t(
+        (m) => m.PersonalMoney.legacyTabs.summaryCards.totalIncome,
+      ),
       icon: ArrowDownIcon,
       value: summary.totalIncomeMinorUnits,
     },
     {
-      description: t("totalExpenses"),
+      description: t(
+        (m) => m.PersonalMoney.legacyTabs.summaryCards.totalExpenses,
+      ),
       icon: ArrowUpIcon,
       value: summary.totalExpensesMinorUnits,
     },
     {
-      description: t("balance"),
+      description: t((m) => m.PersonalMoney.legacyTabs.summaryCards.balance),
       icon: WalletCardsIcon,
       value: summary.balanceMinorUnits,
     },
     {
-      description: t("savings"),
+      description: t((m) => m.PersonalMoney.legacyTabs.summaryCards.savings),
       icon: PiggyBankIcon,
       value: summary.savingsMinorUnits,
     },
     {
-      description: t("debts"),
+      description: t((m) => m.PersonalMoney.legacyTabs.summaryCards.debts),
       icon: LandmarkIcon,
       value: summary.debtsMinorUnits,
     },

@@ -227,7 +227,7 @@ export function MonthView({
                               <span>
                                 + {remainingCount}{" "}
                                 <span className="max-sm:sr-only">
-                                  {t("more")}
+                                  {t((m) => m.EventCalendar.more)}
                                 </span>
                               </span>
                             </button>

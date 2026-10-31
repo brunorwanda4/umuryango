@@ -20,7 +20,7 @@ export default function AppNavbar({ sidebarTitle }: AppNavbarProps) {
         <SidebarTrigger className="h-9 w-9 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors" />
         <div className="h-4 w-px bg-border/50 hidden md:block" />
         <span className="max-w-[200px] sm:max-w-[300px] truncate text-xl bg-gradient-to-r from-foreground to-foreground/75 bg-clip-text font-bold  tracking-tight text-transparent">
-          {sidebarTitle || t("personalWorkspace")}
+          {sidebarTitle || t((m) => m.AppShell.navbar.personalWorkspace)}
         </span>
       </div>
 

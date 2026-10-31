@@ -66,10 +66,14 @@ export default async function FamilyDashboardPage({
           <EmptyMedia variant="icon">
             <UsersIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>{t("familyNotFound")}</EmptyTitle>
+          <EmptyTitle>{t((m) => m.FamilyDashboard.familyNotFound)}</EmptyTitle>
           <EmptyDescription>
-            {t("familyNotFoundDesc", { error: data.error ?? "" })}{" "}
-            <Link href="/family">{t("backToFamilies")}</Link>
+            {t((m) => m.FamilyDashboard.familyNotFoundDesc, {
+              error: data.error ?? "",
+            })}{" "}
+            <Link href="/family">
+              {t((m) => m.FamilyDashboard.backToFamilies)}
+            </Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

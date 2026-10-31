@@ -77,7 +77,9 @@ export function EditCategoryDialog({
       );
 
       if (!response.ok) {
-        toast.error(response.message ?? t("updateFailed"));
+        toast.error(
+          response.message ?? t((m) => m.FamilyCategories.updateFailed),
+        );
         setPending(false);
         return;
       }
@@ -93,7 +95,9 @@ export function EditCategoryDialog({
       type: values.type,
       updatedAt: todayIso(),
     });
-    toast.success(t("updateSuccess", { name: values.name }));
+    toast.success(
+      t((m) => m.FamilyCategories.updateSuccess, { name: values.name }),
+    );
     setPending(false);
   };
 
@@ -105,8 +109,12 @@ export function EditCategoryDialog({
     >
       <DialogContent className="max-h-[96vh] overflow-y-auto lg:max-h-[calc(100vh-2rem)] lg:max-w-4xl lg:overflow-y-hidden">
         <DialogHeader>
-          <DialogTitle>{t("editCategoryDialogTitle")}</DialogTitle>
-          <DialogDescription>{t("editCategoryDialogDesc")}</DialogDescription>
+          <DialogTitle>
+            {t((m) => m.FamilyCategories.editCategoryDialogTitle)}
+          </DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyCategories.editCategoryDialogDesc)}
+          </DialogDescription>
         </DialogHeader>
         <form
           className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6"
@@ -122,7 +130,9 @@ export function EditCategoryDialog({
             form="edit-category-form"
             type="submit"
           >
-            {pending ? t("savingBtn") : t("saveCategoryBtn")}
+            {pending
+              ? t((m) => m.FamilyCategories.savingBtn)
+              : t((m) => m.FamilyCategories.saveCategoryBtn)}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -74,7 +74,7 @@ export function PersonalCategoryDialog({
     if (isPending || !allowedTypes.includes(type)) return;
 
     if (!trimmedName) {
-      setError(t("uniqueName"));
+      setError(t((m) => m.PersonalMoney.categoryDialog.uniqueName));
       return;
     }
 
@@ -86,12 +86,12 @@ export function PersonalCategoryDialog({
     );
 
     if (isDuplicate) {
-      setError(t("uniqueName"));
+      setError(t((m) => m.PersonalMoney.categoryDialog.uniqueName));
       return;
     }
 
     if (!familyId) {
-      setError(t("noWorkspace"));
+      setError(t((m) => m.PersonalMoney.categoryDialog.noWorkspace));
       return;
     }
 
@@ -111,12 +111,20 @@ export function PersonalCategoryDialog({
     });
 
     if (!response.ok) {
-      setError(response.message ?? response.error ?? t("saveFailed"));
+      setError(
+        response.message ??
+          response.error ??
+          t((m) => m.PersonalMoney.categoryDialog.saveFailed),
+      );
       setIsPending(false);
       return;
     }
 
-    toast.success(isEdit ? t("updated") : t("created"));
+    toast.success(
+      isEdit
+        ? t((m) => m.PersonalMoney.categoryDialog.updated)
+        : t((m) => m.PersonalMoney.categoryDialog.created),
+    );
     setIsPending(false);
     onOpenChange(false);
     await onSuccess();
@@ -130,7 +138,9 @@ export function PersonalCategoryDialog({
       >
         <DialogHeader className="p-0">
           <DialogTitle className="font-fraunces text-[22px] font-semibold text-foreground">
-            {category ? t("editTitle") : t("addTitle")}
+            {category
+              ? t((m) => m.PersonalMoney.categoryDialog.editTitle)
+              : t((m) => m.PersonalMoney.categoryDialog.addTitle)}
           </DialogTitle>
         </DialogHeader>
 
@@ -141,7 +151,7 @@ export function PersonalCategoryDialog({
               htmlFor="cat-name-input"
               className="text-[13px] font-medium text-muted-foreground"
             >
-              {t("name")}
+              {t((m) => m.PersonalMoney.categoryDialog.name)}
             </label>
             <input
               id="cat-name-input"
@@ -152,7 +162,9 @@ export function PersonalCategoryDialog({
                 setName(e.target.value);
                 if (error) setError(null);
               }}
-              placeholder={t("namePlaceholder")}
+              placeholder={t(
+                (m) => m.PersonalMoney.categoryDialog.namePlaceholder,
+              )}
               className="h-12 w-full rounded-xl border border-border bg-muted/60 px-3.5 text-base text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
               autoFocus
             />
@@ -164,7 +176,7 @@ export function PersonalCategoryDialog({
               htmlFor="cat-type-select"
               className="text-[13px] font-medium text-muted-foreground"
             >
-              {t("type")}
+              {t((m) => m.PersonalMoney.categoryDialog.type)}
             </label>
             <select
               id="cat-type-select"
@@ -176,10 +188,14 @@ export function PersonalCategoryDialog({
               className="h-12 w-full rounded-xl border border-border bg-muted/60 px-3 text-base text-foreground outline-none focus:ring-2 focus:ring-ring"
             >
               {allowedTypes.includes("INCOME") && (
-                <option value="INCOME">{t("income")}</option>
+                <option value="INCOME">
+                  {t((m) => m.PersonalMoney.categoryDialog.income)}
+                </option>
               )}
               {allowedTypes.includes("EXPENSE") && (
-                <option value="EXPENSE">{t("expense")}</option>
+                <option value="EXPENSE">
+                  {t((m) => m.PersonalMoney.categoryDialog.expense)}
+                </option>
               )}
             </select>
           </div>
@@ -187,7 +203,7 @@ export function PersonalCategoryDialog({
           {/* Color Swatch Field */}
           <div className="mb-3.5 flex flex-col gap-2">
             <span className="text-[13px] font-medium text-muted-foreground">
-              {t("color")}
+              {t((m) => m.PersonalMoney.categoryDialog.color)}
             </span>
             <div className="flex flex-wrap gap-2.5">
               {CATEGORY_COLORS.map((c) => {
@@ -196,7 +212,10 @@ export function PersonalCategoryDialog({
                   <button
                     key={c}
                     type="button"
-                    aria-label={t("colorAria", { color: c })}
+                    aria-label={t(
+                      (m) => m.PersonalMoney.categoryDialog.colorAria,
+                      { color: c },
+                    )}
                     aria-pressed={isSelected}
                     onClick={() => setColor(c)}
                     style={{
@@ -230,14 +249,16 @@ export function PersonalCategoryDialog({
               onClick={() => onOpenChange(false)}
               className="h-11 flex-1 rounded-xl text-sm font-semibold"
             >
-              {t("cancel")}
+              {t((m) => m.PersonalMoney.categoryDialog.cancel)}
             </Button>
             <Button
               type="submit"
               disabled={isPending}
               className="h-11 flex-1 rounded-xl bg-foreground text-sm font-semibold text-background hover:bg-foreground/90"
             >
-              {isPending ? t("saving") : t("save")}
+              {isPending
+                ? t((m) => m.PersonalMoney.categoryDialog.saving)
+                : t((m) => m.PersonalMoney.categoryDialog.save)}
             </Button>
           </div>
         </form>

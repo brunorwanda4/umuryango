@@ -140,16 +140,19 @@ export function PersonPlansPage() {
       { status },
     );
     if (!response.ok) {
-      toast.error(t("toasts.updateFailed"), {
-        description: response.message,
-      });
+      toast.error(
+        t((m) => m.PersonalPlans.toasts.updateFailed),
+        {
+          description: response.message,
+        },
+      );
       void load(detailsPlan?.id);
       return;
     }
     toast.success(
       status === "COMPLETED"
-        ? t("toasts.planCompleted")
-        : t("toasts.planIncomplete"),
+        ? t((m) => m.PersonalPlans.toasts.planCompleted)
+        : t((m) => m.PersonalPlans.toasts.planIncomplete),
     );
     void load(detailsPlan?.id);
   };
@@ -163,12 +166,15 @@ export function PersonPlansPage() {
     );
     setDeleting(false);
     if (!response.ok) {
-      toast.error(t("toasts.deleteFailed"), {
-        description: response.message,
-      });
+      toast.error(
+        t((m) => m.PersonalPlans.toasts.deleteFailed),
+        {
+          description: response.message,
+        },
+      );
       return;
     }
-    toast.success(t("toasts.planDeleted"));
+    toast.success(t((m) => m.PersonalPlans.toasts.planDeleted));
     setDeletePlan(null);
     setDetailsPlan(null);
     void load();
@@ -180,8 +186,10 @@ export function PersonPlansPage() {
       <div className="flex flex-col gap-4">
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>{t("loadErrorTitle")}</AlertTitle>
-          <AlertDescription>{error ?? t("personNotFound")}</AlertDescription>
+          <AlertTitle>{t((m) => m.PersonalPlans.loadErrorTitle)}</AlertTitle>
+          <AlertDescription>
+            {error ?? t((m) => m.PersonalPlans.personNotFound)}
+          </AlertDescription>
         </Alert>
         <Button
           variant="outline"
@@ -191,7 +199,7 @@ export function PersonPlansPage() {
             void load();
           }}
         >
-          {t("tryAgain")}
+          {t((m) => m.PersonalPlans.tryAgain)}
         </Button>
       </div>
     );
@@ -208,15 +216,17 @@ export function PersonPlansPage() {
             <EmptyMedia variant="icon">
               <ListChecksIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>{t("noPlansTitle", { name: firstName })}</EmptyTitle>
+            <EmptyTitle>
+              {t((m) => m.PersonalPlans.noPlansTitle, { name: firstName })}
+            </EmptyTitle>
             <EmptyDescription>
-              {t("noPlansDesc", { name: firstName })}
+              {t((m) => m.PersonalPlans.noPlansDesc, { name: firstName })}
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button onClick={() => openCreate()}>
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              {t("addFirstPlan")}
+              {t((m) => m.PersonalPlans.addFirstPlan)}
             </Button>
           </EmptyContent>
         </Empty>
@@ -262,14 +272,16 @@ export function PersonPlansPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("deleteConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t((m) => m.PersonalPlans.deleteConfirmTitle)}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              {t("deleteConfirmDesc")}
+              {t((m) => m.PersonalPlans.deleteConfirmDesc)}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>
-              {t("cancel")}
+              {t((m) => m.PersonalPlans.cancel)}
             </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
@@ -279,7 +291,9 @@ export function PersonPlansPage() {
                 void confirmDelete();
               }}
             >
-              {deleting ? t("deleting") : t("deletePlan")}
+              {deleting
+                ? t((m) => m.PersonalPlans.deleting)
+                : t((m) => m.PersonalPlans.deletePlan)}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

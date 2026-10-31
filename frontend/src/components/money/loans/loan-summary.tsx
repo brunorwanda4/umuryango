@@ -50,7 +50,7 @@ export function LoanSummary({
       cards={[
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.borrowed"),
+          description: t((m) => m.PersonalLoans.summary.borrowed),
           iconSource: {
             image: { src: "/images/icons/borrowing.png" },
             line: ArrowDownToLineIcon,
@@ -64,7 +64,7 @@ export function LoanSummary({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.lent"),
+          description: t((m) => m.PersonalLoans.summary.lent),
           iconSource: {
             image: { src: "/images/icons/lent.png" },
             line: ArrowUpFromLineIcon,
@@ -75,7 +75,7 @@ export function LoanSummary({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.repaid"),
+          description: t((m) => m.PersonalLoans.summary.repaid),
           iconSource: {
             image: { src: "/images/icons/repaid.png" },
             line: CircleDollarSignIcon,
@@ -89,7 +89,7 @@ export function LoanSummary({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.remaining"),
+          description: t((m) => m.PersonalLoans.summary.remaining),
           iconSource: {
             image: { src: "/images/icons/clock.png" },
             line: ClockIcon,

@@ -35,7 +35,7 @@ function getRecentIncomeColumns({
   return [
     {
       accessorKey: "source",
-      header: t("table.source"),
+      header: t((m) => m.PersonalMoney.personalIncome.table.source),
       cell: ({ row }) => {
         return (
           <div className="flex min-w-44 items-center">
@@ -48,7 +48,7 @@ function getRecentIncomeColumns({
     },
     {
       accessorKey: "description",
-      header: t("table.description"),
+      header: t((m) => m.PersonalMoney.personalIncome.table.description),
       cell: ({ row }) => (
         <span className="block min-w-60 text-muted-foreground">
           {row.original.description}
@@ -57,7 +57,7 @@ function getRecentIncomeColumns({
     },
     {
       accessorKey: "category",
-      header: t("table.category"),
+      header: t((m) => m.PersonalMoney.personalIncome.table.category),
       cell: ({ row }) => (
         <span
           className={cn(
@@ -71,7 +71,7 @@ function getRecentIncomeColumns({
     },
     {
       accessorKey: "amountMinorUnits",
-      header: t("table.amount"),
+      header: t((m) => m.PersonalMoney.personalIncome.table.amount),
       cell: ({ row }) => (
         <span className="font-bold text-chart-2">
           <CompactMoney currency="RWF" value={row.original.amountMinorUnits} />
@@ -80,14 +80,14 @@ function getRecentIncomeColumns({
     },
     {
       accessorKey: "date",
-      header: t("table.date"),
+      header: t((m) => m.PersonalMoney.personalIncome.table.date),
       cell: ({ row }) => (
         <span className="text-muted-foreground">{row.original.date}</span>
       ),
     },
     {
       accessorKey: "paymentMethod",
-      header: t("table.paymentMethod"),
+      header: t((m) => m.PersonalMoney.personalIncome.table.paymentMethod),
       cell: ({ row }) => {
         const PaymentIcon = row.original.paymentIcon;
 
@@ -108,7 +108,11 @@ function getRecentIncomeColumns({
     },
     {
       id: "actions",
-      header: () => <div className="text-right">{t("table.actions")}</div>,
+      header: () => (
+        <div className="text-right">
+          {t((m) => m.PersonalMoney.personalIncome.table.actions)}
+        </div>
+      ),
       cell: ({ row }) => (
         <div className="flex justify-end">
           <RecentIncomeActionsPopover
@@ -176,7 +180,7 @@ export function RecentIncomeTable({
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="flex items-center justify-between px-5 pt-5 pb-2 sm:px-6">
         <CardTitle className="font-bold text-base">
-          {t("table.recentIncome")}
+          {t((m) => m.PersonalMoney.personalIncome.table.recentIncome)}
         </CardTitle>
         <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
@@ -197,7 +201,9 @@ export function RecentIncomeTable({
             columns={recentIncomeColumns}
             data={filteredIncomeData}
             getRowAriaLabel={(row) =>
-              t("table.viewIncomeAria", { source: row.original.source })
+              t((m) => m.PersonalMoney.personalIncome.table.viewIncomeAria, {
+                source: row.original.source,
+              })
             }
             onRowClick={(row) => setViewIncomeId(row.original.id)}
             rowClassName={() => "hover:bg-muted/50"}

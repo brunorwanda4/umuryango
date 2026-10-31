@@ -36,7 +36,7 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
         <span className="truncate">{label}</span>
       </dt>
       <dd className="min-w-0 max-w-[60%] break-words text-right font-medium">
-        {value || tCommon("notRecorded")}
+        {value || tCommon((m) => m.Common.notRecorded)}
       </dd>
     </div>
   );
@@ -68,10 +68,10 @@ export function ContactDetailsDialog({
             </div>
             <div className="min-w-0">
               <DialogTitle className="truncate">
-                {contact?.fullName ?? t("detailsTitle")}
+                {contact?.fullName ?? t((m) => m.FamilyContacts.detailsTitle)}
               </DialogTitle>
               <DialogDescription className="mt-1">
-                {t("detailsDesc")}
+                {t((m) => m.FamilyContacts.detailsDesc)}
               </DialogDescription>
             </div>
           </div>
@@ -81,26 +81,35 @@ export function ContactDetailsDialog({
             <ContactBadges contact={contact} className="pt-1" />
             <dl className="grid gap-2 text-sm sm:grid-cols-2">
               <DetailRow
-                label={tCommon("type")}
+                label={tCommon((m) => m.Common.type)}
                 value={t(`types.${contact.contactType}`)}
               />
-              <DetailRow label={t("phoneLabel")} value={contact.phoneNumber} />
-              <DetailRow label={t("emailLabel")} value={contact.email} />
               <DetailRow
-                label={t("relationshipLabel")}
+                label={t((m) => m.FamilyContacts.phoneLabel)}
+                value={contact.phoneNumber}
+              />
+              <DetailRow
+                label={t((m) => m.FamilyContacts.emailLabel)}
+                value={contact.email}
+              />
+              <DetailRow
+                label={t((m) => m.FamilyContacts.relationshipLabel)}
                 value={contact.relationshipToFamily}
               />
               <DetailRow
-                label={t("organizationLabel")}
+                label={t((m) => m.FamilyContacts.organizationLabel)}
                 value={contact.organization}
               />
-              <DetailRow label={t("addressLabel")} value={contact.address} />
               <DetailRow
-                label={tCommon("createdBy")}
+                label={t((m) => m.FamilyContacts.addressLabel)}
+                value={contact.address}
+              />
+              <DetailRow
+                label={tCommon((m) => m.Common.createdBy)}
                 value={contact.createdByName}
               />
               <DetailRow
-                label={tCommon("createdDate")}
+                label={tCommon((m) => m.Common.createdDate)}
                 value={formatDate(contact.createdAt)}
               />
             </dl>
@@ -108,7 +117,7 @@ export function ContactDetailsDialog({
               <div className="rounded-lg border bg-muted/20 p-4 text-sm">
                 <div className="flex items-center gap-2 font-medium">
                   <HeartHandshakeIcon className="size-4 text-muted-foreground" />
-                  {t("notesLabel")}
+                  {t((m) => m.FamilyContacts.notesLabel)}
                 </div>
                 <p className="mt-2 whitespace-pre-wrap text-muted-foreground">
                   {contact.notes}
@@ -125,7 +134,7 @@ export function ContactDetailsDialog({
                   onClick={() => onEdit(contact)}
                 >
                   <PencilIcon aria-hidden="true" data-icon="inline-start" />
-                  {tCommon("update")}
+                  {tCommon((m) => m.Common.update)}
                 </Button>
                 <Button
                   type="button"
@@ -134,7 +143,7 @@ export function ContactDetailsDialog({
                   onClick={() => onDelete(contact)}
                 >
                   <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-                  {tCommon("delete")}
+                  {tCommon((m) => m.Common.delete)}
                 </Button>
               </div>
             </div>

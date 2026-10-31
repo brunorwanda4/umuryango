@@ -104,7 +104,7 @@ export function ViewTransactionDialog({
                 variant="ghost"
               >
                 <EyeIcon aria-hidden="true" data-icon="inline-start" />
-                {t("view")}
+                {t((m) => m.Common.view)}
               </Button>
             )}
           </DialogTrigger>
@@ -146,7 +146,7 @@ export function ViewTransactionDialog({
               <div className="flex items-center gap-3 border-b px-4 py-3.5">
                 <TagIcon className="text-muted-foreground size-4 shrink-0" />
                 <dt className="text-muted-foreground text-sm">
-                  {t("category")}
+                  {t((m) => m.Common.category)}
                 </dt>
                 <dd className="ml-auto">
                   <Badge className={categoryClassName}>{category}</Badge>
@@ -155,7 +155,7 @@ export function ViewTransactionDialog({
               <div className="flex items-center gap-3 px-4 py-3.5">
                 <PaymentIcon className="text-muted-foreground size-4 shrink-0" />
                 <dt className="text-muted-foreground text-sm">
-                  {t("paymentMethod")}
+                  {t((m) => m.Common.paymentMethod)}
                 </dt>
                 <dd className="ml-auto text-right text-sm font-medium">
                   {paymentMethod}
@@ -191,7 +191,7 @@ export function ViewTransactionDialog({
                 type="button"
                 variant="outline"
               >
-                {t("close")}
+                {t((m) => m.Common.close)}
               </Button>
             </DialogClose>
           </DialogFooter>

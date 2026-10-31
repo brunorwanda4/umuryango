@@ -36,17 +36,21 @@ export function LoanList({
             <HandCoinsIcon aria-hidden="true" />
           </EmptyMedia>
           <EmptyTitle>
-            {hasLoans ? t("tabs.noMatchingTitle") : t("tabs.noLoansTitle")}
+            {hasLoans
+              ? t((m) => m.PersonalLoans.tabs.noMatchingTitle)
+              : t((m) => m.PersonalLoans.tabs.noLoansTitle)}
           </EmptyTitle>
           <EmptyDescription>
-            {hasLoans ? t("tabs.noMatchingDesc") : t("tabs.noLoansDesc")}
+            {hasLoans
+              ? t((m) => m.PersonalLoans.tabs.noMatchingDesc)
+              : t((m) => m.PersonalLoans.tabs.noLoansDesc)}
           </EmptyDescription>
         </EmptyHeader>
         {!hasLoans ? (
           <EmptyContent>
             <Button onClick={onAdd}>
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              {t("tabs.addFirstLoan")}
+              {t((m) => m.PersonalLoans.tabs.addFirstLoan)}
             </Button>
           </EmptyContent>
         ) : null}

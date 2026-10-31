@@ -76,7 +76,9 @@ export function RecordPaymentForm({
       method: "post",
       url: `/families/${encodeURIComponent(familyId)}/money/loans/${encodeURIComponent(loan?.id ?? "")}/repayments`,
     },
-    onSuccessMessage: t("paymentForm.paymentRecordedToast"),
+    onSuccessMessage: t(
+      (m) => m.PersonalLoans.paymentForm.paymentRecordedToast,
+    ),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -109,9 +111,13 @@ export function RecordPaymentForm({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("paymentForm.title")}</DialogTitle>
+          <DialogTitle>
+            {t((m) => m.PersonalLoans.paymentForm.title)}
+          </DialogTitle>
           <DialogDescription>
-            {t("paymentForm.description", { title: loan?.title ?? "" })}{" "}
+            {t((m) => m.PersonalLoans.paymentForm.description, {
+              title: loan?.title ?? "",
+            })}{" "}
             {loan ? (
               <CompactMoney
                 currency={loan.currency}
@@ -129,13 +135,13 @@ export function RecordPaymentForm({
           <CommonFormField
             control={form.control}
             name="payFull"
-            label={t("paymentForm.payFull")}
+            label={t((m) => m.PersonalLoans.paymentForm.payFull)}
             fieldType="checkbox"
           />
           <CommonFormField
             control={form.control}
             name="amountMinorUnits"
-            label={t("paymentForm.amount")}
+            label={t((m) => m.PersonalLoans.paymentForm.amount)}
             fieldType="money"
             currency={loan?.currency ?? "RWF"}
             disabled={payFull}
@@ -145,27 +151,40 @@ export function RecordPaymentForm({
             <CommonFormField
               control={form.control}
               name="paymentDate"
-              label={t("paymentForm.date")}
+              label={t((m) => m.PersonalLoans.paymentForm.date)}
               fieldType="date"
               required
             />
             <CommonFormField
               control={form.control}
               name="paymentMethod"
-              label={t("paymentForm.method")}
+              label={t((m) => m.PersonalLoans.paymentForm.method)}
               fieldType="select"
               selectOptions={[
-                { label: t("paymentForm.methods.cash"), value: "CASH" },
                 {
-                  label: t("paymentForm.methods.mobileMoney"),
+                  label: t((m) => m.PersonalLoans.paymentForm.methods.cash),
+                  value: "CASH",
+                },
+                {
+                  label: t(
+                    (m) => m.PersonalLoans.paymentForm.methods.mobileMoney,
+                  ),
                   value: "MOBILE_MONEY",
                 },
                 {
-                  label: t("paymentForm.methods.bankTransfer"),
+                  label: t(
+                    (m) => m.PersonalLoans.paymentForm.methods.bankTransfer,
+                  ),
                   value: "BANK_TRANSFER",
                 },
-                { label: t("paymentForm.methods.card"), value: "CARD" },
-                { label: t("paymentForm.methods.other"), value: "OTHER" },
+                {
+                  label: t((m) => m.PersonalLoans.paymentForm.methods.card),
+                  value: "CARD",
+                },
+                {
+                  label: t((m) => m.PersonalLoans.paymentForm.methods.other),
+                  value: "OTHER",
+                },
               ]}
               required
             />
@@ -173,9 +192,9 @@ export function RecordPaymentForm({
           <CommonFormField
             control={form.control}
             name="notes"
-            label={t("paymentForm.note")}
+            label={t((m) => m.PersonalLoans.paymentForm.note)}
             fieldType="textarea"
-            placeholder={t("paymentForm.notePlaceholder")}
+            placeholder={t((m) => m.PersonalLoans.paymentForm.notePlaceholder)}
           />
         </form>
         <DialogFooter>
@@ -191,10 +210,10 @@ export function RecordPaymentForm({
               <HandCoinsIcon aria-hidden="true" data-icon="inline-start" />
             )}
             {isPending
-              ? t("paymentForm.recording")
+              ? t((m) => m.PersonalLoans.paymentForm.recording)
               : payFull
-                ? t("paymentForm.payFullBalance")
-                : t("paymentForm.recordPayment")}
+                ? t((m) => m.PersonalLoans.paymentForm.payFullBalance)
+                : t((m) => m.PersonalLoans.paymentForm.recordPayment)}
           </Button>
         </DialogFooter>
       </DialogContent>

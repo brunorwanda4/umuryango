@@ -41,8 +41,12 @@ export function FamilyIncomeItems({
             <EmptyMedia variant="icon">
               <SearchIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>{t("panels.noIncomeFound")}</EmptyTitle>
-            <EmptyDescription>{t("panels.noIncomeFoundDesc")}</EmptyDescription>
+            <EmptyTitle>
+              {t((m) => m.FamilyIncome.panels.noIncomeFound)}
+            </EmptyTitle>
+            <EmptyDescription>
+              {t((m) => m.FamilyIncome.panels.noIncomeFoundDesc)}
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>

@@ -35,7 +35,7 @@ const ForgotPasswordPage = async ({
         <Link
           href={getLocalizedHref("/auth/login", locale)}
           className="inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          aria-label={page("backAriaLabel")}
+          aria-label={page((m) => m.ForgotPasswordPage.backAriaLabel)}
         >
           <ChevronLeftIcon aria-hidden="true" className="size-5" />
         </Link>
@@ -43,21 +43,23 @@ const ForgotPasswordPage = async ({
         <div className="flex items-center gap-2">
           <Image
             src="/logo.svg"
-            alt={shared("brand")}
+            alt={shared((m) => m.Shared.brand)}
             width={32}
             height={32}
             priority
             className="rounded-lg"
           />
-          <span className="text-base font-semibold">{shared("brand")}</span>
+          <span className="text-base font-semibold">
+            {shared((m) => m.Shared.brand)}
+          </span>
         </div>
 
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            {page("heading")}
+            {page((m) => m.ForgotPasswordPage.heading)}
           </h1>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {page("subheading")}
+            {page((m) => m.ForgotPasswordPage.subheading)}
           </p>
         </div>
 

@@ -35,14 +35,14 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
   const activities: Activity[] = [
     ...(data.income?.records ?? []).map((record) => ({
       id: `income-${record.id}`,
-      title: t("addedIncome"),
+      title: t((m) => m.PersonalOverview.recentActivityCard.addedIncome),
       description: record.description ?? record.category.name,
       time: record.createdAt,
       icon: ReceiptTextIcon,
     })),
     ...(data.expenses?.records ?? []).map((record) => ({
       id: `expense-${record.id}`,
-      title: t("addedExpense"),
+      title: t((m) => m.PersonalOverview.recentActivityCard.addedExpense),
       description: record.description ?? record.category.name,
       time: record.createdAt,
       icon: ReceiptTextIcon,
@@ -50,14 +50,18 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
     ...data.plans.map((plan) => ({
       id: `plan-${plan.id}`,
       title:
-        plan.status === "COMPLETED" ? t("completedPlan") : t("createdPlan"),
+        plan.status === "COMPLETED"
+          ? t((m) => m.PersonalOverview.recentActivityCard.completedPlan)
+          : t((m) => m.PersonalOverview.recentActivityCard.createdPlan),
       description: plan.title,
       time: plan.completedAt ?? plan.createdAt,
       icon: CalendarCheckIcon,
     })),
     ...data.families.map((family) => ({
       id: `family-${family.id}`,
-      title: t("familyWorkspaceAvailable"),
+      title: t(
+        (m) => m.PersonalOverview.recentActivityCard.familyWorkspaceAvailable,
+      ),
       description: family.name,
       time: "",
       icon: UsersIcon,
@@ -72,8 +76,12 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("recentActionsDesc")}</CardDescription>
+        <CardTitle>
+          {t((m) => m.PersonalOverview.recentActivityCard.title)}
+        </CardTitle>
+        <CardDescription>
+          {t((m) => m.PersonalOverview.recentActivityCard.recentActionsDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {activities.length === 0 ? (
@@ -82,8 +90,14 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
               <EmptyMedia variant="icon">
                 <ActivityIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
-              <EmptyDescription>{t("noRecentActions")}</EmptyDescription>
+              <EmptyTitle>
+                {t((m) => m.PersonalOverview.recentActivityCard.emptyTitle)}
+              </EmptyTitle>
+              <EmptyDescription>
+                {t(
+                  (m) => m.PersonalOverview.recentActivityCard.noRecentActions,
+                )}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
@@ -105,7 +119,10 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
                 <p className="shrink-0 text-muted-foreground text-xs">
                   {activity.time
                     ? formatRelativeTime(activity.time, t)
-                    : t("availableNow")}
+                    : t(
+                        (m) =>
+                          m.PersonalOverview.recentActivityCard.availableNow,
+                      )}
                 </p>
               </div>
             ))}
@@ -121,13 +138,19 @@ function formatRelativeTime(value: string, t: Translator) {
     0,
     Math.floor((Date.now() - Date.parse(value)) / 1000),
   );
-  if (seconds < 60) return t("justNow");
+  if (seconds < 60)
+    return t((m) => m.PersonalOverview.recentActivityCard.justNow);
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return t("minutesAgo", { minutes });
+  if (minutes < 60)
+    return t((m) => m.PersonalOverview.recentActivityCard.minutesAgo, {
+      minutes,
+    });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return t("hoursAgo", { hours });
+  if (hours < 24)
+    return t((m) => m.PersonalOverview.recentActivityCard.hoursAgo, { hours });
   const days = Math.floor(hours / 24);
-  if (days < 7) return t("daysAgo", { days });
+  if (days < 7)
+    return t((m) => m.PersonalOverview.recentActivityCard.daysAgo, { days });
   return new Date(value).toLocaleDateString("en", {
     month: "short",
     day: "numeric",

@@ -40,7 +40,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createTranslator } from "@/i18n/translate";
+import { createTranslator, type Translator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import { FamilyProjectsSkeleton } from "./family-projects-skeleton";
@@ -116,7 +116,9 @@ export function ProjectDetailWorkspace({
     if (!familyResponse.ok || !familyResponse.data) {
       setState({
         status: "error",
-        message: familyResponse.message ?? t("detailsUnavailableTitle"),
+        message:
+          familyResponse.message ??
+          t((m) => m.FamilyProjects.detailsUnavailableTitle),
       });
       return;
     }
@@ -136,7 +138,8 @@ export function ProjectDetailWorkspace({
         : null,
       projectsMessage: projectsResponse.ok
         ? undefined
-        : (projectsResponse.message ?? t("projectRecordsUnavailableDesc")),
+        : (projectsResponse.message ??
+          t((m) => m.FamilyProjects.projectRecordsUnavailableDesc)),
     });
   }, [familyName, t]);
 
@@ -157,10 +160,16 @@ export function ProjectDetailWorkspace({
           <EmptyMedia variant="icon">
             <FolderKanbanIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>{t("detailsUnavailableTitle")}</EmptyTitle>
+          <EmptyTitle>
+            {t((m) => m.FamilyProjects.detailsUnavailableTitle)}
+          </EmptyTitle>
           <EmptyDescription>
-            {t("detailsUnavailableDesc", { message: state.message })}{" "}
-            <Link href="/family">{t("backToFamilies")}</Link>
+            {t((m) => m.FamilyProjects.detailsUnavailableDesc, {
+              message: state.message,
+            })}{" "}
+            <Link href="/family">
+              {t((m) => m.FamilyProjects.backToFamilies)}
+            </Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -244,9 +253,13 @@ function ProjectDetailContent({
       {projectsMessage ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>{t("waitingForRecordsTitle")}</AlertTitle>
+          <AlertTitle>
+            {t((m) => m.FamilyProjects.waitingForRecordsTitle)}
+          </AlertTitle>
           <AlertDescription>
-            {t("waitingForRecordsDesc", { detail: projectsMessage })}
+            {t((m) => m.FamilyProjects.waitingForRecordsDesc, {
+              detail: projectsMessage,
+            })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -255,11 +268,15 @@ function ProjectDetailContent({
       <Tabs defaultValue="overview" className="gap-4">
         <div className="overflow-x-auto">
           <TabsList className="min-w-max">
-            <TabsTrigger value="overview">{t("overviewTab")}</TabsTrigger>
-            <TabsTrigger value="contributions">
-              {t("contributionsTab")}
+            <TabsTrigger value="overview">
+              {t((m) => m.FamilyProjects.overviewTab)}
             </TabsTrigger>
-            <TabsTrigger value="plan">{t("planTab")}</TabsTrigger>
+            <TabsTrigger value="contributions">
+              {t((m) => m.FamilyProjects.contributionsTab)}
+            </TabsTrigger>
+            <TabsTrigger value="plan">
+              {t((m) => m.FamilyProjects.planTab)}
+            </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="overview">
@@ -302,7 +319,7 @@ function ProjectDetailHeader({
       <Button asChild className="w-fit" size="sm" variant="outline">
         <Link href={`/family/${encodeURIComponent(familyName)}/projects`}>
           <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-          {t("projectsButton")}
+          {t((m) => m.FamilyProjects.projectsButton)}
         </Link>
       </Button>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -316,21 +333,24 @@ function ProjectDetailHeader({
               <Badge variant="outline">{formatTitle(project.category)}</Badge>
             ) : null}
             <Badge variant={sourceRecordCount > 1 ? "outline" : "secondary"}>
-              {t("sourceRecordsBadge", { count: sourceRecordCount })}
+              {t((m) => m.FamilyProjects.sourceRecordsBadge, {
+                count: sourceRecordCount,
+              })}
             </Badge>
           </div>
           <p className="max-w-4xl text-muted-foreground text-sm leading-6">
-            {project.description ?? t("defaultProjectDescription")}
+            {project.description ??
+              t((m) => m.FamilyProjects.defaultProjectDescription)}
           </p>
         </div>
         {canManageContributions ? (
           <Button
             disabled
             size="sm"
-            title={t("recordContributionDisabledTitle")}
+            title={t((m) => m.FamilyProjects.recordContributionDisabledTitle)}
           >
             <HandCoinsIcon aria-hidden="true" data-icon="inline-start" />
-            {t("recordContribution")}
+            {t((m) => m.FamilyProjects.recordContribution)}
           </Button>
         ) : null}
       </div>
@@ -348,28 +368,28 @@ function ProjectDetailMetrics({
   const t = createTranslator("FamilyProjects");
   const cards = [
     {
-      title: t("targetBudget"),
+      title: t((m) => m.FamilyProjects.targetBudget),
       value: project.targetAmountMinorUnits,
-      description: t("savedProjectBudgetTarget"),
+      description: t((m) => m.FamilyProjects.savedProjectBudgetTarget),
       icon: WalletCardsIcon,
       isMoney: true,
     },
     {
-      title: t("contributed"),
+      title: t((m) => m.FamilyProjects.contributed),
       value: project.contributedMinorUnits,
-      description: t("verifiedContributionsReceived"),
+      description: t((m) => m.FamilyProjects.verifiedContributionsReceived),
       icon: HandCoinsIcon,
       isMoney: true,
     },
     {
-      title: t("outstanding"),
+      title: t((m) => m.FamilyProjects.outstanding),
       value: project.outstandingMinorUnits,
-      description: t("remainingFromPersistedRecords"),
+      description: t((m) => m.FamilyProjects.remainingFromPersistedRecords),
       icon: TargetIcon,
       isMoney: true,
     },
     {
-      title: t("targetDate"),
+      title: t((m) => m.FamilyProjects.targetDate),
       value: formatDate(project.targetDate),
       description: getTargetDateDescription(project, t),
       icon: CalendarClockIcon,
@@ -378,7 +398,7 @@ function ProjectDetailMetrics({
 
   return (
     <section
-      aria-label={t("projectFinancialSummaryAria")}
+      aria-label={t((m) => m.FamilyProjects.projectFinancialSummaryAria)}
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
     >
       {cards.map((card) => {
@@ -428,24 +448,28 @@ function ProjectProgressCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("projectProgressTitle")}</CardTitle>
-        <CardDescription>{t("projectProgressDesc")}</CardDescription>
+        <CardTitle>{t((m) => m.FamilyProjects.projectProgressTitle)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilyProjects.projectProgressDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-3 text-sm">
-            <span className="font-medium">{t("fundingProgress")}</span>
+            <span className="font-medium">
+              {t((m) => m.FamilyProjects.fundingProgress)}
+            </span>
             <span className="text-muted-foreground">
               {typeof project.percentFunded === "number"
                 ? `${Math.round(progress)}%`
-                : t("noPercentage")}
+                : t((m) => m.FamilyProjects.noPercentage)}
             </span>
           </div>
           <Progress value={progress} />
         </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <ProjectFact
-            label={t("contributed")}
+            label={t((m) => m.FamilyProjects.contributed)}
             value={
               <CompactMoney
                 currency={currency}
@@ -455,31 +479,35 @@ function ProjectProgressCard({
             }
           />
           <ProjectFact
-            label={t("startDate")}
+            label={t((m) => m.FamilyProjects.startDate)}
             value={formatDate(project.startDate)}
           />
           <ProjectFact
-            label={t("targetDate")}
+            label={t((m) => m.FamilyProjects.targetDate)}
             value={formatDate(project.targetDate)}
           />
           <ProjectFact
-            label={t("responsibleMember")}
-            value={project.ownerName ?? t("noOwnerAssigned")}
-          />
-          <ProjectFact
-            label={t("participants")}
+            label={t((m) => m.FamilyProjects.responsibleMember)}
             value={
-              typeof project.memberCount === "number"
-                ? t("membersCount", { count: project.memberCount })
-                : t("membersNotSet")
+              project.ownerName ?? t((m) => m.FamilyProjects.noOwnerAssigned)
             }
           />
           <ProjectFact
-            label={t("contributionPlanLabel")}
+            label={t((m) => m.FamilyProjects.participants)}
+            value={
+              typeof project.memberCount === "number"
+                ? t((m) => m.FamilyProjects.membersCount, {
+                    count: project.memberCount,
+                  })
+                : t((m) => m.FamilyProjects.membersNotSet)
+            }
+          />
+          <ProjectFact
+            label={t((m) => m.FamilyProjects.contributionPlanLabel)}
             value={
               project.contributionStrategy
                 ? formatTitle(project.contributionStrategy)
-                : t("notSet")
+                : t((m) => m.FamilyProjects.notSet)
             }
           />
         </div>
@@ -502,36 +530,38 @@ function ProjectManagementOverview({
   const t = createTranslator("FamilyProjects");
   const items = [
     {
-      title: t("projectManager"),
-      description: t("projectManagerDesc"),
-      value: project.ownerName ?? t("notAssigned"),
+      title: t((m) => m.FamilyProjects.projectManager),
+      description: t((m) => m.FamilyProjects.projectManagerDesc),
+      value: project.ownerName ?? t((m) => m.FamilyProjects.notAssigned),
       icon: UsersRoundIcon,
     },
     {
-      title: t("familyCadence"),
-      description: t("familyCadenceDesc"),
+      title: t((m) => m.FamilyProjects.familyCadence),
+      description: t((m) => m.FamilyProjects.familyCadenceDesc),
       value: family.contributionCadence,
       icon: CalendarClockIcon,
     },
     {
-      title: t("projectPermission"),
-      description: t("projectPermissionDesc"),
+      title: t((m) => m.FamilyProjects.projectPermission),
+      description: t((m) => m.FamilyProjects.projectPermissionDesc),
       value: canManageProjects
-        ? t("permissionAllowed")
-        : t("permissionViewOnly"),
+        ? t((m) => m.FamilyProjects.permissionAllowed)
+        : t((m) => m.FamilyProjects.permissionViewOnly),
       icon: ShieldCheckIcon,
     },
     {
-      title: t("reportSource"),
-      description: t("reportSourceDesc"),
-      value: t("recordsCount", { count: sourceRecordCount }),
+      title: t((m) => m.FamilyProjects.reportSource),
+      description: t((m) => m.FamilyProjects.reportSourceDesc),
+      value: t((m) => m.FamilyProjects.recordsCount, {
+        count: sourceRecordCount,
+      }),
       icon: CheckCircle2Icon,
     },
   ];
 
   return (
     <section
-      aria-label={t("operationsAria")}
+      aria-label={t((m) => m.FamilyProjects.operationsAria)}
       className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       {items.map((item) => (
@@ -557,10 +587,12 @@ function ProjectContributionSection({
         <AlertCircleIcon aria-hidden="true" />
         <AlertTitle>
           {canManageContributions
-            ? t("contributionEntryReadOnly")
-            : t("contributionEntryRequiresPermission")}
+            ? t((m) => m.FamilyProjects.contributionEntryReadOnly)
+            : t((m) => m.FamilyProjects.contributionEntryRequiresPermission)}
         </AlertTitle>
-        <AlertDescription>{t("contributionAlertDesc")}</AlertDescription>
+        <AlertDescription>
+          {t((m) => m.FamilyProjects.contributionAlertDesc)}
+        </AlertDescription>
       </Alert>
       <ProjectContributionTable currency={currency} projects={projects} />
     </div>
@@ -577,26 +609,30 @@ function ProjectPlanSection({
   const t = createTranslator("FamilyProjects");
   const checklist = [
     {
-      title: t("confirmBudgetRules"),
-      description: t("confirmBudgetRulesDesc"),
-      status: project.targetAmountMinorUnits ? t("ready") : t("needsAmount"),
+      title: t((m) => m.FamilyProjects.confirmBudgetRules),
+      description: t((m) => m.FamilyProjects.confirmBudgetRulesDesc),
+      status: project.targetAmountMinorUnits
+        ? t((m) => m.FamilyProjects.ready)
+        : t((m) => m.FamilyProjects.needsAmount),
     },
     {
-      title: t("assignResponsibleMembers"),
-      description: t("assignResponsibleMembersDesc"),
-      status: project.ownerName ? t("assigned") : t("needsOwner"),
+      title: t((m) => m.FamilyProjects.assignResponsibleMembers),
+      description: t((m) => m.FamilyProjects.assignResponsibleMembersDesc),
+      status: project.ownerName
+        ? t((m) => m.FamilyProjects.assigned)
+        : t((m) => m.FamilyProjects.needsOwner),
     },
     {
-      title: t("collectProjectContributions"),
-      description: t("collectProjectContributionsDesc"),
+      title: t((m) => m.FamilyProjects.collectProjectContributions),
+      description: t((m) => m.FamilyProjects.collectProjectContributionsDesc),
       status: project.contributionStrategy
         ? formatTitle(project.contributionStrategy)
-        : t("needsPlan"),
+        : t((m) => m.FamilyProjects.needsPlan),
     },
     {
-      title: t("keepDocumentsAttached"),
-      description: t("keepDocumentsAttachedDesc"),
-      status: t("documentWorkflow"),
+      title: t((m) => m.FamilyProjects.keepDocumentsAttached),
+      description: t((m) => m.FamilyProjects.keepDocumentsAttachedDesc),
+      status: t((m) => m.FamilyProjects.documentWorkflow),
     },
   ];
 
@@ -604,8 +640,10 @@ function ProjectPlanSection({
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
       <Card>
         <CardHeader>
-          <CardTitle>{t("planningChecklist")}</CardTitle>
-          <CardDescription>{t("planningChecklistDesc")}</CardDescription>
+          <CardTitle>{t((m) => m.FamilyProjects.planningChecklist)}</CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyProjects.planningChecklistDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {checklist.map((item) => (
@@ -639,23 +677,28 @@ function ProjectPlanSection({
           <CardAction>
             <FileTextIcon className="size-4 text-muted-foreground" />
           </CardAction>
-          <CardTitle>{t("projectFile")}</CardTitle>
-          <CardDescription>{t("projectFileDesc")}</CardDescription>
+          <CardTitle>{t((m) => m.FamilyProjects.projectFile)}</CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyProjects.projectFileDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 text-sm">
-          <ProjectFact label={t("familyLabel")} value={family.name} />
           <ProjectFact
-            label={t("targetDate")}
+            label={t((m) => m.FamilyProjects.familyLabel)}
+            value={family.name}
+          />
+          <ProjectFact
+            label={t((m) => m.FamilyProjects.targetDate)}
             value={formatDate(project.targetDate)}
           />
           <ProjectFact
-            label={t("projectStatus")}
+            label={t((m) => m.FamilyProjects.projectStatus)}
             value={formatTitle(project.status ?? "planned")}
           />
           <TableEmptyState
-            description={t("noLinkedDocsDesc")}
+            description={t((m) => m.FamilyProjects.noLinkedDocsDesc)}
             icon={FileTextIcon}
-            title={t("noLinkedDocsReturned")}
+            title={t((m) => m.FamilyProjects.noLinkedDocsReturned)}
           />
         </CardContent>
       </Card>
@@ -704,15 +747,17 @@ function ProjectRecordsUnavailable({
         <EmptyMedia variant="icon">
           <FolderKanbanIcon aria-hidden="true" />
         </EmptyMedia>
-        <EmptyTitle>{t("projectRecordsUnavailable")}</EmptyTitle>
+        <EmptyTitle>
+          {t((m) => m.FamilyProjects.projectRecordsUnavailable)}
+        </EmptyTitle>
         <EmptyDescription>
-          {t("projectRecordsUnavailableDesc")}
+          {t((m) => m.FamilyProjects.projectRecordsUnavailableDesc)}
           {message ? ` API detail: ${message}` : ""}
         </EmptyDescription>
       </EmptyHeader>
       <Button asChild variant="outline">
         <Link href={`/family/${encodeURIComponent(familyName)}/projects`}>
-          {t("backToProjects")}
+          {t((m) => m.FamilyProjects.backToProjects)}
         </Link>
       </Button>
     </Empty>
@@ -735,19 +780,19 @@ function ProjectNotFound({
         <EmptyMedia variant="icon">
           <FolderKanbanIcon aria-hidden="true" />
         </EmptyMedia>
-        <EmptyTitle>{t("projectNotFound")}</EmptyTitle>
+        <EmptyTitle>{t((m) => m.FamilyProjects.projectNotFound)}</EmptyTitle>
         <EmptyDescription>
-          {t("projectNotFoundMatched", {
+          {t((m) => m.FamilyProjects.projectNotFoundMatched, {
             projectName: formatTitle(projectName),
           })}
           {projects.projects?.length
-            ? ` ${t("openProjectsList")}`
-            : ` ${t("noSavedProjectsReturned")}`}
+            ? ` ${t((m) => m.FamilyProjects.openProjectsList)}`
+            : ` ${t((m) => m.FamilyProjects.noSavedProjectsReturned)}`}
         </EmptyDescription>
       </EmptyHeader>
       <Button asChild variant="outline">
         <Link href={`/family/${encodeURIComponent(familyName)}/projects`}>
-          {t("backToProjects")}
+          {t((m) => m.FamilyProjects.backToProjects)}
         </Link>
       </Button>
     </Empty>
@@ -773,27 +818,24 @@ function scopeProjectUpdates(updates: ProjectUpdateRow[], project: ProjectRow) {
   );
 }
 
-function getTargetDateDescription(
-  project: ProjectRow,
-  t: ReturnType<typeof createTranslator>,
-) {
+function getTargetDateDescription(project: ProjectRow, t: Translator) {
   if (!project.targetDate) {
-    return t("noTargetDate");
+    return t((m) => m.FamilyProjects.noTargetDate);
   }
 
   const status = project.status?.toLowerCase();
 
   if (status === "completed") {
-    return t("projectMarkedCompleted");
+    return t((m) => m.FamilyProjects.projectMarkedCompleted);
   }
 
   const targetDate = new Date(project.targetDate);
 
   if (Number.isNaN(targetDate.getTime())) {
-    return t("invalidTargetDate");
+    return t((m) => m.FamilyProjects.invalidTargetDate);
   }
 
   return targetDate < new Date()
-    ? t("needsReviewOrNewDate")
-    : t("upcomingMilestone");
+    ? t((m) => m.FamilyProjects.needsReviewOrNewDate)
+    : t((m) => m.FamilyProjects.upcomingMilestone);
 }

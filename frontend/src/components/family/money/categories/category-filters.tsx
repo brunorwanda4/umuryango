@@ -40,20 +40,29 @@ export function CategoryFilters({
       <CategorySearch
         value={search}
         onChange={setSearch}
-        placeholder={t("searchNameDesc")}
+        placeholder={t((m) => m.FamilyCategories.searchNameDesc)}
       />
       <Select
         value={typeFilter}
         onValueChange={(value) => setTypeFilter(value as "ALL" | CategoryType)}
       >
-        <SelectTrigger aria-label={t("filterTypeAria")} className="w-full">
+        <SelectTrigger
+          aria-label={t((m) => m.FamilyCategories.filterTypeAria)}
+          className="w-full"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="ALL">{t("allTypes")}</SelectItem>
-            <SelectItem value="INCOME">{t("income")}</SelectItem>
-            <SelectItem value="EXPENSE">{t("expense")}</SelectItem>
+            <SelectItem value="ALL">
+              {t((m) => m.FamilyCategories.allTypes)}
+            </SelectItem>
+            <SelectItem value="INCOME">
+              {t((m) => m.FamilyCategories.income)}
+            </SelectItem>
+            <SelectItem value="EXPENSE">
+              {t((m) => m.FamilyCategories.expense)}
+            </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -63,14 +72,23 @@ export function CategoryFilters({
           setStatusFilter(value as "ALL" | CategoryStatus)
         }
       >
-        <SelectTrigger aria-label={t("filterStatusAria")} className="w-full">
+        <SelectTrigger
+          aria-label={t((m) => m.FamilyCategories.filterStatusAria)}
+          className="w-full"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="ALL">{t("allStatuses")}</SelectItem>
-            <SelectItem value="ACTIVE">{t("active")}</SelectItem>
-            <SelectItem value="INACTIVE">{t("inactive")}</SelectItem>
+            <SelectItem value="ALL">
+              {t((m) => m.FamilyCategories.allStatuses)}
+            </SelectItem>
+            <SelectItem value="ACTIVE">
+              {t((m) => m.FamilyCategories.active)}
+            </SelectItem>
+            <SelectItem value="INACTIVE">
+              {t((m) => m.FamilyCategories.inactive)}
+            </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -78,17 +96,26 @@ export function CategoryFilters({
         value={sort}
         onValueChange={(value) => setSort(value as CategorySort)}
       >
-        <SelectTrigger aria-label={t("sortAria")} className="w-full">
+        <SelectTrigger
+          aria-label={t((m) => m.FamilyCategories.sortAria)}
+          className="w-full"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="updated-desc">{t("sortUpdatedDesc")}</SelectItem>
-            <SelectItem value="name-asc">{t("sortNameAsc")}</SelectItem>
-            <SelectItem value="transactions-desc">
-              {t("sortMostUsed")}
+            <SelectItem value="updated-desc">
+              {t((m) => m.FamilyCategories.sortUpdatedDesc)}
             </SelectItem>
-            <SelectItem value="total-desc">{t("sortHighestValue")}</SelectItem>
+            <SelectItem value="name-asc">
+              {t((m) => m.FamilyCategories.sortNameAsc)}
+            </SelectItem>
+            <SelectItem value="transactions-desc">
+              {t((m) => m.FamilyCategories.sortMostUsed)}
+            </SelectItem>
+            <SelectItem value="total-desc">
+              {t((m) => m.FamilyCategories.sortHighestValue)}
+            </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>

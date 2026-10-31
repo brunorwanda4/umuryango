@@ -40,9 +40,9 @@ function ContactFilePreview({
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         {[
-          [t("title"), contacts.length],
-          [t("withPhone"), withPhone],
-          [t("withEmail"), withEmail],
+          [t((m) => m.FamilyContacts.title), contacts.length],
+          [t((m) => m.FamilyContacts.withPhone), withPhone],
+          [t((m) => m.FamilyContacts.withEmail), withEmail],
         ].map(([label, value]) => (
           <div
             key={String(label)}
@@ -54,7 +54,9 @@ function ContactFilePreview({
         ))}
       </div>
       {contacts.length > 1000 ? (
-        <p className="mt-2 text-muted-foreground text-xs">{t("limitHint")}</p>
+        <p className="mt-2 text-muted-foreground text-xs">
+          {t((m) => m.FamilyContacts.limitHint)}
+        </p>
       ) : null}
     </div>
   );
@@ -81,13 +83,13 @@ export function ContactImportPanel({
         : parseGoogleCsv(await file.text());
       if (!contacts.length) {
         setSelectedImport(null);
-        toast.error(t("importEmpty"));
+        toast.error(t((m) => m.FamilyContacts.importEmpty));
         return;
       }
       setSelectedImport({ file, contacts });
     } catch {
       setSelectedImport(null);
-      toast.error(t("importFileError"));
+      toast.error(t((m) => m.FamilyContacts.importFileError));
     }
   };
 
@@ -102,11 +104,11 @@ export function ContactImportPanel({
         contacts: selectedImport.contacts.slice(0, 1000),
       });
       if (!response.ok || !response.data) {
-        toast.error(response.message ?? t("importError"));
+        toast.error(response.message ?? t((m) => m.FamilyContacts.importError));
         return;
       }
       toast.success(
-        t("importSuccess", {
+        t((m) => m.FamilyContacts.importSuccess, {
           created: response.data.created,
           merged: response.data.merged,
         }),
@@ -115,7 +117,7 @@ export function ContactImportPanel({
       if (importInputRef.current) importInputRef.current.value = "";
       onImported?.();
     } catch {
-      toast.error(t("importUploadError"));
+      toast.error(t((m) => m.FamilyContacts.importUploadError));
     } finally {
       setImporting(false);
     }
@@ -123,7 +125,9 @@ export function ContactImportPanel({
 
   return (
     <div className="flex min-h-60 flex-col gap-3">
-      <p className="text-muted-foreground text-sm">{t("importDescription")}</p>
+      <p className="text-muted-foreground text-sm">
+        {t((m) => m.FamilyContacts.importDescription)}
+      </p>
       <input
         ref={importInputRef}
         className="hidden"
@@ -143,7 +147,9 @@ export function ContactImportPanel({
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button type="button" disabled={importing} onClick={handleImport}>
               <FileUpIcon aria-hidden="true" data-icon="inline-start" />
-              {importing ? t("uploading") : t("uploadContacts")}
+              {importing
+                ? t((m) => m.FamilyContacts.uploading)
+                : t((m) => m.FamilyContacts.uploadContacts)}
             </Button>
             <Button
               type="button"
@@ -151,7 +157,7 @@ export function ContactImportPanel({
               disabled={importing}
               onClick={() => importInputRef.current?.click()}
             >
-              {t("chooseAnotherFile")}
+              {t((m) => m.FamilyContacts.chooseAnotherFile)}
             </Button>
           </div>
         </>
@@ -163,7 +169,7 @@ export function ContactImportPanel({
           onClick={() => importInputRef.current?.click()}
         >
           <FileUpIcon aria-hidden="true" data-icon="inline-start" />
-          {t("chooseContactFile")}
+          {t((m) => m.FamilyContacts.chooseContactFile)}
         </Button>
       )}
     </div>

@@ -70,13 +70,15 @@ export function OneTimeIncomePanel({
           <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
             <CoinsIcon className="size-6 text-muted-foreground" />
           </span>
-          <h3 className="font-semibold text-lg">{t("panels.noOneTime")}</h3>
+          <h3 className="font-semibold text-lg">
+            {t((m) => m.FamilyIncome.panels.noOneTime)}
+          </h3>
           <p className="mt-1 mb-6 max-w-sm text-muted-foreground text-sm">
-            {t("panels.noOneTimeDesc")}
+            {t((m) => m.FamilyIncome.panels.noOneTimeDesc)}
           </p>
           <Button size="sm" onClick={() => setOpenCreate(true)}>
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            {t("panels.addOneTime")}
+            {t((m) => m.FamilyIncome.panels.addOneTime)}
           </Button>
         </CardContent>
       </Card>
@@ -89,7 +91,7 @@ export function OneTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              {t("panels.totalOneTime")}
+              {t((m) => m.FamilyIncome.panels.totalOneTime)}
             </CardTitle>
             <WalletIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -106,7 +108,7 @@ export function OneTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              {t("panels.approved")}
+              {t((m) => m.FamilyIncome.panels.approved)}
             </CardTitle>
             <CoinsIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -123,7 +125,7 @@ export function OneTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              {t("panels.pending")}
+              {t((m) => m.FamilyIncome.panels.pending)}
             </CardTitle>
             <ReceiptTextIcon className="size-4 text-muted-foreground" />
           </CardHeader>

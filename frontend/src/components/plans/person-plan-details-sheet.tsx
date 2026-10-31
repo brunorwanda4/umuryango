@@ -90,9 +90,12 @@ export function PersonPlanDetailsSheet({
     const response = await apiRequest(method, path, body);
     setPending(false);
     if (!response.ok) {
-      toast.error(t("details.milestoneUpdateError"), {
-        description: response.message,
-      });
+      toast.error(
+        t((m) => m.PersonalPlans.details.milestoneUpdateError),
+        {
+          description: response.message,
+        },
+      );
       return false;
     }
     onUpdated(plan.id);
@@ -110,7 +113,7 @@ export function PersonPlanDetailsSheet({
       )
     ) {
       setNewMilestone("");
-      toast.success(t("details.milestoneAdded"));
+      toast.success(t((m) => m.PersonalPlans.details.milestoneAdded));
     }
   };
 
@@ -152,21 +155,21 @@ export function PersonPlanDetailsSheet({
   const remaining = target > current ? target - current : BigInt(0);
 
   const statusLabel = isOverdue(plan)
-    ? t("items.overdue")
+    ? t((m) => m.PersonalPlans.items.overdue)
     : plan.status === "COMPLETED"
-      ? t("filters.completed")
+      ? t((m) => m.PersonalPlans.filters.completed)
       : plan.status === "IN_PROGRESS"
-        ? t("filters.inProgress")
+        ? t((m) => m.PersonalPlans.filters.inProgress)
         : plan.status === "CANCELLED"
-          ? t("filters.cancelled")
-          : t("filters.pending");
+          ? t((m) => m.PersonalPlans.filters.cancelled)
+          : t((m) => m.PersonalPlans.filters.pending);
 
   const priorityLabel = plan.priority
     ? plan.priority === "LOW"
-      ? t("items.low")
+      ? t((m) => m.PersonalPlans.items.low)
       : plan.priority === "MEDIUM"
-        ? t("items.medium")
-        : t("items.high")
+        ? t((m) => m.PersonalPlans.items.medium)
+        : t((m) => m.PersonalPlans.items.high)
     : null;
 
   return (
@@ -176,8 +179,8 @@ export function PersonPlanDetailsSheet({
           <SheetTitle>{plan.title}</SheetTitle>
           <SheetDescription>
             {plan.type === "TASK"
-              ? t("details.taskDetails")
-              : t("details.goalDetails")}
+              ? t((m) => m.PersonalPlans.details.taskDetails)
+              : t((m) => m.PersonalPlans.details.goalDetails)}
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-6 px-4 pb-6">
@@ -194,45 +197,68 @@ export function PersonPlanDetailsSheet({
             {plan.type === "TASK" ? (
               <>
                 <Detail
-                  label={t("details.dueDate")}
-                  value={date(plan.dueDate, t("details.notSet"))}
+                  label={t((m) => m.PersonalPlans.details.dueDate)}
+                  value={date(
+                    plan.dueDate,
+                    t((m) => m.PersonalPlans.details.notSet),
+                  )}
                 />
                 <Detail
-                  label={t("details.time")}
-                  value={plan.dueTime || t("details.notSet")}
+                  label={t((m) => m.PersonalPlans.details.time)}
+                  value={
+                    plan.dueTime || t((m) => m.PersonalPlans.details.notSet)
+                  }
                 />
                 <Detail
-                  label={t("details.reminder")}
-                  value={date(plan.reminderAt, t("details.notSet"))}
+                  label={t((m) => m.PersonalPlans.details.reminder)}
+                  value={date(
+                    plan.reminderAt,
+                    t((m) => m.PersonalPlans.details.notSet),
+                  )}
                 />
               </>
             ) : (
               <>
                 <Detail
-                  label={t("details.startDate")}
-                  value={date(plan.startDate, t("details.notSet"))}
+                  label={t((m) => m.PersonalPlans.details.startDate)}
+                  value={date(
+                    plan.startDate,
+                    t((m) => m.PersonalPlans.details.notSet),
+                  )}
                 />
                 <Detail
-                  label={t("details.targetDate")}
-                  value={date(plan.targetDate, t("details.notSet"))}
+                  label={t((m) => m.PersonalPlans.details.targetDate)}
+                  value={date(
+                    plan.targetDate,
+                    t((m) => m.PersonalPlans.details.notSet),
+                  )}
                 />
               </>
             )}
             <Detail
-              label={t("details.created")}
-              value={date(plan.createdAt, t("details.notSet"))}
+              label={t((m) => m.PersonalPlans.details.created)}
+              value={date(
+                plan.createdAt,
+                t((m) => m.PersonalPlans.details.notSet),
+              )}
             />
             {plan.completedAt ? (
               <Detail
-                label={t("details.completed")}
-                value={date(plan.completedAt, t("details.notSet"))}
+                label={t((m) => m.PersonalPlans.details.completed)}
+                value={date(
+                  plan.completedAt,
+                  t((m) => m.PersonalPlans.details.notSet),
+                )}
               />
             ) : null}
           </dl>
           {plan.note ? (
             <>
               <Separator />
-              <Detail label={t("details.notes")} value={plan.note} />
+              <Detail
+                label={t((m) => m.PersonalPlans.details.notes)}
+                value={plan.note}
+              />
             </>
           ) : null}
           {plan.type === "LONG_TERM_GOAL" ? (
@@ -244,7 +270,7 @@ export function PersonPlanDetailsSheet({
               >
                 <div className="flex items-center justify-between gap-3">
                   <h3 id="goal-progress-heading" className="font-semibold">
-                    {t("details.progress")}
+                    {t((m) => m.PersonalPlans.details.progress)}
                   </h3>
                   <span className="text-sm text-muted-foreground">
                     {plan.progress}%
@@ -254,15 +280,15 @@ export function PersonPlanDetailsSheet({
                 {plan.needsMoney ? (
                   <dl className="grid grid-cols-3 gap-3">
                     <Detail
-                      label={t("details.target")}
+                      label={t((m) => m.PersonalPlans.details.target)}
                       value={money(plan.targetAmountMinorUnits, plan.currency)}
                     />
                     <Detail
-                      label={t("details.current")}
+                      label={t((m) => m.PersonalPlans.details.current)}
                       value={money(plan.currentAmountMinorUnits, plan.currency)}
                     />
                     <Detail
-                      label={t("details.remaining")}
+                      label={t((m) => m.PersonalPlans.details.remaining)}
                       value={money(remaining.toString(), plan.currency)}
                     />
                   </dl>
@@ -275,10 +301,10 @@ export function PersonPlanDetailsSheet({
               >
                 <div>
                   <h3 id="milestones-heading" className="font-semibold">
-                    {t("details.milestones")}
+                    {t((m) => m.PersonalPlans.details.milestones)}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {t("details.milestonesCompleted", {
+                    {t((m) => m.PersonalPlans.details.milestonesCompleted, {
                       completed: plan.milestones.filter(
                         (item) => item.completedAt,
                       ).length,
@@ -295,20 +321,24 @@ export function PersonPlanDetailsSheet({
                 >
                   <Field>
                     <FieldLabel htmlFor="new-milestone">
-                      {t("details.addMilestone")}
+                      {t((m) => m.PersonalPlans.details.addMilestone)}
                     </FieldLabel>
                     <Input
                       id="new-milestone"
                       value={newMilestone}
                       onChange={(event) => setNewMilestone(event.target.value)}
-                      placeholder={t("details.milestonePlaceholder")}
+                      placeholder={t(
+                        (m) => m.PersonalPlans.details.milestonePlaceholder,
+                      )}
                     />
                   </Field>
                   <Button
                     type="submit"
                     size="icon"
                     disabled={pending || newMilestone.trim().length < 2}
-                    aria-label={t("details.addMilestoneAria")}
+                    aria-label={t(
+                      (m) => m.PersonalPlans.details.addMilestoneAria,
+                    )}
                   >
                     <PlusIcon aria-hidden="true" />
                   </Button>
@@ -318,12 +348,15 @@ export function PersonPlanDetailsSheet({
                     <Item key={milestone.id} size="sm" variant="outline">
                       <Checkbox
                         checked={Boolean(milestone.completedAt)}
-                        aria-label={t("details.markMilestoneAria", {
-                          title: milestone.title,
-                          status: milestone.completedAt
-                            ? t("items.markIncomplete")
-                            : t("items.markComplete"),
-                        })}
+                        aria-label={t(
+                          (m) => m.PersonalPlans.details.markMilestoneAria,
+                          {
+                            title: milestone.title,
+                            status: milestone.completedAt
+                              ? t((m) => m.PersonalPlans.items.markIncomplete)
+                              : t((m) => m.PersonalPlans.items.markComplete),
+                          },
+                        )}
                         onCheckedChange={(checked) =>
                           void updateMilestone(milestone, {
                             completed: Boolean(checked),
@@ -337,7 +370,9 @@ export function PersonPlanDetailsSheet({
                             onChange={(event) =>
                               setEditTitle(event.target.value)
                             }
-                            aria-label={t("details.milestoneTitleAria")}
+                            aria-label={t(
+                              (m) => m.PersonalPlans.details.milestoneTitleAria,
+                            )}
                           />
                         ) : (
                           <ItemTitle
@@ -355,7 +390,10 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label={t("details.saveMilestoneAria")}
+                              aria-label={t(
+                                (m) =>
+                                  m.PersonalPlans.details.saveMilestoneAria,
+                              )}
                               disabled={editTitle.trim().length < 2}
                               onClick={() =>
                                 void updateMilestone(milestone, {
@@ -368,7 +406,10 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label={t("details.cancelEditingAria")}
+                              aria-label={t(
+                                (m) =>
+                                  m.PersonalPlans.details.cancelEditingAria,
+                              )}
                               onClick={() => setEditing(null)}
                             >
                               <XIcon />
@@ -379,7 +420,10 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label={t("details.moveMilestoneUpAria")}
+                              aria-label={t(
+                                (m) =>
+                                  m.PersonalPlans.details.moveMilestoneUpAria,
+                              )}
                               disabled={index === 0 || pending}
                               onClick={() => void reorder(index, -1)}
                             >
@@ -388,7 +432,10 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label={t("details.moveMilestoneDownAria")}
+                              aria-label={t(
+                                (m) =>
+                                  m.PersonalPlans.details.moveMilestoneDownAria,
+                              )}
                               disabled={
                                 index === plan.milestones.length - 1 || pending
                               }
@@ -399,7 +446,10 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label={t("details.editMilestoneAria")}
+                              aria-label={t(
+                                (m) =>
+                                  m.PersonalPlans.details.editMilestoneAria,
+                              )}
                               onClick={() => {
                                 setEditing(milestone.id);
                                 setEditTitle(milestone.title);
@@ -410,7 +460,10 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label={t("details.deleteMilestoneAria")}
+                              aria-label={t(
+                                (m) =>
+                                  m.PersonalPlans.details.deleteMilestoneAria,
+                              )}
                               onClick={() =>
                                 void request(
                                   "delete",

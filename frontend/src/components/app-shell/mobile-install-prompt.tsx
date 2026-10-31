@@ -79,15 +79,15 @@ export function MobileInstallPrompt() {
           onClick={handleInstall}
         >
           <DownloadIcon aria-hidden="true" className="size-4" />
-          {t("installApp")}
+          {t((m) => m.AppShell.installPrompt.installApp)}
         </button>
         <button
           type="button"
-          aria-label={t("dismiss")}
+          aria-label={t((m) => m.AppShell.installPrompt.dismiss)}
           className="flex size-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30"
           onClick={handleDismiss}
         >
-          {t("later")}
+          {t((m) => m.AppShell.installPrompt.later)}
         </button>
       </div>
     </div>

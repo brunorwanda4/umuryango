@@ -36,13 +36,14 @@ export function SourceRecordsTable({
   const columns: ColumnDef<ReportSourceRecordRow>[] = [
     {
       accessorKey: "title",
-      header: t("recordColumn"),
+      header: t((m) => m.FamilyReports.recordColumn),
       cell: ({ row }) => (
         <div className="flex flex-col gap-1">
           <span className="font-medium">{row.original.title}</span>
           <span className="text-muted-foreground text-xs">
-            {t("createdBy", {
-              name: row.original.createdBy ?? t("unknownUser"),
+            {t((m) => m.FamilyReports.createdBy, {
+              name:
+                row.original.createdBy ?? t((m) => m.FamilyReports.unknownUser),
             })}
           </span>
         </div>
@@ -50,24 +51,28 @@ export function SourceRecordsTable({
     },
     {
       accessorKey: "module",
-      header: t("moduleColumn"),
+      header: t((m) => m.FamilyReports.moduleColumn),
       cell: ({ row }) => formatTitle(row.original.module),
     },
     {
       accessorKey: "date",
-      header: t("dateColumn"),
+      header: t((m) => m.FamilyReports.dateColumn),
       cell: ({ row }) => formatDate(row.original.date),
     },
     {
       accessorKey: "status",
-      header: t("statusColumn"),
+      header: t((m) => m.FamilyReports.statusColumn),
       cell: ({ row }) => (
         <StatusBadge value={row.original.status ?? "recorded"} />
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: () => <div className="text-right">{t("amountColumn")}</div>,
+      header: () => (
+        <div className="text-right">
+          {t((m) => m.FamilyReports.amountColumn)}
+        </div>
+      ),
       cell: ({ row }) => (
         <div className="text-right font-mono">
           <CompactMoney
@@ -83,17 +88,19 @@ export function SourceRecordsTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("sourceRecordsTitle")}</CardTitle>
-        <CardDescription>{t("sourceRecordsDesc")}</CardDescription>
+        <CardTitle>{t((m) => m.FamilyReports.sourceRecordsTitle)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilyReports.sourceRecordsDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {records.length ? (
           <CommonDataTable columns={columns} data={records} />
         ) : (
           <TableEmptyState
-            description={t("noSourceRecordsDesc")}
+            description={t((m) => m.FamilyReports.noSourceRecordsDesc)}
             icon={ReceiptTextIcon}
-            title={t("noSourceRecordsTitle")}
+            title={t((m) => m.FamilyReports.noSourceRecordsTitle)}
           />
         )}
       </CardContent>

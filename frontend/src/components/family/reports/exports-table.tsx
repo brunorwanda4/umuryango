@@ -29,29 +29,30 @@ export function ExportsTable({
   const columns: ColumnDef<ReportExportRow>[] = [
     {
       accessorKey: "title",
-      header: t("exportTitle"),
+      header: t((m) => m.FamilyReports.exportTitle),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.title}</span>
       ),
     },
     {
       accessorKey: "format",
-      header: t("formatTitle"),
+      header: t((m) => m.FamilyReports.formatTitle),
       cell: ({ row }) => formatTitle(row.original.format),
     },
     {
       accessorKey: "requestedBy",
-      header: t("requestedByTitle"),
-      cell: ({ row }) => row.original.requestedBy ?? t("unknownUser"),
+      header: t((m) => m.FamilyReports.requestedByTitle),
+      cell: ({ row }) =>
+        row.original.requestedBy ?? t((m) => m.FamilyReports.unknownUser),
     },
     {
       accessorKey: "requestedAt",
-      header: t("requestedAtTitle"),
+      header: t((m) => m.FamilyReports.requestedAtTitle),
       cell: ({ row }) => formatDateTime(row.original.requestedAt),
     },
     {
       accessorKey: "status",
-      header: t("statusColumn"),
+      header: t((m) => m.FamilyReports.statusColumn),
       cell: ({ row }) => (
         <StatusBadge value={row.original.status ?? "queued"} />
       ),
@@ -65,23 +66,25 @@ export function ExportsTable({
           <Button
             disabled={!canExportReports || !hasSourceRecords}
             size="sm"
-            title={t("newExportDisabledTitle")}
+            title={t((m) => m.FamilyReports.newExportDisabledTitle)}
           >
             <DownloadIcon aria-hidden="true" data-icon="inline-start" />
-            {t("newExport")}
+            {t((m) => m.FamilyReports.newExport)}
           </Button>
         </CardAction>
-        <CardTitle>{t("reportExportsTitle")}</CardTitle>
-        <CardDescription>{t("reportExportsDesc")}</CardDescription>
+        <CardTitle>{t((m) => m.FamilyReports.reportExportsTitle)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilyReports.reportExportsDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {exports.length ? (
           <CommonDataTable columns={columns} data={exports} />
         ) : (
           <TableEmptyState
-            description={t("noExportsDesc")}
+            description={t((m) => m.FamilyReports.noExportsDesc)}
             icon={FileSpreadsheetIcon}
-            title={t("noExportsTitle")}
+            title={t((m) => m.FamilyReports.noExportsTitle)}
           />
         )}
       </CardContent>

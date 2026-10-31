@@ -41,10 +41,10 @@ export function ThemeToggle() {
         size="icon"
         className="rounded-full"
         disabled
-        aria-label={t("label")}
+        aria-label={t((m) => m.Shared.theme.label)}
       >
         <SunIcon aria-hidden="true" />
-        <span className="sr-only">{t("label")}</span>
+        <span className="sr-only">{t((m) => m.Shared.theme.label)}</span>
       </Button>
     );
   }
@@ -59,30 +59,34 @@ export function ThemeToggle() {
               variant="outline"
               size="icon"
               className="rounded-full bg-background/90 backdrop-blur"
-              aria-label={t("label")}
+              aria-label={t((m) => m.Shared.theme.label)}
             >
               <ThemeIcon aria-hidden="true" />
-              <span className="sr-only">{t("label")}</span>
+              <span className="sr-only">{t((m) => m.Shared.theme.label)}</span>
             </Button>
           </DropdownMenuTrigger>
         </TooltipTrigger>
-        <TooltipContent side="left">{t("label")}</TooltipContent>
+        <TooltipContent side="left">
+          {t((m) => m.Shared.theme.label)}
+        </TooltipContent>
       </Tooltip>
       <DropdownMenuContent align="end" className="w-36">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
+          <DropdownMenuLabel>
+            {t((m) => m.Shared.theme.label)}
+          </DropdownMenuLabel>
           <DropdownMenuRadioGroup value={activeTheme} onValueChange={setTheme}>
             <DropdownMenuRadioItem value="light">
               <SunIcon aria-hidden="true" />
-              {t("light")}
+              {t((m) => m.Shared.theme.light)}
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="dark">
               <MoonIcon aria-hidden="true" />
-              {t("dark")}
+              {t((m) => m.Shared.theme.dark)}
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="system">
               <MonitorIcon aria-hidden="true" />
-              {t("system")}
+              {t((m) => m.Shared.theme.system)}
             </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>

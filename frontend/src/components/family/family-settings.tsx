@@ -116,7 +116,7 @@ export function FamilySettings({
       setFamily(response.data);
       setError(undefined);
     } else {
-      setError(response.message ?? t("unableToLoad"));
+      setError(response.message ?? t((m) => m.FamilySettings.unableToLoad));
     }
   }, [familySlug]);
 
@@ -127,7 +127,7 @@ export function FamilySettings({
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>{t("cannotOpenSettings")}</AlertTitle>
+        <AlertTitle>{t((m) => m.FamilySettings.cannotOpenSettings)}</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
@@ -162,7 +162,9 @@ export function FamilySettings({
         canManageSettings ? (
           <GeneralTab familySlug={familySlug} family={family} onSaved={load} />
         ) : (
-          <SettingsPermissionAlert action={t("actions.manageGeneral")} />
+          <SettingsPermissionAlert
+            action={t((m) => m.FamilySettings.actions.manageGeneral)}
+          />
         )
       ) : null}
 
@@ -184,7 +186,9 @@ export function FamilySettings({
         canManageMembers ? (
           <AuditTab familySlug={familySlug} />
         ) : (
-          <SettingsPermissionAlert action={t("actions.viewAudit")} />
+          <SettingsPermissionAlert
+            action={t((m) => m.FamilySettings.actions.viewAudit)}
+          />
         )
       ) : null}
     </div>
@@ -202,22 +206,22 @@ function SettingsOverview({
 }) {
   const sections = [
     {
-      title: t("generalSectionTitle"),
-      description: t("generalSectionDesc"),
+      title: t((m) => m.FamilySettings.generalSectionTitle),
+      description: t((m) => m.FamilySettings.generalSectionDesc),
       href: `${settingsHref}/general`,
       icon: SettingsIcon,
       enabled: canManageSettings,
     },
     {
-      title: t("membersSectionTitle"),
-      description: t("membersSectionDesc"),
+      title: t((m) => m.FamilySettings.membersSectionTitle),
+      description: t((m) => m.FamilySettings.membersSectionDesc),
       href: `${settingsHref}/members`,
       icon: UsersIcon,
       enabled: true,
     },
     {
-      title: t("auditSectionTitle"),
-      description: t("auditSectionDesc"),
+      title: t((m) => m.FamilySettings.auditSectionTitle),
+      description: t((m) => m.FamilySettings.auditSectionDesc),
       href: `${settingsHref}/audit`,
       icon: ClipboardListIcon,
       enabled: canManageMembers,
@@ -232,7 +236,9 @@ function SettingsOverview({
             <div className="flex items-center justify-between gap-3">
               <section.icon className="size-5" aria-hidden="true" />
               {section.enabled ? null : (
-                <Badge variant="outline">{t("noAccess")}</Badge>
+                <Badge variant="outline">
+                  {t((m) => m.FamilySettings.noAccess)}
+                </Badge>
               )}
             </div>
             <CardTitle className="text-base">{section.title}</CardTitle>
@@ -242,13 +248,13 @@ function SettingsOverview({
             {section.enabled ? (
               <Button asChild variant="outline" className="w-full">
                 <Link href={section.href}>
-                  {tCommon("open")}
+                  {tCommon((m) => m.Common.open)}
                   <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
                 </Link>
               </Button>
             ) : (
               <Button variant="outline" className="w-full" disabled>
-                {t("restricted")}
+                {t((m) => m.FamilySettings.restricted)}
               </Button>
             )}
           </CardContent>
@@ -261,20 +267,20 @@ function SettingsOverview({
 function SettingsPermissionAlert({ action }: { action: string }) {
   return (
     <Alert variant="destructive">
-      <AlertTitle>{t("accessRestricted")}</AlertTitle>
+      <AlertTitle>{t((m) => m.FamilySettings.accessRestricted)}</AlertTitle>
       <AlertDescription>
-        {t("noPermissionForAction", { action })}
+        {t((m) => m.FamilySettings.noPermissionForAction, { action })}
       </AlertDescription>
     </Alert>
   );
 }
 
 function getPageTitle(page: FamilySettingsPage) {
-  if (page === "general") return t("general");
-  if (page === "members") return t("memberAccess");
-  if (page === "audit") return t("auditLog");
+  if (page === "general") return t((m) => m.FamilySettings.general);
+  if (page === "members") return t((m) => m.FamilySettings.memberAccess);
+  if (page === "audit") return t((m) => m.FamilySettings.auditLog);
 
-  return t("title");
+  return t((m) => m.FamilySettings.title);
 }
 
 function MemberAccessCard({
@@ -314,7 +320,9 @@ function MemberAccessCard({
     if (response.ok) {
       onChanged();
     } else {
-      setError(response.message ?? t("unableToUpdateAccess"));
+      setError(
+        response.message ?? t((m) => m.FamilySettings.unableToUpdateAccess),
+      );
     }
   };
 
@@ -330,7 +338,7 @@ function MemberAccessCard({
             ? member.kinshipLabel === "OTHER" && member.kinshipCustom
               ? member.kinshipCustom
               : KINSHIP_LABELS[member.kinshipLabel]
-            : t("noRelationshipSet")}
+            : t((m) => m.FamilySettings.noRelationshipSet)}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2">
@@ -420,15 +428,19 @@ function GeneralTab({
     if (response.ok) {
       onSaved();
     } else {
-      setError(response.message ?? t("unableToSave"));
+      setError(response.message ?? t((m) => m.FamilySettings.unableToSave));
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">{t("general")}</CardTitle>
-        <CardDescription>{t("generalDescription")}</CardDescription>
+        <CardTitle className="text-base">
+          {t((m) => m.FamilySettings.general)}
+        </CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilySettings.generalDescription)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {error ? (
@@ -439,7 +451,7 @@ function GeneralTab({
 
         <div className="flex flex-col gap-1.5">
           <label className="font-medium text-sm" htmlFor={nameId}>
-            {t("familyName")}
+            {t((m) => m.FamilySettings.familyName)}
           </label>
           <Input
             id={nameId}
@@ -450,12 +462,14 @@ function GeneralTab({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="font-medium text-sm">{t("familyType")}</span>
+          <span className="font-medium text-sm">
+            {t((m) => m.FamilySettings.familyType)}
+          </span>
           <Select
             value={type}
             onValueChange={(value) => setType(value as FamilyType)}
           >
-            <SelectTrigger aria-label={t("familyType")}>
+            <SelectTrigger aria-label={t((m) => m.FamilySettings.familyType)}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -470,9 +484,13 @@ function GeneralTab({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <span className="font-medium text-sm">{t("defaultCurrency")}</span>
+            <span className="font-medium text-sm">
+              {t((m) => m.FamilySettings.defaultCurrency)}
+            </span>
             <Select value={currency} onValueChange={setCurrency}>
-              <SelectTrigger aria-label={t("defaultCurrency")}>
+              <SelectTrigger
+                aria-label={t((m) => m.FamilySettings.defaultCurrency)}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -487,10 +505,12 @@ function GeneralTab({
 
           <div className="flex flex-col gap-1.5">
             <span className="font-medium text-sm">
-              {t("contributionRhythm")}
+              {t((m) => m.FamilySettings.contributionRhythm)}
             </span>
             <Select value={cadence} onValueChange={setCadence}>
-              <SelectTrigger aria-label={t("contributionRhythm")}>
+              <SelectTrigger
+                aria-label={t((m) => m.FamilySettings.contributionRhythm)}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -506,7 +526,7 @@ function GeneralTab({
 
         <div className="flex flex-col gap-1.5">
           <label className="font-medium text-sm" htmlFor={descriptionId}>
-            {t("familyNote")}
+            {t((m) => m.FamilySettings.familyNote)}
           </label>
           <Textarea
             id={descriptionId}
@@ -518,7 +538,9 @@ function GeneralTab({
 
         <div className="flex justify-end">
           <Button onClick={save} disabled={pending}>
-            {pending ? t("saving") : t("saveChanges")}
+            {pending
+              ? t((m) => m.FamilySettings.saving)
+              : t((m) => m.FamilySettings.saveChanges)}
           </Button>
         </div>
       </CardContent>
@@ -553,12 +575,18 @@ function AuditTab({ familySlug }: { familySlug: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">{t("recentChanges")}</CardTitle>
-        <CardDescription>{t("recentChangesDesc")}</CardDescription>
+        <CardTitle className="text-base">
+          {t((m) => m.FamilySettings.recentChanges)}
+        </CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilySettings.recentChangesDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {events.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("noActivityYet")}</p>
+          <p className="text-muted-foreground text-sm">
+            {t((m) => m.FamilySettings.noActivityYet)}
+          </p>
         ) : (
           events.map((event) => (
             <div

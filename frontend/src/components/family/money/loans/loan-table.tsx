@@ -83,8 +83,8 @@ export function LoanTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("tableTitle")}</CardTitle>
-        <CardDescription>{t("tableDesc")}</CardDescription>
+        <CardTitle>{t((m) => m.FamilyLoans.tableTitle)}</CardTitle>
+        <CardDescription>{t((m) => m.FamilyLoans.tableDesc)}</CardDescription>
       </CardHeader>
       <CardContent>
         {loans.length ? (
@@ -92,18 +92,22 @@ export function LoanTable({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("colDate")}</TableHead>
-                  <TableHead>{t("colLoanTitle")}</TableHead>
-                  <TableHead>{t("colType")}</TableHead>
-                  <TableHead>{t("colBorrower")}</TableHead>
-                  <TableHead>{t("colLender")}</TableHead>
-                  <TableHead>{t("colOriginalAmount")}</TableHead>
-                  <TableHead>{t("colPaidAmount")}</TableHead>
-                  <TableHead>{t("colRemainingBalance")}</TableHead>
-                  <TableHead>{t("colDueDate")}</TableHead>
-                  <TableHead>{t("colStatus")}</TableHead>
+                  <TableHead>{t((m) => m.FamilyLoans.colDate)}</TableHead>
+                  <TableHead>{t((m) => m.FamilyLoans.colLoanTitle)}</TableHead>
+                  <TableHead>{t((m) => m.FamilyLoans.colType)}</TableHead>
+                  <TableHead>{t((m) => m.FamilyLoans.colBorrower)}</TableHead>
+                  <TableHead>{t((m) => m.FamilyLoans.colLender)}</TableHead>
+                  <TableHead>
+                    {t((m) => m.FamilyLoans.colOriginalAmount)}
+                  </TableHead>
+                  <TableHead>{t((m) => m.FamilyLoans.colPaidAmount)}</TableHead>
+                  <TableHead>
+                    {t((m) => m.FamilyLoans.colRemainingBalance)}
+                  </TableHead>
+                  <TableHead>{t((m) => m.FamilyLoans.colDueDate)}</TableHead>
+                  <TableHead>{t((m) => m.FamilyLoans.colStatus)}</TableHead>
                   <TableHead className="text-right">
-                    {t("colActions")}
+                    {t((m) => m.FamilyLoans.colActions)}
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -169,9 +173,12 @@ export function LoanTable({
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
-                              aria-label={t("openActionsAria", {
-                                title: loan.title,
-                              })}
+                              aria-label={t(
+                                (m) => m.FamilyLoans.openActionsAria,
+                                {
+                                  title: loan.title,
+                                },
+                              )}
                               variant="ghost"
                               size="icon"
                             >
@@ -183,7 +190,7 @@ export function LoanTable({
                               onClick={() => onAction(loan, "view")}
                             >
                               <EyeIcon className="mr-2 size-4" />
-                              {t("viewAction")}
+                              {t((m) => m.FamilyLoans.viewAction)}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={completed || !canManageLoans}
@@ -194,27 +201,27 @@ export function LoanTable({
                               ) : (
                                 <PencilIcon className="mr-2 size-4" />
                               )}
-                              {t("editAction")}
+                              {t((m) => m.FamilyLoans.editAction)}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={completed || !canManageLoans}
                               onClick={() => onAction(loan, "repayment")}
                             >
                               <PlusIcon className="mr-2 size-4" />
-                              {t("addRepaymentAction")}
+                              {t((m) => m.FamilyLoans.addRepaymentAction)}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => onAction(loan, "history")}
                             >
                               <HistoryIcon className="mr-2 size-4" />
-                              {t("historyAction")}
+                              {t((m) => m.FamilyLoans.historyAction)}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={!canManageLoans}
                               onClick={() => onAction(loan, "document")}
                             >
                               <UploadIcon className="mr-2 size-4" />
-                              {t("documentAction")}
+                              {t((m) => m.FamilyLoans.documentAction)}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -222,14 +229,14 @@ export function LoanTable({
                               onClick={() => onAction(loan, "approval")}
                             >
                               <SendIcon className="mr-2 size-4" />
-                              {t("approvalAction")}
+                              {t((m) => m.FamilyLoans.approvalAction)}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={completed || !canManageLoans}
                               onClick={() => onAction(loan, "complete")}
                             >
                               <CheckCircle2Icon className="mr-2 size-4" />
-                              {t("completeAction")}
+                              {t((m) => m.FamilyLoans.completeAction)}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={
@@ -243,7 +250,7 @@ export function LoanTable({
                               onClick={() => onAction(loan, "delete")}
                             >
                               <Trash2Icon className="mr-2 size-4" />
-                              {t("deleteAction")}
+                              {t((m) => m.FamilyLoans.deleteAction)}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -260,18 +267,22 @@ export function LoanTable({
               <EmptyMedia variant="icon">
                 <FileClockIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>{t("noLoansTitle")}</EmptyTitle>
-              <EmptyDescription>{t("noLoansDesc")}</EmptyDescription>
+              <EmptyTitle>{t((m) => m.FamilyLoans.noLoansTitle)}</EmptyTitle>
+              <EmptyDescription>
+                {t((m) => m.FamilyLoans.noLoansDesc)}
+              </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               {canManageLoans ? (
                 <Button size="sm" onClick={onAddLoan}>
                   <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                  {t("createTitle")}
+                  {t((m) => m.FamilyLoans.createTitle)}
                 </Button>
               ) : (
                 <span className="text-muted-foreground text-sm">
-                  {t("viewLoansForFamily", { family: family.name })}
+                  {t((m) => m.FamilyLoans.viewLoansForFamily, {
+                    family: family.name,
+                  })}
                 </span>
               )}
             </EmptyContent>

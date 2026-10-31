@@ -8,8 +8,10 @@ export function PersonalDashboardHeader({ firstName }: { firstName?: string }) {
       <div>
         <h1 className="font-fraunces text-4xl font-semibold tracking-tight sm:text-5xl">
           {firstName
-            ? t("header.welcomeBackNamed", { name: firstName })
-            : t("header.welcomeBack")}
+            ? t((m) => m.PersonalOverview.header.welcomeBackNamed, {
+                name: firstName,
+              })
+            : t((m) => m.PersonalOverview.header.welcomeBack)}
         </h1>
       </div>
     </header>

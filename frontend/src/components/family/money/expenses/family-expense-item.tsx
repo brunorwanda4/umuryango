@@ -42,7 +42,10 @@ export function FamilyExpenseItem({
   const categoryStyle = getTransactionCategoryStyle(categoryName);
   const paymentStyle = getTransactionPaymentStyle(tx.paymentMethod);
   const firstReceipt = tx.receipts?.[0];
-  const title = tx.description || categoryName || t("dialogs.addTitle");
+  const title =
+    tx.description ||
+    categoryName ||
+    t((m) => m.FamilyExpenses.dialogs.addTitle);
 
   const counterparty = tx.receivedFrom
     ? { label: "To", name: tx.receivedFrom }
@@ -69,7 +72,7 @@ export function FamilyExpenseItem({
       variant="outline"
       className="hidden sm:inline-flex text-xs font-normal h-6"
     >
-      {t("table.noReceipt")}
+      {t((m) => m.FamilyExpenses.table.noReceipt)}
     </Badge>
   );
 

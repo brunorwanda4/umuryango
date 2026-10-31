@@ -53,7 +53,7 @@ export const LucideIconPicker = forwardRef<
   ref,
 ) {
   const t = createTranslator("Common");
-  const effectivePlaceholder = placeholder ?? t("selectIcon");
+  const effectivePlaceholder = placeholder ?? t((m) => m.Common.selectIcon);
   const [open, setOpen] = useState(false);
   const normalizedValue = normalizeLucideIconName(value);
   const selectedIcon = useMemo(
@@ -92,9 +92,9 @@ export const LucideIconPicker = forwardRef<
         className="w-(--radix-popover-trigger-width) p-0"
       >
         <Command>
-          <CommandInput placeholder={t("searchIcons")} />
+          <CommandInput placeholder={t((m) => m.Common.searchIcons)} />
           <CommandList className="max-h-80">
-            <CommandEmpty>{t("noIconFound")}</CommandEmpty>
+            <CommandEmpty>{t((m) => m.Common.noIconFound)}</CommandEmpty>
             <CommandGroup>
               {lucideIconOptions.map((option) => {
                 const checked =

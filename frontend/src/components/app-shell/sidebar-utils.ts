@@ -55,17 +55,17 @@ const tGroups = createTranslator("AppShell.navigation.groups");
 
 const personalSettingsChildren: NavigationItem[] = [
   {
-    title: tItems("account"),
+    title: tItems((m) => m.AppShell.navigation.items.account),
     href: "/me/settings",
     icon: sidebarIcon("account", SettingsIcon),
   },
   {
-    title: tItems("security"),
+    title: tItems((m) => m.AppShell.navigation.items.security),
     href: "/me/security",
     icon: sidebarIcon("security", ShieldCheckIcon),
   },
   {
-    title: tItems("help"),
+    title: tItems((m) => m.AppShell.navigation.items.help),
     href: "/items",
     icon: sidebarIcon("help", BookOpenCheckIcon),
   },
@@ -73,28 +73,28 @@ const personalSettingsChildren: NavigationItem[] = [
 
 const personalMoneyChildren: NavigationItem[] = [
   {
-    title: tItems("overview"),
+    title: tItems((m) => m.AppShell.navigation.items.overview),
     href: "/me/money",
     icon: sidebarIcon("money", BadgeDollarSignIcon),
     exact: true,
   },
   {
-    title: tItems("income"),
+    title: tItems((m) => m.AppShell.navigation.items.income),
     href: "/me/money/income",
     icon: sidebarIcon("income", ArrowDownIcon),
   },
   {
-    title: tItems("expenses"),
+    title: tItems((m) => m.AppShell.navigation.items.expenses),
     href: "/me/money/expenses",
     icon: sidebarIcon("expense", ArrowUpIcon),
   },
   {
-    title: tItems("categories"),
+    title: tItems((m) => m.AppShell.navigation.items.categories),
     href: "/me/money/categories",
     icon: sidebarIcon("categories", FolderTreeIcon),
   },
   {
-    title: tItems("loans"),
+    title: tItems((m) => m.AppShell.navigation.items.loans),
     href: "/me/money/loans",
     icon: sidebarIcon("loan", LandmarkIcon),
   },
@@ -102,41 +102,41 @@ const personalMoneyChildren: NavigationItem[] = [
 
 export const personalNavigation: NavigationGroup[] = [
   {
-    label: tGroups("personal"),
+    label: tGroups((m) => m.AppShell.navigation.groups.personal),
     items: [
       {
-        title: tItems("overview"),
+        title: tItems((m) => m.AppShell.navigation.items.overview),
         href: "/me",
         icon: sidebarIcon("dashboard", LayoutDashboardIcon),
       },
       {
-        title: tItems("money"),
+        title: tItems((m) => m.AppShell.navigation.items.money),
         href: "/me/money",
         icon: sidebarIcon("money", WalletCardsIcon),
         items: personalMoneyChildren,
       },
       {
-        title: tItems("plans"),
+        title: tItems((m) => m.AppShell.navigation.items.plans),
         href: "/me/plans",
         icon: sidebarIcon("plan", ListChecksIcon),
       },
       {
-        title: tItems("contacts"),
+        title: tItems((m) => m.AppShell.navigation.items.contacts),
         href: "/me/contacts",
         icon: sidebarIcon("contacts", ContactRoundIcon),
       },
     ],
   },
   {
-    label: tGroups("family"),
+    label: tGroups((m) => m.AppShell.navigation.groups.family),
     items: [
       {
-        title: tItems("familyWorkspaces"),
+        title: tItems((m) => m.AppShell.navigation.items.familyWorkspaces),
         href: "/family",
         icon: sidebarIcon("family", UsersIcon),
       },
       {
-        title: tItems("settings"),
+        title: tItems((m) => m.AppShell.navigation.items.settings),
         href: "/me/settings",
         icon: sidebarIcon("settings", SettingsIcon),
         items: personalSettingsChildren,
@@ -147,26 +147,26 @@ export const personalNavigation: NavigationGroup[] = [
 
 export const personalSettingsNavigation: NavigationGroup[] = [
   {
-    label: tGroups("personal"),
+    label: tGroups((m) => m.AppShell.navigation.groups.personal),
     items: [
       {
-        title: tItems("account"),
+        title: tItems((m) => m.AppShell.navigation.items.account),
         href: "/me/settings",
         icon: sidebarIcon("account", SettingsIcon),
         exact: true,
       },
       {
-        title: tItems("security"),
+        title: tItems((m) => m.AppShell.navigation.items.security),
         href: "/me/security",
         icon: sidebarIcon("security", ShieldCheckIcon),
       },
     ],
   },
   {
-    label: tItems("help"),
+    label: tItems((m) => m.AppShell.navigation.items.help),
     items: [
       {
-        title: tItems("help"),
+        title: tItems((m) => m.AppShell.navigation.items.help),
         href: "/items",
         icon: sidebarIcon("help", BookOpenCheckIcon),
       },
@@ -176,17 +176,17 @@ export const personalSettingsNavigation: NavigationGroup[] = [
 
 const getFamilySettingsChildren = (familyHref: string): NavigationItem[] => [
   {
-    title: tItems("general"),
+    title: tItems((m) => m.AppShell.navigation.items.general),
     href: `${familyHref}/settings/general`,
     icon: sidebarIcon("settings", SettingsIcon),
   },
   {
-    title: tItems("members"),
+    title: tItems((m) => m.AppShell.navigation.items.members),
     href: `${familyHref}/settings/members`,
     icon: sidebarIcon("members", UsersIcon),
   },
   {
-    title: tItems("audit"),
+    title: tItems((m) => m.AppShell.navigation.items.audit),
     href: `${familyHref}/settings/audit`,
     icon: sidebarIcon("audit", ClipboardListIcon),
   },
@@ -194,33 +194,33 @@ const getFamilySettingsChildren = (familyHref: string): NavigationItem[] => [
 
 const getFamilyMoneyChildren = (familyHref: string): NavigationItem[] => [
   {
-    title: tItems("overview"),
+    title: tItems((m) => m.AppShell.navigation.items.overview),
     href: `${familyHref}/money`,
     icon: sidebarIcon("money", BadgeDollarSignIcon),
     exact: true,
   },
   {
-    title: tItems("income"),
+    title: tItems((m) => m.AppShell.navigation.items.income),
     href: `${familyHref}/money/income`,
     icon: sidebarIcon("income", ArrowDownIcon),
   },
   {
-    title: tItems("expenses"),
+    title: tItems((m) => m.AppShell.navigation.items.expenses),
     href: `${familyHref}/money/expenses`,
     icon: sidebarIcon("expense", ArrowUpIcon),
   },
   {
-    title: tItems("categories"),
+    title: tItems((m) => m.AppShell.navigation.items.categories),
     href: `${familyHref}/money/categories`,
     icon: sidebarIcon("categories", FolderTreeIcon),
   },
   {
-    title: tNav("items.dashboard"), // or approvals
+    title: tNav((m) => m.AppShell.navigation.items.dashboard), // or approvals
     href: `${familyHref}/money/approvals`,
     icon: sidebarIcon("approved", FileClockIcon),
   },
   {
-    title: tItems("loans"),
+    title: tItems((m) => m.AppShell.navigation.items.loans),
     href: `${familyHref}/money/loans`,
     icon: sidebarIcon("loan", LandmarkIcon),
   },
@@ -231,51 +231,51 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
 
   return [
     {
-      label: tGroups("family"),
+      label: tGroups((m) => m.AppShell.navigation.groups.family),
       items: [
         {
-          title: tItems("dashboard"),
+          title: tItems((m) => m.AppShell.navigation.items.dashboard),
           href: familyHref,
           icon: sidebarIcon("dashboard", HomeIcon),
         },
         {
-          title: tItems("money"),
+          title: tItems((m) => m.AppShell.navigation.items.money),
           href: `${familyHref}/money`,
           icon: sidebarIcon("money", BadgeDollarSignIcon),
           items: getFamilyMoneyChildren(familyHref),
         },
         {
-          title: tItems("projects"),
+          title: tItems((m) => m.AppShell.navigation.items.projects),
           href: `${familyHref}/projects`,
           icon: sidebarIcon("projects", FolderKanbanIcon),
         },
         {
-          title: tItems("reports"),
+          title: tItems((m) => m.AppShell.navigation.items.reports),
           href: `${familyHref}/reports`,
           icon: sidebarIcon("reports", ReceiptTextIcon),
         },
       ],
     },
     {
-      label: tGroups("management"),
+      label: tGroups((m) => m.AppShell.navigation.groups.management),
       items: [
         {
-          title: tItems("events"),
+          title: tItems((m) => m.AppShell.navigation.items.events),
           href: `${familyHref}/events`,
           icon: sidebarIcon("calendar", CalendarDaysIcon),
         },
         {
-          title: tItems("contacts"),
+          title: tItems((m) => m.AppShell.navigation.items.contacts),
           href: `${familyHref}/contacts`,
           icon: sidebarIcon("contacts", ContactRoundIcon),
         },
         {
-          title: tItems("members"),
+          title: tItems((m) => m.AppShell.navigation.items.members),
           href: `${familyHref}/members`,
           icon: sidebarIcon("members", UsersIcon),
         },
         {
-          title: tItems("settings"),
+          title: tItems((m) => m.AppShell.navigation.items.settings),
           href: `${familyHref}/settings`,
           icon: sidebarIcon("settings", SettingsIcon),
           items: getFamilySettingsChildren(familyHref),
@@ -292,14 +292,14 @@ export const getFamilySettingsNavigation = (
 
   return [
     {
-      label: tGroups("system"),
+      label: tGroups((m) => m.AppShell.navigation.groups.system),
       items: getFamilySettingsChildren(familyHref),
     },
     {
-      label: tGroups("management"),
+      label: tGroups((m) => m.AppShell.navigation.groups.management),
       items: [
         {
-          title: tItems("members"),
+          title: tItems((m) => m.AppShell.navigation.items.members),
           href: `${familyHref}/members`,
           icon: sidebarIcon("members", UsersIcon),
         },
@@ -310,12 +310,12 @@ export const getFamilySettingsNavigation = (
 
 export const workspaceLinks = [
   {
-    title: tItems("overview"),
+    title: tItems((m) => m.AppShell.navigation.items.overview),
     href: "/me",
     icon: sidebarIcon("account", WalletCardsIcon),
   },
   {
-    title: tItems("families"),
+    title: tItems((m) => m.AppShell.navigation.items.families),
     href: "/family",
     icon: sidebarIcon("family", UsersIcon),
   },

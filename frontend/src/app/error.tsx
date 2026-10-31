@@ -56,14 +56,14 @@ export default function ErrorPage({
 
       <div className="flex flex-col gap-3 w-full">
         <h1 className="text-4xl font-semibold tracking-normal text-balance sm:text-5xl">
-          {t("title")}
+          {t((m) => m.ErrorPage.title)}
         </h1>
         <p className="mx-auto max-w-md text-lg leading-8 text-muted-foreground">
-          {t("description")}
+          {t((m) => m.ErrorPage.description)}
         </p>
         {error.digest ? (
           <p className="text-sm text-muted-foreground">
-            {t("reference", { digest: error.digest })}
+            {t((m) => m.ErrorPage.reference, { digest: error.digest })}
           </p>
         ) : null}
 
@@ -125,7 +125,7 @@ export default function ErrorPage({
           className="h-12 w-full rounded-full sm:w-fit"
         >
           <RotateCcwIcon data-icon="inline-start" aria-hidden="true" />
-          {t("tryAgain")}
+          {t((m) => m.ErrorPage.tryAgain)}
         </Button>
         <Button
           asChild
@@ -134,7 +134,7 @@ export default function ErrorPage({
           className="h-12 w-full rounded-full sm:w-fit"
         >
           <Link href={getLocalizedHref("/", defaultLocale)}>
-            {t("backHome")}
+            {t((m) => m.ErrorPage.backHome)}
           </Link>
         </Button>
       </div>

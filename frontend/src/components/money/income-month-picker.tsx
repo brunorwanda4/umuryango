@@ -37,7 +37,7 @@ export function IncomeMonthPicker({
       align="end"
       calendarMonths={1}
       displayValue={periodLabel}
-      placeholder={t("pickPeriod")}
+      placeholder={t((m) => m.PersonalMoney.pickPeriod)}
       required
       onValueChange={(value) => {
         if (value.from && value.to) {

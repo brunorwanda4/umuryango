@@ -25,7 +25,7 @@ export function ContactActions({ contact, className }: ContactActionsProps) {
         className="md:hidden"
       >
         <PhoneIcon aria-hidden="true" data-icon="inline-start" />
-        {t("call")}
+        {t((m) => m.FamilyContacts.call)}
       </Button>
       {whatsAppNumber ? (
         <Button

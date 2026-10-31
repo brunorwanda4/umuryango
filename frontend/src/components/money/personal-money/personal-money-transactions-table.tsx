@@ -15,7 +15,8 @@ export function PersonalMoneyTransactionsTable({
   emptyMessage,
 }: PersonalMoneyTransactionsTableProps) {
   const t = createTranslator("PersonalMoney.transactionsTable");
-  const displayEmptyMessage = emptyMessage ?? t("emptyMessage");
+  const displayEmptyMessage =
+    emptyMessage ?? t((m) => m.PersonalMoney.transactionsTable.emptyMessage);
 
   if (items.length === 0) {
     return (
@@ -29,12 +30,14 @@ export function PersonalMoneyTransactionsTable({
     <div className="flex flex-col">
       {/* Desktop Header row */}
       <div className="hidden grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] items-center gap-3 border-b border-border pb-2.5 text-[13px] font-medium text-muted-foreground md:grid">
-        <span>{t("record")}</span>
-        <span>{t("type")}</span>
-        <span>{t("category")}</span>
-        <span>{t("date")}</span>
-        <span>{t("status")}</span>
-        <span className="text-right">{t("amount")}</span>
+        <span>{t((m) => m.PersonalMoney.transactionsTable.record)}</span>
+        <span>{t((m) => m.PersonalMoney.transactionsTable.type)}</span>
+        <span>{t((m) => m.PersonalMoney.transactionsTable.category)}</span>
+        <span>{t((m) => m.PersonalMoney.transactionsTable.date)}</span>
+        <span>{t((m) => m.PersonalMoney.transactionsTable.status)}</span>
+        <span className="text-right">
+          {t((m) => m.PersonalMoney.transactionsTable.amount)}
+        </span>
       </div>
 
       {/* Row items */}
@@ -91,10 +94,10 @@ export function PersonalMoneyTransactionsTable({
                   >
                     <span className="size-1.5 rounded-full bg-current" />
                     {isIncome
-                      ? t("income")
+                      ? t((m) => m.PersonalMoney.transactionsTable.income)
                       : isExpense
-                        ? t("expense")
-                        : t("saving")}
+                        ? t((m) => m.PersonalMoney.transactionsTable.expense)
+                        : t((m) => m.PersonalMoney.transactionsTable.saving)}
                   </span>
                 </div>
 
@@ -120,9 +123,12 @@ export function PersonalMoneyTransactionsTable({
                   >
                     <span className="size-1.5 rounded-full bg-current" />
                     {x.status === "Received"
-                      ? t("statusReceived")
+                      ? t(
+                          (m) =>
+                            m.PersonalMoney.transactionsTable.statusReceived,
+                        )
                       : x.status === "Paid"
-                        ? t("statusPaid")
+                        ? t((m) => m.PersonalMoney.transactionsTable.statusPaid)
                         : x.status}
                   </span>
                 </div>

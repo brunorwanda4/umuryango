@@ -7,14 +7,16 @@ export function LoanProgress({ value }: { value: number }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-2">
       <div className="flex items-center justify-between gap-3 text-xs">
-        <span className="font-medium">{t("progress.label")}</span>
+        <span className="font-medium">
+          {t((m) => m.PersonalLoans.progress.label)}
+        </span>
         <span className="text-muted-foreground">
-          {t("progress.percentRepaid", { value })}
+          {t((m) => m.PersonalLoans.progress.percentRepaid, { value })}
         </span>
       </div>
       <Progress
         value={value}
-        aria-label={t("progress.percentRepaid", { value })}
+        aria-label={t((m) => m.PersonalLoans.progress.percentRepaid, { value })}
       />
     </div>
   );

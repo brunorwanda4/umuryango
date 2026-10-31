@@ -106,7 +106,7 @@ export function LoanForm({
       method: "post",
       url: `/families/${encodeURIComponent(familyId)}/money/loans/personal`,
     },
-    onSuccessMessage: t("form.loanAddedToast"),
+    onSuccessMessage: t((m) => m.PersonalLoans.form.loanAddedToast),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -136,8 +136,12 @@ export function LoanForm({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{t("form.addLoanTitle")}</DialogTitle>
-          <DialogDescription>{t("form.addLoanDesc")}</DialogDescription>
+          <DialogTitle>
+            {t((m) => m.PersonalLoans.form.addLoanTitle)}
+          </DialogTitle>
+          <DialogDescription>
+            {t((m) => m.PersonalLoans.form.addLoanDesc)}
+          </DialogDescription>
         </DialogHeader>
         <form
           id="personal-loan-form"
@@ -151,8 +155,8 @@ export function LoanForm({
             <CommonFormField
               control={form.control}
               name="title"
-              label={t("form.title")}
-              placeholder={t("form.titlePlaceholder")}
+              label={t((m) => m.PersonalLoans.form.title)}
+              placeholder={t((m) => m.PersonalLoans.form.titlePlaceholder)}
               required
             />
           </div>
@@ -162,7 +166,7 @@ export function LoanForm({
             render={({ field, fieldState }) => (
               <FieldSet data-invalid={Boolean(fieldState.error)}>
                 <FieldLegend variant="label">
-                  {t("form.loanType")}{" "}
+                  {t((m) => m.PersonalLoans.form.loanType)}{" "}
                   <span className="text-destructive">*</span>
                 </FieldLegend>
                 <RadioGroup
@@ -175,8 +179,14 @@ export function LoanForm({
                   className="grid grid-cols-2 gap-3"
                 >
                   {[
-                    { label: t("form.borrowed"), value: "BORROWED" },
-                    { label: t("form.lent"), value: "LENT" },
+                    {
+                      label: t((m) => m.PersonalLoans.form.borrowed),
+                      value: "BORROWED",
+                    },
+                    {
+                      label: t((m) => m.PersonalLoans.form.lent),
+                      value: "LENT",
+                    },
                   ].map((option) => {
                     const id = `loan-type-${option.value.toLowerCase()}`;
 
@@ -199,7 +209,7 @@ export function LoanForm({
           <CommonFormField
             control={form.control}
             name="amountMinorUnits"
-            label={t("form.amount")}
+            label={t((m) => m.PersonalLoans.form.amount)}
             fieldType="money"
             currency={currency}
             required
@@ -221,14 +231,14 @@ export function LoanForm({
           <CommonFormField
             control={form.control}
             name="startDate"
-            label={t("form.startDate")}
+            label={t((m) => m.PersonalLoans.form.startDate)}
             fieldType="date"
             required
           />
           <CommonFormField
             control={form.control}
             name="dueDate"
-            label={t("form.dueDate")}
+            label={t((m) => m.PersonalLoans.form.dueDate)}
             fieldType="date"
             inputProps={{ min: form.watch("startDate") }}
             required
@@ -237,9 +247,9 @@ export function LoanForm({
             <CommonFormField
               control={form.control}
               name="notes"
-              label={t("form.note")}
+              label={t((m) => m.PersonalLoans.form.note)}
               fieldType="textarea"
-              placeholder={t("form.notePlaceholder")}
+              placeholder={t((m) => m.PersonalLoans.form.notePlaceholder)}
             />
           </div>
 
@@ -254,7 +264,7 @@ export function LoanForm({
                 variant="outline"
                 className="w-full justify-between"
               >
-                {t("form.additionalDetails")}
+                {t((m) => m.PersonalLoans.form.additionalDetails)}
                 <ChevronDownIcon
                   aria-hidden="true"
                   data-icon="inline-end"
@@ -271,30 +281,46 @@ export function LoanForm({
                 <CommonFormField
                   control={form.control}
                   name="repaymentFrequency"
-                  label={t("form.repaymentFrequency")}
+                  label={t((m) => m.PersonalLoans.form.repaymentFrequency)}
                   fieldType="select"
                   selectOptions={[
-                    { label: t("form.frequencies.once"), value: "ONCE" },
-                    { label: t("form.frequencies.weekly"), value: "WEEKLY" },
                     {
-                      label: t("form.frequencies.biweekly"),
+                      label: t((m) => m.PersonalLoans.form.frequencies.once),
+                      value: "ONCE",
+                    },
+                    {
+                      label: t((m) => m.PersonalLoans.form.frequencies.weekly),
+                      value: "WEEKLY",
+                    },
+                    {
+                      label: t(
+                        (m) => m.PersonalLoans.form.frequencies.biweekly,
+                      ),
                       value: "BIWEEKLY",
                     },
-                    { label: t("form.frequencies.monthly"), value: "MONTHLY" },
                     {
-                      label: t("form.frequencies.quarterly"),
+                      label: t((m) => m.PersonalLoans.form.frequencies.monthly),
+                      value: "MONTHLY",
+                    },
+                    {
+                      label: t(
+                        (m) => m.PersonalLoans.form.frequencies.quarterly,
+                      ),
                       value: "QUARTERLY",
                     },
-                    { label: t("form.frequencies.yearly"), value: "YEARLY" },
+                    {
+                      label: t((m) => m.PersonalLoans.form.frequencies.yearly),
+                      value: "YEARLY",
+                    },
                   ]}
                 />
                 {categoryOptions.length ? (
                   <CommonFormField
                     control={form.control}
                     name="categoryId"
-                    label={t("form.category")}
+                    label={t((m) => m.PersonalLoans.form.category)}
                     fieldType="select"
-                    placeholder={t("form.noCategory")}
+                    placeholder={t((m) => m.PersonalLoans.form.noCategory)}
                     selectOptions={categoryOptions}
                   />
                 ) : null}
@@ -302,7 +328,7 @@ export function LoanForm({
               <CommonFormField
                 control={form.control}
                 name="useInterest"
-                label={t("form.useInterest")}
+                label={t((m) => m.PersonalLoans.form.useInterest)}
                 fieldType="custom"
                 fieldClassName="rounded-2xl border p-4"
                 render={({ field, id }) => (
@@ -317,8 +343,10 @@ export function LoanForm({
                 <CommonFormField
                   control={form.control}
                   name="interestRate"
-                  label={t("form.interestRate")}
-                  placeholder={t("form.interestPlaceholder")}
+                  label={t((m) => m.PersonalLoans.form.interestRate)}
+                  placeholder={t(
+                    (m) => m.PersonalLoans.form.interestPlaceholder,
+                  )}
                   inputProps={{ inputMode: "decimal" }}
                   required
                 />
@@ -334,7 +362,9 @@ export function LoanForm({
             className="w-full sm:w-auto"
           >
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            {isPending ? t("form.adding") : t("form.submitAdd")}
+            {isPending
+              ? t((m) => m.PersonalLoans.form.adding)
+              : t((m) => m.PersonalLoans.form.submitAdd)}
           </Button>
         </DialogFooter>
       </DialogContent>

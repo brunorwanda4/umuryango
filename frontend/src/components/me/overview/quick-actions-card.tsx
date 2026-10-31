@@ -45,8 +45,12 @@ export function QuickActionsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
+        <CardTitle>
+          {t((m) => m.PersonalOverview.quickActionsCard.title)}
+        </CardTitle>
+        <CardDescription>
+          {t((m) => m.PersonalOverview.quickActionsCard.description)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-2">
         {actions.map((action) => (
@@ -69,13 +73,17 @@ export function QuickActionsCard() {
           <FileTextIcon className="size-4" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-sm">{t("documentsTitle")}</p>
+          <p className="font-medium text-sm">
+            {t((m) => m.PersonalOverview.quickActionsCard.documentsTitle)}
+          </p>
           <p className="text-muted-foreground text-xs">
-            {t("documentsUnavailable")}
+            {t((m) => m.PersonalOverview.quickActionsCard.documentsUnavailable)}
           </p>
         </div>
         <Button asChild size="sm" variant="ghost">
-          <Link href="/me/documents">{t("open")}</Link>
+          <Link href="/me/documents">
+            {t((m) => m.PersonalOverview.quickActionsCard.open)}
+          </Link>
         </Button>
       </CardFooter>
     </Card>

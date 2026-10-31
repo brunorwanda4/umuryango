@@ -50,14 +50,25 @@ import apiRequest from "@/service/api";
 
 const createProfileSchema = (t: Translator) =>
   z.object({
-    fullName: z.string().trim().min(2, t("validation.nameMin")).max(160),
-    email: z.string().trim().email(t("validation.emailInvalid")).max(254),
+    fullName: z
+      .string()
+      .trim()
+      .min(
+        2,
+        t((m) => m.PersonalSettings.validation.nameMin),
+      )
+      .max(160),
+    email: z
+      .string()
+      .trim()
+      .email(t((m) => m.PersonalSettings.validation.emailInvalid))
+      .max(254),
     phoneNumber: z
       .string()
       .trim()
       .refine(
         (value) => !value || /^\+?[0-9][0-9\s()-]{6,19}$/.test(value),
-        t("validation.phoneInvalid"),
+        t((m) => m.PersonalSettings.validation.phoneInvalid),
       ),
     gender: z.enum(["female", "male", "custom", "unspecified"]),
   });
@@ -89,10 +100,19 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
   const profileSchema = useMemo(() => createProfileSchema(t), [t]);
   const genderOptions = useMemo(
     () => [
-      { value: "female", label: t("genderOptions.female") },
-      { value: "male", label: t("genderOptions.male") },
-      { value: "custom", label: t("genderOptions.custom") },
-      { value: "unspecified", label: t("genderOptions.unspecified") },
+      {
+        value: "female",
+        label: t((m) => m.PersonalSettings.genderOptions.female),
+      },
+      { value: "male", label: t((m) => m.PersonalSettings.genderOptions.male) },
+      {
+        value: "custom",
+        label: t((m) => m.PersonalSettings.genderOptions.custom),
+      },
+      {
+        value: "unspecified",
+        label: t((m) => m.PersonalSettings.genderOptions.unspecified),
+      },
     ],
     [t],
   );
@@ -116,7 +136,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
       phoneNumber: values.phoneNumber || null,
       gender: values.gender === "unspecified" ? null : values.gender,
     }),
-    onSuccessMessage: t("profileUpdated"),
+    onSuccessMessage: t((m) => m.PersonalSettings.profileUpdated),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: (data) => {
@@ -141,12 +161,15 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
     });
 
     if (!response.ok) {
-      setVerificationError(response.message ?? t("verification.confirmFailed"));
+      setVerificationError(
+        response.message ??
+          t((m) => m.PersonalSettings.verification.confirmFailed),
+      );
       setIsVerifying(false);
       return;
     }
 
-    toast.success(t("verification.verifiedSuccess"));
+    toast.success(t((m) => m.PersonalSettings.verification.verifiedSuccess));
     setPendingEmail(null);
     setVerificationCode("");
     setIsVerifying(false);
@@ -163,9 +186,12 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
     });
 
     if (!response.ok) {
-      setVerificationError(response.message ?? t("verification.sendFailed"));
+      setVerificationError(
+        response.message ??
+          t((m) => m.PersonalSettings.verification.sendFailed),
+      );
     } else {
-      toast.success(t("verification.codeSent"));
+      toast.success(t((m) => m.PersonalSettings.verification.codeSent));
     }
 
     setIsResending(false);
@@ -179,14 +205,16 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
     );
 
     if (!response.ok || !response.data?.user) {
-      toast.error(response.message ?? t("avatarUpdateFailed"));
+      toast.error(
+        response.message ?? t((m) => m.PersonalSettings.avatarUpdateFailed),
+      );
       setIsUpdatingAvatar(false);
       return;
     }
 
     setAvatarUrl(response.data.user.avatarUrl);
     publishCurrentUserUpdate(response.data.user);
-    toast.success(t("avatarUpdated"));
+    toast.success(t((m) => m.PersonalSettings.avatarUpdated));
     setIsUpdatingAvatar(false);
     router.refresh();
   };
@@ -197,9 +225,11 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserRoundIcon aria-hidden="true" />
-            {t("profileCardTitle")}
+            {t((m) => m.PersonalSettings.profileCardTitle)}
           </CardTitle>
-          <CardDescription>{t("profileCardDesc")}</CardDescription>
+          <CardDescription>
+            {t((m) => m.PersonalSettings.profileCardDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -212,9 +242,11 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                 <AvatarFallback name={user.fullName} />
               </Avatar>
               <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <p className="font-medium">{t("avatar")}</p>
+                <p className="font-medium">
+                  {t((m) => m.PersonalSettings.avatar)}
+                </p>
                 <p className="text-muted-foreground text-sm">
-                  {t("avatarDescription")}
+                  {t((m) => m.PersonalSettings.avatarDescription)}
                 </p>
               </div>
               <Button
@@ -228,7 +260,9 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                 ) : (
                   <RefreshCwIcon data-icon="inline-start" />
                 )}
-                {isUpdatingAvatar ? t("updatingAvatar") : t("uploadAvatar")}
+                {isUpdatingAvatar
+                  ? t((m) => m.PersonalSettings.updatingAvatar)
+                  : t((m) => m.PersonalSettings.uploadAvatar)}
               </Button>
             </div>
             <FieldGroup>
@@ -236,32 +270,32 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                 <CommonFormField
                   control={form.control}
                   name="fullName"
-                  label={t("fullName")}
+                  label={t((m) => m.PersonalSettings.fullName)}
                   required
                   inputProps={{ autoComplete: "name" }}
                 />
                 <CommonFormField
                   control={form.control}
                   name="email"
-                  label={t("email")}
+                  label={t((m) => m.PersonalSettings.email)}
                   type="email"
                   required
                   inputProps={{ autoComplete: "email" }}
-                  description={t("emailDescription")}
+                  description={t((m) => m.PersonalSettings.emailDescription)}
                 />
                 <CommonFormField
                   control={form.control}
                   name="phoneNumber"
-                  label={t("phone")}
+                  label={t((m) => m.PersonalSettings.phone)}
                   fieldType="phone"
                   placeholder="+250 788 123 456"
                   inputProps={{ autoComplete: "tel" }}
-                  description={t("phoneDescription")}
+                  description={t((m) => m.PersonalSettings.phoneDescription)}
                 />
                 <CommonFormField
                   control={form.control}
                   name="gender"
-                  label={t("gender")}
+                  label={t((m) => m.PersonalSettings.gender)}
                   fieldType="select"
                   selectOptions={genderOptions}
                 />
@@ -271,7 +305,9 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
             {error ? (
               <Alert variant="destructive">
                 <AlertCircleIcon aria-hidden="true" />
-                <AlertTitle>{t("profileNotUpdated")}</AlertTitle>
+                <AlertTitle>
+                  {t((m) => m.PersonalSettings.profileNotUpdated)}
+                </AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             ) : null}
@@ -279,7 +315,9 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
             {success && !pendingEmail ? (
               <Alert>
                 <CheckCircle2Icon aria-hidden="true" />
-                <AlertTitle>{t("changesSaved")}</AlertTitle>
+                <AlertTitle>
+                  {t((m) => m.PersonalSettings.changesSaved)}
+                </AlertTitle>
                 <AlertDescription>{success}</AlertDescription>
               </Alert>
             ) : null}
@@ -290,7 +328,9 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                 disabled={isPending || !form.formState.isDirty}
               >
                 {isPending ? <Spinner data-icon="inline-start" /> : null}
-                {isPending ? t("saving") : t("saveProfile")}
+                {isPending
+                  ? t((m) => m.PersonalSettings.saving)
+                  : t((m) => m.PersonalSettings.saveProfile)}
               </Button>
             </div>
           </form>
@@ -301,15 +341,17 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
                   <h3 className="font-medium">
-                    {t("verification.pendingTitle")}
+                    {t((m) => m.PersonalSettings.verification.pendingTitle)}
                   </h3>
                   <p className="text-muted-foreground text-sm">
-                    {t("verification.pendingDesc", { email: pendingEmail })}
+                    {t((m) => m.PersonalSettings.verification.pendingDesc, {
+                      email: pendingEmail,
+                    })}
                   </p>
                 </div>
                 <Field data-invalid={Boolean(verificationError)}>
                   <FieldLabel htmlFor="profile-email-code">
-                    {t("codeLabel")}
+                    {t((m) => m.PersonalSettings.codeLabel)}
                   </FieldLabel>
                   <InputOTP
                     id="profile-email-code"
@@ -340,7 +382,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                     disabled={isVerifying || verificationCode.length !== 6}
                   >
                     {isVerifying ? <Spinner data-icon="inline-start" /> : null}
-                    {t("verification.verifyButton")}
+                    {t((m) => m.PersonalSettings.verification.verifyButton)}
                   </Button>
                   <Button
                     type="button"
@@ -349,7 +391,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                     disabled={isResending}
                   >
                     {isResending ? <Spinner data-icon="inline-start" /> : null}
-                    {t("verification.resendButton")}
+                    {t((m) => m.PersonalSettings.verification.resendButton)}
                   </Button>
                 </div>
               </div>
@@ -362,23 +404,28 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MailCheckIcon aria-hidden="true" />
-            {t("account")}
+            {t((m) => m.PersonalSettings.account)}
           </CardTitle>
-          <CardDescription>{t("accountDesc")}</CardDescription>
+          <CardDescription>
+            {t((m) => m.PersonalSettings.accountDesc)}
+          </CardDescription>
           <CardAction>
             <Badge variant={pendingEmail ? "secondary" : "outline"}>
               {pendingEmail
-                ? t("verificationPending")
+                ? t((m) => m.PersonalSettings.verificationPending)
                 : user.emailVerified
-                  ? t("emailVerified")
-                  : t("emailNotVerified")}
+                  ? t((m) => m.PersonalSettings.emailVerified)
+                  : t((m) => m.PersonalSettings.emailNotVerified)}
             </Badge>
           </CardAction>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <AccountDetail label={t("currentEmail")} value={user.email} />
           <AccountDetail
-            label={t("memberSince")}
+            label={t((m) => m.PersonalSettings.currentEmail)}
+            value={user.email}
+          />
+          <AccountDetail
+            label={t((m) => m.PersonalSettings.memberSince)}
             value={formatMemberSince(user.createdAt, t)}
           />
         </CardContent>
@@ -388,12 +435,16 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <KeyRoundIcon aria-hidden="true" />
-            {t("security")}
+            {t((m) => m.PersonalSettings.security)}
           </CardTitle>
-          <CardDescription>{t("securityCardDesc")}</CardDescription>
+          <CardDescription>
+            {t((m) => m.PersonalSettings.securityCardDesc)}
+          </CardDescription>
           <CardAction>
             <Button asChild variant="outline" size="sm">
-              <Link href="/me/security">{t("openSecurity")}</Link>
+              <Link href="/me/security">
+                {t((m) => m.PersonalSettings.openSecurity)}
+              </Link>
             </Button>
           </CardAction>
         </CardHeader>
@@ -419,7 +470,8 @@ function isGenderValue(
 
 function formatMemberSince(value: string, t: Translator) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return t("unavailable");
+  if (Number.isNaN(date.getTime()))
+    return t((m) => m.PersonalSettings.unavailable);
 
   return new Intl.DateTimeFormat("en", {
     month: "long",

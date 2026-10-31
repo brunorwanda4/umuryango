@@ -39,28 +39,30 @@ export function ApprovalFiltersPanel({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle>{t("filtersTitle")}</CardTitle>
-        <CardDescription>{t("filtersDesc")}</CardDescription>
+        <CardTitle>{t((m) => m.FamilyApprovals.filtersTitle)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilyApprovals.filtersDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="relative sm:col-span-2">
           <SearchIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" />
           <Input
-            aria-label={t("searchApprovalsAria")}
+            aria-label={t((m) => m.FamilyApprovals.searchApprovalsAria)}
             className="pl-9"
-            placeholder={t("searchPlaceholder")}
+            placeholder={t((m) => m.FamilyApprovals.searchPlaceholder)}
             value={filters.search}
             onChange={(event) => updateFilter("search", event.target.value)}
           />
         </div>
         <FilterSelect
-          label={t("typeColumn")}
+          label={t((m) => m.FamilyApprovals.typeColumn)}
           value={filters.type}
           onChange={(value) => updateFilter("type", value)}
           options={[
-            ["all", t("allTypes")],
-            ["INCOME", t("incomeButton")],
-            ["EXPENSE", t("expensesButton")],
+            ["all", t((m) => m.FamilyApprovals.allTypes)],
+            ["INCOME", t((m) => m.FamilyApprovals.incomeButton)],
+            ["EXPENSE", t((m) => m.FamilyApprovals.expensesButton)],
             ["BUDGET", "Budget"],
             ["CONTRIBUTION", "Contribution"],
             ["TRANSACTION", "Transaction"],
@@ -68,11 +70,11 @@ export function ApprovalFiltersPanel({
           ]}
         />
         <FilterSelect
-          label={t("statusColumn")}
+          label={t((m) => m.FamilyApprovals.statusColumn)}
           value={filters.status}
           onChange={(value) => updateFilter("status", value)}
           options={[
-            ["all", t("allStatuses")],
+            ["all", t((m) => m.FamilyApprovals.allStatuses)],
             ["PENDING", "Pending"],
             ["APPROVED", "Approved"],
             ["REJECTED", "Rejected"],
@@ -81,55 +83,55 @@ export function ApprovalFiltersPanel({
           ]}
         />
         <FilterSelect
-          label={t("categoryColumn")}
+          label={t((m) => m.FamilyApprovals.categoryColumn)}
           value={filters.category}
           onChange={(value) => updateFilter("category", value)}
           options={[
-            ["all", t("allCategories")],
+            ["all", t((m) => m.FamilyApprovals.allCategories)],
             ...categories.map((category) => [category, category] as const),
           ]}
         />
         <FilterSelect
-          label={t("requestedBy")}
+          label={t((m) => m.FamilyApprovals.requestedBy)}
           value={filters.requestedBy}
           onChange={(value) => updateFilter("requestedBy", value)}
           options={[
-            ["all", t("allRequesters")],
+            ["all", t((m) => m.FamilyApprovals.allRequesters)],
             ...requesters.map((requester) => [requester, requester] as const),
           ]}
         />
         <Input
-          aria-label={t("startDate")}
+          aria-label={t((m) => m.FamilyApprovals.startDate)}
           type="date"
           value={filters.startDate}
           onChange={(event) => updateFilter("startDate", event.target.value)}
         />
         <Input
-          aria-label={t("endDate")}
+          aria-label={t((m) => m.FamilyApprovals.endDate)}
           type="date"
           value={filters.endDate}
           onChange={(event) => updateFilter("endDate", event.target.value)}
         />
         <Input
-          aria-label={t("minAmount")}
+          aria-label={t((m) => m.FamilyApprovals.minAmount)}
           inputMode="numeric"
-          placeholder={t("minAmount")}
+          placeholder={t((m) => m.FamilyApprovals.minAmount)}
           value={filters.minAmount}
           onChange={(event) => updateFilter("minAmount", event.target.value)}
         />
         <Input
-          aria-label={t("maxAmount")}
+          aria-label={t((m) => m.FamilyApprovals.maxAmount)}
           inputMode="numeric"
-          placeholder={t("maxAmount")}
+          placeholder={t((m) => m.FamilyApprovals.maxAmount)}
           value={filters.maxAmount}
           onChange={(event) => updateFilter("maxAmount", event.target.value)}
         />
         <FilterSelect
-          label={t("priority")}
+          label={t((m) => m.FamilyApprovals.priority)}
           value={filters.priority}
           onChange={(value) => updateFilter("priority", value)}
           options={[
-            ["all", t("allPriorities")],
+            ["all", t((m) => m.FamilyApprovals.allPriorities)],
             ["LOW", "Low"],
             ["NORMAL", "Normal"],
             ["HIGH", "High"],
@@ -142,7 +144,7 @@ export function ApprovalFiltersPanel({
           variant="outline"
           onClick={onReset}
         >
-          {t("resetFilters")}
+          {t((m) => m.FamilyApprovals.resetFilters)}
         </Button>
       </CardContent>
     </Card>

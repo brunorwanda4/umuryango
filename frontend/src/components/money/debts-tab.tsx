@@ -22,8 +22,12 @@ export function DebtsTab() {
       <Card>
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>{t("title")}</CardTitle>
-            <CardDescription>{t("description")}</CardDescription>
+            <CardTitle>
+              {t((m) => m.PersonalMoney.legacyTabs.debts.title)}
+            </CardTitle>
+            <CardDescription>
+              {t((m) => m.PersonalMoney.legacyTabs.debts.description)}
+            </CardDescription>
           </div>
           <MoneyFormDialog type="debt" />
         </CardHeader>
@@ -43,7 +47,9 @@ export function DebtsTab() {
             <CardContent className="flex flex-col gap-4">
               <div className="flex flex-wrap gap-2">
                 <Badge variant="outline">
-                  {debt.kind === "borrowed" ? t("borrowed") : t("lent")}
+                  {debt.kind === "borrowed"
+                    ? t((m) => m.PersonalMoney.legacyTabs.debts.borrowed)
+                    : t((m) => m.PersonalMoney.legacyTabs.debts.lent)}
                 </Badge>
                 <Badge variant={getStatusBadgeVariant(debt.status)}>
                   {formatStatus(debt.status)}
@@ -52,7 +58,7 @@ export function DebtsTab() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-muted-foreground text-sm">
-                    {t("principal")}
+                    {t((m) => m.PersonalMoney.legacyTabs.debts.principal)}
                   </p>
                   <p className="font-medium">
                     <CompactMoney
@@ -63,7 +69,7 @@ export function DebtsTab() {
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm">
-                    {tCommon("outstanding")}
+                    {tCommon((m) => m.PersonalMoney.outstanding)}
                   </p>
                   <p className="font-medium">
                     <CompactMoney
@@ -74,7 +80,9 @@ export function DebtsTab() {
                 </div>
               </div>
               <p className="text-muted-foreground text-sm">
-                {tCommon("due", { date: formatDate(debt.dueDate) })}
+                {tCommon((m) => m.PersonalMoney.due, {
+                  date: formatDate(debt.dueDate),
+                })}
               </p>
             </CardContent>
           </Card>

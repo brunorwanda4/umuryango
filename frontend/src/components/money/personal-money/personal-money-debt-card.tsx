@@ -23,11 +23,11 @@ export function PersonalMoneyDebtCard({
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-fraunces text-xl font-semibold text-foreground">
-              {t("debtSnapshot.title")}
+              {t((m) => m.PersonalMoney.debtSnapshot.title)}
             </h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            {t("debtSnapshot.noDebts")}
+            {t((m) => m.PersonalMoney.debtSnapshot.noDebts)}
           </p>
         </div>
         <div className="mt-4">
@@ -39,7 +39,7 @@ export function PersonalMoneyDebtCard({
             className="rounded-full font-semibold"
           >
             <PlusIcon className="size-4" data-icon="inline-start" />
-            {t("debtSnapshot.recordDebt")}
+            {t((m) => m.PersonalMoney.debtSnapshot.recordDebt)}
           </Button>
         </div>
       </section>
@@ -56,28 +56,31 @@ export function PersonalMoneyDebtCard({
       <div className="mb-3.5 flex items-start justify-between gap-2">
         <div>
           <h2 className="font-fraunces text-xl font-semibold text-foreground">
-            {t("debtSnapshot.title")}
+            {t((m) => m.PersonalMoney.debtSnapshot.title)}
           </h2>
           <p className="text-sm text-muted-foreground">{loan.title}</p>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">
           <span className="size-1.5 rounded-full bg-current" />
-          {loan.status === "ACTIVE" ? t("debtSnapshot.dueSoon") : loan.status}
+          {loan.status === "ACTIVE"
+            ? t((m) => m.PersonalMoney.debtSnapshot.dueSoon)
+            : loan.status}
         </span>
       </div>
 
       <div className="flex flex-col">
         <div className="flex justify-between py-2 text-[15px]">
           <span className="text-muted-foreground">
-            {t("debtSnapshot.party")}
+            {t((m) => m.PersonalMoney.debtSnapshot.party)}
           </span>
           <b className="font-semibold text-foreground">
-            {loan.person?.name || t("debtSnapshot.familyLoan")}
+            {loan.person?.name ||
+              t((m) => m.PersonalMoney.debtSnapshot.familyLoan)}
           </b>
         </div>
         <div className="flex justify-between border-t border-border py-2 text-[15px]">
           <span className="text-muted-foreground">
-            {t("debtSnapshot.originalLoan")}
+            {t((m) => m.PersonalMoney.debtSnapshot.originalLoan)}
           </span>
           <b className="font-semibold text-foreground">
             {formatFullRwf(original, currency)}
@@ -85,7 +88,7 @@ export function PersonalMoneyDebtCard({
         </div>
         <div className="flex justify-between border-t border-border py-2 text-[15px]">
           <span className="text-muted-foreground">
-            {t("debtSnapshot.paidSoFar")}
+            {t((m) => m.PersonalMoney.debtSnapshot.paidSoFar)}
           </span>
           <b className="font-semibold text-foreground">
             {formatFullRwf(paid, currency)}
@@ -93,7 +96,7 @@ export function PersonalMoneyDebtCard({
         </div>
         <div className="flex justify-between border-t border-border py-2 text-[15px]">
           <span className="text-muted-foreground">
-            {t("debtSnapshot.outstanding")}
+            {t((m) => m.PersonalMoney.debtSnapshot.outstanding)}
           </span>
           <b className="font-semibold text-foreground">
             {formatFullRwf(outstanding, currency)}
@@ -102,7 +105,7 @@ export function PersonalMoneyDebtCard({
         {loan.dueDate ? (
           <div className="flex justify-between border-t border-border py-2 text-[15px]">
             <span className="text-muted-foreground">
-              {t("debtSnapshot.due")}
+              {t((m) => m.PersonalMoney.debtSnapshot.due)}
             </span>
             <b className="font-semibold text-foreground">
               {formatDisplayDate(loan.dueDate)}

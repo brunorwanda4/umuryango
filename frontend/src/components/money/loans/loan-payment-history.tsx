@@ -24,7 +24,9 @@ export function LoanPaymentHistory({
 
   if (payments.length === 0)
     return (
-      <p className="text-sm text-muted-foreground">{t("details.noPayments")}</p>
+      <p className="text-sm text-muted-foreground">
+        {t((m) => m.PersonalLoans.details.noPayments)}
+      </p>
     );
   return (
     <ItemGroup>
@@ -49,7 +51,9 @@ export function LoanPaymentHistory({
             ) : null}
             {payment.createdByName ? (
               <p className="text-xs text-muted-foreground">
-                {t("details.recordedBy", { name: payment.createdByName })}
+                {t((m) => m.PersonalLoans.details.recordedBy, {
+                  name: payment.createdByName,
+                })}
               </p>
             ) : null}
           </ItemContent>

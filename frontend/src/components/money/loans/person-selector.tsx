@@ -88,7 +88,7 @@ export function AddTrustedPersonDialog({
       method: "post",
       url: `/families/${encodeURIComponent(familyId)}/contacts`,
     },
-    onSuccessMessage: t("person.personAddedToast"),
+    onSuccessMessage: t((m) => m.PersonalLoans.person.personAddedToast),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: (person) => {
@@ -110,13 +110,21 @@ export function AddTrustedPersonDialog({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{t("person.addNewPerson")}</DialogTitle>
-          <DialogDescription>{t("person.dialogDesc")}</DialogDescription>
+          <DialogTitle>
+            {t((m) => m.PersonalLoans.person.addNewPerson)}
+          </DialogTitle>
+          <DialogDescription>
+            {t((m) => m.PersonalLoans.person.dialogDesc)}
+          </DialogDescription>
         </DialogHeader>
         <Tabs defaultValue="form" className="gap-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="form">{t("person.tabManual")}</TabsTrigger>
-            <TabsTrigger value="file">{t("person.tabUpload")}</TabsTrigger>
+            <TabsTrigger value="form">
+              {t((m) => m.PersonalLoans.person.tabManual)}
+            </TabsTrigger>
+            <TabsTrigger value="file">
+              {t((m) => m.PersonalLoans.person.tabUpload)}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="form">
             <form
@@ -130,35 +138,51 @@ export function AddTrustedPersonDialog({
               <CommonFormField
                 control={form.control}
                 name="fullName"
-                label={t("person.fullName")}
-                placeholder={t("person.fullNamePlaceholder")}
+                label={t((m) => m.PersonalLoans.person.fullName)}
+                placeholder={t(
+                  (m) => m.PersonalLoans.person.fullNamePlaceholder,
+                )}
                 required
               />
               <CommonFormField
                 control={form.control}
                 name="contactType"
-                label={t("person.relationship")}
+                label={t((m) => m.PersonalLoans.person.relationship)}
                 fieldType="select"
                 selectOptions={[
-                  { label: t("person.types.family"), value: "RELATIVE" },
-                  { label: t("person.types.friend"), value: "FAMILY_FRIEND" },
-                  { label: t("person.types.neighbor"), value: "NEIGHBOR" },
-                  { label: t("person.types.other"), value: "OTHER" },
+                  {
+                    label: t((m) => m.PersonalLoans.person.types.family),
+                    value: "RELATIVE",
+                  },
+                  {
+                    label: t((m) => m.PersonalLoans.person.types.friend),
+                    value: "FAMILY_FRIEND",
+                  },
+                  {
+                    label: t((m) => m.PersonalLoans.person.types.neighbor),
+                    value: "NEIGHBOR",
+                  },
+                  {
+                    label: t((m) => m.PersonalLoans.person.types.other),
+                    value: "OTHER",
+                  },
                 ]}
                 required
               />
               <CommonFormField
                 control={form.control}
                 name="phoneNumber"
-                label={t("person.phoneNumber")}
+                label={t((m) => m.PersonalLoans.person.phoneNumber)}
                 fieldType="phone"
                 placeholder="+250 788 000 000"
               />
               <CommonFormField
                 control={form.control}
                 name="relationshipToFamily"
-                label={t("person.relationshipDetails")}
-                placeholder={t("person.relationshipDetailsPlaceholder")}
+                label={t((m) => m.PersonalLoans.person.relationshipDetails)}
+                placeholder={t(
+                  (m) => m.PersonalLoans.person.relationshipDetailsPlaceholder,
+                )}
               />
               <DialogFooter>
                 <Button
@@ -167,7 +191,9 @@ export function AddTrustedPersonDialog({
                   className="w-full sm:w-auto"
                 >
                   <UserPlusIcon aria-hidden="true" data-icon="inline-start" />
-                  {isPending ? t("person.adding") : t("person.submitAdd")}
+                  {isPending
+                    ? t((m) => m.PersonalLoans.person.adding)
+                    : t((m) => m.PersonalLoans.person.submitAdd)}
                 </Button>
               </DialogFooter>
             </form>
@@ -209,7 +235,7 @@ export function PersonSelector({
       <CommonFormField
         control={control}
         name="personContactId"
-        label={t("person.personLabel")}
+        label={t((m) => m.PersonalLoans.person.personLabel)}
         fieldType="custom"
         required
         render={({ field, id, invalid }) => (
@@ -225,7 +251,8 @@ export function PersonSelector({
                   variant="outline"
                 >
                   {contacts.find((contact) => contact.id === field.value)
-                    ?.fullName ?? t("person.chooseSavedPerson")}
+                    ?.fullName ??
+                    t((m) => m.PersonalLoans.person.chooseSavedPerson)}
                   <span className="text-muted-foreground text-xs">
                     {contacts.find((contact) => contact.id === field.value)
                       ?.phoneNumber ?? ""}
@@ -234,9 +261,15 @@ export function PersonSelector({
               </PopoverTrigger>
               <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                 <Command className="h-auto min-h-0">
-                  <CommandInput placeholder={t("person.searchPlaceholder")} />
+                  <CommandInput
+                    placeholder={t(
+                      (m) => m.PersonalLoans.person.searchPlaceholder,
+                    )}
+                  />
                   <CommandList>
-                    <CommandEmpty>{t("person.noPersonFound")}</CommandEmpty>
+                    <CommandEmpty>
+                      {t((m) => m.PersonalLoans.person.noPersonFound)}
+                    </CommandEmpty>
                     {contacts.map((contact) => (
                       <CommandItem
                         key={contact.id}
@@ -272,7 +305,7 @@ export function PersonSelector({
               onClick={() => setOpenPerson(true)}
             >
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              {t("person.addNewPerson")}
+              {t((m) => m.PersonalLoans.person.addNewPerson)}
             </Button>
           </div>
         )}

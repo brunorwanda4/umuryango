@@ -90,7 +90,7 @@ export function CreateExpenseDialog({
       method: "post",
       url: `/families/${encodeURIComponent(family.id)}/money/transactions`,
     },
-    onSuccessMessage: t("toasts.recordedSuccess"),
+    onSuccessMessage: t((m) => m.FamilyExpenses.toasts.recordedSuccess),
     toastOnSuccess: true,
     onSuccess: async (data, values) => {
       onOpenChange(false);
@@ -150,8 +150,12 @@ export function CreateExpenseDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{t("dialogs.addTitle")}</DialogTitle>
-          <DialogDescription>{t("dialogs.addDesc")}</DialogDescription>
+          <DialogTitle>
+            {t((m) => m.FamilyExpenses.dialogs.addTitle)}
+          </DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyExpenses.dialogs.addDesc)}
+          </DialogDescription>
         </DialogHeader>
 
         <form
@@ -179,7 +183,9 @@ export function CreateExpenseDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending ? t("dialogs.recording") : t("dialogs.addTitle")}
+            {isPending
+              ? t((m) => m.FamilyExpenses.dialogs.recording)
+              : t((m) => m.FamilyExpenses.dialogs.addTitle)}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -67,45 +67,48 @@ export function ContactList({
   const columns: ColumnDef<FamilyContact>[] = [
     {
       accessorKey: "fullName",
-      header: tCommon("name"),
+      header: tCommon((m) => m.Common.name),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.fullName}</span>
       ),
     },
     {
       accessorKey: "contactType",
-      header: tCommon("type"),
+      header: tCommon((m) => m.Common.type),
       cell: ({ row }) => t(`types.${row.original.contactType}`),
     },
     {
       accessorKey: "phoneNumber",
-      header: tCommon("phone"),
-      cell: ({ row }) => row.original.phoneNumber || tCommon("notRecorded"),
+      header: tCommon((m) => m.Common.phone),
+      cell: ({ row }) =>
+        row.original.phoneNumber || tCommon((m) => m.Common.notRecorded),
     },
     {
       accessorKey: "relationshipToFamily",
-      header: t("relationshipLabel"),
+      header: t((m) => m.FamilyContacts.relationshipLabel),
       cell: ({ row }) =>
-        row.original.relationshipToFamily || tCommon("notRecorded"),
+        row.original.relationshipToFamily ||
+        tCommon((m) => m.Common.notRecorded),
     },
     {
       accessorKey: "organization",
-      header: t("organizationLabel"),
-      cell: ({ row }) => row.original.organization || tCommon("notRecorded"),
+      header: t((m) => m.FamilyContacts.organizationLabel),
+      cell: ({ row }) =>
+        row.original.organization || tCommon((m) => m.Common.notRecorded),
     },
     {
       id: "status",
-      header: tCommon("status"),
+      header: tCommon((m) => m.Common.status),
       cell: ({ row }) => <ContactBadges contact={row.original} />,
     },
     {
       accessorKey: "createdAt",
-      header: tCommon("createdDate"),
+      header: tCommon((m) => m.Common.createdDate),
       cell: ({ row }) => formatDate(row.original.createdAt),
     },
     {
       id: "actions",
-      header: tCommon("actions"),
+      header: tCommon((m) => m.Common.actions),
       cell: ({ row }) => {
         const contact = row.original;
 
@@ -116,7 +119,9 @@ export function ContactList({
                 <Button
                   size="icon"
                   variant="ghost"
-                  aria-label={t("openActionsFor", { name: contact.fullName })}
+                  aria-label={t((m) => m.FamilyContacts.openActionsFor, {
+                    name: contact.fullName,
+                  })}
                 >
                   <MoreVerticalIcon aria-hidden="true" />
                 </Button>
@@ -124,18 +129,18 @@ export function ContactList({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onView(contact)}>
                   <EyeIcon className="mr-2 size-4" />
-                  {tCommon("view")}
+                  {tCommon((m) => m.Common.view)}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onEdit(contact)}>
                   <PencilIcon className="mr-2 size-4" />
-                  {tCommon("edit")}
+                  {tCommon((m) => m.Common.edit)}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => onDelete(contact)}
                 >
                   <Trash2Icon className="mr-2 size-4" />
-                  {tCommon("delete")}
+                  {tCommon((m) => m.Common.delete)}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -148,7 +153,7 @@ export function ContactList({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
+        <CardTitle>{t((m) => m.FamilyContacts.title)}</CardTitle>
       </CardHeader>
       <ContactFilters
         filters={filters}
@@ -196,7 +201,9 @@ export function ContactList({
                     <ContactBadges contact={contact} />
                   </div>
                   <div className="text-sm">
-                    {contact.phoneNumber || contact.email || t("noPhoneEmail")}
+                    {contact.phoneNumber ||
+                      contact.email ||
+                      t((m) => m.FamilyContacts.noPhoneEmail)}
                   </div>
                   <ContactActions contact={contact} />
                   <div className="flex gap-2">
@@ -206,7 +213,7 @@ export function ContactList({
                       onClick={() => onView(contact)}
                     >
                       <EyeIcon aria-hidden="true" data-icon="inline-start" />
-                      {tCommon("view")}
+                      {tCommon((m) => m.Common.view)}
                     </Button>
                     <Button
                       size="sm"
@@ -214,7 +221,7 @@ export function ContactList({
                       onClick={() => onEdit(contact)}
                     >
                       <PencilIcon aria-hidden="true" data-icon="inline-start" />
-                      {tCommon("edit")}
+                      {tCommon((m) => m.Common.edit)}
                     </Button>
                     <Button
                       size="sm"
@@ -222,7 +229,7 @@ export function ContactList({
                       onClick={() => onDelete(contact)}
                     >
                       <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-                      {tCommon("delete")}
+                      {tCommon((m) => m.Common.delete)}
                     </Button>
                   </div>
                 </div>
@@ -236,10 +243,10 @@ export function ContactList({
                 onClick={() => onPageChange(pageIndex - 1)}
               >
                 <ChevronLeftIcon aria-hidden="true" data-icon="inline-start" />
-                {tCommon("previous")}
+                {tCommon((m) => m.Common.previous)}
               </Button>
               <span className="text-muted-foreground text-sm">
-                {tCommon("pageOfTotal", {
+                {tCommon((m) => m.Common.pageOfTotal, {
                   page: pageIndex + 1,
                   total: totalPages,
                 })}
@@ -250,7 +257,7 @@ export function ContactList({
                 disabled={pageIndex + 1 >= totalPages}
                 onClick={() => onPageChange(pageIndex + 1)}
               >
-                {tCommon("next")}
+                {tCommon((m) => m.Common.next)}
                 <ChevronRightIcon aria-hidden="true" data-icon="inline-end" />
               </Button>
             </div>
@@ -276,13 +283,15 @@ export function ContactList({
               <EmptyMedia variant="icon">
                 <UsersRoundIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
-              <EmptyDescription>{t("emptyDescription")}</EmptyDescription>
+              <EmptyTitle>{t((m) => m.FamilyContacts.emptyTitle)}</EmptyTitle>
+              <EmptyDescription>
+                {t((m) => m.FamilyContacts.emptyDescription)}
+              </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button size="sm" onClick={onAddContact}>
                 <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                {t("addContact")}
+                {t((m) => m.FamilyContacts.addContact)}
               </Button>
             </EmptyContent>
           </Empty>

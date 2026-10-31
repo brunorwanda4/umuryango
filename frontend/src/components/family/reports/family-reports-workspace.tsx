@@ -68,7 +68,8 @@ export function FamilyReportsWorkspace({ familyName }: { familyName: string }) {
       if (!familyResponse.ok || !familyResponse.data) {
         setState({
           status: "error",
-          message: familyResponse.message ?? t("loadErrorTitle"),
+          message:
+            familyResponse.message ?? t((m) => m.FamilyReports.loadErrorTitle),
         });
         return;
       }
@@ -80,7 +81,7 @@ export function FamilyReportsWorkspace({ familyName }: { familyName: string }) {
           status: "success",
           family,
           reports: null,
-          reportsMessage: t("roleRestrictedReports"),
+          reportsMessage: t((m) => m.FamilyReports.roleRestrictedReports),
           money: null,
           contributions: null,
           projects: null,
@@ -171,10 +172,14 @@ export function FamilyReportsWorkspace({ familyName }: { familyName: string }) {
           <EmptyMedia variant="icon">
             <FileBarChartIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
+          <EmptyTitle>{t((m) => m.FamilyReports.loadErrorTitle)}</EmptyTitle>
           <EmptyDescription>
-            {t("loadErrorDesc", { message: state.message })}{" "}
-            <Link href="/family">{t("backToFamilies")}</Link>
+            {t((m) => m.FamilyReports.loadErrorDesc, {
+              message: state.message,
+            })}{" "}
+            <Link href="/family">
+              {t((m) => m.FamilyReports.backToFamilies)}
+            </Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -263,9 +268,13 @@ function ReportsWorkspaceContent({
       {reportsMessage ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>{t("waitingForReportRecordsTitle")}</AlertTitle>
+          <AlertTitle>
+            {t((m) => m.FamilyReports.waitingForReportRecordsTitle)}
+          </AlertTitle>
           <AlertDescription>
-            {t("waitingForReportRecordsDesc", { detail: reportsMessage })}
+            {t((m) => m.FamilyReports.waitingForReportRecordsDesc, {
+              detail: reportsMessage,
+            })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -286,10 +295,18 @@ function ReportsWorkspaceContent({
       <Tabs defaultValue="overview" className="gap-4">
         <div className="overflow-x-auto">
           <TabsList className="min-w-max">
-            <TabsTrigger value="overview">{t("overviewTab")}</TabsTrigger>
-            <TabsTrigger value="types">{t("reportTypesTab")}</TabsTrigger>
-            <TabsTrigger value="records">{t("sourceRecordsTab")}</TabsTrigger>
-            <TabsTrigger value="exports">{t("exportsTab")}</TabsTrigger>
+            <TabsTrigger value="overview">
+              {t((m) => m.FamilyReports.overviewTab)}
+            </TabsTrigger>
+            <TabsTrigger value="types">
+              {t((m) => m.FamilyReports.reportTypesTab)}
+            </TabsTrigger>
+            <TabsTrigger value="records">
+              {t((m) => m.FamilyReports.sourceRecordsTab)}
+            </TabsTrigger>
+            <TabsTrigger value="exports">
+              {t((m) => m.FamilyReports.exportsTab)}
+            </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="overview" className="flex flex-col gap-4">

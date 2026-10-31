@@ -85,7 +85,7 @@ export function IncomeFilters({
             <div className="relative min-w-0 flex-1">
               <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder={t("filters.searchPlaceholder")}
+                placeholder={t((m) => m.FamilyIncome.filters.searchPlaceholder)}
                 className="pl-8"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -125,11 +125,13 @@ export function IncomeFilters({
             <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-4 xl:grid-cols-5">
               <Select value={filterCategory} onValueChange={setFilterCategory}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("filters.allCategories")} />
+                  <SelectValue
+                    placeholder={t((m) => m.FamilyIncome.filters.allCategories)}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">
-                    {t("filters.allCategories")}
+                    {t((m) => m.FamilyIncome.filters.allCategories)}
                   </SelectItem>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
@@ -144,11 +146,13 @@ export function IncomeFilters({
                 onValueChange={setFilterPaymentMethod}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("filters.allPayments")} />
+                  <SelectValue
+                    placeholder={t((m) => m.FamilyIncome.filters.allPayments)}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">
-                    {t("filters.allPayments")}
+                    {t((m) => m.FamilyIncome.filters.allPayments)}
                   </SelectItem>
                   <SelectItem value="CASH">Cash</SelectItem>
                   <SelectItem value="MOBILE_MONEY">Mobile Money</SelectItem>
@@ -161,11 +165,13 @@ export function IncomeFilters({
 
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("filters.allStatuses")} />
+                  <SelectValue
+                    placeholder={t((m) => m.FamilyIncome.filters.allStatuses)}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">
-                    {t("filters.allStatuses")}
+                    {t((m) => m.FamilyIncome.filters.allStatuses)}
                   </SelectItem>
                   <SelectItem value="PENDING">
                     {tCommon("status.pending")}
@@ -184,10 +190,14 @@ export function IncomeFilters({
 
               <Select value={filterMember} onValueChange={setFilterMember}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("filters.allMembers")} />
+                  <SelectValue
+                    placeholder={t((m) => m.FamilyIncome.filters.allMembers)}
+                  />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t("filters.allMembers")}</SelectItem>
+                  <SelectItem value="all">
+                    {t((m) => m.FamilyIncome.filters.allMembers)}
+                  </SelectItem>
                   {family.members.map((m) => (
                     <SelectItem key={m.id} value={m.fullName}>
                       {m.fullName}
@@ -203,7 +213,7 @@ export function IncomeFilters({
                 className="w-full"
               >
                 <FilterXIcon className="size-4" data-icon="inline-start" />
-                {t("filters.resetFilters")}
+                {t((m) => m.FamilyIncome.filters.resetFilters)}
               </Button>
             </div>
 

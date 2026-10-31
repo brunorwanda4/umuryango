@@ -23,8 +23,12 @@ export function SavingsTab() {
       <Card>
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>{t("title")}</CardTitle>
-            <CardDescription>{t("description")}</CardDescription>
+            <CardTitle>
+              {t((m) => m.PersonalMoney.legacyTabs.savings.title)}
+            </CardTitle>
+            <CardDescription>
+              {t((m) => m.PersonalMoney.legacyTabs.savings.description)}
+            </CardDescription>
           </div>
           <MoneyFormDialog type="savings" />
         </CardHeader>
@@ -51,7 +55,7 @@ export function SavingsTab() {
                 <div className="flex items-end justify-between gap-3">
                   <div>
                     <p className="text-muted-foreground text-sm">
-                      {t("saved")}
+                      {t((m) => m.PersonalMoney.legacyTabs.savings.saved)}
                     </p>
                     <p className="font-semibold text-xl">
                       <CompactMoney
@@ -72,10 +76,12 @@ export function SavingsTab() {
                   <Progress value={progress} />
                   <div className="flex justify-between gap-3 text-muted-foreground text-xs">
                     <span>
-                      {tCommon("percentComplete", { percent: progress })}
+                      {tCommon((m) => m.PersonalMoney.percentComplete, {
+                        percent: progress,
+                      })}
                     </span>
                     <span>
-                      {t("target")}{" "}
+                      {t((m) => m.PersonalMoney.legacyTabs.savings.target)}{" "}
                       <CompactMoney
                         currency={moneyCurrency}
                         value={goal.targetMinorUnits}
@@ -84,7 +90,9 @@ export function SavingsTab() {
                   </div>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  {tCommon("due", { date: formatDate(goal.dueDate) })}
+                  {tCommon((m) => m.PersonalMoney.due, {
+                    date: formatDate(goal.dueDate),
+                  })}
                 </p>
               </CardContent>
             </Card>

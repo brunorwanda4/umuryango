@@ -87,7 +87,7 @@ export function ContactFormDialog({
               family.id,
             )}/contacts/${encodeURIComponent(contact?.id ?? "")}`,
     },
-    onSuccessMessage: t("saveSuccess"),
+    onSuccessMessage: t((m) => m.FamilyContacts.saveSuccess),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -116,16 +116,24 @@ export function ContactFormDialog({
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            {mode === "create" ? t("dialogCreateTitle") : t("dialogEditTitle")}
+            {mode === "create"
+              ? t((m) => m.FamilyContacts.dialogCreateTitle)
+              : t((m) => m.FamilyContacts.dialogEditTitle)}
           </DialogTitle>
           <DialogDescription>
-            {mode === "create" ? t("dialogCreateDesc") : t("dialogEditDesc")}
+            {mode === "create"
+              ? t((m) => m.FamilyContacts.dialogCreateDesc)
+              : t((m) => m.FamilyContacts.dialogEditDesc)}
           </DialogDescription>
         </DialogHeader>
         <Tabs defaultValue="form" className="gap-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="form">{t("addManually")}</TabsTrigger>
-            <TabsTrigger value="file">{t("uploadFile")}</TabsTrigger>
+            <TabsTrigger value="form">
+              {t((m) => m.FamilyContacts.addManually)}
+            </TabsTrigger>
+            <TabsTrigger value="file">
+              {t((m) => m.FamilyContacts.uploadFile)}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="form">
             <form
@@ -141,15 +149,15 @@ export function ContactFormDialog({
               <CommonFormField
                 control={form.control}
                 name="fullName"
-                label={t("fullNameLabel")}
-                placeholder={t("fullNamePlaceholder")}
+                label={t((m) => m.FamilyContacts.fullNameLabel)}
+                placeholder={t((m) => m.FamilyContacts.fullNamePlaceholder)}
                 required
               />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <CommonFormField
                   control={form.control}
                   name="contactType"
-                  label={t("contactTypeLabel")}
+                  label={t((m) => m.FamilyContacts.contactTypeLabel)}
                   fieldType="select"
                   selectOptions={localizedContactTypeOptions}
                   required
@@ -157,7 +165,7 @@ export function ContactFormDialog({
                 <CommonFormField
                   control={form.control}
                   name="status"
-                  label={t("statusLabel")}
+                  label={t((m) => m.FamilyContacts.statusLabel)}
                   fieldType="select"
                   selectOptions={localizedStatusOptions}
                   required
@@ -167,58 +175,62 @@ export function ContactFormDialog({
                 <CommonFormField
                   control={form.control}
                   name="phoneNumber"
-                  label={t("phoneLabel")}
+                  label={t((m) => m.FamilyContacts.phoneLabel)}
                   fieldType="phone"
-                  placeholder={t("phonePlaceholder")}
+                  placeholder={t((m) => m.FamilyContacts.phonePlaceholder)}
                 />
                 <CommonFormField
                   control={form.control}
                   name="email"
-                  label={t("emailLabel")}
+                  label={t((m) => m.FamilyContacts.emailLabel)}
                   type="email"
-                  placeholder={t("emailPlaceholder")}
+                  placeholder={t((m) => m.FamilyContacts.emailPlaceholder)}
                 />
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <CommonFormField
                   control={form.control}
                   name="relationshipToFamily"
-                  label={t("relationshipLabel")}
-                  placeholder={t("relationshipPlaceholder")}
+                  label={t((m) => m.FamilyContacts.relationshipLabel)}
+                  placeholder={t(
+                    (m) => m.FamilyContacts.relationshipPlaceholder,
+                  )}
                 />
                 <CommonFormField
                   control={form.control}
                   name="organization"
-                  label={t("organizationLabel")}
-                  placeholder={t("organizationPlaceholder")}
+                  label={t((m) => m.FamilyContacts.organizationLabel)}
+                  placeholder={t(
+                    (m) => m.FamilyContacts.organizationPlaceholder,
+                  )}
                 />
               </div>
               <CommonFormField
                 control={form.control}
                 name="address"
-                label={t("addressLabel")}
-                placeholder={t("addressPlaceholder")}
+                label={t((m) => m.FamilyContacts.addressLabel)}
+                placeholder={t((m) => m.FamilyContacts.addressPlaceholder)}
               />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <CommonFormField
                   control={form.control}
                   name="isEmergencyContact"
-                  label={t("isEmergencyLabel")}
+                  label={t((m) => m.FamilyContacts.isEmergencyLabel)}
                   fieldType="checkbox"
                 />
                 <CommonFormField
                   control={form.control}
                   name="isLoanContact"
-                  label={t("isLoanLabel")}
+                  label={t((m) => m.FamilyContacts.isLoanLabel)}
                   fieldType="checkbox"
                 />
               </div>
               <CommonFormField
                 control={form.control}
                 name="notes"
-                label={t("notesLabel")}
+                label={t((m) => m.FamilyContacts.notesLabel)}
                 fieldType="textarea"
-                placeholder={t("notesPlaceholder")}
+                placeholder={t((m) => m.FamilyContacts.notesPlaceholder)}
               />
             </form>
             <DialogFooter>
@@ -228,7 +240,9 @@ export function ContactFormDialog({
                 disabled={isPending}
                 className="w-full sm:w-auto"
               >
-                {isPending ? tCommon("saving") : tCommon("save")}
+                {isPending
+                  ? tCommon((m) => m.Common.saving)
+                  : tCommon((m) => m.Common.save)}
               </Button>
             </DialogFooter>
           </TabsContent>

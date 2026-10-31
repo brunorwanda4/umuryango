@@ -44,14 +44,16 @@ export function ApprovalAnalytics({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t("analyticsTitle")}</CardTitle>
-          <CardDescription>{t("analyticsDesc")}</CardDescription>
+          <CardTitle>{t((m) => m.FamilyApprovals.analyticsTitle)}</CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyApprovals.analyticsDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <TableEmptyState
             icon={BarChart3Icon}
-            title={t("noAnalyticsYet")}
-            description={t("noAnalyticsYetDesc")}
+            title={t((m) => m.FamilyApprovals.noAnalyticsYet)}
+            description={t((m) => m.FamilyApprovals.noAnalyticsYetDesc)}
           />
         </CardContent>
       </Card>
@@ -62,8 +64,10 @@ export function ApprovalAnalytics({
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>{t("pendingVsApproved")}</CardTitle>
-          <CardDescription>{t("pendingVsApprovedDesc")}</CardDescription>
+          <CardTitle>{t((m) => m.FamilyApprovals.pendingVsApproved)}</CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyApprovals.pendingVsApprovedDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">
@@ -84,8 +88,10 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("approvalRateTitle")}</CardTitle>
-          <CardDescription>{t("approvalRateDesc")}</CardDescription>
+          <CardTitle>{t((m) => m.FamilyApprovals.approvalRateTitle)}</CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyApprovals.approvalRateDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-[14rem_1fr]">
           <ChartContainer config={approvalChartConfig} className="h-56 w-full">
@@ -109,7 +115,7 @@ export function ApprovalAnalytics({
               {analytics.approvalPercent.toFixed(0)}%
             </p>
             <p className="text-muted-foreground text-sm leading-6">
-              {t("approvalRateNote")}
+              {t((m) => m.FamilyApprovals.approvalRateNote)}
             </p>
           </div>
         </CardContent>
@@ -117,8 +123,12 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("averageApprovalTimeTitle")}</CardTitle>
-          <CardDescription>{t("averageApprovalTimeDesc")}</CardDescription>
+          <CardTitle>
+            {t((m) => m.FamilyApprovals.averageApprovalTimeTitle)}
+          </CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyApprovals.averageApprovalTimeDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">
@@ -142,8 +152,10 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("approvalsByMonth")}</CardTitle>
-          <CardDescription>{t("approvalsByMonthDesc")}</CardDescription>
+          <CardTitle>{t((m) => m.FamilyApprovals.approvalsByMonth)}</CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyApprovals.approvalsByMonthDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">
@@ -164,8 +176,12 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("approvalsByCategory")}</CardTitle>
-          <CardDescription>{t("approvalsByCategoryDesc")}</CardDescription>
+          <CardTitle>
+            {t((m) => m.FamilyApprovals.approvalsByCategory)}
+          </CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyApprovals.approvalsByCategoryDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">
@@ -196,7 +212,7 @@ export function ApprovalAnalytics({
                     formatter={(value) => (
                       <>
                         <span className="text-muted-foreground">
-                          {t("amountLabel")}
+                          {t((m) => m.FamilyApprovals.amountLabel)}
                         </span>
                         <span className="font-mono font-medium">
                           {formatFullMinorUnits(value, currency)}
@@ -218,8 +234,12 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>{t("rejectionsByCategory")}</CardTitle>
-          <CardDescription>{t("rejectionsByCategoryDesc")}</CardDescription>
+          <CardTitle>
+            {t((m) => m.FamilyApprovals.rejectionsByCategory)}
+          </CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyApprovals.rejectionsByCategoryDesc)}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">

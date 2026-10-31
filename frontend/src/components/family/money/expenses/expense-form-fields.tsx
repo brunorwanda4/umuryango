@@ -55,8 +55,8 @@ export function ExpenseFormFields({
           {
             label:
               categories.length === 0
-                ? t("form.otherCreateCategory")
-                : t("form.createAnotherCategory"),
+                ? t((m) => m.FamilyExpenses.form.otherCreateCategory)
+                : t((m) => m.FamilyExpenses.form.createAnotherCategory),
             value: CREATE_EXPENSE_CATEGORY_VALUE,
           },
         ]
@@ -68,8 +68,8 @@ export function ExpenseFormFields({
       <CommonFormField
         control={control}
         name="title"
-        label={t("form.titleLabel")}
-        placeholder={t("form.titlePlaceholder")}
+        label={t((m) => m.FamilyExpenses.form.titleLabel)}
+        placeholder={t((m) => m.FamilyExpenses.form.titlePlaceholder)}
         required
       />
 
@@ -77,16 +77,18 @@ export function ExpenseFormFields({
         <CommonFormField
           control={control}
           name="amountMinorUnits"
-          label={t("form.amountLabel", { currency: family.defaultCurrency })}
+          label={t((m) => m.FamilyExpenses.form.amountLabel, {
+            currency: family.defaultCurrency,
+          })}
           fieldType="money"
           currency={family.defaultCurrency}
-          placeholder={t("form.amountPlaceholder")}
+          placeholder={t((m) => m.FamilyExpenses.form.amountPlaceholder)}
           required
         />
         <CommonFormField
           control={control}
           name="date"
-          label={t("form.dateLabel")}
+          label={t((m) => m.FamilyExpenses.form.dateLabel)}
           fieldType="date"
           required
         />
@@ -96,13 +98,13 @@ export function ExpenseFormFields({
         <CommonFormField
           control={control}
           name="categoryId"
-          label={t("form.categoryLabel")}
+          label={t((m) => m.FamilyExpenses.form.categoryLabel)}
           fieldType="custom"
           disabled={categories.length === 0 && !canCreateCategoryInline}
           placeholder={
             categories.length === 0
-              ? t("form.selectOtherCategoryPlaceholder")
-              : t("form.selectCategoryPlaceholder")
+              ? t((m) => m.FamilyExpenses.form.selectOtherCategoryPlaceholder)
+              : t((m) => m.FamilyExpenses.form.selectCategoryPlaceholder)
           }
           required
           render={({ field, id, invalid, disabled }) => (
@@ -131,8 +133,15 @@ export function ExpenseFormFields({
                   <SelectValue
                     placeholder={
                       categories.length === 0
-                        ? t("form.selectOtherCategoryPlaceholder")
-                        : t("form.selectCategoryPlaceholder")
+                        ? t(
+                            (m) =>
+                              m.FamilyExpenses.form
+                                .selectOtherCategoryPlaceholder,
+                          )
+                        : t(
+                            (m) =>
+                              m.FamilyExpenses.form.selectCategoryPlaceholder,
+                          )
                     }
                   />
                 </SelectTrigger>
@@ -181,25 +190,25 @@ export function ExpenseFormFields({
               >
                 {canCreateCategoryInline ? (
                   <>
-                    {t("form.inlinePromptPrefix")}
+                    {t((m) => m.FamilyExpenses.form.inlinePromptPrefix)}
                     <Link
                       href={`/family/${family.slug}/money/categories`}
                       className="font-semibold underline hover:opacity-80"
                     >
-                      {t("form.manageCategoriesLink")}
+                      {t((m) => m.FamilyExpenses.form.manageCategoriesLink)}
                     </Link>
-                    {t("form.inlinePromptSuffix")}
+                    {t((m) => m.FamilyExpenses.form.inlinePromptSuffix)}
                   </>
                 ) : (
                   <>
-                    {t("form.firstPromptPrefix")}
+                    {t((m) => m.FamilyExpenses.form.firstPromptPrefix)}
                     <Link
                       href={`/family/${family.slug}/money/categories`}
                       className="font-semibold underline hover:opacity-80"
                     >
-                      {t("form.createCategoryLink")}
+                      {t((m) => m.FamilyExpenses.form.createCategoryLink)}
                     </Link>
-                    {t("form.firstPromptSuffix")}
+                    {t((m) => m.FamilyExpenses.form.firstPromptSuffix)}
                   </>
                 )}
               </span>
@@ -209,10 +218,10 @@ export function ExpenseFormFields({
         <CommonFormField
           control={control}
           name="paymentMethod"
-          label={t("form.paymentMethodLabel")}
+          label={t((m) => m.FamilyExpenses.form.paymentMethodLabel)}
           fieldType="select"
           selectOptions={paymentMethods}
-          placeholder={t("form.selectPaymentMethod")}
+          placeholder={t((m) => m.FamilyExpenses.form.selectPaymentMethod)}
           required
         />
       </div>
@@ -221,19 +230,19 @@ export function ExpenseFormFields({
         <CommonFormField
           control={control}
           name="paidTo"
-          label={t("form.paidToLabel")}
-          placeholder={t("form.paidToPlaceholder")}
+          label={t((m) => m.FamilyExpenses.form.paidToLabel)}
+          placeholder={t((m) => m.FamilyExpenses.form.paidToPlaceholder)}
         />
         <CommonFormField
           control={control}
           name="paidBy"
-          label={t("form.paidByLabel")}
+          label={t((m) => m.FamilyExpenses.form.paidByLabel)}
           fieldType="select"
           selectOptions={family.members.map((member) => ({
             label: member.fullName,
             value: member.fullName,
           }))}
-          placeholder={t("form.selectFamilyMember")}
+          placeholder={t((m) => m.FamilyExpenses.form.selectFamilyMember)}
         />
       </div>
 
@@ -241,39 +250,39 @@ export function ExpenseFormFields({
         <CommonFormField
           control={control}
           name="budgetId"
-          label={t("form.budgetLabel")}
+          label={t((m) => m.FamilyExpenses.form.budgetLabel)}
           fieldType="select"
           selectOptions={[
-            { label: t("form.noBudget"), value: "none" },
+            { label: t((m) => m.FamilyExpenses.form.noBudget), value: "none" },
             ...linkOptions.budgets.map((budget) => ({
               label: budget.categoryName,
               value: budget.id ?? budget.categoryName,
             })),
           ]}
-          placeholder={t("form.optionalBudget")}
+          placeholder={t((m) => m.FamilyExpenses.form.optionalBudget)}
         />
         <CommonFormField
           control={control}
           name="projectId"
-          label={t("form.projectLabel")}
+          label={t((m) => m.FamilyExpenses.form.projectLabel)}
           fieldType="select"
           selectOptions={[
-            { label: t("form.noProject"), value: "none" },
+            { label: t((m) => m.FamilyExpenses.form.noProject), value: "none" },
             ...linkOptions.projects.map((project) => ({
               label: project.name,
               value: project.id,
             })),
           ]}
-          placeholder={t("form.optionalProject")}
+          placeholder={t((m) => m.FamilyExpenses.form.optionalProject)}
         />
       </div>
 
       <CommonFormField
         control={control}
         name="notes"
-        label={t("form.notesLabel")}
+        label={t((m) => m.FamilyExpenses.form.notesLabel)}
         fieldType="textarea"
-        placeholder={t("form.notesPlaceholder")}
+        placeholder={t((m) => m.FamilyExpenses.form.notesPlaceholder)}
         textareaProps={{ rows: 4 }}
       />
 
@@ -281,7 +290,7 @@ export function ExpenseFormFields({
         <CommonFormField
           control={control}
           name="status"
-          label={t("form.statusLabel")}
+          label={t((m) => m.FamilyExpenses.form.statusLabel)}
           fieldType="select"
           selectOptions={expenseStatuses}
           required
@@ -290,9 +299,9 @@ export function ExpenseFormFields({
           <CommonFormField
             control={control}
             name="fileName"
-            label={t("form.receiptUploadLabel")}
+            label={t((m) => m.FamilyExpenses.form.receiptUploadLabel)}
             type="file"
-            description={t("form.receiptUploadDesc")}
+            description={t((m) => m.FamilyExpenses.form.receiptUploadDesc)}
           />
         ) : null}
       </div>

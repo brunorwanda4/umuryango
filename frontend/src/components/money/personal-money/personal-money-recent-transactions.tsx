@@ -20,10 +20,10 @@ export function PersonalMoneyRecentTransactions({
     <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
       <div className="mb-4 flex flex-col gap-0.5">
         <h2 className="font-fraunces text-xl font-semibold tracking-tight text-foreground">
-          {t("recentTransactions.title")}
+          {t((m) => m.PersonalMoney.recentTransactions.title)}
         </h2>
         <p className="text-sm text-muted-foreground">
-          {t("recentTransactions.description")}
+          {t((m) => m.PersonalMoney.recentTransactions.description)}
         </p>
       </div>
 

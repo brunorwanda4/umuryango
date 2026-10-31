@@ -88,7 +88,9 @@ export function ExpenseAnalytics({
     () =>
       summarizeBy(
         approved,
-        (transaction) => transaction.receivedBy || t("table.notRecorded"),
+        (transaction) =>
+          transaction.receivedBy ||
+          t((m) => m.FamilyExpenses.table.notRecorded),
       ).sort((a, b) => b.amount - a.amount),
     [approved, t],
   );
@@ -122,63 +124,85 @@ export function ExpenseAnalytics({
   return (
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <AmountChart
-        title={t("analytics.byCategoryTitle")}
-        description={t("analytics.byCategoryDesc")}
+        title={t((m) => m.FamilyExpenses.analytics.byCategoryTitle)}
+        description={t((m) => m.FamilyExpenses.analytics.byCategoryDesc)}
         data={byCategory}
         currency={currency}
         layout="vertical"
-        emptyTitle={t("analytics.noApprovedExpensesTitle")}
-        emptyDescription={t("analytics.noApprovedExpensesDesc")}
-        amountLabel={t("analytics.amount")}
+        emptyTitle={t(
+          (m) => m.FamilyExpenses.analytics.noApprovedExpensesTitle,
+        )}
+        emptyDescription={t(
+          (m) => m.FamilyExpenses.analytics.noApprovedExpensesDesc,
+        )}
+        amountLabel={t((m) => m.FamilyExpenses.analytics.amount)}
       />
       <TrendChart
         data={monthlyTrend}
         currency={currency}
-        title={t("analytics.monthlyTrendTitle")}
-        description={t("analytics.monthlyTrendDesc")}
-        emptyTitle={t("analytics.noMonthlyTrendTitle")}
-        emptyDescription={t("analytics.noMonthlyTrendDesc")}
-        amountLabel={t("analytics.amount")}
+        title={t((m) => m.FamilyExpenses.analytics.monthlyTrendTitle)}
+        description={t((m) => m.FamilyExpenses.analytics.monthlyTrendDesc)}
+        emptyTitle={t((m) => m.FamilyExpenses.analytics.noMonthlyTrendTitle)}
+        emptyDescription={t(
+          (m) => m.FamilyExpenses.analytics.noMonthlyTrendDesc,
+        )}
+        amountLabel={t((m) => m.FamilyExpenses.analytics.amount)}
       />
       <AmountChart
-        title={t("analytics.byMemberTitle")}
-        description={t("analytics.byMemberDesc")}
+        title={t((m) => m.FamilyExpenses.analytics.byMemberTitle)}
+        description={t((m) => m.FamilyExpenses.analytics.byMemberDesc)}
         data={byMember}
         currency={currency}
         layout="vertical"
-        emptyTitle={t("analytics.noApprovedExpensesTitle")}
-        emptyDescription={t("analytics.noApprovedExpensesDesc")}
-        amountLabel={t("analytics.amount")}
+        emptyTitle={t(
+          (m) => m.FamilyExpenses.analytics.noApprovedExpensesTitle,
+        )}
+        emptyDescription={t(
+          (m) => m.FamilyExpenses.analytics.noApprovedExpensesDesc,
+        )}
+        amountLabel={t((m) => m.FamilyExpenses.analytics.amount)}
       />
       <AmountChart
-        title={t("analytics.byPaymentMethodTitle")}
-        description={t("analytics.byPaymentMethodDesc")}
+        title={t((m) => m.FamilyExpenses.analytics.byPaymentMethodTitle)}
+        description={t((m) => m.FamilyExpenses.analytics.byPaymentMethodDesc)}
         data={byPaymentMethod}
         currency={currency}
         layout="vertical"
-        emptyTitle={t("analytics.noApprovedExpensesTitle")}
-        emptyDescription={t("analytics.noApprovedExpensesDesc")}
-        amountLabel={t("analytics.amount")}
+        emptyTitle={t(
+          (m) => m.FamilyExpenses.analytics.noApprovedExpensesTitle,
+        )}
+        emptyDescription={t(
+          (m) => m.FamilyExpenses.analytics.noApprovedExpensesDesc,
+        )}
+        amountLabel={t((m) => m.FamilyExpenses.analytics.amount)}
       />
       <BudgetActualChart
         data={budgetActual}
         currency={currency}
-        title={t("analytics.budgetVsActualTitle")}
-        description={t("analytics.budgetVsActualDesc")}
-        emptyTitle={t("analytics.noBudgetComparisonTitle")}
-        emptyDescription={t("analytics.noBudgetComparisonDesc")}
-        budgetLabel={t("analytics.budget")}
-        actualLabel={t("analytics.actual")}
+        title={t((m) => m.FamilyExpenses.analytics.budgetVsActualTitle)}
+        description={t((m) => m.FamilyExpenses.analytics.budgetVsActualDesc)}
+        emptyTitle={t(
+          (m) => m.FamilyExpenses.analytics.noBudgetComparisonTitle,
+        )}
+        emptyDescription={t(
+          (m) => m.FamilyExpenses.analytics.noBudgetComparisonDesc,
+        )}
+        budgetLabel={t((m) => m.FamilyExpenses.analytics.budget)}
+        actualLabel={t((m) => m.FamilyExpenses.analytics.actual)}
       />
       <AmountChart
-        title={t("analytics.topCategoriesTitle")}
-        description={t("analytics.topCategoriesDesc")}
+        title={t((m) => m.FamilyExpenses.analytics.topCategoriesTitle)}
+        description={t((m) => m.FamilyExpenses.analytics.topCategoriesDesc)}
         data={topCategories}
         currency={currency}
         layout="horizontal"
-        emptyTitle={t("analytics.noApprovedExpensesTitle")}
-        emptyDescription={t("analytics.noApprovedExpensesDesc")}
-        amountLabel={t("analytics.amount")}
+        emptyTitle={t(
+          (m) => m.FamilyExpenses.analytics.noApprovedExpensesTitle,
+        )}
+        emptyDescription={t(
+          (m) => m.FamilyExpenses.analytics.noApprovedExpensesDesc,
+        )}
+        amountLabel={t((m) => m.FamilyExpenses.analytics.amount)}
       />
     </section>
   );

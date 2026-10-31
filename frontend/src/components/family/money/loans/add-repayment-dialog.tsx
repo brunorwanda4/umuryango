@@ -74,7 +74,7 @@ export function AddRepaymentDialog({
         family.id,
       )}/money/loans/${encodeURIComponent(loan?.id ?? "")}/repayments`,
     },
-    onSuccessMessage: t("toasts.repaymentRecorded"),
+    onSuccessMessage: t((m) => m.FamilyLoans.toasts.repaymentRecorded),
     toastOnSuccess: true,
     toastOnError: true,
     onError: async (message) => {
@@ -102,9 +102,11 @@ export function AddRepaymentDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>{t("repaymentDialogTitle")}</DialogTitle>
+          <DialogTitle>
+            {t((m) => m.FamilyLoans.repaymentDialogTitle)}
+          </DialogTitle>
           <DialogDescription>
-            {t("repaymentDialogDesc", {
+            {t((m) => m.FamilyLoans.repaymentDialogDesc, {
               title: loan?.title ?? "this loan",
               remaining: `${remaining} ${family.defaultCurrency}`,
             })}
@@ -120,14 +122,16 @@ export function AddRepaymentDialog({
           ) : null}
           {exceedsRemaining ? (
             <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-destructive text-sm">
-              {t("exceedsRemainingWarning")}
+              {t((m) => m.FamilyLoans.exceedsRemainingWarning)}
             </div>
           ) : null}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <CommonFormField
               control={form.control}
               name="amountMinorUnits"
-              label={t("amountPaidLabel", { currency: family.defaultCurrency })}
+              label={t((m) => m.FamilyLoans.amountPaidLabel, {
+                currency: family.defaultCurrency,
+              })}
               fieldType="money"
               currency={family.defaultCurrency}
               required
@@ -135,7 +139,7 @@ export function AddRepaymentDialog({
             <CommonFormField
               control={form.control}
               name="paymentDate"
-              label={t("paymentDateLabel")}
+              label={t((m) => m.FamilyLoans.paymentDateLabel)}
               fieldType="date"
               required
             />
@@ -143,7 +147,7 @@ export function AddRepaymentDialog({
           <CommonFormField
             control={form.control}
             name="paymentMethod"
-            label={t("paymentMethodLabel")}
+            label={t((m) => m.FamilyLoans.paymentMethodLabel)}
             fieldType="select"
             selectOptions={paymentMethods}
             required
@@ -152,38 +156,38 @@ export function AddRepaymentDialog({
             <CommonFormField
               control={form.control}
               name="paidBy"
-              label={t("paidByLabel")}
-              placeholder={t("paidByPlaceholder")}
+              label={t((m) => m.FamilyLoans.paidByLabel)}
+              placeholder={t((m) => m.FamilyLoans.paidByPlaceholder)}
               required
             />
             <CommonFormField
               control={form.control}
               name="receivedBy"
-              label={t("receivedByLabel")}
-              placeholder={t("receivedByPlaceholder")}
+              label={t((m) => m.FamilyLoans.receivedByLabel)}
+              placeholder={t((m) => m.FamilyLoans.receivedByPlaceholder)}
               required
             />
           </div>
           <CommonFormField
             control={form.control}
             name="receiptFileName"
-            label={t("receiptLabel")}
+            label={t((m) => m.FamilyLoans.receiptLabel)}
             type="file"
-            description={t("receiptDesc")}
+            description={t((m) => m.FamilyLoans.receiptDesc)}
           />
           <CommonFormField
             control={form.control}
             name="notes"
-            label={t("notesLabel")}
+            label={t((m) => m.FamilyLoans.notesLabel)}
             fieldType="textarea"
-            placeholder={t("notesPlaceholder")}
+            placeholder={t((m) => m.FamilyLoans.notesPlaceholder)}
           />
           <CommonFormField
             control={form.control}
             name="allowOverpayment"
-            label={t("allowOverpaymentLabel")}
+            label={t((m) => m.FamilyLoans.allowOverpaymentLabel)}
             fieldType="checkbox"
-            description={t("allowOverpaymentDesc")}
+            description={t((m) => m.FamilyLoans.allowOverpaymentDesc)}
           />
         </form>
         <DialogFooter>
@@ -198,7 +202,9 @@ export function AddRepaymentDialog({
             }
             className="w-full sm:w-auto"
           >
-            {isPending ? t("recordingRepayment") : t("recordRepaymentBtn")}
+            {isPending
+              ? t((m) => m.FamilyLoans.recordingRepayment)
+              : t((m) => m.FamilyLoans.recordRepaymentBtn)}
           </Button>
         </DialogFooter>
       </DialogContent>

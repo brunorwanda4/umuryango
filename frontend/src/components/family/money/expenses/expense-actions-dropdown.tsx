@@ -67,7 +67,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <EyeIcon className="mr-2 size-4" />
-          {t("actions.view")}
+          {t((m) => m.FamilyExpenses.actions.view)}
         </DropdownMenuItem>
         {canEdit ? (
           <DropdownMenuItem
@@ -77,12 +77,12 @@ export function ExpenseActionsDropdown({
             }}
           >
             <PencilIcon className="mr-2 size-4" />
-            {t("actions.edit")}
+            {t((m) => m.FamilyExpenses.actions.edit)}
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem disabled>
             <LockIcon className="mr-2 size-4" />
-            {t("actions.locked")}
+            {t((m) => m.FamilyExpenses.actions.locked)}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem
@@ -92,7 +92,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <Trash2Icon className="mr-2 size-4" />
-          {t("actions.delete")}
+          {t((m) => m.FamilyExpenses.actions.delete)}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -102,7 +102,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <UploadIcon className="mr-2 size-4" />
-          {t("actions.uploadReceipt")}
+          {t((m) => m.FamilyExpenses.actions.uploadReceipt)}
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={!firstReceipt}
@@ -112,7 +112,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <DownloadIcon className="mr-2 size-4" />
-          {t("actions.downloadReceipt")}
+          {t((m) => m.FamilyExpenses.actions.downloadReceipt)}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(event) => {
@@ -125,7 +125,7 @@ export function ExpenseActionsDropdown({
           ) : (
             <SendIcon className="mr-2 size-4" />
           )}
-          {t("actions.sendForApproval")}
+          {t((m) => m.FamilyExpenses.actions.sendForApproval)}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(event) => {
@@ -134,7 +134,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <CopyIcon className="mr-2 size-4" />
-          {t("actions.duplicate")}
+          {t((m) => m.FamilyExpenses.actions.duplicate)}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

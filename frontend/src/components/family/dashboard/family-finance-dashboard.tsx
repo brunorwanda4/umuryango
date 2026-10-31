@@ -66,22 +66,22 @@ export function FamilyFinanceDashboard({
 
   const dashboardStats = [
     {
-      label: t("pendingApprovals"),
+      label: t((m) => m.FamilyDashboard.pendingApprovals),
       value: totals?.pendingApprovalCount ?? 0,
       valueClassName: "text-[var(--chart-4)]",
     },
     {
-      label: t("moneyRecords"),
+      label: t((m) => m.FamilyDashboard.moneyRecords),
       value: normalizedMoney?.sourceRecordCount ?? records.length,
       valueClassName: "text-[var(--chart-2)]",
     },
     {
-      label: t("overdue"),
+      label: t((m) => m.FamilyDashboard.overdue),
       value: totals?.overdueCount ?? 0,
       valueClassName: "text-[var(--chart-5)]",
     },
     {
-      label: t("familyMembers"),
+      label: t((m) => m.FamilyDashboard.familyMembers),
       value: family.memberCount,
       valueClassName: "text-[var(--chart-1)]",
     },
@@ -90,13 +90,13 @@ export function FamilyFinanceDashboard({
   return (
     <section
       className="flex flex-col gap-4"
-      aria-label={t("overviewAriaLabel")}
+      aria-label={t((m) => m.FamilyDashboard.overviewAriaLabel)}
     >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr]">
         <Card className="family-balance-card gap-0 rounded-[22px] border py-[22px] text-white shadow-xl">
           <CardHeader className="px-[22px]">
             <CardDescription className="font-mono font-semibold text-[17px] text-white/90 tracking-[0.14em] uppercase">
-              {t("totalBalance", { currency })}
+              {t((m) => m.FamilyDashboard.totalBalance, { currency })}
             </CardDescription>
           </CardHeader>
           <CardContent className="mt-7 flex flex-1 flex-col px-[22px]">
@@ -108,12 +108,12 @@ export function FamilyFinanceDashboard({
             <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
               <BalanceStat
                 currency={currency}
-                label={t("incomeThisMonth")}
+                label={t((m) => m.FamilyDashboard.incomeThisMonth)}
                 value={totals?.incomeMinorUnits ?? 0}
               />
               <BalanceStat
                 currency={currency}
-                label={t("spentThisMonth")}
+                label={t((m) => m.FamilyDashboard.spentThisMonth)}
                 value={totals?.expenseMinorUnits ?? 0}
               />
             </div>
@@ -150,7 +150,7 @@ export function FamilyFinanceDashboard({
             href={`${moneyHref}/income`}
             icon={ArrowDownLeftIcon}
             iconClassName="text-[var(--chart-2)]"
-            label={t("addIncome")}
+            label={t((m) => m.FamilyDashboard.addIncome)}
           />
         ) : null}
         {hasCapability(family, "RECORD_EXPENSE") ? (
@@ -158,14 +158,14 @@ export function FamilyFinanceDashboard({
             href={`${moneyHref}/expenses`}
             icon={ArrowUpRightIcon}
             iconClassName="text-destructive"
-            label={t("addExpense")}
+            label={t((m) => m.FamilyDashboard.addExpense)}
           />
         ) : null}
         {hasCapability(family, "MANAGE_DEBTS") ? (
           <DashboardAction
             href={`${moneyHref}/loans`}
             icon={PlusIcon}
-            label={t("addLoan")}
+            label={t((m) => m.FamilyDashboard.addLoan)}
           />
         ) : null}
       </div>
@@ -173,14 +173,14 @@ export function FamilyFinanceDashboard({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <DashboardCard
           actionHref={moneyHref}
-          actionLabel={tCommon("open")}
-          description={t("moneyThisMonthDesc")}
-          title={t("moneyThisMonthTitle")}
+          actionLabel={tCommon((m) => m.Common.open)}
+          description={t((m) => m.FamilyDashboard.moneyThisMonthDesc)}
+          title={t((m) => m.FamilyDashboard.moneyThisMonthTitle)}
         >
           <div
             className="mt-1 flex h-2.5 overflow-hidden rounded-full bg-muted"
             role="img"
-            aria-label={t("moneyShareAria", {
+            aria-label={t((m) => m.FamilyDashboard.moneyShareAria, {
               incomeShare,
               expenseShare: 100 - incomeShare,
             })}
@@ -198,13 +198,13 @@ export function FamilyFinanceDashboard({
             <LegendItem
               className="bg-[var(--chart-2)]"
               currency={currency}
-              label={t("income")}
+              label={t((m) => m.FamilyDashboard.income)}
               value={totals?.incomeMinorUnits ?? 0}
             />
             <LegendItem
               className="bg-destructive"
               currency={currency}
-              label={t("expenses")}
+              label={t((m) => m.FamilyDashboard.expenses)}
               value={totals?.expenseMinorUnits ?? 0}
             />
           </div>
@@ -212,27 +212,27 @@ export function FamilyFinanceDashboard({
             <RecordList currency={currency} records={records.slice(0, 4)} />
           ) : (
             <DashboardEmpty
-              description={t("noTransactionsDesc")}
+              description={t((m) => m.FamilyDashboard.noTransactionsDesc)}
               icon={WalletCardsIcon}
-              title={t("noTransactionsTitle")}
+              title={t((m) => m.FamilyDashboard.noTransactionsTitle)}
             />
           )}
         </DashboardCard>
 
         <DashboardCard
           actionHref={`${moneyHref}/approvals`}
-          actionLabel={tCommon("viewAll")}
-          description={t("moneyToReviewDesc")}
-          title={t("moneyToReviewTitle")}
+          actionLabel={tCommon((m) => m.Common.viewAll)}
+          description={t((m) => m.FamilyDashboard.moneyToReviewDesc)}
+          title={t((m) => m.FamilyDashboard.moneyToReviewTitle)}
         >
           <div className="grid grid-cols-2 gap-2.5">
             <MetricStat
-              label={t("pendingApprovals")}
+              label={t((m) => m.FamilyDashboard.pendingApprovals)}
               value={totals?.pendingApprovalCount ?? 0}
               valueClassName="text-[var(--chart-5)]"
             />
             <MetricStat
-              label={t("overdue")}
+              label={t((m) => m.FamilyDashboard.overdue)}
               value={totals?.overdueCount ?? 0}
               valueClassName="text-[var(--chart-1)]"
             />
@@ -248,7 +248,8 @@ export function FamilyFinanceDashboard({
                         {approval.title}
                       </p>
                       <p className="text-muted-foreground text-[13px]">
-                        {approval.status ?? t("pendingReview")}
+                        {approval.status ??
+                          t((m) => m.FamilyDashboard.pendingReview)}
                       </p>
                     </div>
                     <CompactMoney
@@ -261,9 +262,11 @@ export function FamilyFinanceDashboard({
             </div>
           ) : (
             <DashboardEmpty
-              description={t("nothingNeedsAttentionDesc")}
+              description={t(
+                (m) => m.FamilyDashboard.nothingNeedsAttentionDesc,
+              )}
               icon={CalendarCheckIcon}
-              title={t("nothingNeedsAttentionTitle")}
+              title={t((m) => m.FamilyDashboard.nothingNeedsAttentionTitle)}
             />
           )}
         </DashboardCard>
@@ -286,27 +289,27 @@ export function FamilyQuickActions({ family }: { family: FamilyDetail }) {
   const moneyHref = `/family/${encodeURIComponent(family.slug)}/money`;
   const actions = [
     {
-      label: t("addIncome"),
+      label: t((m) => m.FamilyDashboard.addIncome),
       href: `${moneyHref}/income`,
       icon: ArrowDownLeftIcon,
       iconClassName: "text-[var(--chart-2)]",
       capability: "RECORD_INCOME" as const,
     },
     {
-      label: t("addExpense"),
+      label: t((m) => m.FamilyDashboard.addExpense),
       href: `${moneyHref}/expenses`,
       icon: ArrowUpRightIcon,
       iconClassName: "text-destructive",
       capability: "RECORD_EXPENSE" as const,
     },
     {
-      label: t("addLoan"),
+      label: t((m) => m.FamilyDashboard.addLoan),
       href: `${moneyHref}/loans`,
       icon: LandmarkIcon,
       capability: "MANAGE_DEBTS" as const,
     },
     {
-      label: t("openMoney"),
+      label: t((m) => m.FamilyDashboard.openMoney),
       href: moneyHref,
       icon: WalletCardsIcon,
       capability: null,
@@ -320,9 +323,11 @@ export function FamilyQuickActions({ family }: { family: FamilyDetail }) {
     <Card className={cardClassName}>
       <CardHeader className="px-5 pb-3.5">
         <CardTitle className="font-fraunces text-xl">
-          {t("quickActionsTitle")}
+          {t((m) => m.FamilyDashboard.quickActionsTitle)}
         </CardTitle>
-        <CardDescription>{t("quickActionsDesc")}</CardDescription>
+        <CardDescription>
+          {t((m) => m.FamilyDashboard.quickActionsDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-2.5 px-5 sm:grid-cols-2">
         {actions.map((action) => (
@@ -532,9 +537,9 @@ function FamilyWorkspaceCard({ family }: { family: FamilyDetail }) {
   return (
     <DashboardCard
       actionHref={href}
-      actionLabel={tCommon("viewAll")}
-      description={t("familyWorkspaceDesc")}
-      title={t("familyWorkspaceTitle")}
+      actionLabel={tCommon((m) => m.Common.viewAll)}
+      description={t((m) => m.FamilyDashboard.familyWorkspaceDesc)}
+      title={t((m) => m.FamilyDashboard.familyWorkspaceTitle)}
     >
       <div className="flex items-center justify-between gap-3 py-1">
         <div className="flex min-w-0 items-center gap-3">
@@ -549,12 +554,14 @@ function FamilyWorkspaceCard({ family }: { family: FamilyDetail }) {
               </Badge>
             </p>
             <p className="text-muted-foreground text-[13px]">
-              {t("membersCount", { count: family.memberCount })}
+              {t((m) => m.FamilyDashboard.membersCount, {
+                count: family.memberCount,
+              })}
             </p>
           </div>
         </div>
         <Button asChild variant="outline" size="sm">
-          <Link href={href}>{tCommon("open")}</Link>
+          <Link href={href}>{tCommon((m) => m.Common.open)}</Link>
         </Button>
       </div>
     </DashboardCard>
@@ -575,29 +582,29 @@ function LoansCard({
   return (
     <DashboardCard
       actionHref={href}
-      actionLabel={tCommon("open")}
-      description={t("savingsAndDebtsDesc")}
-      title={t("savingsAndDebtsTitle")}
+      actionLabel={tCommon((m) => m.Common.open)}
+      description={t((m) => m.FamilyDashboard.savingsAndDebtsDesc)}
+      title={t((m) => m.FamilyDashboard.savingsAndDebtsTitle)}
     >
       <div className="grid grid-cols-2 gap-2.5">
         <MoneyStat
           className="text-destructive"
           currency={currency}
-          label={t("outstandingDebts")}
+          label={t((m) => m.FamilyDashboard.outstandingDebts)}
           value={debt}
         />
         <MoneyStat
           className="text-[var(--chart-2)]"
           currency={currency}
-          label={t("familySavings")}
+          label={t((m) => m.FamilyDashboard.familySavings)}
           value={savings}
         />
       </div>
       {!hasAmount(debt) && !hasAmount(savings) ? (
         <DashboardEmpty
-          description={t("noSavingsOrDebtsDesc")}
+          description={t((m) => m.FamilyDashboard.noSavingsOrDebtsDesc)}
           icon={LandmarkIcon}
-          title={t("noSavingsOrDebtsTitle")}
+          title={t((m) => m.FamilyDashboard.noSavingsOrDebtsTitle)}
         />
       ) : null}
     </DashboardCard>
@@ -623,7 +630,7 @@ function MoneyStat({
       <div className={cn("stat-value mt-1 text-[22px]", className)}>
         <CompactMoney
           currency={currency}
-          emptyLabel={t("noRecords")}
+          emptyLabel={t((m) => m.FamilyDashboard.noRecords)}
           value={value}
         />
       </div>

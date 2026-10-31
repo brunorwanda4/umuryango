@@ -81,10 +81,12 @@ function MoneyCategoriesWorkspace({
         setApiMessage(undefined);
       } else if (response.ok) {
         setCategories(demoCategories);
-        setApiMessage(t("demoNotice"));
+        setApiMessage(t((m) => m.FamilyCategories.demoNotice));
       } else {
         setCategories(demoCategories);
-        setApiMessage(response.message ?? t("unavailableNotice"));
+        setApiMessage(
+          response.message ?? t((m) => m.FamilyCategories.unavailableNotice),
+        );
       }
 
       setLoading(false);
@@ -121,8 +123,8 @@ function MoneyCategoriesWorkspace({
     );
     toast.success(
       status === "ACTIVE"
-        ? t("activeAgain", { name: category.name })
-        : t("archived", { name: category.name }),
+        ? t((m) => m.FamilyCategories.activeAgain, { name: category.name })
+        : t((m) => m.FamilyCategories.archived, { name: category.name }),
     );
   };
 
@@ -142,7 +144,9 @@ function MoneyCategoriesWorkspace({
       );
 
       if (!response.ok) {
-        toast.error(response.message ?? t("deleteFailed"));
+        toast.error(
+          response.message ?? t((m) => m.FamilyCategories.deleteFailed),
+        );
         return;
       }
     }
@@ -150,15 +154,17 @@ function MoneyCategoriesWorkspace({
     setCategories((currentCategories) =>
       currentCategories.filter((item) => item.id !== deleteCategory.id),
     );
-    toast.success(t("deleted", { name: deleteCategory.name }));
+    toast.success(
+      t((m) => m.FamilyCategories.deleted, { name: deleteCategory.name }),
+    );
     setDeleteCategory(null);
   };
 
   return (
     <div className="flex flex-col gap-6">
       <PageTitle
-        title={t("pageTitle")}
-        description={t("pageDescription")}
+        title={t((m) => m.FamilyCategories.pageTitle)}
+        description={t((m) => m.FamilyCategories.pageDescription)}
         actions={
           <CreateCategoryForm
             existingCategories={categories}

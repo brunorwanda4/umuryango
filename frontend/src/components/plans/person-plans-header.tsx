@@ -28,14 +28,16 @@ export function PersonPlansHeader({
                 width={24}
               />
               <h1 className="truncate font-bricolage text-2xl font-bold sm:text-3xl">
-                {t("personPlansTitle", { name: firstName })}
+                {t((m) => m.PersonalPlans.personPlansTitle, {
+                  name: firstName,
+                })}
               </h1>
             </div>
           </div>
         </div>
         <Button onClick={onAdd} className="w-full sm:w-auto">
           <PlusIcon aria-hidden="true" data-icon="inline-start" />
-          {t("addPlan")}
+          {t((m) => m.PersonalPlans.addPlan)}
         </Button>
       </div>
     </header>

@@ -30,10 +30,10 @@ export default function NotFound() {
             404
           </p>
           <h1 className="text-4xl font-semibold tracking-normal text-balance sm:text-5xl">
-            {t("heading")}
+            {t((m) => m.NotFoundPage.heading)}
           </h1>
           <p className="mx-auto max-w-md text-lg leading-8 text-muted-foreground">
-            {t("description")}
+            {t((m) => m.NotFoundPage.description)}
           </p>
         </div>
 
@@ -44,7 +44,7 @@ export default function NotFound() {
             className="h-12 w-full rounded-full sm:w-fit"
           >
             <HouseIcon data-icon="inline-start" aria-hidden="true" />
-            {t("backHome")}
+            {t((m) => m.NotFoundPage.backHome)}
           </Button>
           <Button
             href={getLocalizedHref("/auth/login", defaultLocale)}
@@ -53,7 +53,7 @@ export default function NotFound() {
             className="h-12 w-full rounded-full sm:w-fit"
           >
             <LogInIcon data-icon="inline-start" aria-hidden="true" />
-            {t("login")}
+            {t((m) => m.NotFoundPage.login)}
           </Button>
         </div>
       </main>

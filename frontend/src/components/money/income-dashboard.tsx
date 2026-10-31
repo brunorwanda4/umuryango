@@ -46,8 +46,12 @@ export function IncomeDashboard({
     return (
       <Alert variant="destructive" className="flex flex-col gap-4">
         <AlertCircleIcon aria-hidden="true" />
-        <AlertTitle>{t("loadError")}</AlertTitle>
-        <AlertDescription>{error ?? t("noWorkspace")}</AlertDescription>
+        <AlertTitle>
+          {t((m) => m.PersonalMoney.personalIncome.loadError)}
+        </AlertTitle>
+        <AlertDescription>
+          {error ?? t((m) => m.PersonalMoney.personalIncome.noWorkspace)}
+        </AlertDescription>
         <Button
           className="mt-3 w-fit"
           onClick={onRetry}
@@ -55,7 +59,7 @@ export function IncomeDashboard({
           variant="outline"
         >
           <RefreshCwIcon data-icon="inline-start" />
-          {t("tryAgain")}
+          {t((m) => m.PersonalMoney.personalIncome.tryAgain)}
         </Button>
       </Alert>
     );
@@ -65,8 +69,12 @@ export function IncomeDashboard({
     return (
       <div className="grid place-content-center w-fill h-screen">
         <Alert className="flex flex-col gap-4">
-          <AlertTitle>{t("createCategoryTitle")}</AlertTitle>
-          <AlertDescription>{t("createCategoryDesc")}</AlertDescription>
+          <AlertTitle>
+            {t((m) => m.PersonalMoney.personalIncome.createCategoryTitle)}
+          </AlertTitle>
+          <AlertDescription>
+            {t((m) => m.PersonalMoney.personalIncome.createCategoryDesc)}
+          </AlertDescription>
           <CreateCategoryForm
             defaultType="INCOME"
             existingCategories={categories}
@@ -84,8 +92,12 @@ export function IncomeDashboard({
       <IncomeSummaryCards summary={data.summary} />
       <Tabs defaultValue="data">
         <TabsList>
-          <TabsTrigger value="data">{t("dataTab")}</TabsTrigger>
-          <TabsTrigger value="charts">{t("chartsTab")}</TabsTrigger>
+          <TabsTrigger value="data">
+            {t((m) => m.PersonalMoney.personalIncome.dataTab)}
+          </TabsTrigger>
+          <TabsTrigger value="charts">
+            {t((m) => m.PersonalMoney.personalIncome.chartsTab)}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="data">
           <RecentIncomeTable

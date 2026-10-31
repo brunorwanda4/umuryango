@@ -103,7 +103,7 @@ export function EditLoanDialog({
         family.id,
       )}/money/loans/${encodeURIComponent(loan?.id ?? "")}`,
     },
-    onSuccessMessage: t("toasts.loanUpdated"),
+    onSuccessMessage: t((m) => m.FamilyLoans.toasts.loanUpdated),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -123,8 +123,10 @@ export function EditLoanDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{t("editTitle")}</DialogTitle>
-          <DialogDescription>{t("editDesc")}</DialogDescription>
+          <DialogTitle>{t((m) => m.FamilyLoans.editTitle)}</DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyLoans.editDesc)}
+          </DialogDescription>
         </DialogHeader>
         <form
           id="edit-loan-form"
@@ -147,7 +149,9 @@ export function EditLoanDialog({
             disabled={isPending || !loan || loan.status === "COMPLETED"}
             className="w-full sm:w-auto"
           >
-            {isPending ? t("saving") : t("saveChanges")}
+            {isPending
+              ? t((m) => m.FamilyLoans.saving)
+              : t((m) => m.FamilyLoans.saveChanges)}
           </Button>
         </DialogFooter>
       </DialogContent>

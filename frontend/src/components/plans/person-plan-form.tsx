@@ -125,8 +125,8 @@ export function PersonPlanForm({
       progressMethod: values.needsMoney ? values.progressMethod : "MILESTONE",
     }),
     onSuccessMessage: editPlan
-      ? t("form.planUpdatedToast")
-      : t("form.planAddedToast"),
+      ? t((m) => m.PersonalPlans.form.planUpdatedToast)
+      : t((m) => m.PersonalPlans.form.planAddedToast),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -153,9 +153,13 @@ export function PersonPlanForm({
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {editPlan ? t("form.editPlan") : t("form.addPlan")}
+            {editPlan
+              ? t((m) => m.PersonalPlans.form.editPlan)
+              : t((m) => m.PersonalPlans.form.addPlan)}
           </DialogTitle>
-          <DialogDescription>{t("form.description")}</DialogDescription>
+          <DialogDescription>
+            {t((m) => m.PersonalPlans.form.description)}
+          </DialogDescription>
         </DialogHeader>
         <form
           id="person-plan-form"
@@ -167,7 +171,7 @@ export function PersonPlanForm({
             <CommonFormField
               control={form.control}
               name="type"
-              label={t("form.planType")}
+              label={t((m) => m.PersonalPlans.form.planType)}
               fieldType="custom"
               render={({ field }) => (
                 <ToggleGroup
@@ -183,11 +187,11 @@ export function PersonPlanForm({
                       aria-hidden="true"
                       data-icon="inline-start"
                     />{" "}
-                    {t("form.task")}
+                    {t((m) => m.PersonalPlans.form.task)}
                   </ToggleGroupItem>
                   <ToggleGroupItem value="LONG_TERM_GOAL">
                     <TargetIcon aria-hidden="true" data-icon="inline-start" />{" "}
-                    {t("form.longTermGoal")}
+                    {t((m) => m.PersonalPlans.form.longTermGoal)}
                   </ToggleGroupItem>
                 </ToggleGroup>
               )}
@@ -196,11 +200,15 @@ export function PersonPlanForm({
           <CommonFormField
             control={form.control}
             name="title"
-            label={type === "TASK" ? t("form.title") : t("form.goalTitle")}
+            label={
+              type === "TASK"
+                ? t((m) => m.PersonalPlans.form.title)
+                : t((m) => m.PersonalPlans.form.goalTitle)
+            }
             placeholder={
               type === "TASK"
-                ? t("form.titleTaskPlaceholder")
-                : t("form.titleGoalPlaceholder")
+                ? t((m) => m.PersonalPlans.form.titleTaskPlaceholder)
+                : t((m) => m.PersonalPlans.form.titleGoalPlaceholder)
             }
             required
           />
@@ -210,34 +218,37 @@ export function PersonPlanForm({
               <CommonFormField
                 control={form.control}
                 name="dueDate"
-                label={t("form.dueDate")}
+                label={t((m) => m.PersonalPlans.form.dueDate)}
                 fieldType="time"
                 required
               />
               <CommonFormField
                 control={form.control}
                 name="priority"
-                label={t("form.priority")}
+                label={t((m) => m.PersonalPlans.form.priority)}
                 fieldType="select"
                 selectOptions={[
-                  { value: "LOW", label: t("form.low") },
-                  { value: "MEDIUM", label: t("form.medium") },
-                  { value: "HIGH", label: t("form.high") },
+                  { value: "LOW", label: t((m) => m.PersonalPlans.form.low) },
+                  {
+                    value: "MEDIUM",
+                    label: t((m) => m.PersonalPlans.form.medium),
+                  },
+                  { value: "HIGH", label: t((m) => m.PersonalPlans.form.high) },
                 ]}
                 required
               />
               <CommonFormField
                 control={form.control}
                 name="reminderAt"
-                label={t("form.reminder")}
+                label={t((m) => m.PersonalPlans.form.reminder)}
                 fieldType="date"
               />
               <CommonFormField
                 control={form.control}
                 name="note"
-                label={t("form.note")}
+                label={t((m) => m.PersonalPlans.form.note)}
                 fieldType="textarea"
-                placeholder={t("form.optionalDetails")}
+                placeholder={t((m) => m.PersonalPlans.form.optionalDetails)}
               />
             </>
           ) : (
@@ -245,22 +256,24 @@ export function PersonPlanForm({
               <CommonFormField
                 control={form.control}
                 name="description"
-                label={t("form.descriptionLabel")}
+                label={t((m) => m.PersonalPlans.form.descriptionLabel)}
                 fieldType="textarea"
-                placeholder={t("form.descriptionPlaceholder")}
+                placeholder={t(
+                  (m) => m.PersonalPlans.form.descriptionPlaceholder,
+                )}
               />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <CommonFormField
                   control={form.control}
                   name="startDate"
-                  label={t("form.startDate")}
+                  label={t((m) => m.PersonalPlans.form.startDate)}
                   fieldType="date"
                   required
                 />
                 <CommonFormField
                   control={form.control}
                   name="targetDate"
-                  label={t("form.targetDate")}
+                  label={t((m) => m.PersonalPlans.form.targetDate)}
                   fieldType="date"
                   inputProps={{ min: form.watch("startDate") }}
                   required
@@ -269,7 +282,7 @@ export function PersonPlanForm({
               <CommonFormField
                 control={form.control}
                 name="needsMoney"
-                label={t("form.needsMoney")}
+                label={t((m) => m.PersonalPlans.form.needsMoney)}
                 fieldType="custom"
                 fieldClassName="rounded-2xl border p-4"
                 render={({ field, id }) => (
@@ -285,7 +298,7 @@ export function PersonPlanForm({
                   <CommonFormField
                     control={form.control}
                     name="targetAmountMinorUnits"
-                    label={t("form.targetAmount")}
+                    label={t((m) => m.PersonalPlans.form.targetAmount)}
                     fieldType="money"
                     currency="RWF"
                     required
@@ -293,7 +306,7 @@ export function PersonPlanForm({
                   <CommonFormField
                     control={form.control}
                     name="currentAmountMinorUnits"
-                    label={t("form.currentAmount")}
+                    label={t((m) => m.PersonalPlans.form.currentAmount)}
                     fieldType="money"
                     currency="RWF"
                   />
@@ -302,9 +315,9 @@ export function PersonPlanForm({
               <CommonFormField
                 control={form.control}
                 name="note"
-                label={t("form.note")}
+                label={t((m) => m.PersonalPlans.form.note)}
                 fieldType="textarea"
-                placeholder={t("form.optionalDetails")}
+                placeholder={t((m) => m.PersonalPlans.form.optionalDetails)}
               />
               <Collapsible
                 open={additionalOpen}
@@ -317,7 +330,7 @@ export function PersonPlanForm({
                     variant="outline"
                     className="w-full justify-between"
                   >
-                    {t("form.additionalDetails")}
+                    {t((m) => m.PersonalPlans.form.additionalDetails)}
                     <ChevronDownIcon
                       aria-hidden="true"
                       data-icon="inline-end"
@@ -333,38 +346,54 @@ export function PersonPlanForm({
                   <CommonFormField
                     control={form.control}
                     name="goalCategory"
-                    label={t("form.goalCategory")}
-                    placeholder={t("form.goalCategoryPlaceholder")}
+                    label={t((m) => m.PersonalPlans.form.goalCategory)}
+                    placeholder={t(
+                      (m) => m.PersonalPlans.form.goalCategoryPlaceholder,
+                    )}
                   />
                   <CommonFormField
                     control={form.control}
                     name="reminderFrequency"
-                    label={t("form.reminderFrequency")}
+                    label={t((m) => m.PersonalPlans.form.reminderFrequency)}
                     fieldType="select"
-                    placeholder={t("form.noRecurringReminder")}
+                    placeholder={t(
+                      (m) => m.PersonalPlans.form.noRecurringReminder,
+                    )}
                     selectOptions={[
-                      { value: "WEEKLY", label: t("form.weekly") },
-                      { value: "MONTHLY", label: t("form.monthly") },
-                      { value: "QUARTERLY", label: t("form.quarterly") },
+                      {
+                        value: "WEEKLY",
+                        label: t((m) => m.PersonalPlans.form.weekly),
+                      },
+                      {
+                        value: "MONTHLY",
+                        label: t((m) => m.PersonalPlans.form.monthly),
+                      },
+                      {
+                        value: "QUARTERLY",
+                        label: t((m) => m.PersonalPlans.form.quarterly),
+                      },
                     ]}
                   />
                   <CommonFormField
                     control={form.control}
                     name="goalIcon"
-                    label={t("form.goalIcon")}
+                    label={t((m) => m.PersonalPlans.form.goalIcon)}
                     fieldType="lucide-icon"
-                    placeholder={t("form.chooseIcon")}
+                    placeholder={t((m) => m.PersonalPlans.form.chooseIcon)}
                   />
                   <CommonFormField
                     control={form.control}
                     name="progressMethod"
-                    label={t("form.progressCalculation")}
+                    label={t((m) => m.PersonalPlans.form.progressCalculation)}
                     fieldType="select"
                     selectOptions={[
-                      { value: "MILESTONE", label: t("form.milestones") },
+                      {
+                        value: "MILESTONE",
+                        label: t((m) => m.PersonalPlans.form.milestones),
+                      },
                       {
                         value: "FINANCIAL",
-                        label: t("form.financialProgress"),
+                        label: t((m) => m.PersonalPlans.form.financialProgress),
                         disabled: !needsMoney,
                       },
                     ]}
@@ -387,10 +416,10 @@ export function PersonPlanForm({
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
             )}
             {isPending
-              ? t("form.saving")
+              ? t((m) => m.PersonalPlans.form.saving)
               : editPlan
-                ? t("form.saveChanges")
-                : t("form.submitAdd")}
+                ? t((m) => m.PersonalPlans.form.saveChanges)
+                : t((m) => m.PersonalPlans.form.submitAdd)}
           </Button>
         </DialogFooter>
       </DialogContent>

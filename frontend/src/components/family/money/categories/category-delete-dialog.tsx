@@ -32,21 +32,29 @@ export function CategoryDeleteDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {isUsed ? t("archiveConfirmTitle") : t("deletePromptTitle")}
+            {isUsed
+              ? t((m) => m.FamilyCategories.archiveConfirmTitle)
+              : t((m) => m.FamilyCategories.deletePromptTitle)}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {isUsed
-              ? t("archiveUsedDesc", {
+              ? t((m) => m.FamilyCategories.archiveUsedDesc, {
                   name: category?.name ?? "",
                   count: category?.transactionsCount ?? 0,
                 })
-              : t("deleteUnusedDesc", { name: category?.name ?? "" })}
+              : t((m) => m.FamilyCategories.deleteUnusedDesc, {
+                  name: category?.name ?? "",
+                })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+          <AlertDialogCancel>
+            {t((m) => m.FamilyCategories.cancel)}
+          </AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm}>
-            {isUsed ? t("archiveCategoryBtn") : t("deleteCategoryBtn")}
+            {isUsed
+              ? t((m) => m.FamilyCategories.archiveCategoryBtn)
+              : t((m) => m.FamilyCategories.deleteCategoryBtn)}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

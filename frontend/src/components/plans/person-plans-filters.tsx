@@ -36,23 +36,23 @@ export function PersonPlansFilters({
   const selectOptions = useMemo(
     () => ({
       type: [
-        ["all", t("filters.allTypes")],
-        ["TASK", t("filters.tasks")],
-        ["LONG_TERM_GOAL", t("filters.longTermGoals")],
+        ["all", t((m) => m.PersonalPlans.filters.allTypes)],
+        ["TASK", t((m) => m.PersonalPlans.filters.tasks)],
+        ["LONG_TERM_GOAL", t((m) => m.PersonalPlans.filters.longTermGoals)],
       ],
       status: [
-        ["all", t("filters.allStatuses")],
-        ["PENDING", t("filters.pending")],
-        ["IN_PROGRESS", t("filters.inProgress")],
-        ["COMPLETED", t("filters.completed")],
-        ["CANCELLED", t("filters.cancelled")],
-        ["OVERDUE", t("filters.overdue")],
+        ["all", t((m) => m.PersonalPlans.filters.allStatuses)],
+        ["PENDING", t((m) => m.PersonalPlans.filters.pending)],
+        ["IN_PROGRESS", t((m) => m.PersonalPlans.filters.inProgress)],
+        ["COMPLETED", t((m) => m.PersonalPlans.filters.completed)],
+        ["CANCELLED", t((m) => m.PersonalPlans.filters.cancelled)],
+        ["OVERDUE", t((m) => m.PersonalPlans.filters.overdue)],
       ],
       priority: [
-        ["all", t("filters.allPriorities")],
-        ["LOW", t("filters.low")],
-        ["MEDIUM", t("filters.medium")],
-        ["HIGH", t("filters.high")],
+        ["all", t((m) => m.PersonalPlans.filters.allPriorities)],
+        ["LOW", t((m) => m.PersonalPlans.filters.low)],
+        ["MEDIUM", t((m) => m.PersonalPlans.filters.medium)],
+        ["HIGH", t((m) => m.PersonalPlans.filters.high)],
       ],
     }),
     [t],
@@ -60,9 +60,9 @@ export function PersonPlansFilters({
 
   const filterAriaLabels = useMemo(
     () => ({
-      type: t("filters.filterByType"),
-      status: t("filters.filterByStatus"),
-      priority: t("filters.filterByPriority"),
+      type: t((m) => m.PersonalPlans.filters.filterByType),
+      status: t((m) => m.PersonalPlans.filters.filterByStatus),
+      priority: t((m) => m.PersonalPlans.filters.filterByPriority),
     }),
     [t],
   );
@@ -89,8 +89,8 @@ export function PersonPlansFilters({
               <SearchIcon aria-hidden="true" />
             </InputGroupAddon>
             <InputGroupInput
-              aria-label={t("filters.searchAria")}
-              placeholder={t("filters.searchPlaceholder")}
+              aria-label={t((m) => m.PersonalPlans.filters.searchAria)}
+              placeholder={t((m) => m.PersonalPlans.filters.searchPlaceholder)}
               value={filters.search}
               onChange={(event) =>
                 onChange({ ...filters, search: event.target.value })
@@ -103,13 +103,13 @@ export function PersonPlansFilters({
             <Button
               variant="outline"
               className="w-full justify-center sm:w-auto"
-              aria-label={t("filters.toggleFiltersAria")}
+              aria-label={t((m) => m.PersonalPlans.filters.toggleFiltersAria)}
             >
               <SlidersHorizontalIcon
                 aria-hidden="true"
                 data-icon="inline-start"
               />
-              <span>{t("filters.toggleFilters")}</span>
+              <span>{t((m) => m.PersonalPlans.filters.toggleFilters)}</span>
               {activeAdvancedFilterCount > 0 && (
                 <span className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
                   {activeAdvancedFilterCount}
@@ -118,7 +118,7 @@ export function PersonPlansFilters({
             </Button>
           </CollapsibleTrigger>
           <Button
-            aria-label={t("filters.resetFilters")}
+            aria-label={t((m) => m.PersonalPlans.filters.resetFilters)}
             disabled={!isFiltered}
             size="icon"
             variant="outline"
@@ -154,9 +154,9 @@ export function PersonPlansFilters({
           </Select>
         ))}
         <DatePickerInput
-          aria-label={t("filters.filterByDate")}
+          aria-label={t((m) => m.PersonalPlans.filters.filterByDate)}
           className="w-full"
-          placeholder={t("filters.anyDate")}
+          placeholder={t((m) => m.PersonalPlans.filters.anyDate)}
           value={filters.date}
           onValueChange={(date) => onChange({ ...filters, date })}
         />

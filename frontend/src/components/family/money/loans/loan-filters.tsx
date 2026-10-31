@@ -45,7 +45,7 @@ export function LoanFilters({
           <div className="relative md:col-span-2 xl:col-span-2">
             <SearchIcon className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
             <Input
-              placeholder={t("searchPlaceholder")}
+              placeholder={t((m) => m.FamilyLoans.searchPlaceholder)}
               className="pl-8"
               value={filters.search}
               onChange={(event) => update({ search: event.target.value })}
@@ -58,10 +58,12 @@ export function LoanFilters({
             }
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("allLoanTypes")} />
+              <SelectValue placeholder={t((m) => m.FamilyLoans.allLoanTypes)} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("allLoanTypes")}</SelectItem>
+              <SelectItem value="all">
+                {t((m) => m.FamilyLoans.allLoanTypes)}
+              </SelectItem>
               {loanTypes.map((type) => (
                 <SelectItem key={type.value} value={type.value}>
                   {type.label}
@@ -76,10 +78,12 @@ export function LoanFilters({
             }
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("allStatuses")} />
+              <SelectValue placeholder={t((m) => m.FamilyLoans.allStatuses)} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("allStatuses")}</SelectItem>
+              <SelectItem value="all">
+                {t((m) => m.FamilyLoans.allStatuses)}
+              </SelectItem>
               {loanStatuses.map((status) => (
                 <SelectItem key={status.value} value={status.value}>
                   {status.label}
@@ -92,10 +96,12 @@ export function LoanFilters({
             onValueChange={(borrower) => update({ borrower })}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("allBorrowers")} />
+              <SelectValue placeholder={t((m) => m.FamilyLoans.allBorrowers)} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("allBorrowers")}</SelectItem>
+              <SelectItem value="all">
+                {t((m) => m.FamilyLoans.allBorrowers)}
+              </SelectItem>
               {borrowers.map((borrower) => (
                 <SelectItem key={borrower} value={borrower}>
                   {borrower}
@@ -108,10 +114,12 @@ export function LoanFilters({
             onValueChange={(lender) => update({ lender })}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("allLenders")} />
+              <SelectValue placeholder={t((m) => m.FamilyLoans.allLenders)} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("allLenders")}</SelectItem>
+              <SelectItem value="all">
+                {t((m) => m.FamilyLoans.allLenders)}
+              </SelectItem>
               {lenders.map((lender) => (
                 <SelectItem key={lender} value={lender}>
                   {lender}
@@ -176,7 +184,9 @@ export function LoanFilters({
             </div>
           </div>
           <div className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2 text-sm xl:min-w-40">
-            <span id="loan-overdue-filter-label">{t("overdueOnly")}</span>
+            <span id="loan-overdue-filter-label">
+              {t((m) => m.FamilyLoans.overdueOnly)}
+            </span>
             <Switch
               aria-labelledby="loan-overdue-filter-label"
               checked={filters.overdueOnly}
@@ -191,7 +201,7 @@ export function LoanFilters({
             className="w-full xl:w-auto"
           >
             <FilterXIcon aria-hidden="true" data-icon="inline-start" />
-            {t("resetFiltersBtn")}
+            {t((m) => m.FamilyLoans.resetFiltersBtn)}
           </Button>
         </div>
       </CardContent>

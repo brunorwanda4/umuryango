@@ -11,10 +11,10 @@ export default async function FamilyEventsPage(
       <header className="flex flex-col gap-2">
         <div className="flex flex-col gap-1">
           <h1 className="font-semibold text-2xl tracking-normal sm:text-3xl">
-            {t("title")}
+            {t((m) => m.FamilyEvents.title)}
           </h1>
           <p className="max-w-2xl text-muted-foreground text-sm">
-            {t("description")}
+            {t((m) => m.FamilyEvents.description)}
           </p>
         </div>
       </header>

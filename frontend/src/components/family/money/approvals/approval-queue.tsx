@@ -55,12 +55,12 @@ export function ApprovalQueue({
   const columns: ColumnDef<ApprovalQueueItem>[] = [
     {
       accessorKey: "type",
-      header: t("typeColumn"),
+      header: t((m) => m.FamilyApprovals.typeColumn),
       cell: ({ row }) => <TypeBadge type={row.original.type} />,
     },
     {
       accessorKey: "title",
-      header: t("titleColumn"),
+      header: t((m) => m.FamilyApprovals.titleColumn),
       cell: ({ row }) => (
         <button
           className="block max-w-[220px] truncate text-left font-medium hover:underline"
@@ -73,19 +73,23 @@ export function ApprovalQueue({
     },
     {
       accessorKey: "category",
-      header: t("categoryColumn"),
+      header: t((m) => m.FamilyApprovals.categoryColumn),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">{row.original.category}</span>
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: () => <div className="text-right">{t("amountColumn")}</div>,
+      header: () => (
+        <div className="text-right">
+          {t((m) => m.FamilyApprovals.amountColumn)}
+        </div>
+      ),
       cell: ({ row }) => (
         <div className="whitespace-nowrap text-right font-mono">
           <CompactMoney
             currency={currency}
-            emptyLabel={tCommon("notRecorded")}
+            emptyLabel={tCommon((m) => m.Common.notRecorded)}
             value={row.original.amountMinorUnits}
           />
         </div>
@@ -93,14 +97,14 @@ export function ApprovalQueue({
     },
     {
       accessorKey: "requestedBy",
-      header: t("requestedBy"),
+      header: t((m) => m.FamilyApprovals.requestedBy),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">{row.original.requestedBy}</span>
       ),
     },
     {
       accessorKey: "submittedAt",
-      header: t("submittedDate"),
+      header: t((m) => m.FamilyApprovals.submittedDate),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {formatDate(row.original.submittedAt)}
@@ -109,17 +113,19 @@ export function ApprovalQueue({
     },
     {
       accessorKey: "priority",
-      header: t("priority"),
+      header: t((m) => m.FamilyApprovals.priority),
       cell: ({ row }) => <PriorityBadge priority={row.original.priority} />,
     },
     {
       accessorKey: "status",
-      header: t("statusColumn"),
+      header: t((m) => m.FamilyApprovals.statusColumn),
       cell: ({ row }) => <ApprovalStatusBadge status={row.original.status} />,
     },
     {
       id: "actions",
-      header: () => <div className="text-right">{tCommon("actions")}</div>,
+      header: () => (
+        <div className="text-right">{tCommon((m) => m.Common.actions)}</div>
+      ),
       cell: ({ row }) => {
         const approval = row.original;
         const canUseTransactionAction =
@@ -130,7 +136,7 @@ export function ApprovalQueue({
         return (
           <div className="flex justify-end gap-1">
             <Button
-              aria-label={t("openDetailsAria")}
+              aria-label={t((m) => m.FamilyApprovals.openDetailsAria)}
               size="icon-sm"
               type="button"
               variant="ghost"
@@ -141,7 +147,7 @@ export function ApprovalQueue({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  aria-label={t("approvalActionsAria")}
+                  aria-label={t((m) => m.FamilyApprovals.approvalActionsAria)}
                   size="icon-sm"
                   variant="ghost"
                 >
@@ -151,7 +157,7 @@ export function ApprovalQueue({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onOpenDetails(approval)}>
                   <FileTextIcon className="mr-2 size-4" />
-                  {t("viewDetails")}
+                  {t((m) => m.FamilyApprovals.viewDetails)}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   disabled={
@@ -160,7 +166,7 @@ export function ApprovalQueue({
                   onClick={() => onAction(approval, "approve")}
                 >
                   <CheckCircle2Icon className="mr-2 size-4" />
-                  {t("approve")}
+                  {t((m) => m.FamilyApprovals.approve)}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   disabled={
@@ -169,15 +175,15 @@ export function ApprovalQueue({
                   onClick={() => onAction(approval, "reject")}
                 >
                   <XCircleIcon className="mr-2 size-4" />
-                  {t("reject")}
+                  {t((m) => m.FamilyApprovals.reject)}
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled>
                   <MessageSquareIcon className="mr-2 size-4" />
-                  {t("requestChanges")}
+                  {t((m) => m.FamilyApprovals.requestChanges)}
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled>
                   <UserRoundPlusIcon className="mr-2 size-4" />
-                  {t("assignApprover")}
+                  {t((m) => m.FamilyApprovals.assignApprover)}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -190,8 +196,10 @@ export function ApprovalQueue({
   return (
     <Card className="min-w-0">
       <CardHeader>
-        <CardTitle>{t("queueTitle")}</CardTitle>
-        <CardDescription>{t("queueDesc")}</CardDescription>
+        <CardTitle>{t((m) => m.FamilyApprovals.queueTitle)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilyApprovals.queueDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="min-w-0">
         {approvals.length ? (
@@ -199,8 +207,8 @@ export function ApprovalQueue({
         ) : (
           <TableEmptyState
             icon={FileClockIcon}
-            title={t("noPendingApprovals")}
-            description={t("noPendingApprovalsDesc")}
+            title={t((m) => m.FamilyApprovals.noPendingApprovals)}
+            description={t((m) => m.FamilyApprovals.noPendingApprovalsDesc)}
           />
         )}
       </CardContent>

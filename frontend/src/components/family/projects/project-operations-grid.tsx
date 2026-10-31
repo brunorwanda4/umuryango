@@ -29,38 +29,38 @@ export function ProjectOperationsGrid({
 }) {
   const items = [
     {
-      title: tDashboard("familyMembers"),
-      description: t("availableMembersDesc"),
+      title: tDashboard((m) => m.FamilyDashboard.familyMembers),
+      description: t((m) => m.FamilyProjects.availableMembersDesc),
       value: family.memberCount.toLocaleString(),
       icon: UsersRoundIcon,
     },
     {
-      title: t("reportSourceTitle"),
-      description: t("reportSourceDesc"),
-      value: t("sourceRecordCount", {
+      title: t((m) => m.FamilyProjects.reportSourceTitle),
+      description: t((m) => m.FamilyProjects.reportSourceDesc),
+      value: t((m) => m.FamilyProjects.sourceRecordCount, {
         count: projects?.sourceRecordCount ?? 0,
       }),
       icon: CheckCircle2Icon,
     },
     {
-      title: t("contributionCadenceTitle"),
-      description: t("contributionCadenceDesc"),
+      title: t((m) => m.FamilyProjects.contributionCadenceTitle),
+      description: t((m) => m.FamilyProjects.contributionCadenceDesc),
       value: family.contributionCadence,
       icon: CalendarClockIcon,
     },
     {
-      title: t("projectPermissionTitle"),
-      description: t("projectPermissionDesc"),
+      title: t((m) => m.FamilyProjects.projectPermissionTitle),
+      description: t((m) => m.FamilyProjects.projectPermissionDesc),
       value: hasCapability(family, "MANAGE_PROJECTS")
-        ? t("permissionAllowed")
-        : t("permissionViewOnly"),
+        ? t((m) => m.FamilyProjects.permissionAllowed)
+        : t((m) => m.FamilyProjects.permissionViewOnly),
       icon: FolderKanbanIcon,
     },
   ];
 
   return (
     <section
-      aria-label={t("operationsAria")}
+      aria-label={t((m) => m.FamilyProjects.operationsAria)}
       className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       {items.map((item) => {

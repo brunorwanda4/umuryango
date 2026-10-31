@@ -46,7 +46,7 @@ export function ContactFilters({
                   search: event.target.value,
                 }))
               }
-              placeholder={t("searchPlaceholder")}
+              placeholder={t((m) => m.FamilyContacts.searchPlaceholder)}
               className="pl-9"
             />
           </div>
@@ -61,10 +61,14 @@ export function ContactFilters({
             }
           >
             <SelectTrigger className="min-w-0 flex-1 basis-32 md:w-52 md:flex-none">
-              <SelectValue placeholder={t("contactTypePlaceholder")} />
+              <SelectValue
+                placeholder={t((m) => m.FamilyContacts.contactTypePlaceholder)}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("allTypes")}</SelectItem>
+              <SelectItem value="all">
+                {t((m) => m.FamilyContacts.allTypes)}
+              </SelectItem>
               {contactTypeOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {t(`types.${option.value}`)}
@@ -83,10 +87,14 @@ export function ContactFilters({
             }
           >
             <SelectTrigger className="min-w-0 flex-1 basis-32 md:w-44 md:flex-none">
-              <SelectValue placeholder={t("filterStatus")} />
+              <SelectValue
+                placeholder={t((m) => m.FamilyContacts.filterStatus)}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("allStatuses")}</SelectItem>
+              <SelectItem value="all">
+                {t((m) => m.FamilyContacts.allStatuses)}
+              </SelectItem>
               {contactStatusOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {t(`statuses.${option.value}`)}
@@ -111,7 +119,7 @@ export function ContactFilters({
                 }))
               }
             />
-            {t("emergencyOnly")}
+            {t((m) => m.FamilyContacts.emergencyOnly)}
           </Label>
           <Label
             htmlFor="contacts-loan-only"
@@ -127,10 +135,10 @@ export function ContactFilters({
                 }))
               }
             />
-            {t("loanOnly")}
+            {t((m) => m.FamilyContacts.loanOnly)}
           </Label>
           <Button size="sm" variant="outline" onClick={onReset}>
-            {tCommon("reset")}
+            {tCommon((m) => m.Common.reset)}
           </Button>
         </div>
       </div>

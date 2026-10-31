@@ -34,7 +34,9 @@ export function ExpenseSummaryCards({
       cards={[
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.totalExpenses"),
+          description: t(
+            (m) => m.PersonalMoney.personalExpenses.summary.totalExpenses,
+          ),
           iconSource: {
             image: { src: "/images/icons/wallet.png" },
             line: WalletCardsIcon,
@@ -48,7 +50,9 @@ export function ExpenseSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.expenseTransactions"),
+          description: t(
+            (m) => m.PersonalMoney.personalExpenses.summary.expenseTransactions,
+          ),
           iconSource: {
             image: { src: "/images/icons/transaction.png" },
             line: ArrowUpRightIcon,
@@ -57,7 +61,9 @@ export function ExpenseSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.thisMonth"),
+          description: t(
+            (m) => m.PersonalMoney.personalExpenses.summary.thisMonth,
+          ),
           iconSource: {
             image: { src: "/images/icons/calendar.png" },
             line: CalendarDaysIcon,
@@ -71,7 +77,9 @@ export function ExpenseSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.largestExpense"),
+          description: t(
+            (m) => m.PersonalMoney.personalExpenses.summary.largestExpense,
+          ),
           iconSource: {
             image: { src: "/images/icons/quality.png" },
             line: TrophyIcon,
@@ -79,7 +87,9 @@ export function ExpenseSummaryCards({
           value: (
             <CompactMoney
               currency="RWF"
-              emptyLabel={t("summary.noRecords")}
+              emptyLabel={t(
+                (m) => m.PersonalMoney.personalExpenses.summary.noRecords,
+              )}
               value={summary.largestExpense?.amountMinorUnits}
             />
           ),

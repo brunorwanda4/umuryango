@@ -38,16 +38,26 @@ export function ViewIncomeDialog({
 
   return (
     <ViewTransactionDialog
-      amountLabel={t("viewDialog.amountReceived")}
+      amountLabel={t(
+        (m) => m.PersonalMoney.personalIncome.viewDialog.amountReceived,
+      )}
       amountMinorUnits={income.amountMinorUnits}
       category={income.category}
       categoryClassName={income.categoryClassName}
       currency={income.currency}
       date={income.date}
-      dateLabel={t("viewDialog.dateReceived")}
-      deleteLabel={t("viewDialog.deleteIncome")}
-      detailsDescription={t("viewDialog.detailsDesc")}
-      detailsTitle={t("viewDialog.detailsTitle")}
+      dateLabel={t(
+        (m) => m.PersonalMoney.personalIncome.viewDialog.dateReceived,
+      )}
+      deleteLabel={t(
+        (m) => m.PersonalMoney.personalIncome.viewDialog.deleteIncome,
+      )}
+      detailsDescription={t(
+        (m) => m.PersonalMoney.personalIncome.viewDialog.detailsDesc,
+      )}
+      detailsTitle={t(
+        (m) => m.PersonalMoney.personalIncome.viewDialog.detailsTitle,
+      )}
       description={income.description}
       leading={
         <Avatar className="size-11 shrink-0 rounded-lg">
@@ -86,7 +96,9 @@ export function ViewIncomeDialog({
       searchParamValue={searchParamValue ?? `view-income-${income.id}`}
       title={income.source}
       trigger={trigger}
-      updateLabel={t("viewDialog.updateIncome")}
+      updateLabel={t(
+        (m) => m.PersonalMoney.personalIncome.viewDialog.updateIncome,
+      )}
     />
   );
 }

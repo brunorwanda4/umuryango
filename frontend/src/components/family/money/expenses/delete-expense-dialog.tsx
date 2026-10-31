@@ -45,14 +45,16 @@ export function DeleteExpenseDialog({
       );
 
       if (response.ok) {
-        toast.success(t("toasts.reversedSuccess"));
+        toast.success(t((m) => m.FamilyExpenses.toasts.reversedSuccess));
         onOpenChange(false);
         onSuccess();
       } else {
-        setError(response.message ?? t("toasts.deleteFailed"));
+        setError(
+          response.message ?? t((m) => m.FamilyExpenses.toasts.deleteFailed),
+        );
       }
     } catch {
-      setError(t("toasts.requestFailed"));
+      setError(t((m) => m.FamilyExpenses.toasts.requestFailed));
     } finally {
       setIsPending(false);
     }
@@ -63,9 +65,11 @@ export function DeleteExpenseDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
-            {t("dialogs.deleteTitle")}
+            {t((m) => m.FamilyExpenses.dialogs.deleteTitle)}
           </DialogTitle>
-          <DialogDescription>{t("dialogs.deleteDesc")}</DialogDescription>
+          <DialogDescription>
+            {t((m) => m.FamilyExpenses.dialogs.deleteDesc)}
+          </DialogDescription>
         </DialogHeader>
 
         {error ? (
@@ -89,14 +93,16 @@ export function DeleteExpenseDialog({
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            {t("dialogs.cancel")}
+            {t((m) => m.FamilyExpenses.dialogs.cancel)}
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
           >
-            {isPending ? t("dialogs.deleting") : t("dialogs.deleteExpense")}
+            {isPending
+              ? t((m) => m.FamilyExpenses.dialogs.deleting)
+              : t((m) => m.FamilyExpenses.dialogs.deleteExpense)}
           </Button>
         </DialogFooter>
       </DialogContent>

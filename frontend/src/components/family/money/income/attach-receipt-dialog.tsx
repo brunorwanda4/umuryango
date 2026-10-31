@@ -58,15 +58,15 @@ export function AttachReceiptDialog({
         payload,
       );
       if (response.ok) {
-        toast.success(t("receipt.success"));
+        toast.success(t((m) => m.FamilyIncome.receipt.success));
         onOpenChange(false);
         setFileName("");
         onSuccess();
       } else {
-        setError(response.message ?? t("receipt.failed"));
+        setError(response.message ?? t((m) => m.FamilyIncome.receipt.failed));
       }
     } catch {
-      setError(t("receipt.requestFailed"));
+      setError(t((m) => m.FamilyIncome.receipt.requestFailed));
     } finally {
       setIsPending(false);
     }
@@ -76,9 +76,11 @@ export function AttachReceiptDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("receipt.attachTitle")}</DialogTitle>
+          <DialogTitle>
+            {t((m) => m.FamilyIncome.receipt.attachTitle)}
+          </DialogTitle>
           <DialogDescription>
-            {t("receipt.attachDesc", {
+            {t((m) => m.FamilyIncome.receipt.attachDesc, {
               description: transaction?.description ?? "",
             })}
           </DialogDescription>
@@ -94,7 +96,7 @@ export function AttachReceiptDialog({
               className="text-sm font-semibold mb-1 block"
               htmlFor="receipt-file-input"
             >
-              {t("receipt.fileLabel")}
+              {t((m) => m.FamilyIncome.receipt.fileLabel)}
             </label>
             <Input
               id="receipt-file-input"
@@ -114,7 +116,9 @@ export function AttachReceiptDialog({
 
           <DialogFooter className="mt-4">
             <Button type="submit" disabled={isPending} className="w-full">
-              {isPending ? t("receipt.uploading") : t("receipt.attach")}
+              {isPending
+                ? t((m) => m.FamilyIncome.receipt.uploading)
+                : t((m) => m.FamilyIncome.receipt.attach)}
             </Button>
           </DialogFooter>
         </form>

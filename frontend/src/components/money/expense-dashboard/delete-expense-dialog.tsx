@@ -50,11 +50,16 @@ export function DeleteExpenseDialog({
     setIsPending(false);
 
     if (!response.ok) {
-      toast.error(response.message ?? t("deleteDialog.deleteError"));
+      toast.error(
+        response.message ??
+          t((m) => m.PersonalMoney.personalExpenses.deleteDialog.deleteError),
+      );
       return;
     }
 
-    toast.success(t("deleteDialog.deletedToast"));
+    toast.success(
+      t((m) => m.PersonalMoney.personalExpenses.deleteDialog.deletedToast),
+    );
     await onSuccess?.();
   }
 
@@ -74,7 +79,7 @@ export function DeleteExpenseDialog({
               variant="ghost"
             >
               <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-              {t("deleteDialog.confirm")}
+              {t((m) => m.PersonalMoney.personalExpenses.deleteDialog.confirm)}
             </Button>
           ) : (
             trigger
@@ -83,20 +88,27 @@ export function DeleteExpenseDialog({
       )}
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
+          <AlertDialogTitle>
+            {t((m) => m.PersonalMoney.personalExpenses.deleteDialog.title)}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            {t("deleteDialog.description", { source: expense.source })}
+            {t(
+              (m) => m.PersonalMoney.personalExpenses.deleteDialog.description,
+              { source: expense.source },
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{t("deleteDialog.cancel")}</AlertDialogCancel>
+          <AlertDialogCancel>
+            {t((m) => m.PersonalMoney.personalExpenses.deleteDialog.cancel)}
+          </AlertDialogCancel>
           <AlertDialogAction
             disabled={isPending}
             onClick={deleteExpense}
             variant="destructive"
           >
             {isPending ? <Spinner data-icon="inline-start" /> : null}
-            {t("deleteDialog.confirm")}
+            {t((m) => m.PersonalMoney.personalExpenses.deleteDialog.confirm)}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -107,7 +107,7 @@ export function CreateCategoryForm({
       method: "post",
       url: `/families/${encodeURIComponent(familyId)}/money/categories${personal ? "/mine" : ""}`,
     },
-    onSuccessMessage: t("createdSuccess"),
+    onSuccessMessage: t((m) => m.FamilyCategories.createdSuccess),
     toastOnSuccess: true,
     onSuccess: async (category) => {
       setOpen(false);
@@ -141,15 +141,19 @@ export function CreateCategoryForm({
           {trigger ?? (
             <Button size="sm">
               <FolderPlusIcon aria-hidden="true" data-icon="inline-start" />
-              {t("createCategoryBtn")}
+              {t((m) => m.FamilyCategories.createCategoryBtn)}
             </Button>
           )}
         </DialogTrigger>
       )}
       <DialogContent className="max-h-[96vh] overflow-y-auto lg:max-h-[calc(100vh-2rem)] lg:max-w-4xl lg:overflow-y-hidden">
         <DialogHeader>
-          <DialogTitle>{t("createCategoryDialogTitle")}</DialogTitle>
-          <DialogDescription>{t("createCategoryDialogDesc")}</DialogDescription>
+          <DialogTitle>
+            {t((m) => m.FamilyCategories.createCategoryDialogTitle)}
+          </DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyCategories.createCategoryDialogDesc)}
+          </DialogDescription>
         </DialogHeader>
         <form
           id="category-form"
@@ -171,7 +175,7 @@ export function CreateCategoryForm({
               onClick={() => setOpen(false)}
               className=" w-fit"
             >
-              {t("cancel")}
+              {t((m) => m.FamilyCategories.cancel)}
             </Button>
           </DialogClose>
           <Button
@@ -180,7 +184,9 @@ export function CreateCategoryForm({
             disabled={isPending}
             className="w-fit"
           >
-            {isPending ? t("creating") : t("createCategoryBtn")}
+            {isPending
+              ? t((m) => m.FamilyCategories.creating)
+              : t((m) => m.FamilyCategories.createCategoryBtn)}
           </Button>
         </DialogFooter>
       </DialogContent>

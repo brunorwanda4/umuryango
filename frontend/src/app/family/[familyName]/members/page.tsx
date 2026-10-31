@@ -134,7 +134,7 @@ export default function FamilyMembersPage({
       } else {
         setState({
           status: "error",
-          message: response.message ?? t("unableToLoad"),
+          message: response.message ?? t((m) => m.FamilyMembers.unableToLoad),
         });
       }
     },
@@ -156,10 +156,16 @@ export default function FamilyMembersPage({
           <EmptyMedia variant="icon">
             <UsersIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>{tDashboard("familyNotFound")}</EmptyTitle>
+          <EmptyTitle>
+            {tDashboard((m) => m.FamilyDashboard.familyNotFound)}
+          </EmptyTitle>
           <EmptyDescription>
-            {tDashboard("familyNotFoundDesc", { error: state.message })}{" "}
-            <Link href="/family">{tDashboard("backToFamilies")}</Link>
+            {tDashboard((m) => m.FamilyDashboard.familyNotFoundDesc, {
+              error: state.message,
+            })}{" "}
+            <Link href="/family">
+              {tDashboard((m) => m.FamilyDashboard.backToFamilies)}
+            </Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -190,9 +196,11 @@ function MembersManager({
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="font-bold text-2xl tracking-tight">{t("title")}</h1>
+          <h1 className="font-bold text-2xl tracking-tight">
+            {t((m) => m.FamilyMembers.title)}
+          </h1>
           <p className="text-muted-foreground text-sm">
-            {t("membersInFamily", {
+            {t((m) => m.FamilyMembers.membersInFamily, {
               count: family.memberCount,
               familyName: family.name,
             })}
@@ -209,10 +217,12 @@ function MembersManager({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UsersIcon className="size-4" aria-hidden="true" />
-            {t("title")}
+            {t((m) => m.FamilyMembers.title)}
           </CardTitle>
           <CardDescription>
-            {canManage ? t("descriptionManage") : t("descriptionView")}
+            {canManage
+              ? t((m) => m.FamilyMembers.descriptionManage)
+              : t((m) => m.FamilyMembers.descriptionView)}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
@@ -265,7 +275,7 @@ function MemberRow({
     if (response.ok) {
       onChanged();
     } else {
-      setError(response.message ?? t("unableToUpdate"));
+      setError(response.message ?? t((m) => m.FamilyMembers.unableToUpdate));
     }
   };
 
@@ -283,7 +293,7 @@ function MemberRow({
             {member.fullName}
           </span>
           <span className="text-muted-foreground text-xs">
-            {tDashboard("joinedDate", {
+            {tDashboard((m) => m.FamilyDashboard.joinedDate, {
               date: joinedFormatter.format(new Date(member.joinedAt)),
             })}
           </span>
@@ -305,7 +315,10 @@ function MemberRow({
               }
               disabled={pending}
             >
-              <SelectTrigger className="w-32" aria-label={t("memberAuthority")}>
+              <SelectTrigger
+                className="w-32"
+                aria-label={t((m) => m.FamilyMembers.memberAuthority)}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -335,9 +348,12 @@ const addMemberSchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, t("emailRequired"))
+    .min(
+      1,
+      t((m) => m.FamilyMembers.emailRequired),
+    )
     .refine((value) => emailPattern.test(value), {
-      message: t("emailInvalid"),
+      message: t((m) => m.FamilyMembers.emailInvalid),
     }),
   authority: z.enum(["ADMIN", "MEMBER"]),
 });
@@ -356,13 +372,15 @@ function AddMemberDialog({
       <DialogTrigger asChild>
         <Button>
           <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
-          {t("inviteMember")}
+          {t((m) => m.FamilyMembers.inviteMember)}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t("inviteTitle")}</DialogTitle>
-          <DialogDescription>{t("inviteDesc")}</DialogDescription>
+          <DialogTitle>{t((m) => m.FamilyMembers.inviteTitle)}</DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyMembers.inviteDesc)}
+          </DialogDescription>
         </DialogHeader>
         <AddMemberForm
           familySlug={familySlug}
@@ -398,7 +416,7 @@ function AddMemberForm({
         email: values.email.trim().toLowerCase(),
         authority: values.authority,
       }),
-      onSuccessMessage: t("inviteSuccess"),
+      onSuccessMessage: t((m) => m.FamilyMembers.inviteSuccess),
       onSuccess: () => {
         form.reset();
         onAdded();
@@ -414,7 +432,7 @@ function AddMemberForm({
     >
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>{t("addMemberError")}</AlertTitle>
+          <AlertTitle>{t((m) => m.FamilyMembers.addMemberError)}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
@@ -430,7 +448,7 @@ function AddMemberForm({
         <CommonFormField
           control={form.control}
           name="email"
-          label={t("inviteEmail")}
+          label={t((m) => m.FamilyMembers.inviteEmail)}
           placeholder="member@example.com"
           type="email"
           required
@@ -439,7 +457,7 @@ function AddMemberForm({
         <CommonFormField
           control={form.control}
           name="authority"
-          label={t("inviteRole")}
+          label={t((m) => m.FamilyMembers.inviteRole)}
           fieldType="select"
           selectOptions={ASSIGNABLE_AUTHORITIES}
           required
@@ -449,17 +467,17 @@ function AddMemberForm({
       <DialogFooter>
         <DialogClose asChild>
           <Button type="button" variant="outline">
-            {tCommon("cancel")}
+            {tCommon((m) => m.Common.cancel)}
           </Button>
         </DialogClose>
         <Button type="submit" disabled={isPending}>
           {isPending ? (
             <>
               <Spinner data-icon="inline-start" />
-              {t("sending")}
+              {t((m) => m.FamilyMembers.sending)}
             </>
           ) : (
-            t("sendInvite")
+            t((m) => m.FamilyMembers.sendInvite)
           )}
         </Button>
       </DialogFooter>

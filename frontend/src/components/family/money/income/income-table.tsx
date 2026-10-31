@@ -62,7 +62,7 @@ export function IncomeTable({
   const columns: ColumnDef<IncomeTransaction>[] = [
     {
       accessorKey: "date",
-      header: t("table.columnDate"),
+      header: t((m) => m.FamilyIncome.table.columnDate),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {formatDate(row.original.date)}
@@ -71,23 +71,24 @@ export function IncomeTable({
     },
     {
       accessorKey: "description",
-      header: t("table.columnTitle"),
+      header: t((m) => m.FamilyIncome.table.columnTitle),
       cell: ({ row }) => (
         <span className="block max-w-[180px] truncate font-medium">
-          {row.original.description || t("table.columnTitle")}
+          {row.original.description ||
+            t((m) => m.FamilyIncome.table.columnTitle)}
         </span>
       ),
     },
     {
       accessorKey: "category.name",
-      header: t("table.columnCategory"),
+      header: t((m) => m.FamilyIncome.table.columnCategory),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">{row.original.category.name}</span>
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: t("table.columnAmount"),
+      header: t((m) => m.FamilyIncome.table.columnAmount),
       cell: ({ row }) => (
         <span className="whitespace-nowrap font-mono">
           <CompactMoney
@@ -116,7 +117,7 @@ export function IncomeTable({
     },
     {
       accessorKey: "receivedFrom",
-      header: t("table.columnReceivedFrom"),
+      header: t((m) => m.FamilyIncome.table.columnReceivedFrom),
       cell: ({ row }) => (
         <span className="block max-w-[150px] truncate">
           {row.original.receivedFrom || "-"}
@@ -134,7 +135,7 @@ export function IncomeTable({
     },
     {
       accessorKey: "paymentMethod",
-      header: t("table.columnPaymentMethod"),
+      header: t((m) => m.FamilyIncome.table.columnPaymentMethod),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {row.original.paymentMethod
@@ -168,7 +169,7 @@ export function IncomeTable({
     },
     {
       accessorKey: "status",
-      header: t("table.columnStatus"),
+      header: t((m) => m.FamilyIncome.table.columnStatus),
       cell: ({ row }) => {
         const status = row.original.status;
 
@@ -201,7 +202,9 @@ export function IncomeTable({
     {
       id: "actions",
       header: () => (
-        <div className="text-right">{t("table.columnActions")}</div>
+        <div className="text-right">
+          {t((m) => m.FamilyIncome.table.columnActions)}
+        </div>
       ),
       cell: ({ row }) => (
         <div className="flex justify-end">
@@ -220,7 +223,7 @@ export function IncomeTable({
   return (
     <Card className="min-w-0">
       <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-        <CardTitle>{t("table.historyTitle")}</CardTitle>
+        <CardTitle>{t((m) => m.FamilyIncome.table.historyTitle)}</CardTitle>
         <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
       <CardContent
@@ -232,7 +235,7 @@ export function IncomeTable({
               columns={columns}
               data={filteredTransactions}
               getRowAriaLabel={(row) =>
-                t("table.viewDetailsAria", {
+                t((m) => m.FamilyIncome.table.viewDetailsAria, {
                   title: row.original.description || "Income Transaction",
                 })
               }
@@ -254,14 +257,16 @@ export function IncomeTable({
             <span className="flex size-12 items-center justify-center rounded-full bg-muted mb-4">
               <CoinsIcon className="size-6 text-muted-foreground" />
             </span>
-            <h3 className="font-semibold text-lg">{t("table.emptyTitle")}</h3>
+            <h3 className="font-semibold text-lg">
+              {t((m) => m.FamilyIncome.table.emptyTitle)}
+            </h3>
             <p className="text-muted-foreground text-sm max-w-sm mt-1 mb-6">
-              {t("table.emptyDesc")}
+              {t((m) => m.FamilyIncome.table.emptyDesc)}
             </p>
             {hasCapability(family, "RECORD_INCOME") && (
               <Button size="sm" onClick={() => setOpenCreate(true)}>
                 <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                {t("addIncome")}
+                {t((m) => m.FamilyIncome.addIncome)}
               </Button>
             )}
           </div>

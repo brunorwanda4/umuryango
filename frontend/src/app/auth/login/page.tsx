@@ -67,7 +67,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
         <Link
           href={getLocalizedHref("/", locale)}
           className="flex size-14 items-center justify-center rounded-2xl bg-card shadow-sm ring-1 ring-border"
-          aria-label={shared("homeAriaLabel")}
+          aria-label={shared((m) => m.Shared.homeAriaLabel)}
         >
           <Image
             src="/logo.svg"
@@ -82,9 +82,9 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
         <div className="flex flex-1 items-center py-10">
           <div className="grid w-full items-center gap-10 md:grid-cols-[minmax(13rem,0.62fr)_minmax(22rem,1fr)] lg:grid-cols-[minmax(13rem,0.6fr)_minmax(22rem,1fr)] xl:gap-14">
             <h1 className="max-w-sm text-5xl font-semibold leading-[1.04] tracking-normal text-balance sm:text-6xl md:text-5xl xl:text-6xl">
-              {login("heading")}{" "}
+              {login((m) => m.LoginPage.heading)}{" "}
               <span className="text-muted-foreground">
-                {login("highlightedHeading")}
+                {login((m) => m.LoginPage.highlightedHeading)}
               </span>
             </h1>
 
@@ -92,7 +92,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
               <Card className="absolute right-[4%] top-[10%] z-20 aspect-[0.74] w-[56%] overflow-hidden rounded-[1.6rem] p-0 shadow-md ring-1 ring-border">
                 <Image
                   src="/images/auth/1.jpg"
-                  alt={login("images.first")}
+                  alt={login((m) => m.LoginPage.images.first)}
                   fill
                   priority
                   sizes="(min-width: 1280px) 20rem, (min-width: 768px) 32vw, 58vw"
@@ -100,7 +100,9 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                 />
                 <div className="absolute inset-x-4 top-4 flex flex-col gap-1.5">
                   <div className="flex items-center justify-between text-[0.65rem] font-semibold text-background">
-                    <span className="opacity-80">{login("familySavings")}</span>
+                    <span className="opacity-80">
+                      {login((m) => m.LoginPage.familySavings)}
+                    </span>
                     <span>62%</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-background/40">
@@ -116,7 +118,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
               <Card className="absolute left-[4%] top-[25%] z-10 aspect-[1.12] w-[42%] overflow-hidden rounded-[1.45rem] p-0 shadow-md ring-1 ring-border">
                 <Image
                   src="/images/auth/2.jpg"
-                  alt={login("images.second")}
+                  alt={login((m) => m.LoginPage.images.second)}
                   fill
                   sizes="(min-width: 1280px) 15rem, (min-width: 768px) 24vw, 42vw"
                   className="object-cover"
@@ -130,7 +132,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                 <div className="relative aspect-[1.28] overflow-hidden rounded-xl">
                   <Image
                     src="/images/auth/3.jpg"
-                    alt={login("images.third")}
+                    alt={login((m) => m.LoginPage.images.third)}
                     fill
                     sizes="(min-width: 1280px) 15rem, (min-width: 768px) 24vw, 42vw"
                     className="object-cover object-center"
@@ -142,7 +144,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
                   </div>
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-xs font-semibold">
-                      {login("monthlyContribution")}
+                      {login((m) => m.LoginPage.monthlyContribution)}
                     </span>
                     <span className="text-[0.7rem] font-semibold text-muted-foreground">
                       + RWF 50,000
@@ -154,7 +156,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
               <div className="absolute bottom-[14%] left-[38%] z-40 size-28 overflow-hidden rounded-full border-4 border-background bg-muted shadow-2xl ring-2 ring-primary sm:size-32">
                 <Image
                   src="/images/auth/4.jpg"
-                  alt={login("images.fourth")}
+                  alt={login((m) => m.LoginPage.images.fourth)}
                   fill
                   sizes="8rem"
                   className="object-cover object-center"
@@ -169,7 +171,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
               </div>
               <Badge className="absolute bottom-[25%] right-[18%] z-30 gap-1 rounded-full bg-background font-semibold text-foreground shadow-sm">
                 <WalletIcon aria-hidden="true" className="size-3" />
-                {login("expenses")}
+                {login((m) => m.LoginPage.expenses)}
               </Badge>
             </div>
           </div>
@@ -180,7 +182,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
         <div className="mx-auto flex w-full max-w-[32.75rem] flex-col gap-8">
           <div className="flex flex-col gap-2">
             <h2 className="text-xl font-semibold tracking-normal">
-              {login("title")}
+              {login((m) => m.LoginPage.title)}
             </h2>
           </div>
 
@@ -198,7 +200,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
             variant="outline"
             className="h-12 w-full rounded-full border-primary/30 text-sm font-semibold text-primary hover:text-primary"
           >
-            {login("createAccount")}
+            {login((m) => m.LoginPage.createAccount)}
           </Button>
 
           <Separator className="my-3" />
@@ -206,7 +208,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
           <div className="flex flex-col items-center gap-5">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Image src="/logo.svg" alt="" width={24} height={24} />
-              <span>{shared("brand")}</span>
+              <span>{shared((m) => m.Shared.brand)}</span>
             </div>
           </div>
         </div>

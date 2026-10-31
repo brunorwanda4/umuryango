@@ -42,14 +42,14 @@ export function DeleteTransactionDialog({
         `/families/${encodeURIComponent(family.id)}/money/transactions/${transaction.id}`,
       );
       if (response.ok) {
-        toast.success(t("reverse.success"));
+        toast.success(t((m) => m.FamilyIncome.reverse.success));
         onOpenChange(false);
         onSuccess();
       } else {
-        setError(response.message ?? t("reverse.failed"));
+        setError(response.message ?? t((m) => m.FamilyIncome.reverse.failed));
       }
     } catch {
-      setError(t("receipt.requestFailed"));
+      setError(t((m) => m.FamilyIncome.receipt.requestFailed));
     } finally {
       setIsPending(false);
     }
@@ -60,9 +60,11 @@ export function DeleteTransactionDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-destructive flex items-center gap-2">
-            {t("reverse.title")}
+            {t((m) => m.FamilyIncome.reverse.title)}
           </DialogTitle>
-          <DialogDescription>{t("reverse.desc")}</DialogDescription>
+          <DialogDescription>
+            {t((m) => m.FamilyIncome.reverse.desc)}
+          </DialogDescription>
         </DialogHeader>
 
         {error && (
@@ -86,14 +88,16 @@ export function DeleteTransactionDialog({
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            {t("reverse.cancel")}
+            {t((m) => m.FamilyIncome.reverse.cancel)}
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
           >
-            {isPending ? t("reverse.reversing") : t("reverse.confirm")}
+            {isPending
+              ? t((m) => m.FamilyIncome.reverse.reversing)
+              : t((m) => m.FamilyIncome.reverse.confirm)}
           </Button>
         </DialogFooter>
       </DialogContent>

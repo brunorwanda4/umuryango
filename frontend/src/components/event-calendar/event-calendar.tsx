@@ -173,19 +173,25 @@ export function EventCalendar({
   const handleEventSave = (event: CalendarEvent) => {
     if (event.id) {
       onEventUpdate?.(event);
-      toast(t("eventUpdated", { title: event.title }), {
-        description: format(new Date(event.start), "MMM d, yyyy"),
-        position: "bottom-left",
-      });
+      toast(
+        t((m) => m.EventCalendar.eventUpdated, { title: event.title }),
+        {
+          description: format(new Date(event.start), "MMM d, yyyy"),
+          position: "bottom-left",
+        },
+      );
     } else {
       onEventAdd?.({
         ...event,
         id: Math.random().toString(36).substring(2, 11),
       });
-      toast(t("eventAdded", { title: event.title }), {
-        description: format(new Date(event.start), "MMM d, yyyy"),
-        position: "bottom-left",
-      });
+      toast(
+        t((m) => m.EventCalendar.eventAdded, { title: event.title }),
+        {
+          description: format(new Date(event.start), "MMM d, yyyy"),
+          position: "bottom-left",
+        },
+      );
     }
     setIsEventDialogOpen(false);
     setSelectedEvent(null);
@@ -198,20 +204,26 @@ export function EventCalendar({
     setSelectedEvent(null);
 
     if (deletedEvent) {
-      toast(t("eventDeleted", { title: deletedEvent.title }), {
-        description: format(new Date(deletedEvent.start), "MMM d, yyyy"),
-        position: "bottom-left",
-      });
+      toast(
+        t((m) => m.EventCalendar.eventDeleted, { title: deletedEvent.title }),
+        {
+          description: format(new Date(deletedEvent.start), "MMM d, yyyy"),
+          position: "bottom-left",
+        },
+      );
     }
   };
 
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
     onEventUpdate?.(updatedEvent);
 
-    toast(t("eventMoved", { title: updatedEvent.title }), {
-      description: format(new Date(updatedEvent.start), "MMM d, yyyy"),
-      position: "bottom-left",
-    });
+    toast(
+      t((m) => m.EventCalendar.eventMoved, { title: updatedEvent.title }),
+      {
+        description: format(new Date(updatedEvent.start), "MMM d, yyyy"),
+        position: "bottom-left",
+      },
+    );
   };
 
   const viewTitle = useMemo(() => {
@@ -255,10 +267,10 @@ export function EventCalendar({
   }, [currentDate, view]);
 
   const viewLabels: Record<CalendarView, string> = {
-    month: t("month"),
-    week: t("week"),
-    day: t("day"),
-    agenda: t("agenda"),
+    month: t((m) => m.EventCalendar.month),
+    week: t((m) => m.EventCalendar.week),
+    day: t((m) => m.EventCalendar.day),
+    agenda: t((m) => m.EventCalendar.agenda),
   };
 
   return (
@@ -290,11 +302,13 @@ export function EventCalendar({
                 className="min-[480px]:hidden"
                 data-icon="inline-start"
               />
-              <span className="max-[479px]:sr-only">{t("today")}</span>
+              <span className="max-[479px]:sr-only">
+                {t((m) => m.EventCalendar.today)}
+              </span>
             </Button>
             <div className="flex items-center sm:gap-2">
               <Button
-                aria-label={t("previous")}
+                aria-label={t((m) => m.EventCalendar.previous)}
                 onClick={handlePrevious}
                 size="icon"
                 variant="ghost"
@@ -302,7 +316,7 @@ export function EventCalendar({
                 <ChevronLeftIcon aria-hidden="true" />
               </Button>
               <Button
-                aria-label={t("next")}
+                aria-label={t((m) => m.EventCalendar.next)}
                 onClick={handleNext}
                 size="icon"
                 variant="ghost"
@@ -335,16 +349,20 @@ export function EventCalendar({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-32">
                 <DropdownMenuItem onClick={() => setView("month")}>
-                  {t("month")} <DropdownMenuShortcut>M</DropdownMenuShortcut>
+                  {t((m) => m.EventCalendar.month)}{" "}
+                  <DropdownMenuShortcut>M</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setView("week")}>
-                  {t("week")} <DropdownMenuShortcut>W</DropdownMenuShortcut>
+                  {t((m) => m.EventCalendar.week)}{" "}
+                  <DropdownMenuShortcut>W</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setView("day")}>
-                  {t("day")} <DropdownMenuShortcut>D</DropdownMenuShortcut>
+                  {t((m) => m.EventCalendar.day)}{" "}
+                  <DropdownMenuShortcut>D</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setView("agenda")}>
-                  {t("agenda")} <DropdownMenuShortcut>A</DropdownMenuShortcut>
+                  {t((m) => m.EventCalendar.agenda)}{" "}
+                  <DropdownMenuShortcut>A</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -361,7 +379,9 @@ export function EventCalendar({
                 className="sm:-ms-1 opacity-60"
                 data-icon="inline-start"
               />
-              <span className="max-sm:sr-only">{t("newEvent")}</span>
+              <span className="max-sm:sr-only">
+                {t((m) => m.EventCalendar.newEvent)}
+              </span>
             </Button>
           </div>
         </div>

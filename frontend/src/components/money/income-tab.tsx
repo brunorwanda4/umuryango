@@ -17,16 +17,22 @@ export function IncomeTab() {
     <Card>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <CardTitle>{t("title")}</CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
+          <CardTitle>
+            {t((m) => m.PersonalMoney.legacyTabs.income.title)}
+          </CardTitle>
+          <CardDescription>
+            {t((m) => m.PersonalMoney.legacyTabs.income.description)}
+          </CardDescription>
         </div>
         <MoneyFormDialog type="income" />
       </CardHeader>
       <CardContent>
         <MoneyTable
           currency={moneyCurrency}
-          emptyDescription={t("emptyDescription")}
-          emptyTitle={t("emptyTitle")}
+          emptyDescription={t(
+            (m) => m.PersonalMoney.legacyTabs.income.emptyDescription,
+          )}
+          emptyTitle={t((m) => m.PersonalMoney.legacyTabs.income.emptyTitle)}
           records={incomeActivities}
           showType={false}
         />

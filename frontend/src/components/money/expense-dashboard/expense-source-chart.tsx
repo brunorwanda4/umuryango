@@ -34,7 +34,7 @@ export function ExpenseSourceChart({
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="px-5 pt-5 pb-0 sm:px-6 sm:pt-6">
         <CardTitle className="font-bold text-base">
-          {t("charts.byCategoryTitle")}
+          {t((m) => m.PersonalMoney.personalExpenses.charts.byCategoryTitle)}
         </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 px-5 pb-5 sm:px-6 lg:grid-cols-[minmax(13rem,1fr)_auto] lg:items-center">
@@ -74,7 +74,7 @@ export function ExpenseSourceChart({
               dominantBaseline="middle"
               className="fill-muted-foreground text-sm"
             >
-              {t("charts.total")}
+              {t((m) => m.PersonalMoney.personalExpenses.charts.total)}
             </text>
             <ChartTooltip
               content={

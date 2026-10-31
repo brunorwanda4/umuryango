@@ -15,14 +15,22 @@ export function TransactionsTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
+        <CardTitle>
+          {t((m) => m.PersonalMoney.legacyTabs.transactions.title)}
+        </CardTitle>
+        <CardDescription>
+          {t((m) => m.PersonalMoney.legacyTabs.transactions.description)}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <MoneyTable
           currency={moneyCurrency}
-          emptyDescription={t("emptyDescription")}
-          emptyTitle={t("emptyTitle")}
+          emptyDescription={t(
+            (m) => m.PersonalMoney.legacyTabs.transactions.emptyDescription,
+          )}
+          emptyTitle={t(
+            (m) => m.PersonalMoney.legacyTabs.transactions.emptyTitle,
+          )}
           records={recentActivities}
         />
       </CardContent>

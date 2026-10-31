@@ -48,14 +48,14 @@ export default async function Home({ searchParams }: HomeProps) {
         <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)] lg:items-center">
           <div className="flex flex-col gap-7">
             <Badge variant="outline" className="w-fit">
-              {t("badge")}
+              {t((m) => m.Home.badge)}
             </Badge>
             <div className="flex flex-col gap-5">
               <h1 className="max-w-3xl text-5xl font-semibold leading-tight tracking-normal text-balance sm:text-6xl">
-                {t("title")}
+                {t((m) => m.Home.title)}
               </h1>
               <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-                {t("description")}
+                {t((m) => m.Home.description)}
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -64,7 +64,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 className="h-12 w-full rounded-full sm:w-fit"
                 href={getLocalizedHref("/auth/login", locale)}
               >
-                {t("login")}
+                {t((m) => m.Home.login)}
               </Button>
               <Button
                 variant="outline"
@@ -72,24 +72,26 @@ export default async function Home({ searchParams }: HomeProps) {
                 className="h-12 w-full rounded-full sm:w-fit"
                 href={getLocalizedHref("/items", locale)}
               >
-                {t("viewItems")}
+                {t((m) => m.Home.viewItems)}
               </Button>
             </div>
             <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-              {t("privacyNote")}{" "}
+              {t((m) => m.Home.privacyNote)}{" "}
               <Link
                 href={getLocalizedHref("/privacy", locale)}
                 className="font-medium text-foreground"
               >
-                {t("privacyLink")}
+                {t((m) => m.Home.privacyLink)}
               </Link>
             </p>
           </div>
 
           <Card className="rounded-lg">
             <CardHeader>
-              <CardTitle>{t("trustTitle")}</CardTitle>
-              <CardDescription>{t("trustDescription")}</CardDescription>
+              <CardTitle>{t((m) => m.Home.trustTitle)}</CardTitle>
+              <CardDescription>
+                {t((m) => m.Home.trustDescription)}
+              </CardDescription>
             </CardHeader>
             <div className="grid gap-3 px-5 pb-5">
               {messages.Home.trustItems.map((item) => (

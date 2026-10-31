@@ -42,12 +42,12 @@ export function MoneyApprovalTable({
       if (response.ok) {
         toast.success(
           action === "approve"
-            ? t("transactionApproved")
-            : t("transactionRejected"),
+            ? t((m) => m.FamilyMoney.transactionApproved)
+            : t((m) => m.FamilyMoney.transactionRejected),
         );
         window.location.reload();
       } else {
-        toast.error(response.message || t("processFailed"));
+        toast.error(response.message || t((m) => m.FamilyMoney.processFailed));
       }
     } catch {
       toast.error(tCommon("errors.unexpected"));
@@ -59,31 +59,34 @@ export function MoneyApprovalTable({
   const columns: ColumnDef<MoneyApprovalRow>[] = [
     {
       accessorKey: "title",
-      header: t("recordColumn"),
+      header: t((m) => m.FamilyMoney.recordColumn),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.title}</span>
       ),
     },
     {
       accessorKey: "type",
-      header: t("typeColumn"),
+      header: t((m) => m.FamilyMoney.typeColumn),
       cell: ({ row }) => formatTitle(row.original.type),
     },
     {
       accessorKey: "submittedBy",
-      header: t("submittedBy"),
-      cell: ({ row }) => row.original.submittedBy ?? t("unknownUser"),
+      header: t((m) => m.FamilyMoney.submittedBy),
+      cell: ({ row }) =>
+        row.original.submittedBy ?? t((m) => m.FamilyMoney.unknownUser),
     },
     {
       accessorKey: "status",
-      header: t("filterStatus"),
+      header: t((m) => m.FamilyMoney.filterStatus),
       cell: ({ row }) => (
         <StatusBadge value={row.original.status ?? "pending"} />
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: () => <div className="text-right">{t("amountColumn")}</div>,
+      header: () => (
+        <div className="text-right">{t((m) => m.FamilyMoney.amountColumn)}</div>
+      ),
       cell: ({ row }) => (
         <div className="text-right font-mono">
           <CompactMoney
@@ -96,13 +99,15 @@ export function MoneyApprovalTable({
     },
     {
       id: "actions",
-      header: () => <div className="text-right">{tCommon("actions")}</div>,
+      header: () => (
+        <div className="text-right">{tCommon((m) => m.Common.actions)}</div>
+      ),
       cell: ({ row }) => (
         <div className="flex justify-end gap-2">
           <Button
             size="icon-sm"
             variant="outline"
-            title={t("FamilyApprovals.approve", undefined)}
+            title={t((m) => m.FamilyApprovals.approve, undefined)}
             disabled={processingId === row.original.id}
             onClick={() => handleAction(row.original.id, "approve")}
           >
@@ -115,7 +120,7 @@ export function MoneyApprovalTable({
           <Button
             size="icon-sm"
             variant="outline"
-            title={t("FamilyApprovals.reject", undefined)}
+            title={t((m) => m.FamilyApprovals.reject, undefined)}
             disabled={processingId === row.original.id}
             onClick={() => handleAction(row.original.id, "reject")}
           >
@@ -133,8 +138,10 @@ export function MoneyApprovalTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("approvalQueueTitle")}</CardTitle>
-        <CardDescription>{t("approvalQueueDesc")}</CardDescription>
+        <CardTitle>{t((m) => m.FamilyMoney.approvalQueueTitle)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilyMoney.approvalQueueDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {approvals.length ? (
@@ -142,8 +149,8 @@ export function MoneyApprovalTable({
         ) : (
           <TableEmptyState
             icon={FileClockIcon}
-            title={t("noApprovalsTitle")}
-            description={t("noApprovalsDesc")}
+            title={t((m) => m.FamilyMoney.noApprovalsTitle)}
+            description={t((m) => m.FamilyMoney.noApprovalsDesc)}
           />
         )}
       </CardContent>

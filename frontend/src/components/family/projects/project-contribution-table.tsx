@@ -29,35 +29,37 @@ export function ProjectContributionTable({
   const columns: ColumnDef<ProjectContributionRow>[] = [
     {
       accessorKey: "projectName",
-      header: t("projectColumn"),
+      header: t((m) => m.FamilyProjects.projectColumn),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.projectName}</span>
       ),
     },
     {
       accessorKey: "contributorName",
-      header: t("contributorColumn"),
+      header: t((m) => m.FamilyProjects.contributorColumn),
     },
     {
       accessorKey: "paidAt",
-      header: tCommon("date"),
+      header: tCommon((m) => m.Common.date),
       cell: ({ row }) => formatDate(row.original.paidAt),
     },
     {
       accessorKey: "status",
-      header: tCommon("status"),
+      header: tCommon((m) => m.Common.status),
       cell: ({ row }) => (
         <StatusBadge value={row.original.status ?? "pending"} />
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: () => <div className="text-right">{tCommon("amount")}</div>,
+      header: () => (
+        <div className="text-right">{tCommon((m) => m.Common.amount)}</div>
+      ),
       cell: ({ row }) => (
         <div className="text-right font-mono">
           <CompactMoney
             currency={currency}
-            emptyLabel={tDashboard("noRecords")}
+            emptyLabel={tDashboard((m) => m.FamilyDashboard.noRecords)}
             value={row.original.amountMinorUnits}
           />
         </div>
@@ -68,17 +70,21 @@ export function ProjectContributionTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("projectContributionsTitle")}</CardTitle>
-        <CardDescription>{t("projectContributionsDesc")}</CardDescription>
+        <CardTitle>
+          {t((m) => m.FamilyProjects.projectContributionsTitle)}
+        </CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilyProjects.projectContributionsDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {contributions.length ? (
           <CommonDataTable columns={columns} data={contributions} />
         ) : (
           <TableEmptyState
-            description={t("noProjectContributionsDesc")}
+            description={t((m) => m.FamilyProjects.noProjectContributionsDesc)}
             icon={HandCoinsIcon}
-            title={t("noProjectContributionsTitle")}
+            title={t((m) => m.FamilyProjects.noProjectContributionsTitle)}
           />
         )}
       </CardContent>

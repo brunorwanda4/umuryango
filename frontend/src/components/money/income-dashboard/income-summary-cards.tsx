@@ -34,7 +34,9 @@ export function IncomeSummaryCards({
       cards={[
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.totalIncome"),
+          description: t(
+            (m) => m.PersonalMoney.personalIncome.summary.totalIncome,
+          ),
           iconSource: {
             image: { src: "/images/icons/wallet.png" },
             line: WalletCardsIcon,
@@ -48,7 +50,9 @@ export function IncomeSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.incomeTransactions"),
+          description: t(
+            (m) => m.PersonalMoney.personalIncome.summary.incomeTransactions,
+          ),
           iconSource: {
             image: { src: "/images/icons/transaction.png" },
             line: ArrowUpRightIcon,
@@ -57,7 +61,9 @@ export function IncomeSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.thisMonth"),
+          description: t(
+            (m) => m.PersonalMoney.personalIncome.summary.thisMonth,
+          ),
           iconSource: {
             image: { src: "/images/icons/calendar.png" },
             line: CalendarDaysIcon,
@@ -71,7 +77,9 @@ export function IncomeSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: t("summary.largestIncome"),
+          description: t(
+            (m) => m.PersonalMoney.personalIncome.summary.largestIncome,
+          ),
           iconSource: {
             image: { src: "/images/icons/quality.png" },
             line: TrophyIcon,
@@ -79,7 +87,9 @@ export function IncomeSummaryCards({
           value: (
             <CompactMoney
               currency="RWF"
-              emptyLabel={t("summary.noRecords")}
+              emptyLabel={t(
+                (m) => m.PersonalMoney.personalIncome.summary.noRecords,
+              )}
               value={summary.largestIncome?.amountMinorUnits}
             />
           ),

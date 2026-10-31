@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
@@ -23,7 +22,6 @@ import { DeleteExpenseDialog } from "./expenses/delete-expense-dialog";
 import { EditExpenseDialog } from "./expenses/edit-expense-dialog";
 import { ExpenseAnalytics } from "./expenses/expense-analytics";
 import { ExpenseDetailsDialog } from "./expenses/expense-details-dialog";
-import { ExpenseFilters } from "./expenses/expense-filters";
 import { ExpenseMetricCards } from "./expenses/expense-metric-cards";
 import { ExpenseTable } from "./expenses/expense-table";
 import type {
@@ -116,9 +114,7 @@ export function MoneyExpensesPage({
       ] = await Promise.all([
         apiRequest<undefined, ExpenseTransaction[]>(
           "get",
-          `/families/${encodeURIComponent(
-            familyData.id,
-          )}/money/transactions?type=EXPENSE`,
+          `/families/${encodeURIComponent(familyData.id)}/money/transactions?type=EXPENSE`,
         ),
         apiRequest<undefined, Category[]>(
           "get",
@@ -126,15 +122,11 @@ export function MoneyExpensesPage({
         ),
         apiRequest<undefined, MoneyOverview>(
           "get",
-          `/families/${encodeURIComponent(
-            familyData.id,
-          )}/money/overview?period=month`,
+          `/families/${encodeURIComponent(familyData.id)}/money/overview?period=month`,
         ),
         apiRequest<undefined, ProjectsOverview>(
           "get",
-          `/families/${encodeURIComponent(
-            familyData.id,
-          )}/projects/overview?status=all`,
+          `/families/${encodeURIComponent(familyData.id)}/projects/overview?status=all`,
         ),
       ]);
 
@@ -207,11 +199,12 @@ export function MoneyExpensesPage({
           );
         } else {
           toast.error(
-            categoriesResponse.message ?? t("toasts.categoriesRefreshFailed"),
+            categoriesResponse.message ??
+              t((m) => m.FamilyExpenses.toasts.categoriesRefreshFailed),
           );
         }
       } catch {
-        toast.error(t("toasts.categoriesRefreshFailed"));
+        toast.error(t((m) => m.FamilyExpenses.toasts.categoriesRefreshFailed));
       }
     },
     [family, fetchData, t],
@@ -309,7 +302,7 @@ export function MoneyExpensesPage({
   const handleSendApproval = async (transaction: ExpenseTransaction) => {
     if (!family) return;
     if (transaction.status !== "PENDING") {
-      toast.success(t("toasts.readyForApproval"));
+      toast.success(t((m) => m.FamilyExpenses.toasts.readyForApproval));
       return;
     }
 
@@ -319,13 +312,15 @@ export function MoneyExpensesPage({
         `/families/${family.id}/money/transactions/${transaction.id}/approve`,
       );
       if (response.ok) {
-        toast.success(t("toasts.approvedSuccess"));
+        toast.success(t((m) => m.FamilyExpenses.toasts.approvedSuccess));
         fetchData();
       } else {
-        toast.error(response.message ?? t("toasts.approvalFailed"));
+        toast.error(
+          response.message ?? t((m) => m.FamilyExpenses.toasts.approvalFailed),
+        );
       }
     } catch {
-      toast.error(t("toasts.approvalError"));
+      toast.error(t((m) => m.FamilyExpenses.toasts.approvalError));
     }
   };
 
@@ -346,7 +341,7 @@ export function MoneyExpensesPage({
   const handleDownloadReceipt = (transaction: ExpenseTransaction) => {
     const receipt = transaction.receipts?.[0];
     if (!receipt) {
-      toast.error(t("toasts.noReceiptAttached"));
+      toast.error(t((m) => m.FamilyExpenses.toasts.noReceiptAttached));
       return;
     }
 
@@ -386,9 +381,11 @@ export function MoneyExpensesPage({
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
               <AlertCircleIcon className="size-5" />
-              {t("failedToLoad")}
+              {t((m) => m.FamilyExpenses.failedToLoad)}
             </CardTitle>
-            <CardDescription>{error || t("workspaceNotFound")}</CardDescription>
+            <CardDescription>
+              {error || t((m) => m.FamilyExpenses.workspaceNotFound)}
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -400,8 +397,8 @@ export function MoneyExpensesPage({
   return (
     <div className="flex flex-col gap-6">
       <PageTitle
-        title={t("pageTitle")}
-        description={t("pageDescription")}
+        title={t((m) => m.FamilyExpenses.pageTitle)}
+        description={t((m) => m.FamilyExpenses.pageDescription)}
         actions={
           hasCapability(family, "RECORD_EXPENSE") ? (
             <Button
@@ -412,20 +409,32 @@ export function MoneyExpensesPage({
               }}
             >
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              {t("addExpense")}
+              {t((m) => m.FamilyExpenses.addExpense)}
             </Button>
           ) : null
         }
       />
-      <Separator />
       <ExpenseMetricCards transactions={transactions} currency={currency} />
       <Tabs>
         <TabsList>
-          <TabsTrigger value="data">{t("tabData")}</TabsTrigger>
-          <TabsTrigger value="overview">{t("tabOverview")}</TabsTrigger>
+          <TabsTrigger value="data">
+            {t((m) => m.FamilyExpenses.tabData)}
+          </TabsTrigger>
+          <TabsTrigger value="overview">
+            {t((m) => m.FamilyExpenses.tabOverview)}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="data" className=" space-y-8">
-          <ExpenseFilters
+          <ExpenseTable
+            filteredTransactions={filteredTransactions}
+            currency={currency}
+            isAdmin={isAdmin}
+            family={family}
+            handleActionClick={handleActionClick}
+            handleSendApproval={handleSendApproval}
+            handleDuplicate={handleDuplicate}
+            handleDownloadReceipt={handleDownloadReceipt}
+            setOpenCreate={setOpenCreate}
             search={search}
             setSearch={setSearch}
             filterCategory={filterCategory}
@@ -446,18 +455,6 @@ export function MoneyExpensesPage({
             setMaxAmount={setMaxAmount}
             resetFilters={resetFilters}
             categories={categories}
-            family={family}
-          />
-          <ExpenseTable
-            filteredTransactions={filteredTransactions}
-            currency={currency}
-            isAdmin={isAdmin}
-            family={family}
-            handleActionClick={handleActionClick}
-            handleSendApproval={handleSendApproval}
-            handleDuplicate={handleDuplicate}
-            handleDownloadReceipt={handleDownloadReceipt}
-            setOpenCreate={setOpenCreate}
           />
         </TabsContent>
         <TabsContent value="overview">

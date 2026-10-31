@@ -161,11 +161,11 @@ export function FamilyContactsPage({
   const handleDelete = async (contact: FamilyContact) => {
     if (!family) return;
     const workspaceName = personal
-      ? t("workspacePersonal")
-      : t("workspaceFamily");
+      ? t((m) => m.FamilyContacts.workspacePersonal)
+      : t((m) => m.FamilyContacts.workspaceFamily);
     if (
       !window.confirm(
-        t("deleteConfirm", {
+        t((m) => m.FamilyContacts.deleteConfirm, {
           name: contact.fullName,
           workspace: workspaceName,
         }),
@@ -180,10 +180,10 @@ export function FamilyContactsPage({
     );
 
     if (response.ok) {
-      toast.success(t("deleteSuccess"));
+      toast.success(t((m) => m.FamilyContacts.deleteSuccess));
       fetchData();
     } else {
-      toast.error(response.message ?? t("deleteError"));
+      toast.error(response.message ?? t((m) => m.FamilyContacts.deleteError));
     }
   };
 
@@ -196,7 +196,7 @@ export function FamilyContactsPage({
         ? parseVcard(text)
         : parseGoogleCsv(text);
       if (!imported.length) {
-        toast.error(t("importEmpty"));
+        toast.error(t((m) => m.FamilyContacts.importEmpty));
         return;
       }
 
@@ -207,19 +207,19 @@ export function FamilyContactsPage({
         contacts: imported.slice(0, 1000),
       });
       if (!response.ok || !response.data) {
-        toast.error(response.message ?? t("importError"));
+        toast.error(response.message ?? t((m) => m.FamilyContacts.importError));
         return;
       }
 
       toast.success(
-        t("importSuccess", {
+        t((m) => m.FamilyContacts.importSuccess, {
           created: response.data.created,
           merged: response.data.merged,
         }),
       );
       await fetchData();
     } catch {
-      toast.error(t("importFileError"));
+      toast.error(t((m) => m.FamilyContacts.importFileError));
     } finally {
       setImporting(false);
     }
@@ -234,13 +234,13 @@ export function FamilyContactsPage({
           <EmptyMedia variant="icon">
             <AlertCircleIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
+          <EmptyTitle>{t((m) => m.FamilyContacts.loadErrorTitle)}</EmptyTitle>
           <EmptyDescription>
             {error ||
-              t("workspaceNotFound", {
+              t((m) => m.FamilyContacts.workspaceNotFound, {
                 workspace: personal
-                  ? t("workspacePersonal")
-                  : t("workspaceFamily"),
+                  ? t((m) => m.FamilyContacts.workspacePersonal)
+                  : t((m) => m.FamilyContacts.workspaceFamily),
               })}
           </EmptyDescription>
         </EmptyHeader>

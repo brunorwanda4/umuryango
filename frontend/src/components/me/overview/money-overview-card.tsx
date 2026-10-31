@@ -52,18 +52,21 @@ export function MoneyOverviewCard({
   const chartConfig = useMemo(
     () =>
       ({
-        amount: { label: t("amount"), color: "var(--chart-1)" },
+        amount: {
+          label: t((m) => m.PersonalOverview.moneyCard.amount),
+          color: "var(--chart-1)",
+        },
       }) satisfies ChartConfig,
     [t],
   );
   const chartData = [
     {
-      name: t("income"),
+      name: t((m) => m.PersonalOverview.moneyCard.income),
       amount: toChartNumber(income),
       fill: "var(--chart-2)",
     },
     {
-      name: t("expenses"),
+      name: t((m) => m.PersonalOverview.moneyCard.expenses),
       amount: toChartNumber(expenses),
       fill: "var(--chart-1)",
     },
@@ -79,12 +82,14 @@ export function MoneyOverviewCard({
   return (
     <Card className="min-w-0">
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
+        <CardTitle>{t((m) => m.PersonalOverview.moneyCard.title)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.PersonalOverview.moneyCard.description)}
+        </CardDescription>
         <CardAction>
           <Button asChild size="sm" variant="ghost">
             <Link href="/me/money">
-              {t("openMoney")}
+              {t((m) => m.PersonalOverview.moneyCard.openMoney)}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
@@ -97,8 +102,12 @@ export function MoneyOverviewCard({
               <EmptyMedia variant="icon">
                 <ReceiptTextIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>{t("noMoneyRecords")}</EmptyTitle>
-              <EmptyDescription>{t("noMoneyRecordsDesc")}</EmptyDescription>
+              <EmptyTitle>
+                {t((m) => m.PersonalOverview.moneyCard.noMoneyRecords)}
+              </EmptyTitle>
+              <EmptyDescription>
+                {t((m) => m.PersonalOverview.moneyCard.noMoneyRecordsDesc)}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
@@ -139,10 +148,12 @@ export function MoneyOverviewCard({
             </ChartContainer>
             <Separator />
             <div className="flex flex-col gap-3">
-              <p className="font-medium text-sm">{t("recentTransactions")}</p>
+              <p className="font-medium text-sm">
+                {t((m) => m.PersonalOverview.moneyCard.recentTransactions)}
+              </p>
               {records.length === 0 ? (
                 <p className="text-muted-foreground text-sm">
-                  {t("noRecentTransactions")}
+                  {t((m) => m.PersonalOverview.moneyCard.noRecentTransactions)}
                 </p>
               ) : (
                 records.map((record) => {

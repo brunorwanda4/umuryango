@@ -60,21 +60,23 @@ export default function GlobalError({
     >
       <body className="flex min-h-full flex-col bg-background text-foreground">
         {/* metadata exports are not supported in global-error; use a title element */}
-        <title>{t("title")}</title>
+        <title>{t((m) => m.GlobalErrorPage.title)}</title>
         <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-5 py-20 text-center sm:px-6">
           <div className="flex flex-col gap-3">
             <p className="text-sm font-semibold tracking-wide text-muted-foreground">
               500
             </p>
             <h1 className="text-4xl font-semibold tracking-normal text-balance sm:text-5xl">
-              {t("heading")}
+              {t((m) => m.GlobalErrorPage.heading)}
             </h1>
             <p className="mx-auto max-w-md text-lg leading-8 text-muted-foreground">
-              {t("description")}
+              {t((m) => m.GlobalErrorPage.description)}
             </p>
             {error.digest ? (
               <p className="text-sm text-muted-foreground">
-                {t("reference", { digest: error.digest })}
+                {t((m) => m.GlobalErrorPage.reference, {
+                  digest: error.digest,
+                })}
               </p>
             ) : null}
 
@@ -133,7 +135,7 @@ export default function GlobalError({
             onClick={() => unstable_retry()}
             className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-primary px-6 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
           >
-            {t("tryAgain")}
+            {t((m) => m.GlobalErrorPage.tryAgain)}
           </button>
         </main>
       </body>

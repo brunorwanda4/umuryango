@@ -26,8 +26,12 @@ export default async function SettingsPage() {
   return (
     <div className="flex max-w-4xl flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="font-bold text-2xl tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground text-sm">{t("description")}</p>
+        <h1 className="font-bold text-2xl tracking-tight">
+          {t((m) => m.PersonalSettings.title)}
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          {t((m) => m.PersonalSettings.description)}
+        </p>
       </div>
 
       {user ? (
@@ -35,9 +39,12 @@ export default async function SettingsPage() {
       ) : (
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>{t("profileUnavailableTitle")}</AlertTitle>
+          <AlertTitle>
+            {t((m) => m.PersonalSettings.profileUnavailableTitle)}
+          </AlertTitle>
           <AlertDescription>
-            {response.message ?? t("profileUnavailableDesc")}
+            {response.message ??
+              t((m) => m.PersonalSettings.profileUnavailableDesc)}
           </AlertDescription>
         </Alert>
       )}

@@ -33,7 +33,7 @@ export function LoanFormFields({
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const loanType = useWatch({ control, name: "type" });
   const contactOptions = [
-    { label: t("form.manualEntry"), value: "__manual" },
+    { label: t((m) => m.FamilyLoans.form.manualEntry), value: "__manual" },
     ...contacts
       .filter((contact) => contact.status === "ACTIVE")
       .map((contact) => ({
@@ -53,15 +53,15 @@ export function LoanFormFields({
       <CommonFormField
         control={control}
         name="title"
-        label={t("form.loanTitleLabel")}
-        placeholder={t("form.loanTitlePlaceholder")}
+        label={t((m) => m.FamilyLoans.form.loanTitleLabel)}
+        placeholder={t((m) => m.FamilyLoans.form.loanTitlePlaceholder)}
         required
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <CommonFormField
           control={control}
           name="type"
-          label={t("form.loanTypeLabel")}
+          label={t((m) => m.FamilyLoans.form.loanTypeLabel)}
           fieldType="select"
           selectOptions={loanTypes}
           required
@@ -69,10 +69,12 @@ export function LoanFormFields({
         <CommonFormField
           control={control}
           name="amountMinorUnits"
-          label={t("form.amountLabel", { currency: family.defaultCurrency })}
+          label={t((m) => m.FamilyLoans.form.amountLabel, {
+            currency: family.defaultCurrency,
+          })}
           fieldType="money"
           currency={family.defaultCurrency}
-          placeholder={t("form.amountPlaceholder")}
+          placeholder={t((m) => m.FamilyLoans.form.amountPlaceholder)}
           required
         />
       </div>
@@ -80,14 +82,14 @@ export function LoanFormFields({
         <CommonFormField
           control={control}
           name="startDate"
-          label={t("form.startDateLabel")}
+          label={t((m) => m.FamilyLoans.form.startDateLabel)}
           fieldType="date"
           required
         />
         <CommonFormField
           control={control}
           name="dueDate"
-          label={t("form.dueDateLabel")}
+          label={t((m) => m.FamilyLoans.form.dueDateLabel)}
           fieldType="date"
           required
         />
@@ -98,7 +100,7 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="borrowerContactId"
-              label={t("form.borrowerLabel")}
+              label={t((m) => m.FamilyLoans.form.borrowerLabel)}
               fieldType="select"
               selectOptions={contactOptions}
               description="Choose a saved borrower from family contacts."
@@ -106,8 +108,10 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="borrower"
-              label={t("form.manualBorrowerLabel")}
-              placeholder={t("form.manualBorrowerPlaceholder")}
+              label={t((m) => m.FamilyLoans.form.manualBorrowerLabel)}
+              placeholder={t(
+                (m) => m.FamilyLoans.form.manualBorrowerPlaceholder,
+              )}
             />
           </>
         ) : (
@@ -115,7 +119,7 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="lenderContactId"
-              label={t("form.lenderLabel")}
+              label={t((m) => m.FamilyLoans.form.lenderLabel)}
               fieldType="select"
               selectOptions={contactOptions}
               description="Choose a saved lender from family contacts."
@@ -123,8 +127,8 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="lender"
-              label={t("form.manualLenderLabel")}
-              placeholder={t("form.manualLenderPlaceholder")}
+              label={t((m) => m.FamilyLoans.form.manualLenderLabel)}
+              placeholder={t((m) => m.FamilyLoans.form.manualLenderPlaceholder)}
             />
           </>
         )}
@@ -143,13 +147,13 @@ export function LoanFormFields({
         <CommonFormField
           control={control}
           name="category"
-          label={t("form.categoryLabel")}
+          label={t((m) => m.FamilyLoans.form.categoryLabel)}
           placeholder="e.g. Education, business, emergency"
         />
         <CommonFormField
           control={control}
           name="status"
-          label={t("form.statusLabel")}
+          label={t((m) => m.FamilyLoans.form.statusLabel)}
           fieldType="select"
           selectOptions={loanStatuses}
           required
@@ -158,9 +162,9 @@ export function LoanFormFields({
       <CommonFormField
         control={control}
         name="notes"
-        label={t("form.notesLabel")}
+        label={t((m) => m.FamilyLoans.form.notesLabel)}
         fieldType="textarea"
-        placeholder={t("form.notesPlaceholder")}
+        placeholder={t((m) => m.FamilyLoans.form.notesPlaceholder)}
       />
       <Collapsible
         open={showOptionalFields}
@@ -178,7 +182,7 @@ export function LoanFormFields({
                 aria-hidden="true"
                 data-icon="inline-start"
               />
-              {t("form.optionalSettings")}
+              {t((m) => m.FamilyLoans.form.optionalSettings)}
             </span>
             <ChevronDownIcon
               aria-hidden="true"
@@ -196,15 +200,15 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="interestRatePercent"
-              label={t("form.interestRateLabel")}
-              placeholder={t("form.interestRatePlaceholder")}
+              label={t((m) => m.FamilyLoans.form.interestRateLabel)}
+              placeholder={t((m) => m.FamilyLoans.form.interestRatePlaceholder)}
               inputProps={{ inputMode: "decimal" }}
               description="Enter annual percentage, if applicable."
             />
             <CommonFormField
               control={control}
               name="paymentMethod"
-              label={t("form.paymentMethodLabel")}
+              label={t((m) => m.FamilyLoans.form.paymentMethodLabel)}
               fieldType="select"
               selectOptions={paymentMethods}
               required
@@ -212,7 +216,7 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="repaymentFrequency"
-              label={t("form.repaymentFrequencyLabel")}
+              label={t((m) => m.FamilyLoans.form.repaymentFrequencyLabel)}
               fieldType="select"
               selectOptions={repaymentFrequencies}
               required
@@ -222,14 +226,14 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="documentFileName"
-              label={t("docFileLabel")}
+              label={t((m) => m.FamilyLoans.docFileLabel)}
               type="file"
-              description={t("docFileDesc")}
+              description={t((m) => m.FamilyLoans.docFileDesc)}
             />
             <CommonFormField
               control={control}
               name="approvalStatus"
-              label={t("details.approvalStatus")}
+              label={t((m) => m.FamilyLoans.details.approvalStatus)}
               fieldType="select"
               selectOptions={loanApprovalStatuses}
               required

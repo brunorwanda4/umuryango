@@ -45,8 +45,12 @@ export function AgendaView({
       {!hasEvents ? (
         <div className="flex min-h-[70svh] flex-col items-center justify-center py-16 text-center">
           <CalendarXIcon className="mb-2 text-muted-foreground/50" size={32} />
-          <h3 className="font-medium text-lg">{t("noEventsFound")}</h3>
-          <p className="text-muted-foreground">{t("noEventsPeriod")}</p>
+          <h3 className="font-medium text-lg">
+            {t((m) => m.EventCalendar.noEventsFound)}
+          </h3>
+          <p className="text-muted-foreground">
+            {t((m) => m.EventCalendar.noEventsPeriod)}
+          </p>
         </div>
       ) : (
         days.map((day) => {

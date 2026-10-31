@@ -19,8 +19,8 @@ export function SidebarViewSwitcher({
   const t = createTranslator("AppShell.sidebar");
   const showingSettings = value === "settings";
   const label = showingSettings
-    ? t("backToMainSidebar")
-    : t("openSettingsSidebar");
+    ? t((m) => m.AppShell.sidebar.backToMainSidebar)
+    : t((m) => m.AppShell.sidebar.openSettingsSidebar);
   const Icon = showingSettings ? ChevronLeftIcon : SettingsIcon;
 
   return (
@@ -33,7 +33,7 @@ export function SidebarViewSwitcher({
           onClick={() => onChange(showingSettings ? "main" : "settings")}
         >
           <Icon aria-hidden="true" />
-          <span>{t("settings")}</span>
+          <span>{t((m) => m.AppShell.sidebar.settings)}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>

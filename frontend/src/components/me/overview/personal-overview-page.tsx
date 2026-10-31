@@ -24,7 +24,7 @@ export function PersonalOverviewPage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>{t("errorLoad")}</AlertTitle>
+          <AlertTitle>{t((m) => m.PersonalOverview.errorLoad)}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
         <Button
@@ -33,7 +33,7 @@ export function PersonalOverviewPage() {
           onClick={() => void reload()}
         >
           <RefreshCwIcon data-icon="inline-start" aria-hidden="true" />
-          {t("tryAgain")}
+          {t((m) => m.PersonalOverview.tryAgain)}
         </Button>
       </div>
     );
@@ -46,7 +46,7 @@ export function PersonalOverviewPage() {
       {data.warnings.length > 0 ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>{t("warningsTitle")}</AlertTitle>
+          <AlertTitle>{t((m) => m.PersonalOverview.warningsTitle)}</AlertTitle>
           <AlertDescription>
             {[...new Set(data.warnings)].join(" ")}
           </AlertDescription>
@@ -86,7 +86,7 @@ function PersonalOverviewSkeleton() {
   return (
     <output
       className="mx-auto flex w-full max-w-7xl flex-col gap-6"
-      aria-label={t("loadingAria")}
+      aria-label={t((m) => m.PersonalOverview.loadingAria)}
     >
       <div className="flex flex-col gap-2">
         <Skeleton className="h-5 w-32" />

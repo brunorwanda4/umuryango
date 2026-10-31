@@ -39,8 +39,12 @@ export function ContactPageHeader({
 
   return (
     <PageTitle
-      title={personal ? t("personalTitle") : t("familyTitle")}
-      badge={t("savedCount", { count: totalCount })}
+      title={
+        personal
+          ? t((m) => m.FamilyContacts.personalTitle)
+          : t((m) => m.FamilyContacts.familyTitle)
+      }
+      badge={t((m) => m.FamilyContacts.savedCount, { count: totalCount })}
       icon={
         <SidebarIcon
           className="size-6"
@@ -50,12 +54,18 @@ export function ContactPageHeader({
           }}
         />
       }
-      description={personal ? t("personalDescription") : t("description")}
+      description={
+        personal
+          ? t((m) => m.FamilyContacts.personalDescription)
+          : t((m) => m.FamilyContacts.description)
+      }
       actions={
         <>
           {emergencyCount > 0 ? (
             <Badge variant="destructive">
-              {t("emergencyBadge", { count: emergencyCount })}
+              {t((m) => m.FamilyContacts.emergencyBadge, {
+                count: emergencyCount,
+              })}
             </Badge>
           ) : null}
           <input
@@ -72,11 +82,13 @@ export function ContactPageHeader({
             onClick={() => fileInputRef.current?.click()}
           >
             <FileUpIcon aria-hidden="true" data-icon="inline-start" />
-            {importing ? t("importing") : t("importContacts")}
+            {importing
+              ? t((m) => m.FamilyContacts.importing)
+              : t((m) => m.FamilyContacts.importContacts)}
           </Button>
           <Button size="sm" onClick={onAddContact}>
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            {t("addContact")}
+            {t((m) => m.FamilyContacts.addContact)}
           </Button>
         </>
       }

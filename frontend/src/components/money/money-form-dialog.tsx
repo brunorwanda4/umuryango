@@ -185,38 +185,50 @@ export function MoneyFormDialog({
       }
     > = {
       debt: {
-        action: t("actions.addDebt"),
-        description: t("descriptions.addDebt"),
-        title: t("titles.addDebt"),
-        updateAction: t("actions.updateDebt"),
-        updateDescription: t("descriptions.updateDebt"),
-        updateTitle: t("titles.updateDebt"),
+        action: t((m) => m.PersonalMoney.moneyForm.actions.addDebt),
+        description: t((m) => m.PersonalMoney.moneyForm.descriptions.addDebt),
+        title: t((m) => m.PersonalMoney.moneyForm.titles.addDebt),
+        updateAction: t((m) => m.PersonalMoney.moneyForm.actions.updateDebt),
+        updateDescription: t(
+          (m) => m.PersonalMoney.moneyForm.descriptions.updateDebt,
+        ),
+        updateTitle: t((m) => m.PersonalMoney.moneyForm.titles.updateDebt),
       },
       expense: {
-        action: t("actions.addExpense"),
-        description: t("descriptions.addExpense"),
-        title: t("titles.addExpense"),
+        action: t((m) => m.PersonalMoney.moneyForm.actions.addExpense),
+        description: t(
+          (m) => m.PersonalMoney.moneyForm.descriptions.addExpense,
+        ),
+        title: t((m) => m.PersonalMoney.moneyForm.titles.addExpense),
         transactionType: "EXPENSE",
-        updateAction: t("actions.updateExpense"),
-        updateDescription: t("descriptions.updateExpense"),
-        updateTitle: t("titles.updateExpense"),
+        updateAction: t((m) => m.PersonalMoney.moneyForm.actions.updateExpense),
+        updateDescription: t(
+          (m) => m.PersonalMoney.moneyForm.descriptions.updateExpense,
+        ),
+        updateTitle: t((m) => m.PersonalMoney.moneyForm.titles.updateExpense),
       },
       income: {
-        action: t("actions.addIncome"),
-        description: t("descriptions.addIncome"),
-        title: t("titles.addIncome"),
+        action: t((m) => m.PersonalMoney.moneyForm.actions.addIncome),
+        description: t((m) => m.PersonalMoney.moneyForm.descriptions.addIncome),
+        title: t((m) => m.PersonalMoney.moneyForm.titles.addIncome),
         transactionType: "INCOME",
-        updateAction: t("actions.updateIncome"),
-        updateDescription: t("descriptions.updateIncome"),
-        updateTitle: t("titles.updateIncome"),
+        updateAction: t((m) => m.PersonalMoney.moneyForm.actions.updateIncome),
+        updateDescription: t(
+          (m) => m.PersonalMoney.moneyForm.descriptions.updateIncome,
+        ),
+        updateTitle: t((m) => m.PersonalMoney.moneyForm.titles.updateIncome),
       },
       savings: {
-        action: t("actions.addSavings"),
-        description: t("descriptions.addSavings"),
-        title: t("titles.addSavings"),
-        updateAction: t("actions.updateSavings"),
-        updateDescription: t("descriptions.updateSavings"),
-        updateTitle: t("titles.updateSavings"),
+        action: t((m) => m.PersonalMoney.moneyForm.actions.addSavings),
+        description: t(
+          (m) => m.PersonalMoney.moneyForm.descriptions.addSavings,
+        ),
+        title: t((m) => m.PersonalMoney.moneyForm.titles.addSavings),
+        updateAction: t((m) => m.PersonalMoney.moneyForm.actions.updateSavings),
+        updateDescription: t(
+          (m) => m.PersonalMoney.moneyForm.descriptions.updateSavings,
+        ),
+        updateTitle: t((m) => m.PersonalMoney.moneyForm.titles.updateSavings),
       },
     };
     return configs[type];
@@ -224,10 +236,22 @@ export function MoneyFormDialog({
 
   const accountOptions = useMemo(
     () => [
-      { value: "MOBILE_MONEY", label: t("accounts.mobileMoney") },
-      { value: "BANK_TRANSFER", label: t("accounts.bankTransfer") },
-      { value: "CASH", label: t("accounts.cash") },
-      { value: "SAVINGS_WALLET", label: t("accounts.savingsWallet") },
+      {
+        value: "MOBILE_MONEY",
+        label: t((m) => m.PersonalMoney.moneyForm.accounts.mobileMoney),
+      },
+      {
+        value: "BANK_TRANSFER",
+        label: t((m) => m.PersonalMoney.moneyForm.accounts.bankTransfer),
+      },
+      {
+        value: "CASH",
+        label: t((m) => m.PersonalMoney.moneyForm.accounts.cash),
+      },
+      {
+        value: "SAVINGS_WALLET",
+        label: t((m) => m.PersonalMoney.moneyForm.accounts.savingsWallet),
+      },
     ],
     [t],
   );
@@ -264,18 +288,22 @@ export function MoneyFormDialog({
   const categoryTypeLabel = config.transactionType?.toLowerCase();
   const entryLabel =
     config.transactionType === "EXPENSE"
-      ? t("fields.expense")
-      : t("fields.source");
+      ? t((m) => m.PersonalMoney.moneyForm.fields.expense)
+      : t((m) => m.PersonalMoney.moneyForm.fields.source);
   const entryLabelLower = entryLabel.toLowerCase();
   const titleField =
     config.transactionType === "EXPENSE"
       ? {
-          label: t("fields.expense"),
-          placeholder: t("fields.expensePlaceholder"),
+          label: t((m) => m.PersonalMoney.moneyForm.fields.expense),
+          placeholder: t(
+            (m) => m.PersonalMoney.moneyForm.fields.expensePlaceholder,
+          ),
         }
       : {
-          label: t("fields.source"),
-          placeholder: t("fields.sourcePlaceholder"),
+          label: t((m) => m.PersonalMoney.moneyForm.fields.source),
+          placeholder: t(
+            (m) => m.PersonalMoney.moneyForm.fields.sourcePlaceholder,
+          ),
         };
   const categoryOptions = [
     ...activeCategories.map((category) => ({
@@ -287,10 +315,15 @@ export function MoneyFormDialog({
           {
             value: CREATE_CATEGORY_VALUE,
             label: activeCategories.length
-              ? t("fields.createAnotherCategory", {
+              ? t(
+                  (m) => m.PersonalMoney.moneyForm.fields.createAnotherCategory,
+                  {
+                    type: categoryTypeLabel ?? "",
+                  },
+                )
+              : t((m) => m.PersonalMoney.moneyForm.fields.createCategory, {
                   type: categoryTypeLabel ?? "",
-                })
-              : t("fields.createCategory", { type: categoryTypeLabel ?? "" }),
+                }),
           },
         ]
       : []),
@@ -328,9 +361,11 @@ export function MoneyFormDialog({
         ...(isUpdate ? {} : { idempotencyKey: idempotencyKeyRef.current }),
       };
     },
-    onSuccessMessage: t("savedToast", {
+    onSuccessMessage: t((m) => m.PersonalMoney.moneyForm.savedToast, {
       type: entryLabel,
-      mode: isUpdate ? t("updatedMode") : t("recordedMode"),
+      mode: isUpdate
+        ? t((m) => m.PersonalMoney.moneyForm.updatedMode)
+        : t((m) => m.PersonalMoney.moneyForm.recordedMode),
     }),
     toastOnSuccess: true,
     onSuccess: async () => {
@@ -396,7 +431,9 @@ export function MoneyFormDialog({
           {error ? (
             <Alert variant="destructive">
               <AlertTitle>
-                {t("notSavedToast", { type: entryLabel })}
+                {t((m) => m.PersonalMoney.moneyForm.notSavedToast, {
+                  type: entryLabel,
+                })}
               </AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -412,7 +449,7 @@ export function MoneyFormDialog({
             <CommonFormField
               control={form.control}
               name="amountMinorUnits"
-              label={t("fields.amount")}
+              label={t((m) => m.PersonalMoney.moneyForm.fields.amount)}
               fieldType="money"
               currency="RWF"
               placeholder="0"
@@ -421,10 +458,12 @@ export function MoneyFormDialog({
             <CommonFormField
               control={form.control}
               name="categoryId"
-              label={t("fields.category")}
+              label={t((m) => m.PersonalMoney.moneyForm.fields.category)}
               fieldType="custom"
               disabled={!activeCategories.length && !canCreateCategoryInline}
-              placeholder={t("fields.selectCategory")}
+              placeholder={t(
+                (m) => m.PersonalMoney.moneyForm.fields.selectCategory,
+              )}
               required
               render={({ field, id, invalid, disabled }) => (
                 <>
@@ -449,7 +488,12 @@ export function MoneyFormDialog({
                       onBlur={field.onBlur}
                       ref={field.ref}
                     >
-                      <SelectValue placeholder={t("fields.selectCategory")} />
+                      <SelectValue
+                        placeholder={t(
+                          (m) =>
+                            m.PersonalMoney.moneyForm.fields.selectCategory,
+                        )}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -492,16 +536,18 @@ export function MoneyFormDialog({
             <CommonFormField
               control={form.control}
               name="account"
-              label={t("fields.account")}
+              label={t((m) => m.PersonalMoney.moneyForm.fields.account)}
               fieldType="select"
-              placeholder={t("fields.selectAccount")}
+              placeholder={t(
+                (m) => m.PersonalMoney.moneyForm.fields.selectAccount,
+              )}
               required
               selectOptions={accountOptions}
             />
             <CommonFormField
               control={form.control}
               name="date"
-              label={t("fields.date")}
+              label={t((m) => m.PersonalMoney.moneyForm.fields.date)}
               fieldType="date"
               required
             />
@@ -509,28 +555,35 @@ export function MoneyFormDialog({
               <CommonFormField
                 control={form.control}
                 name="notes"
-                label={t("fields.notes")}
+                label={t((m) => m.PersonalMoney.moneyForm.fields.notes)}
                 fieldType="textarea"
-                placeholder={t("fields.notesPlaceholder", {
-                  type: entryLabelLower,
-                })}
+                placeholder={t(
+                  (m) => m.PersonalMoney.moneyForm.fields.notesPlaceholder,
+                  {
+                    type: entryLabelLower,
+                  },
+                )}
               />
             </div>
           </FieldGroup>
           {!activeCategories.length ? (
             <p className="text-sm text-muted-foreground">
-              {t("fields.addCategoryWarning", { type: entryLabelLower })}
+              {t((m) => m.PersonalMoney.moneyForm.fields.addCategoryWarning, {
+                type: entryLabelLower,
+              })}
             </p>
           ) : null}
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline">
-                {t("fields.cancel")}
+                {t((m) => m.PersonalMoney.moneyForm.fields.cancel)}
               </Button>
             </DialogClose>
             <Button disabled={!canSubmit || isPending} type="submit">
               {isPending ? <Spinner data-icon="inline-start" /> : null}
-              {isUpdate ? t("fields.saveChanges") : t("fields.saveEntry")}
+              {isUpdate
+                ? t((m) => m.PersonalMoney.moneyForm.fields.saveChanges)
+                : t((m) => m.PersonalMoney.moneyForm.fields.saveEntry)}
             </Button>
           </DialogFooter>
         </form>

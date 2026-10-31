@@ -26,7 +26,7 @@ export function PersonalIncomePage() {
   return (
     <div className="flex flex-col gap-5">
       <PageTitle
-        title={t("title")}
+        title={t((m) => m.PersonalMoney.personalIncome.title)}
         icon={
           <SidebarIcon
             className="size-6"
@@ -36,7 +36,7 @@ export function PersonalIncomePage() {
             }}
           />
         }
-        description={t("description")}
+        description={t((m) => m.PersonalMoney.personalIncome.description)}
         actions={
           <IncomePageActions
             canRecordIncome={Boolean(family)}

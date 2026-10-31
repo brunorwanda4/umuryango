@@ -41,18 +41,23 @@ export function ViewDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[calc(100vh-2rem)] overflow-y-scroll">
         <DialogHeader>
-          <DialogTitle>{t("dialogs.detailsTitle")}</DialogTitle>
-          <DialogDescription>{t("dialogs.detailsDesc")}</DialogDescription>
+          <DialogTitle>
+            {t((m) => m.FamilyIncome.dialogs.detailsTitle)}
+          </DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyIncome.dialogs.detailsDesc)}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-4 text-sm">
           <h2 className="text-2xl font-bold text-center mb-6">
-            {transaction.description || t("details.defaultTitle")}
+            {transaction.description ||
+              t((m) => m.FamilyIncome.details.defaultTitle)}
           </h2>
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">
-              {t("details.amount")}
+              {t((m) => m.FamilyIncome.details.amount)}
             </span>
             <span className="font-mono font-semibold text-right text-primary">
               <CompactMoney
@@ -66,7 +71,7 @@ export function ViewDetailsDialog({
             <>
               <div className="grid grid-cols-2 border-b pb-2">
                 <span className="text-muted-foreground font-medium">
-                  {t("details.expectedAmount")}
+                  {t((m) => m.FamilyIncome.details.expectedAmount)}
                 </span>
                 <span className="font-mono text-right">
                   {transaction.expectedAmountMinorUnits ? (
@@ -82,7 +87,7 @@ export function ViewDetailsDialog({
 
               <div className="grid grid-cols-2 border-b pb-2">
                 <span className="text-muted-foreground font-medium">
-                  {t("details.amountLeft")}
+                  {t((m) => m.FamilyIncome.details.amountLeft)}
                 </span>
                 <span className="font-mono text-right">
                   {remainingMinorUnits === null ? (
@@ -98,7 +103,7 @@ export function ViewDetailsDialog({
 
               <div className="grid grid-cols-2 border-b pb-2">
                 <span className="text-muted-foreground font-medium">
-                  {t("details.paymentStatus")}
+                  {t((m) => m.FamilyIncome.details.paymentStatus)}
                 </span>
                 <span className="text-right">
                   {transaction.paymentStatus.replace("_", " ")}
@@ -107,7 +112,7 @@ export function ViewDetailsDialog({
 
               <div className="grid grid-cols-2 border-b pb-2">
                 <span className="text-muted-foreground font-medium">
-                  {t("details.dueDate")}
+                  {t((m) => m.FamilyIncome.details.dueDate)}
                 </span>
                 <span className="text-right">
                   {transaction.dueDate ? formatDate(transaction.dueDate) : "-"}
@@ -116,7 +121,7 @@ export function ViewDetailsDialog({
 
               <div className="grid grid-cols-2 border-b pb-2">
                 <span className="text-muted-foreground font-medium">
-                  {t("details.houseOrUnit")}
+                  {t((m) => m.FamilyIncome.details.houseOrUnit)}
                 </span>
                 <span className="text-right">
                   {transaction.propertyName || "-"}
@@ -126,10 +131,10 @@ export function ViewDetailsDialog({
               {(transaction.periodStart || transaction.periodEnd) && (
                 <div className="grid grid-cols-2 border-b pb-2">
                   <span className="text-muted-foreground font-medium">
-                    {t("details.rentPeriod")}
+                    {t((m) => m.FamilyIncome.details.rentPeriod)}
                   </span>
                   <span className="text-right">
-                    {t("details.rentPeriodRange", {
+                    {t((m) => m.FamilyIncome.details.rentPeriodRange, {
                       start: transaction.periodStart
                         ? formatDate(transaction.periodStart)
                         : "-",
@@ -145,21 +150,21 @@ export function ViewDetailsDialog({
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">
-              {t("details.category")}
+              {t((m) => m.FamilyIncome.details.category)}
             </span>
             <span className="text-right">{transaction.category.name}</span>
           </div>
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">
-              {t("details.dateReceived")}
+              {t((m) => m.FamilyIncome.details.dateReceived)}
             </span>
             <span className="text-right">{formatDate(transaction.date)}</span>
           </div>
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">
-              {t("details.paymentMethod")}
+              {t((m) => m.FamilyIncome.details.paymentMethod)}
             </span>
             <span className="text-right">
               {transaction.paymentMethod?.replace("_", " ")}
@@ -168,7 +173,7 @@ export function ViewDetailsDialog({
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">
-              {t("details.receivedFrom")}
+              {t((m) => m.FamilyIncome.details.receivedFrom)}
             </span>
             <span className="text-right">
               {transaction.receivedFrom || "-"}
@@ -177,14 +182,14 @@ export function ViewDetailsDialog({
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">
-              {t("details.receivedBy")}
+              {t((m) => m.FamilyIncome.details.receivedBy)}
             </span>
             <span className="text-right">{transaction.receivedBy || "-"}</span>
           </div>
 
           <div className="grid grid-cols-2 border-b pb-2">
             <span className="text-muted-foreground font-medium">
-              {t("details.status")}
+              {t((m) => m.FamilyIncome.details.status)}
             </span>
             <div className="text-right">
               <Badge
@@ -200,7 +205,7 @@ export function ViewDetailsDialog({
           {transaction.notes && (
             <div className="border-b pb-2">
               <span className="text-muted-foreground font-medium block mb-1">
-                {t("details.notes")}
+                {t((m) => m.FamilyIncome.details.notes)}
               </span>
               <p className="p-2 bg-muted rounded text-xs leading-5 whitespace-pre-wrap">
                 {transaction.notes}
@@ -211,7 +216,7 @@ export function ViewDetailsDialog({
           {transaction.receipts && transaction.receipts.length > 0 && (
             <div className="border-b pb-2">
               <span className="text-muted-foreground font-medium block mb-1">
-                {t("details.receiptsCount", {
+                {t((m) => m.FamilyIncome.details.receiptsCount, {
                   count: transaction.receipts.length,
                 })}
               </span>
@@ -235,7 +240,7 @@ export function ViewDetailsDialog({
 
           <div className="grid grid-cols-2 border-b pb-2 text-xs">
             <span className="text-muted-foreground">
-              {t("details.recordedBy")}
+              {t((m) => m.FamilyIncome.details.recordedBy)}
             </span>
             <span className="text-right font-medium">
               {transaction.createdBy.fullName}
@@ -244,7 +249,7 @@ export function ViewDetailsDialog({
 
           <div className="grid grid-cols-2 border-b pb-2 text-xs">
             <span className="text-muted-foreground">
-              {t("details.recordedDate")}
+              {t((m) => m.FamilyIncome.details.recordedDate)}
             </span>
             <span className="text-right font-medium">
               {formatDate(transaction.createdAt)}
@@ -253,7 +258,7 @@ export function ViewDetailsDialog({
 
           <div className="grid grid-cols-2 text-xs">
             <span className="text-muted-foreground">
-              {t("details.lastUpdated")}
+              {t((m) => m.FamilyIncome.details.lastUpdated)}
             </span>
             <span className="text-right font-medium">
               {formatDate(transaction.updatedAt)}

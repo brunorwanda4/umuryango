@@ -114,7 +114,7 @@ export function EditIncomeDialog({
       method: "patch",
       url: `/families/${encodeURIComponent(family.id)}/money/transactions/${transaction?.id}`,
     },
-    onSuccessMessage: t("toasts.updatedSuccess"),
+    onSuccessMessage: t((m) => m.FamilyIncome.toasts.updatedSuccess),
     toastOnSuccess: true,
     onSuccess: () => {
       onOpenChange(false);
@@ -164,8 +164,12 @@ export function EditIncomeDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>{t("dialogs.editTitle")}</DialogTitle>
-          <DialogDescription>{t("dialogs.editDesc")}</DialogDescription>
+          <DialogTitle>
+            {t((m) => m.FamilyIncome.dialogs.editTitle)}
+          </DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyIncome.dialogs.editDesc)}
+          </DialogDescription>
         </DialogHeader>
 
         <form
@@ -195,7 +199,9 @@ export function EditIncomeDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending ? t("dialogs.saving") : t("dialogs.savingChanges")}
+            {isPending
+              ? t((m) => m.FamilyIncome.dialogs.saving)
+              : t((m) => m.FamilyIncome.dialogs.savingChanges)}
           </Button>
         </DialogFooter>
       </DialogContent>

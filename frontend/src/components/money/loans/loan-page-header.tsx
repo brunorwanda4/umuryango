@@ -9,7 +9,7 @@ export function LoanPageHeader({ onAdd }: { onAdd: () => void }) {
 
   return (
     <PageTitle
-      title={t("title")}
+      title={t((m) => m.PersonalLoans.title)}
       icon={
         <SidebarIcon
           className="size-6"
@@ -19,11 +19,11 @@ export function LoanPageHeader({ onAdd }: { onAdd: () => void }) {
           }}
         />
       }
-      description={t("description")}
+      description={t((m) => m.PersonalLoans.description)}
       actions={
         <Button className="mt-4 w-full sm:w-auto lg:mt-0" onClick={onAdd}>
           <PlusIcon aria-hidden="true" data-icon="inline-start" />
-          {t("addLoan")}
+          {t((m) => m.PersonalLoans.addLoan)}
         </Button>
       }
     />

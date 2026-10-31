@@ -126,11 +126,13 @@ export function FamilyProjectsWorkspace({
           <EmptyMedia variant="icon">
             <FolderKanbanIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
+          <EmptyTitle>{t((m) => m.FamilyProjects.loadErrorTitle)}</EmptyTitle>
           <EmptyDescription>
             {state.message} You may not have access, or the family workspace no
             longer exists.{" "}
-            <Link href="/family">{tDashboard("backToFamilies")}</Link>
+            <Link href="/family">
+              {tDashboard((m) => m.FamilyDashboard.backToFamilies)}
+            </Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -177,7 +179,7 @@ function ProjectsWorkspaceContent({
   return (
     <div className="flex flex-col gap-6">
       <PageTitle
-        title={t("title")}
+        title={t((m) => m.FamilyProjects.title)}
         badge={AUTHORITY_LABELS[family.authority]}
         actions={
           <div className="flex flex-wrap gap-2 lg:justify-end">
@@ -191,7 +193,7 @@ function ProjectsWorkspaceContent({
             {canExportReports ? (
               <Button size="sm" variant="outline">
                 <DownloadIcon aria-hidden="true" data-icon="inline-start" />
-                {tCommon("export")}
+                {tCommon((m) => m.Common.export)}
               </Button>
             ) : null}
           </div>
@@ -207,9 +209,13 @@ function ProjectsWorkspaceContent({
       {projectsMessage ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>{t("waitingForRecordsTitle")}</AlertTitle>
+          <AlertTitle>
+            {t((m) => m.FamilyProjects.waitingForRecordsTitle)}
+          </AlertTitle>
           <AlertDescription>
-            {t("waitingForRecordsDesc", { detail: projectsMessage })}
+            {t((m) => m.FamilyProjects.waitingForRecordsDesc, {
+              detail: projectsMessage,
+            })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -217,11 +223,15 @@ function ProjectsWorkspaceContent({
       <Tabs defaultValue="projects" className="gap-4">
         <div className="overflow-x-auto">
           <TabsList className="min-w-max">
-            <TabsTrigger value="projects">{t("projectsTab")}</TabsTrigger>
-            <TabsTrigger value="contributions">
-              {t("contributionsTab")}
+            <TabsTrigger value="projects">
+              {t((m) => m.FamilyProjects.projectsTab)}
             </TabsTrigger>
-            <TabsTrigger value="operations">{t("operationsTab")}</TabsTrigger>
+            <TabsTrigger value="contributions">
+              {t((m) => m.FamilyProjects.contributionsTab)}
+            </TabsTrigger>
+            <TabsTrigger value="operations">
+              {t((m) => m.FamilyProjects.operationsTab)}
+            </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="projects">

@@ -49,8 +49,12 @@ export function RecentIncomeItems({
             <EmptyMedia variant="icon">
               <SearchIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>{t("items.noIncomeTitle")}</EmptyTitle>
-            <EmptyDescription>{t("items.noIncomeDesc")}</EmptyDescription>
+            <EmptyTitle>
+              {t((m) => m.PersonalMoney.personalIncome.items.noIncomeTitle)}
+            </EmptyTitle>
+            <EmptyDescription>
+              {t((m) => m.PersonalMoney.personalIncome.items.noIncomeDesc)}
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>
@@ -96,7 +100,10 @@ function RecentIncomeItem({
           variant="outline"
         >
           <button
-            aria-label={t("table.viewIncomeAria", { source: income.source })}
+            aria-label={t(
+              (m) => m.PersonalMoney.personalIncome.table.viewIncomeAria,
+              { source: income.source },
+            )}
             className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             onClick={() => setIsViewOpen(true)}
             type="button"

@@ -45,8 +45,12 @@ export function ExpenseDashboard({
     return (
       <Alert variant="destructive">
         <AlertCircleIcon aria-hidden="true" />
-        <AlertTitle>{t("loadError")}</AlertTitle>
-        <AlertDescription>{error ?? t("noWorkspace")}</AlertDescription>
+        <AlertTitle>
+          {t((m) => m.PersonalMoney.personalExpenses.loadError)}
+        </AlertTitle>
+        <AlertDescription>
+          {error ?? t((m) => m.PersonalMoney.personalExpenses.noWorkspace)}
+        </AlertDescription>
         <Button
           className="mt-3 w-fit"
           onClick={onRetry}
@@ -54,7 +58,7 @@ export function ExpenseDashboard({
           variant="outline"
         >
           <RefreshCwIcon data-icon="inline-start" />
-          {t("tryAgain")}
+          {t((m) => m.PersonalMoney.personalExpenses.tryAgain)}
         </Button>
       </Alert>
     );
@@ -65,8 +69,12 @@ export function ExpenseDashboard({
       <ExpenseSummaryCards summary={data.summary} />
       <Tabs defaultValue="data">
         <TabsList>
-          <TabsTrigger value="data">{t("dataTab")}</TabsTrigger>
-          <TabsTrigger value="charts">{t("chartsTab")}</TabsTrigger>
+          <TabsTrigger value="data">
+            {t((m) => m.PersonalMoney.personalExpenses.dataTab)}
+          </TabsTrigger>
+          <TabsTrigger value="charts">
+            {t((m) => m.PersonalMoney.personalExpenses.chartsTab)}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="data">
           <RecentExpenseTable

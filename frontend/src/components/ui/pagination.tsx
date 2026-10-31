@@ -12,7 +12,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
   const t = createTranslator("Common");
   return (
     <nav
-      aria-label={t("pagination")}
+      aria-label={t((m) => m.Common.pagination)}
       data-slot="pagination"
       className={cn("mx-auto flex w-full justify-center", className)}
       {...props}
@@ -71,10 +71,10 @@ function PaginationPrevious({
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   const t = createTranslator("Common");
-  const label = text ?? t("previous");
+  const label = text ?? t((m) => m.Common.previous);
   return (
     <PaginationLink
-      aria-label={t("goToPreviousPage")}
+      aria-label={t((m) => m.Common.goToPreviousPage)}
       size="default"
       className={cn("pl-1.5!", className)}
       {...props}
@@ -91,10 +91,10 @@ function PaginationNext({
   ...props
 }: React.ComponentProps<typeof PaginationLink> & { text?: string }) {
   const t = createTranslator("Common");
-  const label = text ?? t("next");
+  const label = text ?? t((m) => m.Common.next);
   return (
     <PaginationLink
-      aria-label={t("goToNextPage")}
+      aria-label={t((m) => m.Common.goToNextPage)}
       size="default"
       className={cn("pr-1.5!", className)}
       {...props}
@@ -121,7 +121,7 @@ function PaginationEllipsis({
       {...props}
     >
       <MoreHorizontalIcon />
-      <span className="sr-only">{t("morePages")}</span>
+      <span className="sr-only">{t((m) => m.Common.morePages)}</span>
     </span>
   );
 }

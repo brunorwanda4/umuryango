@@ -447,9 +447,11 @@ export function MoneyIncomePage({
           <CardHeader>
             <CardTitle className="text-destructive flex items-center gap-2">
               <AlertCircleIcon className="size-5" />
-              {t("failedToLoad")}
+              {t((m) => m.FamilyIncome.failedToLoad)}
             </CardTitle>
-            <CardDescription>{error || t("workspaceNotFound")}</CardDescription>
+            <CardDescription>
+              {error || t((m) => m.FamilyIncome.workspaceNotFound)}
+            </CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -464,12 +466,12 @@ export function MoneyIncomePage({
       aria-busy={isRefreshing}
     >
       <PageTitle
-        title={t("pageTitle")}
+        title={t((m) => m.FamilyIncome.pageTitle)}
         actions={
           hasCapability(family, "RECORD_INCOME") && (
             <Button size="sm" onClick={() => openGenericCreate(true)}>
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              {t("addIncome")}
+              {t((m) => m.FamilyIncome.addIncome)}
             </Button>
           )
         }
@@ -502,9 +504,13 @@ export function MoneyIncomePage({
       {/* Main Income Table */}
       <Tabs defaultValue="all">
         <TabsList>
-          <TabsTrigger value="all">{tCommon("all")}</TabsTrigger>
-          <TabsTrigger value="every-time">{t("tabs.everyTime")}</TabsTrigger>
-          <TabsTrigger value="one-time">{t("tabs.oneTime")}</TabsTrigger>
+          <TabsTrigger value="all">{tCommon((m) => m.Common.all)}</TabsTrigger>
+          <TabsTrigger value="every-time">
+            {t((m) => m.FamilyIncome.tabs.everyTime)}
+          </TabsTrigger>
+          <TabsTrigger value="one-time">
+            {t((m) => m.FamilyIncome.tabs.oneTime)}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="all">
           <IncomeTable

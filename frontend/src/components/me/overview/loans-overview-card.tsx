@@ -47,12 +47,14 @@ export function LoansOverviewCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>{t("description")}</CardDescription>
+        <CardTitle>{t((m) => m.PersonalOverview.loansCard.title)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.PersonalOverview.loansCard.description)}
+        </CardDescription>
         <CardAction>
           <Button asChild size="sm" variant="ghost">
             <Link href="/me/money/loans">
-              {t("openLoans")}
+              {t((m) => m.PersonalOverview.loansCard.openLoans)}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
@@ -61,21 +63,21 @@ export function LoansOverviewCard({
       <CardContent className="flex flex-col gap-5">
         <div className="grid grid-cols-2 gap-3">
           <LoanStat
-            label={t("totalBorrowed")}
+            label={t((m) => m.PersonalOverview.loansCard.totalBorrowed)}
             currency={currency}
             value={addMinorUnits(
               ...borrowed.map((loan) => loan.originalAmountMinorUnits),
             ).toString()}
           />
           <LoanStat
-            label={t("totalLent")}
+            label={t((m) => m.PersonalOverview.loansCard.totalLent)}
             currency={currency}
             value={addMinorUnits(
               ...lent.map((loan) => loan.originalAmountMinorUnits),
             ).toString()}
           />
           <LoanStat
-            label={t("remainingStat")}
+            label={t((m) => m.PersonalOverview.loansCard.remainingStat)}
             currency={currency}
             value={addMinorUnits(
               ...active.map((loan) => loan.remainingBalanceMinorUnits),
@@ -84,7 +86,7 @@ export function LoansOverviewCard({
           <div className="rounded-xl bg-muted p-3">
             <p className="font-semibold text-lg">{dueSoon.length}</p>
             <p className="text-muted-foreground text-xs">
-              {t("dueInSevenDays")}
+              {t((m) => m.PersonalOverview.loansCard.dueInSevenDays)}
             </p>
           </div>
         </div>
@@ -94,8 +96,12 @@ export function LoansOverviewCard({
               <EmptyMedia variant="icon">
                 <HandCoinsIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>{t("noLoansYet")}</EmptyTitle>
-              <EmptyDescription>{t("noLoansDesc")}</EmptyDescription>
+              <EmptyTitle>
+                {t((m) => m.PersonalOverview.loansCard.noLoansYet)}
+              </EmptyTitle>
+              <EmptyDescription>
+                {t((m) => m.PersonalOverview.loansCard.noLoansDesc)}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
@@ -117,7 +123,7 @@ export function LoansOverviewCard({
                         {loan.title}
                       </p>
                       <p className="text-muted-foreground text-xs">
-                        {t("duePersonDate", {
+                        {t((m) => m.PersonalOverview.loansCard.duePersonDate, {
                           name: loan.person.name,
                           date: new Date(loan.dueDate).toLocaleDateString(
                             "en",
@@ -134,15 +140,20 @@ export function LoansOverviewCard({
                         loan.status === "OVERDUE" ? "destructive" : "outline"
                       }
                     >
-                      {loan.type === "BORROWED" ? t("borrowed") : t("lent")}
+                      {loan.type === "BORROWED"
+                        ? t((m) => m.PersonalOverview.loansCard.borrowed)
+                        : t((m) => m.PersonalOverview.loansCard.lent)}
                     </Badge>
                   </div>
                   <Progress
                     value={progress}
-                    aria-label={t("repaidAria", {
-                      title: loan.title,
-                      progress,
-                    })}
+                    aria-label={t(
+                      (m) => m.PersonalOverview.loansCard.repaidAria,
+                      {
+                        title: loan.title,
+                        progress,
+                      },
+                    )}
                   />
                 </div>
               );

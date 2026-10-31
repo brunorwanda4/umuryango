@@ -26,9 +26,9 @@ const LayoutAuth = ({ children }: { children: ReactNode }) => {
       </div>
       <footer className="border-border border-t px-5 py-5 sm:px-6">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>{auth("free")}</p>
+          <p>{auth((m) => m.AuthLayout.free)}</p>
           <nav
-            aria-label={shared("authFooterAriaLabel")}
+            aria-label={shared((m) => m.Shared.authFooterAriaLabel)}
             className="flex flex-wrap items-center gap-3"
           >
             {authFooterLinks.map((link) => (

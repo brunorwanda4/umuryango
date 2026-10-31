@@ -30,58 +30,58 @@ export function ProjectMetricCards({
   const totals = projects?.totals;
   const cards = [
     {
-      title: t("plannedBudget"),
+      title: t((m) => m.FamilyProjects.plannedBudget),
       value: totals?.plannedMinorUnits,
-      description: t("plannedBudgetDesc"),
+      description: t((m) => m.FamilyProjects.plannedBudgetDesc),
       icon: WalletCardsIcon,
       isMoney: true,
     },
     {
-      title: t("contributed"),
+      title: t((m) => m.FamilyProjects.contributed),
       value: totals?.contributedMinorUnits,
-      description: t("contributedDesc"),
+      description: t((m) => m.FamilyProjects.contributedDesc),
       icon: HandCoinsIcon,
       isMoney: true,
     },
     {
-      title: t("outstanding"),
+      title: t((m) => m.FamilyProjects.outstanding),
       value: totals?.outstandingMinorUnits,
-      description: t("outstandingDesc"),
+      description: t((m) => m.FamilyProjects.outstandingDesc),
       icon: TargetIcon,
       isMoney: true,
     },
     {
-      title: t("activeProjects"),
+      title: t((m) => m.FamilyProjects.activeProjects),
       value:
         typeof totals?.activeProjectCount === "number"
           ? totals.activeProjectCount.toLocaleString()
-          : tDashboard("noRecords"),
-      description: t("activeProjectsDesc"),
+          : tDashboard((m) => m.FamilyDashboard.noRecords),
+      description: t((m) => m.FamilyProjects.activeProjectsDesc),
       icon: HammerIcon,
     },
     {
-      title: t("pastTargetDate"),
+      title: t((m) => m.FamilyProjects.pastTargetDate),
       value:
         typeof totals?.overdueProjectCount === "number"
           ? totals.overdueProjectCount.toLocaleString()
-          : tDashboard("noRecords"),
-      description: t("pastTargetDateDesc"),
+          : tDashboard((m) => m.FamilyDashboard.noRecords),
+      description: t((m) => m.FamilyProjects.pastTargetDateDesc),
       icon: CalendarClockIcon,
     },
     {
-      title: t("contributors"),
+      title: t((m) => m.FamilyProjects.contributors),
       value:
         typeof totals?.contributorCount === "number"
           ? totals.contributorCount.toLocaleString()
-          : tDashboard("noRecords"),
-      description: t("contributorsDesc"),
+          : tDashboard((m) => m.FamilyDashboard.noRecords),
+      description: t((m) => m.FamilyProjects.contributorsDesc),
       icon: UsersRoundIcon,
     },
   ];
 
   return (
     <section
-      aria-label={t("projectsSummaryAria")}
+      aria-label={t((m) => m.FamilyProjects.projectsSummaryAria)}
       className="grid gap-4 grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6"
     >
       {cards.map((card) => {
@@ -96,7 +96,9 @@ export function ProjectMetricCards({
                   {card.isMoney ? (
                     <CompactMoney
                       currency={currency}
-                      emptyLabel={tDashboard("noRecords")}
+                      emptyLabel={tDashboard(
+                        (m) => m.FamilyDashboard.noRecords,
+                      )}
                       value={card.value}
                     />
                   ) : (

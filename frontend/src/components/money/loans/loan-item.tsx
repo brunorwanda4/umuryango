@@ -42,12 +42,12 @@ export function LoanItem({
 
   const statusLabel =
     loan.status === "REPAID"
-      ? t("filters.repaid")
+      ? t((m) => m.PersonalLoans.filters.repaid)
       : loan.status === "ACTIVE"
-        ? t("filters.active")
+        ? t((m) => m.PersonalLoans.filters.active)
         : loan.status === "OVERDUE"
-          ? t("filters.overdue")
-          : t("filters.cancelled");
+          ? t((m) => m.PersonalLoans.filters.overdue)
+          : t((m) => m.PersonalLoans.filters.cancelled);
 
   return (
     <Item variant="outline" className="items-start gap-4 bg-card p-4 sm:p-5">
@@ -64,8 +64,12 @@ export function LoanItem({
             </ItemTitle>
             <ItemDescription>
               {loan.type === "BORROWED"
-                ? t("item.borrowedFrom", { name: loan.person.name })
-                : t("item.lentTo", { name: loan.person.name })}
+                ? t((m) => m.PersonalLoans.item.borrowedFrom, {
+                    name: loan.person.name,
+                  })
+                : t((m) => m.PersonalLoans.item.lentTo, {
+                    name: loan.person.name,
+                  })}
               {loan.person.relationship ? ` · ${loan.person.relationship}` : ""}
             </ItemDescription>
           </ItemContent>
@@ -88,7 +92,9 @@ export function LoanItem({
       <ItemContent className="basis-full gap-4">
         <div className="grid grid-cols-2 gap-4 text-sm lg:grid-cols-5">
           <div>
-            <p className="text-muted-foreground">{t("item.loanAmount")}</p>
+            <p className="text-muted-foreground">
+              {t((m) => m.PersonalLoans.item.loanAmount)}
+            </p>
             <p className="font-semibold">
               <CompactMoney
                 currency={loan.currency}
@@ -97,7 +103,9 @@ export function LoanItem({
             </p>
           </div>
           <div>
-            <p className="text-muted-foreground">{t("item.paid")}</p>
+            <p className="text-muted-foreground">
+              {t((m) => m.PersonalLoans.item.paid)}
+            </p>
             <p className="font-semibold">
               <CompactMoney
                 currency={loan.currency}
@@ -106,7 +114,9 @@ export function LoanItem({
             </p>
           </div>
           <div>
-            <p className="text-muted-foreground">{t("item.remaining")}</p>
+            <p className="text-muted-foreground">
+              {t((m) => m.PersonalLoans.item.remaining)}
+            </p>
             <p className="font-semibold text-primary">
               <CompactMoney
                 currency={loan.currency}
@@ -115,11 +125,15 @@ export function LoanItem({
             </p>
           </div>
           <div>
-            <p className="text-muted-foreground">{t("item.startDate")}</p>
+            <p className="text-muted-foreground">
+              {t((m) => m.PersonalLoans.item.startDate)}
+            </p>
             <p className="font-medium">{formatDate(loan.startDate)}</p>
           </div>
           <div>
-            <p className="text-muted-foreground">{t("item.dueDate")}</p>
+            <p className="text-muted-foreground">
+              {t((m) => m.PersonalLoans.item.dueDate)}
+            </p>
             <p className="font-medium">{formatDate(loan.dueDate)}</p>
           </div>
         </div>
@@ -134,12 +148,12 @@ export function LoanItem({
         <ItemActions className="grid grid-cols-2 sm:flex">
           <Button variant="outline" size="sm" onClick={() => onView(loan)}>
             <EyeIcon aria-hidden="true" data-icon="inline-start" />
-            {t("item.viewDetails")}
+            {t((m) => m.PersonalLoans.item.viewDetails)}
           </Button>
           {canPay ? (
             <Button size="sm" onClick={() => onPayment(loan)}>
               <HandCoinsIcon aria-hidden="true" data-icon="inline-start" />
-              {t("item.recordPayment")}
+              {t((m) => m.PersonalLoans.item.recordPayment)}
             </Button>
           ) : null}
         </ItemActions>

@@ -1,3 +1,9 @@
+import {
+  ArrowUpRightIcon,
+  CalendarDaysIcon,
+  Clock3Icon,
+  WalletCardsIcon,
+} from "lucide-react";
 import { useMemo } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
@@ -48,11 +54,7 @@ export function IncomeMetricCards({
 
     let totalRecorded = BigInt(0);
     let monthRecorded = BigInt(0);
-    let todayRecorded = BigInt(0);
     let pendingAmount = BigInt(0);
-    let approvedAmount = BigInt(0);
-    let rentBalance = BigInt(0);
-    let overdueRentCount = 0;
     let activeRecordCount = 0;
 
     for (const tx of transactions) {
@@ -66,31 +68,11 @@ export function IncomeMetricCards({
       const txDateKey = getRecordDateKey(tx.date);
       totalRecorded += amount;
 
-      if (tx.incomeRecurrence === "MONTHLY" && tx.expectedAmountMinorUnits) {
-        const expectedAmount = getMinorUnits(tx.expectedAmountMinorUnits);
-        const remaining = expectedAmount - amount;
-
-        if (remaining > BigInt(0)) {
-          rentBalance += remaining;
-        }
-
-        const dueDateKey = getRecordDateKey(tx.dueDate);
-        if (dueDateKey && remaining > BigInt(0) && dueDateKey < todayKey) {
-          overdueRentCount += 1;
-        }
-      }
-
       if (txDateKey?.startsWith(currentMonthKey)) {
         monthRecorded += amount;
       }
 
-      if (txDateKey === todayKey) {
-        todayRecorded += amount;
-      }
-
-      if (tx.status === "APPROVED") {
-        approvedAmount += amount;
-      } else if (tx.status === "PENDING") {
+      if (tx.status === "PENDING") {
         pendingAmount += amount;
       }
     }
@@ -98,11 +80,7 @@ export function IncomeMetricCards({
     return {
       totalRecorded: totalRecorded.toString(),
       monthRecorded: monthRecorded.toString(),
-      todayRecorded: todayRecorded.toString(),
       pendingAmount: pendingAmount.toString(),
-      approvedAmount: approvedAmount.toString(),
-      rentBalance: rentBalance.toString(),
-      overdueRentCount,
       recordCount: activeRecordCount,
     };
   }, [transactions]);
@@ -111,63 +89,49 @@ export function IncomeMetricCards({
 
   const cards = [
     {
-      description: t("metrics.totalIncome"),
+      description: t((m) => m.FamilyIncome.metrics.totalIncome),
       value: <CompactMoney currency={currency} value={summary.totalRecorded} />,
-      iconImage: "/images/icons/wallet.png",
+      iconSource: {
+        image: { src: "/images/icons/wallet.png" },
+        line: WalletCardsIcon,
+      },
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: t("metrics.incomeThisMonth"),
+      description: t((m) => m.FamilyIncome.metrics.incomeThisMonth),
       value: <CompactMoney currency={currency} value={summary.monthRecorded} />,
-      iconImage: "/images/icons/income.png",
+      iconSource: {
+        image: { src: "/images/icons/income.png" },
+        line: CalendarDaysIcon,
+      },
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: t("metrics.incomeToday"),
-      value: <CompactMoney currency={currency} value={summary.todayRecorded} />,
-      iconImage: "/images/icons/money.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-    },
-    {
-      description: t("metrics.pendingIncome"),
+      description: t((m) => m.FamilyIncome.metrics.pendingIncome),
       value: <CompactMoney currency={currency} value={summary.pendingAmount} />,
-      iconImage: "/images/icons/clock.png",
+      iconSource: {
+        image: { src: "/images/icons/clock.png" },
+        line: Clock3Icon,
+      },
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: t("metrics.approvedIncome"),
-      value: (
-        <CompactMoney currency={currency} value={summary.approvedAmount} />
-      ),
-      iconImage: "/images/icons/approved.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-    },
-    {
-      description: t("metrics.rentBalance"),
-      value: <CompactMoney currency={currency} value={summary.rentBalance} />,
-      iconImage: "/images/icons/salary.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-    },
-    {
-      description: t("metrics.overdueRent"),
-      value: String(summary.overdueRentCount),
-      iconImage: "/images/icons/calendar.png",
-      className: "rounded-2xl border-border/80 py-0 shadow-sm",
-    },
-    {
-      description: t("metrics.incomeRecords"),
+      description: t((m) => m.FamilyIncome.metrics.incomeRecords),
       value: String(summary.recordCount),
-      iconImage: "/images/icons/transaction.png",
+      iconSource: {
+        image: { src: "/images/icons/transaction.png" },
+        line: ArrowUpRightIcon,
+      },
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
   ];
 
   return (
     <CommonOverviewCardDisplay
-      className="grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-      cardHeaderClassName="min-h-36 flex-col items-start justify-between gap-4 "
-      cardDescriptionClassName="text-sm font-medium text-muted-foreground"
-      cardTitleClassName="whitespace-normal leading-tight sm:text-2xl"
+      cardDescriptionClassName="flex items-center text-sm font-medium leading-5 text-muted-foreground max-sm:text-sm max-sm:font-medium "
+      cardHeaderClassName="flex-col items-start justify-between gap-4 py-4"
+      cardTitleClassName="whitespace-normal leading-tight tracking-normal sm:text-3xl"
+      className="grid-cols-1 gap-4 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4"
       iconPosition="start"
       cards={cards}
     />

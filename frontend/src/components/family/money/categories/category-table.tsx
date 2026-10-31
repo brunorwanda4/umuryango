@@ -74,7 +74,7 @@ export function CategoryTable({
   return (
     <Card className="min-w-0">
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle>{t("masterDataTitle")}</CardTitle>
+        <CardTitle>{t((m) => m.FamilyCategories.masterDataTitle)}</CardTitle>
         <CategorySearch
           value={search}
           onChange={onSearchChange}
@@ -89,7 +89,7 @@ export function CategoryTable({
           <CategoryCardSkeleton />
         ) : categories.length ? (
           <section
-            aria-label={t("categoryListAria")}
+            aria-label={t((m) => m.FamilyCategories.categoryListAria)}
             className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3"
           >
             {categories.map((category) => (
@@ -109,8 +109,12 @@ export function CategoryTable({
               <EmptyMedia variant="icon">
                 <FolderCogIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>{t("table.noCategoriesTitle")}</EmptyTitle>
-              <EmptyDescription>{t("table.noCategoriesDesc")}</EmptyDescription>
+              <EmptyTitle>
+                {t((m) => m.FamilyCategories.table.noCategoriesTitle)}
+              </EmptyTitle>
+              <EmptyDescription>
+                {t((m) => m.FamilyCategories.table.noCategoriesDesc)}
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         )}
@@ -143,11 +147,15 @@ function CategoryCard({
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <CardTitle className="truncate">{category.name}</CardTitle>
               {category.isDefault ? (
-                <Badge variant="secondary">{t("defaultBadge")}</Badge>
+                <Badge variant="secondary">
+                  {t((m) => m.FamilyCategories.defaultBadge)}
+                </Badge>
               ) : null}
             </div>
             <CardDescription className="mt-1 truncate">
-              {t("createdBy", { name: category.createdBy })}
+              {t((m) => m.FamilyCategories.createdBy, {
+                name: category.createdBy,
+              })}
             </CardDescription>
           </div>
         </div>
@@ -176,21 +184,21 @@ function CategoryCard({
         </p>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <CategoryMetric
-            label={t("metricTransactions")}
+            label={t((m) => m.FamilyCategories.metricTransactions)}
             value={categoryCountFormatter.format(category.transactionsCount)}
           />
           <CategoryMetric
-            label={t("metricTotalAmount")}
+            label={t((m) => m.FamilyCategories.metricTotalAmount)}
             value={
               <CompactMoney
                 currency={currency}
-                emptyLabel={t("noRecords")}
+                emptyLabel={t((m) => m.FamilyCategories.noRecords)}
                 value={category.totalMinorUnits}
               />
             }
           />
           <CategoryMetric
-            label={t("metricLastUpdated")}
+            label={t((m) => m.FamilyCategories.metricLastUpdated)}
             value={formatDate(category.updatedAt)}
           />
         </dl>
@@ -225,7 +233,9 @@ function CategoryActions({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          aria-label={t("actionsAria", { name: category.name })}
+          aria-label={t((m) => m.FamilyCategories.actionsAria, {
+            name: category.name,
+          })}
           size="icon-sm"
           variant="ghost"
         >
@@ -233,11 +243,13 @@ function CategoryActions({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className=" min-w-40">
-        <DropdownMenuLabel>{t("categoryActions")}</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          {t((m) => m.FamilyCategories.categoryActions)}
+        </DropdownMenuLabel>
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={() => onEdit(category)}>
             <PencilIcon aria-hidden="true" data-icon="inline-start" />
-            {t("table.edit")}
+            {t((m) => m.FamilyCategories.table.edit)}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() =>
@@ -249,8 +261,8 @@ function CategoryActions({
           >
             <ArchiveIcon aria-hidden="true" data-icon="inline-start" />
             {category.status === "ACTIVE"
-              ? t("archiveAction")
-              : t("activateAction")}
+              ? t((m) => m.FamilyCategories.archiveAction)
+              : t((m) => m.FamilyCategories.activateAction)}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         {onDelete ? (
@@ -262,7 +274,7 @@ function CategoryActions({
                 onSelect={() => onDelete(category)}
               >
                 <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-                {t("table.delete")}
+                {t((m) => m.FamilyCategories.table.delete)}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </>

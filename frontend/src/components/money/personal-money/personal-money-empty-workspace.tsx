@@ -10,10 +10,12 @@ export function PersonalMoneyEmptyWorkspace() {
     <div className="flex flex-wrap items-center justify-between gap-4 rounded-[16px] border border-border bg-card p-4">
       <div className="flex items-center gap-3 text-sm text-muted-foreground">
         <UsersIcon className="size-5 flex-none text-foreground" />
-        <span>{t("emptyWorkspace")}</span>
+        <span>{t((m) => m.PersonalMoney.emptyWorkspace)}</span>
       </div>
       <Button asChild size="sm">
-        <Link href="/family">{t("openFamilyWorkspaces")}</Link>
+        <Link href="/family">
+          {t((m) => m.PersonalMoney.openFamilyWorkspaces)}
+        </Link>
       </Button>
     </div>
   );

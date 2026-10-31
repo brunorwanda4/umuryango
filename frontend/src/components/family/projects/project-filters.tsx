@@ -29,9 +29,11 @@ export function ProjectFilters({
           aria-hidden="true"
         />
         <div>
-          <p className="font-medium text-sm">{t("projectStatus")}</p>
+          <p className="font-medium text-sm">
+            {t((m) => m.FamilyProjects.projectStatus)}
+          </p>
           <p className="text-muted-foreground text-xs">
-            {t("currentView", { status: statusLabel })}
+            {t((m) => m.FamilyProjects.currentView, { status: statusLabel })}
           </p>
         </div>
       </div>
@@ -41,16 +43,24 @@ export function ProjectFilters({
       >
         <SelectTrigger
           className="w-full sm:w-44"
-          aria-label={t("projectStatus")}
+          aria-label={t((m) => m.FamilyProjects.projectStatus)}
         >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="active">{t("statusActive")}</SelectItem>
-            <SelectItem value="planned">{t("statusPlanned")}</SelectItem>
-            <SelectItem value="completed">{t("statusCompleted")}</SelectItem>
-            <SelectItem value="all">{t("statusAll")}</SelectItem>
+            <SelectItem value="active">
+              {t((m) => m.FamilyProjects.statusActive)}
+            </SelectItem>
+            <SelectItem value="planned">
+              {t((m) => m.FamilyProjects.statusPlanned)}
+            </SelectItem>
+            <SelectItem value="completed">
+              {t((m) => m.FamilyProjects.statusCompleted)}
+            </SelectItem>
+            <SelectItem value="all">
+              {t((m) => m.FamilyProjects.statusAll)}
+            </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>

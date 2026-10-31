@@ -108,13 +108,15 @@ export default function AppNavbarNotifications() {
           {unreadCount > 0 && (
             <span className="absolute top-1.5 right-1.5 flex size-2 rounded-full bg-primary ring-2 ring-background animate-pulse" />
           )}
-          <span className="sr-only">{t("notifications")}</span>
+          <span className="sr-only">
+            {t((m) => m.AppShell.navbar.notifications)}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-1 md:w-96">
         <div className="flex items-center justify-between px-3 py-2">
           <DropdownMenuLabel className="p-0 font-semibold text-sm">
-            {t("notifications")}
+            {t((m) => m.AppShell.navbar.notifications)}
           </DropdownMenuLabel>
           {unreadCount > 0 && (
             <button
@@ -123,7 +125,7 @@ export default function AppNavbarNotifications() {
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <CheckIcon className="size-3" />
-              {t("markAllRead")}
+              {t((m) => m.AppShell.navbar.markAllRead)}
             </button>
           )}
         </div>
@@ -132,7 +134,9 @@ export default function AppNavbarNotifications() {
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
               <InboxIcon className="size-8 opacity-40 mb-2" />
-              <span className="text-xs">{t("noNotificationsYet")}</span>
+              <span className="text-xs">
+                {t((m) => m.AppShell.navbar.noNotificationsYet)}
+              </span>
             </div>
           ) : (
             notifications.map((notification) => (
@@ -179,7 +183,7 @@ export default function AppNavbarNotifications() {
           onClick={() => router.push(isFamilyView ? familyHref : "/me")}
           className="justify-center text-xs text-muted-foreground font-medium py-2 rounded-xl focus:bg-accent"
         >
-          {t("viewAllActivity")}
+          {t((m) => m.AppShell.navbar.viewAllActivity)}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

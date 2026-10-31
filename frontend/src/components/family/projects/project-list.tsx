@@ -41,8 +41,10 @@ export function ProjectList({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("projectPlansTitle")}</CardTitle>
-        <CardDescription>{t("projectPlansDesc")}</CardDescription>
+        <CardTitle>{t((m) => m.FamilyProjects.projectPlansTitle)}</CardTitle>
+        <CardDescription>
+          {t((m) => m.FamilyProjects.projectPlansDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {rows.length ? (
@@ -76,40 +78,45 @@ export function ProjectList({
                 </div>
                 <div className="flex flex-wrap gap-2 lg:justify-end">
                   <Badge variant="secondary">
-                    {project.ownerName ?? t("noOwnerAssigned")}
+                    {project.ownerName ??
+                      t((m) => m.FamilyProjects.noOwnerAssigned)}
                   </Badge>
                   <Badge variant="outline">
                     {typeof project.memberCount === "number"
-                      ? tDashboard("membersCount", {
+                      ? tDashboard((m) => m.FamilyDashboard.membersCount, {
                           count: project.memberCount,
                         })
-                      : t("membersNotSet")}
+                      : t((m) => m.FamilyProjects.membersNotSet)}
                   </Badge>
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
                 <ProjectFact
-                  label={t("targetAmount")}
+                  label={t((m) => m.FamilyProjects.targetAmount)}
                   value={
                     <CompactMoney
                       currency={currency}
-                      emptyLabel={tDashboard("noRecords")}
+                      emptyLabel={tDashboard(
+                        (m) => m.FamilyDashboard.noRecords,
+                      )}
                       value={project.targetAmountMinorUnits}
                     />
                   }
                 />
                 <ProjectFact
-                  label={t("contributed")}
+                  label={t((m) => m.FamilyProjects.contributed)}
                   value={
                     <CompactMoney
                       currency={currency}
-                      emptyLabel={tDashboard("noRecords")}
+                      emptyLabel={tDashboard(
+                        (m) => m.FamilyDashboard.noRecords,
+                      )}
                       value={project.contributedMinorUnits}
                     />
                   }
                 />
                 <ProjectFact
-                  label={t("targetDate")}
+                  label={t((m) => m.FamilyProjects.targetDate)}
                   value={formatDate(project.targetDate)}
                 />
               </div>
@@ -117,14 +124,14 @@ export function ProjectList({
                 <Progress value={clampPercent(project.percentFunded)} />
                 <p className="text-muted-foreground text-xs">
                   {typeof project.percentFunded === "number"
-                    ? t("percentFunded", {
+                    ? t((m) => m.FamilyProjects.percentFunded, {
                         percent: Math.round(
                           clampPercent(project.percentFunded),
                         ),
                       })
-                    : t("fundingPercentMissing")}
+                    : t((m) => m.FamilyProjects.fundingPercentMissing)}
                   {project.contributionStrategy
-                    ? ` ${t("contributionPlan", {
+                    ? ` ${t((m) => m.FamilyProjects.contributionPlan, {
                         strategy: formatTitle(project.contributionStrategy),
                       })}`
                     : ""}
@@ -134,9 +141,9 @@ export function ProjectList({
           ))
         ) : (
           <TableEmptyState
-            description={t("noProjectPlansDesc")}
+            description={t((m) => m.FamilyProjects.noProjectPlansDesc)}
             icon={FolderKanbanIcon}
-            title={t("noProjectPlansTitle")}
+            title={t((m) => m.FamilyProjects.noProjectPlansTitle)}
           />
         )}
       </CardContent>

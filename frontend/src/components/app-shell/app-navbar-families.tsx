@@ -101,7 +101,8 @@ const AppNavbarFamilies = () => {
   const currentFamily = state.families.find(
     (family) => family.slug === currentFamilySlug,
   );
-  const triggerLabel = currentFamily?.name ?? t("families");
+  const triggerLabel =
+    currentFamily?.name ?? t((m) => m.AppShell.navbar.families);
 
   return (
     <DropdownMenu>
@@ -111,8 +112,10 @@ const AppNavbarFamilies = () => {
           size="sm"
           aria-label={
             currentFamily
-              ? t("switchFamilyWithCurrent", { name: currentFamily.name })
-              : t("switchFamily")
+              ? t((m) => m.AppShell.navbar.switchFamilyWithCurrent, {
+                  name: currentFamily.name,
+                })
+              : t((m) => m.AppShell.navbar.switchFamily)
           }
         >
           <UsersIcon data-icon="inline-start" aria-hidden="true" />
@@ -127,12 +130,14 @@ const AppNavbarFamilies = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-72">
-        <DropdownMenuLabel>{t("switchFamily")}</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          {t((m) => m.AppShell.navbar.switchFamily)}
+        </DropdownMenuLabel>
         <DropdownMenuGroup>
           {state.status === "loading" && state.families.length === 0 ? (
             <DropdownMenuItem disabled>
               <Spinner aria-hidden="true" />
-              {t("loadingFamilies")}
+              {t((m) => m.AppShell.navbar.loadingFamilies)}
             </DropdownMenuItem>
           ) : null}
 
@@ -154,13 +159,15 @@ const AppNavbarFamilies = () => {
           })}
 
           {state.status === "success" && state.families.length === 0 ? (
-            <DropdownMenuItem disabled>{t("noFamiliesYet")}</DropdownMenuItem>
+            <DropdownMenuItem disabled>
+              {t((m) => m.AppShell.navbar.noFamiliesYet)}
+            </DropdownMenuItem>
           ) : null}
 
           {state.status === "error" ? (
             <DropdownMenuItem onSelect={() => void loadFamilies()}>
               <RefreshCwIcon aria-hidden="true" />
-              {t("tryLoadingAgain")}
+              {t((m) => m.AppShell.navbar.tryLoadingAgain)}
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuGroup>
@@ -170,19 +177,19 @@ const AppNavbarFamilies = () => {
           <DropdownMenuItem asChild>
             <Link href="/me">
               <UserIcon aria-hidden="true" />
-              {t("personalWorkspaces")}
+              {t((m) => m.AppShell.navbar.personalWorkspaces)}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/family">
               <UsersIcon aria-hidden="true" />
-              {t("viewAllFamilies")}
+              {t((m) => m.AppShell.navbar.viewAllFamilies)}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/family/new">
               <PlusIcon aria-hidden="true" />
-              {t("createFamily")}
+              {t((m) => m.AppShell.navbar.createFamily)}
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>

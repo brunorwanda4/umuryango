@@ -59,7 +59,7 @@ export function UpdateIncomeDialog({
             variant="ghost"
           >
             <PencilIcon aria-hidden="true" data-icon="inline-start" />
-            {t("actions.edit")}
+            {t((m) => m.PersonalMoney.personalIncome.actions.edit)}
           </Button>
         ) : (
           trigger

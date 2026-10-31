@@ -13,19 +13,26 @@ export function SourceWarning({
 }) {
   const t = createTranslator("FamilyReports");
   const messages = [
-    moneyMessage ? `${t("types.money")}: ${moneyMessage}` : null,
-    contributionsMessage
-      ? `${t("types.contributions")}: ${contributionsMessage}`
+    moneyMessage
+      ? `${t((m) => m.FamilyReports.types.money)}: ${moneyMessage}`
       : null,
-    projectsMessage ? `${t("types.projects")}: ${projectsMessage}` : null,
+    contributionsMessage
+      ? `${t((m) => m.FamilyReports.types.contributions)}: ${contributionsMessage}`
+      : null,
+    projectsMessage
+      ? `${t((m) => m.FamilyReports.types.projects)}: ${projectsMessage}`
+      : null,
   ].filter(Boolean);
 
   return (
     <Alert>
       <FileClockIcon aria-hidden="true" />
-      <AlertTitle>{t("someSourceModulesNotReady")}</AlertTitle>
+      <AlertTitle>
+        {t((m) => m.FamilyReports.someSourceModulesNotReady)}
+      </AlertTitle>
       <AlertDescription>
-        {t("reportsCanOnlyIncludeReturned")} {messages.join(" ")}
+        {t((m) => m.FamilyReports.reportsCanOnlyIncludeReturned)}{" "}
+        {messages.join(" ")}
       </AlertDescription>
     </Alert>
   );

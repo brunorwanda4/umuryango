@@ -81,10 +81,14 @@ export function SidebarResizeHandle({ open }: { open: boolean }) {
       type="button"
       data-sidebar="rail"
       data-slot="sidebar-rail"
-      aria-label={t("resizeSidebar")}
+      aria-label={t((m) => m.AppShell.sidebar.resizeSidebar)}
       tabIndex={-1}
       onMouseDown={handleMouseDown}
-      title={state === "collapsed" ? t("expandSidebar") : t("resizeSidebar")}
+      title={
+        state === "collapsed"
+          ? t((m) => m.AppShell.sidebar.expandSidebar)
+          : t((m) => m.AppShell.sidebar.resizeSidebar)
+      }
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 transition-colors ease-linear sm:flex",
         "group-data-[side=left]:-right-4 group-data-[side=right]:left-0",

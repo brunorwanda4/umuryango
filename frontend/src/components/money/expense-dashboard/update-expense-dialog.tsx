@@ -59,7 +59,7 @@ export function UpdateExpenseDialog({
             variant="ghost"
           >
             <PencilIcon aria-hidden="true" data-icon="inline-start" />
-            {t("actions.edit")}
+            {t((m) => m.PersonalMoney.personalExpenses.actions.edit)}
           </Button>
         ) : (
           trigger

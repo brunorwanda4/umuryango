@@ -26,7 +26,7 @@ export function PersonalExpensePage() {
   return (
     <div className="flex flex-col gap-5">
       <PageTitle
-        title={t("title")}
+        title={t((m) => m.PersonalMoney.personalExpenses.title)}
         icon={
           <SidebarIcon
             className="size-6"
@@ -36,7 +36,7 @@ export function PersonalExpensePage() {
             }}
           />
         }
-        description={t("description")}
+        description={t((m) => m.PersonalMoney.personalExpenses.description)}
         actions={
           <ExpensePageActions
             canRecordExpense={Boolean(family)}

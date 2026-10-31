@@ -35,7 +35,7 @@ export function ReportTypesGrid({
 
   return (
     <section
-      aria-label={t("availableReportTypesAria")}
+      aria-label={t((m) => m.FamilyReports.availableReportTypesAria)}
       className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3"
     >
       {reportTypes.map((reportType) => {
@@ -56,7 +56,7 @@ export function ReportTypesGrid({
             <CardContent className="flex flex-col gap-4">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <ReportFact
-                  label={t("statusColumn")}
+                  label={t((m) => m.FamilyReports.statusColumn)}
                   value={
                     recentReport?.status
                       ? formatTitle(recentReport.status)
@@ -64,7 +64,7 @@ export function ReportTypesGrid({
                   }
                 />
                 <ReportFact
-                  label={t("lastGenerated")}
+                  label={t((m) => m.FamilyReports.lastGenerated)}
                   value={formatDateTime(recentReport?.generatedAt)}
                 />
               </div>
@@ -76,16 +76,16 @@ export function ReportTypesGrid({
                     variant="outline"
                   >
                     <EyeIcon aria-hidden="true" data-icon="inline-start" />
-                    {t("viewSource")}
+                    {t((m) => m.FamilyReports.viewSource)}
                   </Button>
                 ) : null}
                 <Button
                   disabled={!canExportReports || !hasSourceRecords}
                   size="sm"
-                  title={t("reportExportWorkflowTitle")}
+                  title={t((m) => m.FamilyReports.reportExportWorkflowTitle)}
                 >
                   <DownloadIcon aria-hidden="true" data-icon="inline-start" />
-                  {tCommon("export")}
+                  {tCommon((m) => m.Common.export)}
                 </Button>
               </div>
             </CardContent>

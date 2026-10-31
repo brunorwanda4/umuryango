@@ -134,7 +134,7 @@ export function CreateIncomeDialog({
       method: "post",
       url: `/families/${encodeURIComponent(family.id)}/money/transactions`,
     },
-    onSuccessMessage: t("toasts.recordedSuccess"),
+    onSuccessMessage: t((m) => m.FamilyIncome.toasts.recordedSuccess),
     toastOnSuccess: true,
     onSuccess: async (data, values) => {
       // If mock file upload was requested
@@ -182,8 +182,10 @@ export function CreateIncomeDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>{t("dialogs.addTitle")}</DialogTitle>
-          <DialogDescription>{t("dialogs.addDesc")}</DialogDescription>
+          <DialogTitle>{t((m) => m.FamilyIncome.dialogs.addTitle)}</DialogTitle>
+          <DialogDescription>
+            {t((m) => m.FamilyIncome.dialogs.addDesc)}
+          </DialogDescription>
         </DialogHeader>
 
         <form
@@ -214,7 +216,9 @@ export function CreateIncomeDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending ? t("dialogs.recording") : t("addIncome")}
+            {isPending
+              ? t((m) => m.FamilyIncome.dialogs.recording)
+              : t((m) => m.FamilyIncome.addIncome)}
           </Button>
         </DialogFooter>
       </DialogContent>

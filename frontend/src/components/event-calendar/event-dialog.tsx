@@ -143,7 +143,12 @@ export function EventDialog({
         endHours < StartHour ||
         endHours > EndHour
       ) {
-        setError(t("timeRangeError", { start: StartHour, end: EndHour }));
+        setError(
+          t((m) => m.EventCalendar.timeRangeError, {
+            start: StartHour,
+            end: EndHour,
+          }),
+        );
         return;
       }
 
@@ -156,12 +161,12 @@ export function EventDialog({
 
     // Validate that end date is not before start date
     if (isBefore(end, start)) {
-      setError(t("endDateBeforeStartError"));
+      setError(t((m) => m.EventCalendar.endDateBeforeStartError));
       return;
     }
 
     // Use generic title if empty
-    const eventTitle = title.trim() ? title : t("noTitle");
+    const eventTitle = title.trim() ? title : t((m) => m.EventCalendar.noTitle);
 
     onSave({
       allDay,
@@ -191,37 +196,37 @@ export function EventDialog({
     {
       bgClass: "bg-sky-400 data-[state=checked]:bg-sky-400",
       borderClass: "border-sky-400 data-[state=checked]:border-sky-400",
-      label: t("colors.sky"),
+      label: t((m) => m.EventCalendar.colors.sky),
       value: "sky",
     },
     {
       bgClass: "bg-amber-400 data-[state=checked]:bg-amber-400",
       borderClass: "border-amber-400 data-[state=checked]:border-amber-400",
-      label: t("colors.amber"),
+      label: t((m) => m.EventCalendar.colors.amber),
       value: "amber",
     },
     {
       bgClass: "bg-violet-400 data-[state=checked]:bg-violet-400",
       borderClass: "border-violet-400 data-[state=checked]:border-violet-400",
-      label: t("colors.violet"),
+      label: t((m) => m.EventCalendar.colors.violet),
       value: "violet",
     },
     {
       bgClass: "bg-rose-400 data-[state=checked]:bg-rose-400",
       borderClass: "border-rose-400 data-[state=checked]:border-rose-400",
-      label: t("colors.rose"),
+      label: t((m) => m.EventCalendar.colors.rose),
       value: "rose",
     },
     {
       bgClass: "bg-emerald-400 data-[state=checked]:bg-emerald-400",
       borderClass: "border-emerald-400 data-[state=checked]:border-emerald-400",
-      label: t("colors.emerald"),
+      label: t((m) => m.EventCalendar.colors.emerald),
       value: "emerald",
     },
     {
       bgClass: "bg-orange-400 data-[state=checked]:bg-orange-400",
       borderClass: "border-orange-400 data-[state=checked]:border-orange-400",
-      label: t("colors.orange"),
+      label: t((m) => m.EventCalendar.colors.orange),
       value: "orange",
     },
   ];
@@ -231,10 +236,14 @@ export function EventDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {event?.id ? t("editEvent") : t("createEvent")}
+            {event?.id
+              ? t((m) => m.EventCalendar.editEvent)
+              : t((m) => m.EventCalendar.createEvent)}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            {event?.id ? t("editEventDesc") : t("createEventDesc")}
+            {event?.id
+              ? t((m) => m.EventCalendar.editEventDesc)
+              : t((m) => m.EventCalendar.createEventDesc)}
           </DialogDescription>
         </DialogHeader>
         {error && (
@@ -244,7 +253,7 @@ export function EventDialog({
         )}
         <div className="grid gap-4 py-4">
           <div className="*:not-first:mt-1.5">
-            <Label htmlFor="title">{t("title")}</Label>
+            <Label htmlFor="title">{t((m) => m.EventCalendar.title)}</Label>
             <Input
               id="title"
               onChange={(e) => setTitle(e.target.value)}
@@ -253,7 +262,9 @@ export function EventDialog({
           </div>
 
           <div className="*:not-first:mt-1.5">
-            <Label htmlFor="description">{t("description")}</Label>
+            <Label htmlFor="description">
+              {t((m) => m.EventCalendar.description)}
+            </Label>
             <Textarea
               id="description"
               onChange={(e) => setDescription(e.target.value)}
@@ -264,7 +275,9 @@ export function EventDialog({
 
           <div className="flex gap-4">
             <div className="flex-1 *:not-first:mt-1.5">
-              <Label htmlFor="start-date">{t("startDate")}</Label>
+              <Label htmlFor="start-date">
+                {t((m) => m.EventCalendar.startDate)}
+              </Label>
               <Popover onOpenChange={setStartDateOpen} open={startDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -281,7 +294,9 @@ export function EventDialog({
                         !startDate && "text-muted-foreground",
                       )}
                     >
-                      {startDate ? format(startDate, "PPP") : t("pickDate")}
+                      {startDate
+                        ? format(startDate, "PPP")
+                        : t((m) => m.EventCalendar.pickDate)}
                     </span>
                     <CalendarIcon
                       aria-hidden="true"
@@ -313,10 +328,14 @@ export function EventDialog({
 
             {!allDay && (
               <div className="min-w-28 *:not-first:mt-1.5">
-                <Label htmlFor="start-time">{t("startTime")}</Label>
+                <Label htmlFor="start-time">
+                  {t((m) => m.EventCalendar.startTime)}
+                </Label>
                 <Select onValueChange={setStartTime} value={startTime}>
                   <SelectTrigger id="start-time">
-                    <SelectValue placeholder={t("selectTime")} />
+                    <SelectValue
+                      placeholder={t((m) => m.EventCalendar.selectTime)}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {timeOptions.map((option) => (
@@ -332,7 +351,9 @@ export function EventDialog({
 
           <div className="flex gap-4">
             <div className="flex-1 *:not-first:mt-1.5">
-              <Label htmlFor="end-date">{t("endDate")}</Label>
+              <Label htmlFor="end-date">
+                {t((m) => m.EventCalendar.endDate)}
+              </Label>
               <Popover onOpenChange={setEndDateOpen} open={endDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -349,7 +370,9 @@ export function EventDialog({
                         !endDate && "text-muted-foreground",
                       )}
                     >
-                      {endDate ? format(endDate, "PPP") : t("pickDate")}
+                      {endDate
+                        ? format(endDate, "PPP")
+                        : t((m) => m.EventCalendar.pickDate)}
                     </span>
                     <CalendarIcon
                       aria-hidden="true"
@@ -378,10 +401,14 @@ export function EventDialog({
 
             {!allDay && (
               <div className="min-w-28 *:not-first:mt-1.5">
-                <Label htmlFor="end-time">{t("endTime")}</Label>
+                <Label htmlFor="end-time">
+                  {t((m) => m.EventCalendar.endTime)}
+                </Label>
                 <Select onValueChange={setEndTime} value={endTime}>
                   <SelectTrigger id="end-time">
-                    <SelectValue placeholder={t("selectTime")} />
+                    <SelectValue
+                      placeholder={t((m) => m.EventCalendar.selectTime)}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {timeOptions.map((option) => (
@@ -401,11 +428,13 @@ export function EventDialog({
               id="all-day"
               onCheckedChange={(checked) => setAllDay(checked === true)}
             />
-            <Label htmlFor="all-day">{t("allDay")}</Label>
+            <Label htmlFor="all-day">{t((m) => m.EventCalendar.allDay)}</Label>
           </div>
 
           <div className="*:not-first:mt-1.5">
-            <Label htmlFor="location">{t("location")}</Label>
+            <Label htmlFor="location">
+              {t((m) => m.EventCalendar.location)}
+            </Label>
             <Input
               id="location"
               onChange={(e) => setLocation(e.target.value)}
@@ -414,7 +443,7 @@ export function EventDialog({
           </div>
           <fieldset className="flex flex-col gap-4">
             <legend className="font-medium text-foreground text-sm leading-none">
-              {t("color")}
+              {t((m) => m.EventCalendar.color)}
             </legend>
             <RadioGroup
               className="flex gap-1.5"
@@ -441,7 +470,7 @@ export function EventDialog({
         <DialogFooter className="flex-row sm:justify-between">
           {event?.id && (
             <Button
-              aria-label={t("deleteEvent")}
+              aria-label={t((m) => m.EventCalendar.deleteEvent)}
               onClick={handleDelete}
               size="icon"
               variant="outline"
@@ -451,9 +480,11 @@ export function EventDialog({
           )}
           <div className="flex flex-1 justify-end gap-2">
             <Button onClick={onClose} variant="outline">
-              {t("cancel")}
+              {t((m) => m.EventCalendar.cancel)}
             </Button>
-            <Button onClick={handleSave}>{t("save")}</Button>
+            <Button onClick={handleSave}>
+              {t((m) => m.EventCalendar.save)}
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>

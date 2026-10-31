@@ -24,39 +24,43 @@ export function ReportsHeader({
         <div className="flex min-w-0 flex-col gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-bold text-2xl tracking-tight sm:text-3xl">
-              {t("title")}
+              {t((m) => m.FamilyReports.title)}
             </h1>
             <Badge variant="secondary">
               {AUTHORITY_LABELS[family.authority]}
             </Badge>
             <Badge variant={hasSourceRecords ? "outline" : "secondary"}>
               {hasSourceRecords
-                ? t("sourceRecordsLoaded")
-                : t("noSourceRecords")}
+                ? t((m) => m.FamilyReports.sourceRecordsLoaded)
+                : t((m) => m.FamilyReports.noSourceRecords)}
             </Badge>
           </div>
           <p className="max-w-4xl text-muted-foreground text-sm leading-6">
-            {t("reportsHeaderDesc", { name: family.name })}
+            {t((m) => m.FamilyReports.reportsHeaderDesc, { name: family.name })}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 lg:justify-end">
           {canExportReports ? (
             <>
-              <Button disabled size="sm" title={t("pdfNeedsExportJob")}>
+              <Button
+                disabled
+                size="sm"
+                title={t((m) => m.FamilyReports.pdfNeedsExportJob)}
+              >
                 <PrinterIcon aria-hidden="true" data-icon="inline-start" />
-                {t("exportPdf")}
+                {t((m) => m.FamilyReports.exportPdf)}
               </Button>
               <Button
                 disabled
                 size="sm"
-                title={t("excelNeedsExportJob")}
+                title={t((m) => m.FamilyReports.excelNeedsExportJob)}
                 variant="outline"
               >
                 <FileSpreadsheetIcon
                   aria-hidden="true"
                   data-icon="inline-start"
                 />
-                {t("exportExcel")}
+                {t((m) => m.FamilyReports.exportExcel)}
               </Button>
             </>
           ) : null}

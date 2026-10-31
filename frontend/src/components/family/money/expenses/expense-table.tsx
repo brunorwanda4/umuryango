@@ -22,9 +22,10 @@ import {
   type ExpenseAction,
   ExpenseActionsDropdown,
 } from "./expense-actions-dropdown";
+import { ExpenseFilters } from "./expense-filters";
 import { formatPaymentMethod } from "./expense-utils";
 import { FamilyExpenseItems } from "./family-expense-items";
-import type { ExpenseTransaction } from "./types-and-schemas";
+import type { Category, ExpenseTransaction } from "./types-and-schemas";
 
 const FAMILY_EXPENSES_VIEW_MODE_STORAGE_KEY =
   "rwanda-family-family-expenses-view-mode";
@@ -39,6 +40,26 @@ export function ExpenseTable({
   handleDuplicate,
   handleDownloadReceipt,
   setOpenCreate,
+  search,
+  setSearch,
+  filterCategory,
+  setFilterCategory,
+  filterPaymentMethod,
+  setFilterPaymentMethod,
+  filterStatus,
+  setFilterStatus,
+  filterMember,
+  setFilterMember,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  minAmount,
+  setMinAmount,
+  maxAmount,
+  setMaxAmount,
+  resetFilters,
+  categories,
 }: {
   filteredTransactions: ExpenseTransaction[];
   currency: string;
@@ -52,6 +73,26 @@ export function ExpenseTable({
   handleDuplicate: (transaction: ExpenseTransaction) => void;
   handleDownloadReceipt: (transaction: ExpenseTransaction) => void;
   setOpenCreate: (open: boolean) => void;
+  search: string;
+  setSearch: (value: string) => void;
+  filterCategory: string;
+  setFilterCategory: (value: string) => void;
+  filterPaymentMethod: string;
+  setFilterPaymentMethod: (value: string) => void;
+  filterStatus: string;
+  setFilterStatus: (value: string) => void;
+  filterMember: string;
+  setFilterMember: (value: string) => void;
+  startDate: string;
+  setStartDate: (value: string) => void;
+  endDate: string;
+  setEndDate: (value: string) => void;
+  minAmount: string;
+  setMinAmount: (value: string) => void;
+  maxAmount: string;
+  setMaxAmount: (value: string) => void;
+  resetFilters: () => void;
+  categories: Category[];
 }) {
   const t = createTranslator("FamilyExpenses");
   const [viewMode, setViewMode] = usePersistentViewMode(
@@ -61,7 +102,7 @@ export function ExpenseTable({
   const columns: ColumnDef<ExpenseTransaction>[] = [
     {
       accessorKey: "date",
-      header: t("table.columnDate"),
+      header: t((m) => m.FamilyExpenses.table.columnDate),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {formatDate(row.original.date)}
@@ -70,23 +111,24 @@ export function ExpenseTable({
     },
     {
       accessorKey: "description",
-      header: t("table.columnTitle"),
+      header: t((m) => m.FamilyExpenses.table.columnTitle),
       cell: ({ row }) => (
         <span className="block max-w-[220px] truncate font-medium">
-          {row.original.description || t("dialogs.addTitle")}
+          {row.original.description ||
+            t((m) => m.FamilyExpenses.dialogs.addTitle)}
         </span>
       ),
     },
     {
       id: "category",
-      header: t("table.columnCategory"),
+      header: t((m) => m.FamilyExpenses.table.columnCategory),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">{row.original.category.name}</span>
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: t("table.columnAmount"),
+      header: t((m) => m.FamilyExpenses.table.columnAmount),
       cell: ({ row }) => (
         <span className="whitespace-nowrap font-mono">
           <CompactMoney
@@ -98,25 +140,27 @@ export function ExpenseTable({
     },
     {
       accessorKey: "receivedFrom",
-      header: t("table.columnPaidTo"),
+      header: t((m) => m.FamilyExpenses.table.columnPaidTo),
       cell: ({ row }) => (
         <span className="block max-w-[160px] truncate">
-          {row.original.receivedFrom || t("table.notRecorded")}
+          {row.original.receivedFrom ||
+            t((m) => m.FamilyExpenses.table.notRecorded)}
         </span>
       ),
     },
     {
       accessorKey: "receivedBy",
-      header: t("table.columnPaidBy"),
+      header: t((m) => m.FamilyExpenses.table.columnPaidBy),
       cell: ({ row }) => (
         <span className="block max-w-[160px] truncate">
-          {row.original.receivedBy || t("table.notRecorded")}
+          {row.original.receivedBy ||
+            t((m) => m.FamilyExpenses.table.notRecorded)}
         </span>
       ),
     },
     {
       accessorKey: "paymentMethod",
-      header: t("table.columnPaymentMethod"),
+      header: t((m) => m.FamilyExpenses.table.columnPaymentMethod),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {formatPaymentMethod(row.original.paymentMethod)}
@@ -125,12 +169,12 @@ export function ExpenseTable({
     },
     {
       accessorKey: "status",
-      header: t("table.columnStatus"),
+      header: t((m) => m.FamilyExpenses.table.columnStatus),
       cell: ({ row }) => <ExpenseStatusBadge status={row.original.status} />,
     },
     {
       id: "receipt",
-      header: t("table.columnReceipt"),
+      header: t((m) => m.FamilyExpenses.table.columnReceipt),
       cell: ({ row }) => {
         const firstReceipt = row.original.receipts?.[0];
         return firstReceipt ? (
@@ -144,14 +188,18 @@ export function ExpenseTable({
             <span className="truncate">{firstReceipt.fileName}</span>
           </Button>
         ) : (
-          <Badge variant="outline">{t("table.noReceipt")}</Badge>
+          <Badge variant="outline">
+            {t((m) => m.FamilyExpenses.table.noReceipt)}
+          </Badge>
         );
       },
     },
     {
       id: "actions",
       header: () => (
-        <span className="flex justify-end">{t("table.columnActions")}</span>
+        <span className="flex justify-end">
+          {t((m) => m.FamilyExpenses.table.columnActions)}
+        </span>
       ),
       cell: ({ row }) => (
         <div className="flex justify-end">
@@ -169,14 +217,39 @@ export function ExpenseTable({
   ];
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
+    <Card className=" gap-2">
+      <CardHeader className="flex flex-row items-center justify-between gap-3">
         <div className="space-y-1">
-          <CardTitle>{t("table.historyTitle")}</CardTitle>
-          <CardDescription>{t("table.historyDesc")}</CardDescription>
+          <CardTitle>{t((m) => m.FamilyExpenses.table.historyTitle)}</CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyExpenses.table.historyDesc)}
+          </CardDescription>
         </div>
         <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
+      <ExpenseFilters
+        search={search}
+        setSearch={setSearch}
+        filterCategory={filterCategory}
+        setFilterCategory={setFilterCategory}
+        filterPaymentMethod={filterPaymentMethod}
+        setFilterPaymentMethod={setFilterPaymentMethod}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+        filterMember={filterMember}
+        setFilterMember={setFilterMember}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        minAmount={minAmount}
+        setMinAmount={setMinAmount}
+        maxAmount={maxAmount}
+        setMaxAmount={setMaxAmount}
+        resetFilters={resetFilters}
+        categories={categories}
+        family={family}
+      />
       <CardContent className={cn(viewMode === "items" && "px-0 pb-0")}>
         {filteredTransactions.length ? (
           viewMode === "table" ? (
@@ -184,8 +257,10 @@ export function ExpenseTable({
               columns={columns}
               data={filteredTransactions}
               getRowAriaLabel={(row) =>
-                t("table.viewDetailsAria", {
-                  title: row.original.description || t("dialogs.addTitle"),
+                t((m) => m.FamilyExpenses.table.viewDetailsAria, {
+                  title:
+                    row.original.description ||
+                    t((m) => m.FamilyExpenses.dialogs.addTitle),
                 })
               }
               onRowClick={(row) => handleActionClick(row.original, "view")}
@@ -207,14 +282,16 @@ export function ExpenseTable({
             <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
               <ReceiptTextIcon className="size-6 text-muted-foreground" />
             </span>
-            <h3 className="font-semibold text-lg">{t("table.emptyTitle")}</h3>
+            <h3 className="font-semibold text-lg">
+              {t((m) => m.FamilyExpenses.table.emptyTitle)}
+            </h3>
             <p className="mt-1 mb-6 max-w-sm text-muted-foreground text-sm">
-              {t("table.emptyDesc")}
+              {t((m) => m.FamilyExpenses.table.emptyDesc)}
             </p>
             {hasCapability(family, "RECORD_EXPENSE") ? (
               <Button size="sm" onClick={() => setOpenCreate(true)}>
                 <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                {t("addExpense")}
+                {t((m) => m.FamilyExpenses.addExpense)}
               </Button>
             ) : null}
           </div>

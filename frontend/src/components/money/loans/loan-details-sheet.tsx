@@ -78,25 +78,31 @@ export function LoanDetailsSheet({
 
   const statusLabel = loan
     ? loan.status === "REPAID"
-      ? t("filters.repaid")
+      ? t((m) => m.PersonalLoans.filters.repaid)
       : loan.status === "ACTIVE"
-        ? t("filters.active")
+        ? t((m) => m.PersonalLoans.filters.active)
         : loan.status === "OVERDUE"
-          ? t("filters.overdue")
-          : t("filters.cancelled")
+          ? t((m) => m.PersonalLoans.filters.overdue)
+          : t((m) => m.PersonalLoans.filters.cancelled)
     : "";
 
   return (
     <Dialog open={Boolean(loan)} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>{loan?.title ?? t("details.title")}</DialogTitle>
+          <DialogTitle>
+            {loan?.title ?? t((m) => m.PersonalLoans.details.title)}
+          </DialogTitle>
           <DialogDescription>
             {loan
               ? loan.type === "BORROWED"
-                ? t("item.borrowedFrom", { name: loan.person.name })
-                : t("item.lentTo", { name: loan.person.name })
-              : t("details.defaultDesc")}
+                ? t((m) => m.PersonalLoans.item.borrowedFrom, {
+                    name: loan.person.name,
+                  })
+                : t((m) => m.PersonalLoans.item.lentTo, {
+                    name: loan.person.name,
+                  })
+              : t((m) => m.PersonalLoans.details.defaultDesc)}
           </DialogDescription>
         </DialogHeader>
         {loan ? (
@@ -108,7 +114,8 @@ export function LoanDetailsSheet({
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{loan.person.name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {loan.person.relationship ?? t("details.trustedPerson")}
+                  {loan.person.relationship ??
+                    t((m) => m.PersonalLoans.details.trustedPerson)}
                 </p>
               </div>
               <Badge variant="secondary">{statusLabel}</Badge>
@@ -127,48 +134,56 @@ export function LoanDetailsSheet({
               href={`/family/${encodeURIComponent(familySlug)}/contacts?view=${encodeURIComponent(loan.person.id)}`}
             >
               <ExternalLinkIcon aria-hidden="true" data-icon="inline-start" />
-              {t("details.viewPerson")}
+              {t((m) => m.PersonalLoans.details.viewPerson)}
             </Button>
             <Separator />
             <dl className="grid grid-cols-2 gap-5">
-              <Detail label={t("details.loanType")}>
-                {loan.type === "BORROWED" ? t("form.borrowed") : t("form.lent")}
+              <Detail label={t((m) => m.PersonalLoans.details.loanType)}>
+                {loan.type === "BORROWED"
+                  ? t((m) => m.PersonalLoans.form.borrowed)
+                  : t((m) => m.PersonalLoans.form.lent)}
               </Detail>
-              <Detail label={t("details.originalAmount")}>
+              <Detail label={t((m) => m.PersonalLoans.details.originalAmount)}>
                 <CompactMoney
                   currency={loan.currency}
                   value={loan.originalAmountMinorUnits}
                 />
               </Detail>
-              <Detail label={t("details.totalPaid")}>
+              <Detail label={t((m) => m.PersonalLoans.details.totalPaid)}>
                 <CompactMoney
                   currency={loan.currency}
                   value={loan.paidAmountMinorUnits}
                 />
               </Detail>
-              <Detail label={t("details.remainingBalance")}>
+              <Detail
+                label={t((m) => m.PersonalLoans.details.remainingBalance)}
+              >
                 <CompactMoney
                   currency={loan.currency}
                   value={loan.remainingBalanceMinorUnits}
                 />
               </Detail>
-              <Detail label={t("details.startDate")}>
+              <Detail label={t((m) => m.PersonalLoans.details.startDate)}>
                 {formatDate(loan.startDate)}
               </Detail>
-              <Detail label={t("details.dueDate")}>
+              <Detail label={t((m) => m.PersonalLoans.details.dueDate)}>
                 {formatDate(loan.dueDate)}
               </Detail>
             </dl>
             <LoanProgress value={getLoanProgress(loan)} />
             {loan.notes ? (
               <div className="flex flex-col gap-2">
-                <h3 className="text-sm font-semibold">{t("details.notes")}</h3>
+                <h3 className="text-sm font-semibold">
+                  {t((m) => m.PersonalLoans.details.notes)}
+                </h3>
                 <p className="text-sm text-muted-foreground">{loan.notes}</p>
               </div>
             ) : null}
             <Separator />
             <div className="flex flex-col gap-3">
-              <h3 className="font-semibold">{t("details.paymentHistory")}</h3>
+              <h3 className="font-semibold">
+                {t((m) => m.PersonalLoans.details.paymentHistory)}
+              </h3>
               {loading ? (
                 <div className="flex flex-col gap-2">
                   <Skeleton className="h-16 w-full" />

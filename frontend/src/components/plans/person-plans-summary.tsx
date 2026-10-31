@@ -30,13 +30,13 @@ export function PersonPlansSummary({ plans }: { plans: PersonPlan[] }) {
       iconPosition="start"
       cards={[
         {
-          description: t("summary.dueToday"),
+          description: t((m) => m.PersonalPlans.summary.dueToday),
           value: activeTasks.filter((plan) => sameDay(plan.dueDate, now))
             .length,
           iconImage: "/images/icons/today.png",
         },
         {
-          description: t("summary.thisWeek"),
+          description: t((m) => m.PersonalPlans.summary.thisWeek),
           value: activeTasks.filter((plan) => {
             const due = plan.dueDate ? new Date(plan.dueDate) : null;
             return due && due >= new Date(now.toDateString()) && due <= weekEnd;
@@ -44,12 +44,12 @@ export function PersonPlansSummary({ plans }: { plans: PersonPlan[] }) {
           iconImage: "/images/icons/week.png",
         },
         {
-          description: t("summary.inProgress"),
+          description: t((m) => m.PersonalPlans.summary.inProgress),
           value: plans.filter((plan) => plan.status === "IN_PROGRESS").length,
           iconImage: "/images/icons/rise.png",
         },
         {
-          description: t("summary.completed"),
+          description: t((m) => m.PersonalPlans.summary.completed),
           value: plans.filter((plan) => plan.status === "COMPLETED").length,
           iconImage: "/images/icons/approved.png",
         },

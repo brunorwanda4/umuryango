@@ -33,7 +33,7 @@ export function FamilyDashboard({
       <header className="px-1 pb-1">
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="font-fraunces font-semibold text-[clamp(28px,6vw,40px)] leading-[1.1] tracking-[-0.01em]">
-            {t("welcomeBack", { name: greetingName })}
+            {t((m) => m.FamilyDashboard.welcomeBack, { name: greetingName })}
           </h1>
           <Badge variant="secondary">
             {AUTHORITY_LABELS[family.authority]}
@@ -44,9 +44,13 @@ export function FamilyDashboard({
       {moneyMessage ? (
         <Alert>
           <InfoIcon className="size-4" aria-hidden="true" />
-          <AlertTitle>{t("moneyLoadErrorTitle")}</AlertTitle>
+          <AlertTitle>
+            {t((m) => m.FamilyDashboard.moneyLoadErrorTitle)}
+          </AlertTitle>
           <AlertDescription>
-            {t("moneyLoadErrorDescription", { detail: moneyMessage })}
+            {t((m) => m.FamilyDashboard.moneyLoadErrorDescription, {
+              detail: moneyMessage,
+            })}
           </AlertDescription>
         </Alert>
       ) : null}

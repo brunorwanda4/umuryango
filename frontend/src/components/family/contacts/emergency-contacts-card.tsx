@@ -26,9 +26,11 @@ export function EmergencyContactsCard({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <ShieldAlertIcon className="size-4 text-destructive" />
-          {t("emergencyContacts")}
+          {t((m) => m.FamilyContacts.emergencyContacts)}
         </CardTitle>
-        <CardDescription>{t("emergencyContactsDesc")}</CardDescription>
+        <CardDescription>
+          {t((m) => m.FamilyContacts.emergencyContactsDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {emergencyContacts.slice(0, 6).map((contact) => (

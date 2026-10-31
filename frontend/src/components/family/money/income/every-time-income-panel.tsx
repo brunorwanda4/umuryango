@@ -253,13 +253,15 @@ export function EveryTimeIncomePanel({
           <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
             <CalendarClockIcon className="size-6 text-muted-foreground" />
           </span>
-          <h3 className="font-semibold text-lg">{t("panels.noEveryTime")}</h3>
+          <h3 className="font-semibold text-lg">
+            {t((m) => m.FamilyIncome.panels.noEveryTime)}
+          </h3>
           <p className="mt-1 mb-6 max-w-sm text-muted-foreground text-sm">
-            {t("panels.noEveryTimeDesc")}
+            {t((m) => m.FamilyIncome.panels.noEveryTimeDesc)}
           </p>
           <Button size="sm" onClick={() => setOpenCreate(true)}>
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            {t("panels.addEveryTime")}
+            {t((m) => m.FamilyIncome.panels.addEveryTime)}
           </Button>
         </CardContent>
       </Card>
@@ -272,7 +274,7 @@ export function EveryTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              {t("panels.expected")}
+              {t((m) => m.FamilyIncome.panels.expected)}
             </CardTitle>
             <WalletIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -289,7 +291,7 @@ export function EveryTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              {t("panels.paid")}
+              {t((m) => m.FamilyIncome.panels.paid)}
             </CardTitle>
             <CoinsIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -306,7 +308,7 @@ export function EveryTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              {t("panels.left")}
+              {t((m) => m.FamilyIncome.panels.left)}
             </CardTitle>
             <AlertCircleIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -323,7 +325,7 @@ export function EveryTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              {t("panels.overdue")}
+              {t((m) => m.FamilyIncome.panels.overdue)}
             </CardTitle>
             <CalendarClockIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -369,7 +371,7 @@ export function EveryTimeIncomePanel({
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <div className="text-muted-foreground text-xs">
-                        {t("panels.expected")}
+                        {t((m) => m.FamilyIncome.panels.expected)}
                       </div>
                       <div className="font-mono">
                         <CompactMoney
@@ -380,7 +382,7 @@ export function EveryTimeIncomePanel({
                     </div>
                     <div>
                       <div className="text-muted-foreground text-xs">
-                        {t("panels.paid")}
+                        {t((m) => m.FamilyIncome.panels.paid)}
                       </div>
                       <div className="font-mono">
                         <CompactMoney
@@ -391,7 +393,7 @@ export function EveryTimeIncomePanel({
                     </div>
                     <div>
                       <div className="text-muted-foreground text-xs">
-                        {t("panels.mustPayLeft")}
+                        {t((m) => m.FamilyIncome.panels.mustPayLeft)}
                       </div>
                       <div className="font-mono font-semibold">
                         <CompactMoney
@@ -403,9 +405,11 @@ export function EveryTimeIncomePanel({
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-muted-foreground text-xs">
-                      {t("panels.recordCount", { count: source.recordCount })}
+                      {t((m) => m.FamilyIncome.panels.recordCount, {
+                        count: source.recordCount,
+                      })}
                       {source.nextDueDate
-                        ? t("panels.nextDue", {
+                        ? t((m) => m.FamilyIncome.panels.nextDue, {
                             date: formatDate(source.nextDueDate),
                           })
                         : ""}
@@ -423,10 +427,10 @@ export function EveryTimeIncomePanel({
               <CardContent className="pt-0">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3">
                   <span className="text-muted-foreground text-xs">
-                    {t("panels.cardHint", {
+                    {t((m) => m.FamilyIncome.panels.cardHint, {
                       action: canEditManagedTransaction
-                        ? t("panels.changePayment")
-                        : t("panels.viewRecord"),
+                        ? t((m) => m.FamilyIncome.panels.changePayment)
+                        : t((m) => m.FamilyIncome.panels.viewRecord),
                     })}
                   </span>
                   <div className="flex flex-wrap gap-2">
@@ -443,7 +447,7 @@ export function EveryTimeIncomePanel({
                       }}
                     >
                       <PencilIcon aria-hidden="true" data-icon="inline-start" />
-                      {t("panels.manage")}
+                      {t((m) => m.FamilyIncome.panels.manage)}
                     </Button>
                     <Button
                       type="button"
@@ -459,7 +463,7 @@ export function EveryTimeIncomePanel({
                       }}
                     >
                       <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                      {t("panels.addPayment")}
+                      {t((m) => m.FamilyIncome.panels.addPayment)}
                     </Button>
                   </div>
                 </div>
