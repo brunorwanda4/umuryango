@@ -3,9 +3,11 @@
 import {
   ArrowRightIcon,
   ClipboardListIcon,
+  PaletteIcon,
   SettingsIcon,
   UsersIcon,
 } from "lucide-react";
+import { AppearanceSettingsPage } from "@/components/settings/appearance-settings-page";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -82,7 +84,7 @@ type AuditEvent = {
   createdAt: string;
 };
 
-type FamilySettingsPage = "overview" | "general" | "members" | "audit";
+type FamilySettingsPage = "overview" | "general" | "members" | "audit" | "appearance";
 
 const FAMILY_TYPE_VALUES: FamilyType[] = [
   "NUCLEAR",
@@ -182,6 +184,10 @@ export function FamilySettings({
         </div>
       ) : null}
 
+      {page === "appearance" ? (
+        <AppearanceSettingsPage showHeader={false} />
+      ) : null}
+
       {page === "audit" ? (
         canManageMembers ? (
           <AuditTab familySlug={familySlug} />
@@ -220,6 +226,13 @@ function SettingsOverview({
       enabled: true,
     },
     {
+      title: t((m) => m.FamilySettings.appearanceSectionTitle),
+      description: t((m) => m.FamilySettings.appearanceSectionDesc),
+      href: `${settingsHref}/appearance`,
+      icon: PaletteIcon,
+      enabled: true,
+    },
+    {
       title: t((m) => m.FamilySettings.auditSectionTitle),
       description: t((m) => m.FamilySettings.auditSectionDesc),
       href: `${settingsHref}/audit`,
@@ -229,7 +242,7 @@ function SettingsOverview({
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {sections.map((section) => (
         <Card key={section.href}>
           <CardHeader>
@@ -278,6 +291,7 @@ function SettingsPermissionAlert({ action }: { action: string }) {
 function getPageTitle(page: FamilySettingsPage) {
   if (page === "general") return t((m) => m.FamilySettings.general);
   if (page === "members") return t((m) => m.FamilySettings.memberAccess);
+  if (page === "appearance") return t((m) => m.FamilySettings.appearance);
   if (page === "audit") return t((m) => m.FamilySettings.auditLog);
 
   return t((m) => m.FamilySettings.title);

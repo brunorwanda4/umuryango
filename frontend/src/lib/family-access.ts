@@ -37,6 +37,13 @@ export type FamilyKinship =
   | "CLEANER"
   | "OTHER";
 
+export type FamilyType =
+  | "NUCLEAR"
+  | "JOINT_EXTENDED"
+  | "SINGLE_PARENT"
+  | "BLENDED"
+  | "ADOPTIVE";
+
 const tAuth = createTranslator("FamilyAccess.authorities");
 const tKin = createTranslator("FamilyAccess.kinships");
 const tCap = createTranslator("FamilyAccess.capabilities");
@@ -93,6 +100,86 @@ export const CAPABILITY_LABELS: Record<FamilyCapability, string> = {
 export const ALL_CAPABILITIES = Object.keys(
   CAPABILITY_LABELS,
 ) as FamilyCapability[];
+
+export const KINSHIPS_BY_FAMILY_TYPE: Record<FamilyType, FamilyKinship[]> = {
+  NUCLEAR: [
+    "FATHER",
+    "MOTHER",
+    "SON",
+    "DAUGHTER",
+    "BROTHER",
+    "SISTER",
+    "OTHER",
+  ],
+  SINGLE_PARENT: [
+    "FATHER",
+    "MOTHER",
+    "SON",
+    "DAUGHTER",
+    "BROTHER",
+    "SISTER",
+    "OTHER",
+  ],
+  JOINT_EXTENDED: [
+    "FATHER",
+    "MOTHER",
+    "SON",
+    "DAUGHTER",
+    "BROTHER",
+    "SISTER",
+    "GRANDFATHER",
+    "GRANDMOTHER",
+    "UNCLE",
+    "AUNT",
+    "COUSIN",
+    "IN_LAW",
+    "FAMILY_FRIEND",
+    "NEIGHBOR",
+    "CLEANER",
+    "OTHER",
+  ],
+  BLENDED: [
+    "FATHER",
+    "MOTHER",
+    "SON",
+    "DAUGHTER",
+    "BROTHER",
+    "SISTER",
+    "IN_LAW",
+    "GRANDFATHER",
+    "GRANDMOTHER",
+    "COUSIN",
+    "OTHER",
+  ],
+  ADOPTIVE: [
+    "FATHER",
+    "MOTHER",
+    "SON",
+    "DAUGHTER",
+    "BROTHER",
+    "SISTER",
+    "GRANDFATHER",
+    "GRANDMOTHER",
+    "UNCLE",
+    "AUNT",
+    "OTHER",
+  ],
+};
+
+export function getKinshipOptions(familyType?: FamilyType | null): {
+  value: FamilyKinship;
+  label: string;
+}[] {
+  const kinships =
+    familyType && KINSHIPS_BY_FAMILY_TYPE[familyType]
+      ? KINSHIPS_BY_FAMILY_TYPE[familyType]
+      : (Object.keys(KINSHIP_LABELS) as FamilyKinship[]);
+
+  return kinships.map((k) => ({
+    value: k,
+    label: KINSHIP_LABELS[k] ?? k,
+  }));
+}
 
 export function hasCapability(
   source: {

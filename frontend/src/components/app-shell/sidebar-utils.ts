@@ -14,6 +14,7 @@ import {
   LayoutDashboardIcon,
   ListChecksIcon,
   type LucideIcon,
+  PaletteIcon,
   ReceiptTextIcon,
   SettingsIcon,
   ShieldCheckIcon,
@@ -58,6 +59,11 @@ const personalSettingsChildren: NavigationItem[] = [
     title: tItems((m) => m.AppShell.navigation.items.account),
     href: "/me/settings",
     icon: sidebarIcon("account", SettingsIcon),
+  },
+  {
+    title: tItems((m) => m.AppShell.navigation.items.appearance),
+    href: "/me/settings/appearance",
+    icon: sidebarIcon("application", PaletteIcon),
   },
   {
     title: tItems((m) => m.AppShell.navigation.items.security),
@@ -156,6 +162,11 @@ export const personalSettingsNavigation: NavigationGroup[] = [
         exact: true,
       },
       {
+        title: tItems((m) => m.AppShell.navigation.items.appearance),
+        href: "/me/settings/appearance",
+        icon: sidebarIcon("application", PaletteIcon),
+      },
+      {
         title: tItems((m) => m.AppShell.navigation.items.security),
         href: "/me/security",
         icon: sidebarIcon("security", ShieldCheckIcon),
@@ -184,6 +195,11 @@ const getFamilySettingsChildren = (familyHref: string): NavigationItem[] => [
     title: tItems((m) => m.AppShell.navigation.items.members),
     href: `${familyHref}/settings/members`,
     icon: sidebarIcon("members", UsersIcon),
+  },
+  {
+    title: tItems((m) => m.AppShell.navigation.items.appearance),
+    href: `${familyHref}/settings/appearance`,
+    icon: sidebarIcon("application", PaletteIcon),
   },
   {
     title: tItems((m) => m.AppShell.navigation.items.audit),
@@ -364,16 +380,28 @@ export function isActivePath(
   return pathname === targetPath || pathname.startsWith(`${targetPath}/`);
 }
 
+export function stripGeneratedSlugSuffix(value: string) {
+  return value.replace(/[-_\s]+(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/i, "").trim();
+}
+
 export function formatFamilyName(familySlug?: string) {
   if (!familySlug) {
     return createTranslator("AppShell.workspaceSwitcher")("familyWorkspace");
   }
 
-  return decodeURIComponent(familySlug)
+  const decoded = decodeURIComponent(familySlug).trim();
+  const cleaned = stripGeneratedSlugSuffix(decoded) || decoded;
+
+  const formatted = cleaned
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ")
     .trim()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+  return (
+    formatted ||
+    createTranslator("AppShell.workspaceSwitcher")("familyWorkspace")
+  );
 }
 
 export function getInitials(value: string) {

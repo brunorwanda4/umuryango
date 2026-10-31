@@ -5,6 +5,7 @@ import {
   FileTextIcon,
   FolderKanbanIcon,
   HomeIcon,
+  PaletteIcon,
   ReceiptTextIcon,
   SearchIcon,
   SettingsIcon,
@@ -135,6 +136,12 @@ export default function AppNavbarSearch() {
                 <SettingsIcon className="mr-2 size-4" />
                 <span>{tSearch((m) => m.AppShell.search.familySettings)}</span>
               </CommandItem>
+              <CommandItem
+                onSelect={() => handleNavigate(`${familyHref}/settings/appearance`)}
+              >
+                <PaletteIcon className="mr-2 size-4" />
+                <span>{tSearch((m) => m.AppShell.search.appearanceSettings)}</span>
+              </CommandItem>
             </CommandGroup>
           )}
 
@@ -156,6 +163,10 @@ export default function AppNavbarSearch() {
             <CommandItem onSelect={() => handleNavigate("/me/settings")}>
               <SettingsIcon className="mr-2 size-4" />
               <span>{tSearch((m) => m.AppShell.search.accountSettings)}</span>
+            </CommandItem>
+            <CommandItem onSelect={() => handleNavigate("/me/settings/appearance")}>
+              <PaletteIcon className="mr-2 size-4" />
+              <span>{tSearch((m) => m.AppShell.search.appearanceSettings)}</span>
             </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/me/security")}>
               <ShieldCheckIcon className="mr-2 size-4" />

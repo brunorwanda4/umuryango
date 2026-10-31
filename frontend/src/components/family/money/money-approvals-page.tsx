@@ -1,17 +1,11 @@
 "use client";
 
-import { AlertCircleIcon, ArrowLeftIcon, ShieldCheckIcon } from "lucide-react";
+import { AlertCircleIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { PageTitle } from "@/components/common/pages/page-title";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Empty,
   EmptyDescription,
@@ -19,7 +13,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
@@ -29,11 +22,7 @@ import { ApprovalDetailsSheet } from "./approvals/approval-details-sheet";
 import { ApprovalFiltersPanel } from "./approvals/approval-filters-panel";
 import { ApprovalQueue } from "./approvals/approval-queue";
 import { ApprovalSummaryCards } from "./approvals/approval-summary-cards";
-import type {
-  ApprovalFilters,
-  ApprovalQueueItem,
-  MoneyTransaction,
-} from "./approvals/types";
+import type { ApprovalFilters, ApprovalQueueItem, MoneyTransaction } from "./approvals/types";
 import {
   buildApprovalAnalytics,
   buildApprovalQueue,
@@ -55,8 +44,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<ApprovalFilters>(EMPTY_FILTERS);
-  const [selectedApproval, setSelectedApproval] =
-    useState<ApprovalQueueItem | null>(null);
+  const [selectedApproval, setSelectedApproval] = useState<ApprovalQueueItem | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -71,10 +59,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
       );
 
       if (!familyResponse.ok || !familyResponse.data) {
-        throw new Error(
-          familyResponse.message ??
-            t((m) => m.FamilyApprovals.workspaceNotFound),
-        );
+        throw new Error(familyResponse.message ?? t((m) => m.FamilyApprovals.workspaceNotFound));
       }
 
       const familyData = familyResponse.data;
@@ -91,28 +76,17 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
         ),
       ]);
 
-      setMoney(
-        overviewResponse.ok
-          ? normalizeMoneyOverview(overviewResponse.data)
-          : null,
-      );
+      setMoney(overviewResponse.ok ? normalizeMoneyOverview(overviewResponse.data) : null);
       setMoneyMessage(
         overviewResponse.ok
           ? null
-          : (overviewResponse.message ??
-              t((m) => m.FamilyApprovals.approvalSourceUnavailable)),
+          : (overviewResponse.message ?? t((m) => m.FamilyApprovals.approvalSourceUnavailable)),
       );
       setTransactions(
-        transactionResponse.ok && transactionResponse.data
-          ? transactionResponse.data
-          : [],
+        transactionResponse.ok && transactionResponse.data ? transactionResponse.data : [],
       );
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : t((m) => m.FamilyApprovals.toastError),
-      );
+      setError(err instanceof Error ? err.message : t((m) => m.FamilyApprovals.toastError));
     } finally {
       setLoading(false);
     }
@@ -124,8 +98,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
 
   const currency = money?.currency ?? family?.defaultCurrency ?? "RWF";
   const canApprove = family ? hasCapability(family, "APPROVE_EXPENSE") : false;
-  const canAssign =
-    family?.authority === "HEAD" || family?.authority === "ADMIN";
+  const canAssign = family?.authority === "HEAD" || family?.authority === "ADMIN";
 
   const queue = useMemo(
     () => buildApprovalQueue(transactions, money?.approvals ?? []),
@@ -137,8 +110,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
     if (!user) return [];
 
     return queue.filter(
-      (item) =>
-        item.requestedById === user.id || item.requestedBy === user.fullName,
+      (item) => item.requestedById === user.id || item.requestedBy === user.fullName,
     );
   }, [canApprove, queue, user]);
 
@@ -146,25 +118,24 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
     if (canApprove) return transactions;
     if (!user) return [];
 
-    return transactions.filter(
-      (transaction) => transaction.createdById === user.id,
-    );
+    return transactions.filter((transaction) => transaction.createdById === user.id);
   }, [canApprove, transactions, user]);
-
-  const filteredQueue = useMemo(
-    () => filterApprovals(visibleQueue, filters),
-    [visibleQueue, filters],
-  );
 
   const analytics = useMemo(
     () => buildApprovalAnalytics(visibleTransactions, visibleQueue),
     [visibleTransactions, visibleQueue],
   );
 
+  const filteredQueue = useMemo(
+    () => filterApprovals(visibleQueue, filters),
+    [visibleQueue, filters],
+  );
+
   const filterOptions = useMemo(() => {
     const categories = Array.from(
       new Set(visibleQueue.map((item) => item.category).filter(Boolean)),
     ).sort();
+
     const requesters = Array.from(
       new Set(visibleQueue.map((item) => item.requestedBy).filter(Boolean)),
     ).sort();
@@ -176,9 +147,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
     if (!selectedApproval) return null;
     return (
       visibleQueue.find(
-        (item) =>
-          item.id === selectedApproval.id &&
-          item.source === selectedApproval.source,
+        (item) => item.id === selectedApproval.id && item.source === selectedApproval.source,
       ) ?? selectedApproval
     );
   }, [visibleQueue, selectedApproval]);
@@ -216,9 +185,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
         await fetchData();
         setSelectedApproval(null);
       } else {
-        toast.error(
-          response.message ?? t((m) => m.FamilyApprovals.toastFailed),
-        );
+        toast.error(response.message ?? t((m) => m.FamilyApprovals.toastFailed));
       }
     } catch {
       toast.error(t((m) => m.FamilyApprovals.toastError));
@@ -249,25 +216,10 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
 
   return (
     <div className="flex min-w-0 max-w-full flex-col gap-6">
-      <header className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex min-w-0 flex-col gap-2">
-            <div className="flex items-center gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-md border bg-background">
-                <ShieldCheckIcon className="size-5 text-muted-foreground" />
-              </span>
-              <h1 className="font-bold text-2xl tracking-tight sm:text-3xl">
-                {t((m) => m.FamilyApprovals.pageTitle)}
-              </h1>
-            </div>
-            <p className="max-w-4xl text-muted-foreground text-sm leading-6">
-              {t((m) => m.FamilyApprovals.pageDesc)}
-            </p>
-          </div>
-        </div>
-      </header>
-
-      <Separator />
+      <PageTitle
+        title={t((m) => m.FamilyApprovals.pageTitle)}
+        description={t((m) => m.FamilyApprovals.pageDesc)}
+      />
 
       {moneyMessage ? (
         <Card className="border-dashed">

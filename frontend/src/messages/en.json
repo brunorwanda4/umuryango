@@ -738,7 +738,8 @@
       "securitySettings": "Security Settings",
       "quickNavigations": "Quick Navigations",
       "browseFamilies": "Browse Families",
-      "createNewFamily": "Create a New Family"
+      "createNewFamily": "Create a New Family",
+      "appearanceSettings": "Appearance Settings"
     },
     "sidebar": {
       "resizeSidebar": "Resize Sidebar",
@@ -819,7 +820,8 @@
         "families": "Families",
         "familyWorkspaces": "Family workspaces",
         "general": "General",
-        "audit": "Audit log"
+        "audit": "Audit log",
+        "appearance": "Appearance"
       }
     }
   },
@@ -1077,7 +1079,11 @@
       "zero": "No members",
       "one": "{count} member",
       "other": "{count} members"
-    }
+    },
+    "inviteKinshipPlaceholder": "Select a relationship (optional)",
+    "customKinshipLabel": "Specify relationship",
+    "customKinshipPlaceholder": "e.g., Guardian, Step-brother, Cousin",
+    "customKinshipRequired": "Please specify the custom relationship."
   },
   "FamilyEvents": {
     "title": "Events",
@@ -2380,7 +2386,11 @@
     },
     "saveSettings": "Save settings",
     "dangerZone": "Danger zone",
-    "archiveFamily": "Archive family workspace"
+    "archiveFamily": "Archive family workspace",
+    "appearance": "Appearance",
+    "appearanceDescription": "Customize theme preferences and how navigation icons appear.",
+    "appearanceSectionTitle": "Appearance",
+    "appearanceSectionDesc": "Customize theme preferences and how navigation icons appear."
   },
   "PersonalOverview": {
     "metadataTitle": "Overview | Rwanda Family",

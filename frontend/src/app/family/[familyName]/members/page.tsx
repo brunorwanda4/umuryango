@@ -1,14 +1,15 @@
 "use client";
 
-import { CheckIcon, UserPlusIcon, UsersIcon } from "lucide-react";
+import { UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { use, useCallback, useEffect, useState } from "react";
-import { z } from "zod";
-import { CommonFormField } from "@/components/common/form/common-form-field";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  AddMemberDialog,
+  ASSIGNABLE_AUTHORITIES,
+  type AssignableAuthority,
+} from "@/components/family/members";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -17,23 +18,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { FieldGroup } from "@/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -44,23 +34,20 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
 import { createTranslator } from "@/i18n/translate";
 import {
   AUTHORITY_LABELS,
   type FamilyAuthority,
   type FamilyCapability,
   type FamilyKinship,
+  type FamilyType,
   hasCapability,
   KINSHIP_LABELS,
 } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 
 const t = createTranslator("FamilyMembers");
-const tCommon = createTranslator("Common");
 const tDashboard = createTranslator("FamilyDashboard");
-
-type AssignableAuthority = Exclude<FamilyAuthority, "HEAD">;
 
 type FamilyMemberSummary = {
   id: string;
@@ -81,6 +68,7 @@ type FamilyDetail = {
   country: string;
   defaultCurrency: string;
   contributionCadence: string;
+  type: FamilyType;
   description: string | null;
   createdAt: string;
   authority: FamilyAuthority;
@@ -93,16 +81,6 @@ type FetchState =
   | { status: "loading" }
   | { status: "error"; message: string }
   | { status: "success"; family: FamilyDetail };
-
-const ASSIGNABLE_AUTHORITIES: {
-  value: AssignableAuthority;
-  label: string;
-}[] = [
-  { value: "ADMIN", label: AUTHORITY_LABELS.ADMIN },
-  { value: "MEMBER", label: AUTHORITY_LABELS.MEMBER },
-];
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const joinedFormatter = new Intl.DateTimeFormat("en", {
   year: "numeric",
@@ -207,7 +185,11 @@ function MembersManager({
           </p>
         </div>
         {canManage ? (
-          <AddMemberDialog familySlug={familySlug} onAdded={onChanged} />
+          <AddMemberDialog
+            familySlug={familySlug}
+            familyType={family.type}
+            onAdded={onChanged}
+          />
         ) : null}
       </header>
 
@@ -264,9 +246,7 @@ function MemberRow({
 
     const response = await apiRequest(
       "patch",
-      `/families/${encodeURIComponent(familySlug)}/members/${encodeURIComponent(
-        member.id,
-      )}`,
+      `/families/${encodeURIComponent(familySlug)}/members/${encodeURIComponent(member.id)}`,
       { authority },
     );
 
@@ -336,152 +316,6 @@ function MemberRow({
       </div>
       {error ? <p className="text-destructive text-xs">{error}</p> : null}
     </div>
-  );
-}
-
-type AddMemberFormValues = {
-  email: string;
-  authority: AssignableAuthority;
-};
-
-const addMemberSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(
-      1,
-      t((m) => m.FamilyMembers.emailRequired),
-    )
-    .refine((value) => emailPattern.test(value), {
-      message: t((m) => m.FamilyMembers.emailInvalid),
-    }),
-  authority: z.enum(["ADMIN", "MEMBER"]),
-});
-
-function AddMemberDialog({
-  familySlug,
-  onAdded,
-}: {
-  familySlug: string;
-  onAdded: () => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
-          {t((m) => m.FamilyMembers.inviteMember)}
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t((m) => m.FamilyMembers.inviteTitle)}</DialogTitle>
-          <DialogDescription>
-            {t((m) => m.FamilyMembers.inviteDesc)}
-          </DialogDescription>
-        </DialogHeader>
-        <AddMemberForm
-          familySlug={familySlug}
-          onAdded={() => {
-            setOpen(false);
-            onAdded();
-          }}
-        />
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function AddMemberForm({
-  familySlug,
-  onAdded,
-}: {
-  familySlug: string;
-  onAdded: () => void;
-}) {
-  const { form, onSubmit, error, success, isPending } =
-    useZodFormSubmit<AddMemberFormValues>({
-      schema: addMemberSchema,
-      formOptions: {
-        defaultValues: { email: "", authority: "MEMBER" },
-      },
-      request: {
-        method: "post",
-        url: `/families/${encodeURIComponent(familySlug)}/members`,
-        apiRequest: () => ({ idempotencyKey: crypto.randomUUID() }),
-      },
-      transform: (values) => ({
-        email: values.email.trim().toLowerCase(),
-        authority: values.authority,
-      }),
-      onSuccessMessage: t((m) => m.FamilyMembers.inviteSuccess),
-      onSuccess: () => {
-        form.reset();
-        onAdded();
-      },
-      toastOnError: true,
-      toastOnSuccess: true,
-    });
-
-  return (
-    <form
-      className="flex flex-col gap-6"
-      onSubmit={form.handleSubmit(onSubmit)}
-    >
-      {error ? (
-        <Alert variant="destructive">
-          <AlertTitle>{t((m) => m.FamilyMembers.addMemberError)}</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      {success ? (
-        <Alert>
-          <CheckIcon aria-hidden="true" />
-          <AlertDescription>{success}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      <FieldGroup>
-        <CommonFormField
-          control={form.control}
-          name="email"
-          label={t((m) => m.FamilyMembers.inviteEmail)}
-          placeholder="member@example.com"
-          type="email"
-          required
-          inputProps={{ autoComplete: "email" }}
-        />
-        <CommonFormField
-          control={form.control}
-          name="authority"
-          label={t((m) => m.FamilyMembers.inviteRole)}
-          fieldType="select"
-          selectOptions={ASSIGNABLE_AUTHORITIES}
-          required
-        />
-      </FieldGroup>
-
-      <DialogFooter>
-        <DialogClose asChild>
-          <Button type="button" variant="outline">
-            {tCommon((m) => m.Common.cancel)}
-          </Button>
-        </DialogClose>
-        <Button type="submit" disabled={isPending}>
-          {isPending ? (
-            <>
-              <Spinner data-icon="inline-start" />
-              {t((m) => m.FamilyMembers.sending)}
-            </>
-          ) : (
-            t((m) => m.FamilyMembers.sendInvite)
-          )}
-        </Button>
-      </DialogFooter>
-    </form>
   );
 }
 
