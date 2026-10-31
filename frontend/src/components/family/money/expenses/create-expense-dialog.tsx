@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import type { FamilyDetail } from "../../dashboard/types";
 import { ExpenseFormFields } from "./expense-form-fields";
@@ -41,6 +42,7 @@ export function CreateExpenseDialog({
   onCategoriesChanged: (category?: Category) => void | Promise<void>;
   onSuccess: () => void;
 }) {
+  const t = createTranslator("FamilyExpenses");
   const { user: currentUser } = useCurrentUser();
   const defaultPaidBy =
     family.members.find((member) => member.userId === currentUser?.id)
@@ -88,7 +90,7 @@ export function CreateExpenseDialog({
       method: "post",
       url: `/families/${encodeURIComponent(family.id)}/money/transactions`,
     },
-    onSuccessMessage: "Expense recorded successfully",
+    onSuccessMessage: t("toasts.recordedSuccess"),
     toastOnSuccess: true,
     onSuccess: async (data, values) => {
       onOpenChange(false);
@@ -148,11 +150,8 @@ export function CreateExpenseDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Add Expense</DialogTitle>
-          <DialogDescription>
-            Record money leaving the family and attach supporting receipt
-            details.
-          </DialogDescription>
+          <DialogTitle>{t("dialogs.addTitle")}</DialogTitle>
+          <DialogDescription>{t("dialogs.addDesc")}</DialogDescription>
         </DialogHeader>
 
         <form
@@ -180,7 +179,7 @@ export function CreateExpenseDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending ? "Recording..." : "Add Expense"}
+            {isPending ? t("dialogs.recording") : t("dialogs.addTitle")}
           </Button>
         </DialogFooter>
       </DialogContent>

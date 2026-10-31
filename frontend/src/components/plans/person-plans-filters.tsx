@@ -1,5 +1,5 @@
 import { RotateCcwIcon, SearchIcon, SlidersHorizontalIcon } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { DatePickerInput } from "@/components/ui/calendar-day";
 import {
@@ -20,29 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 import { EMPTY_PLAN_FILTERS, type PlanFilters } from "./types-and-schemas";
-
-const selectOptions = {
-  type: [
-    ["all", "All types"],
-    ["TASK", "Tasks"],
-    ["LONG_TERM_GOAL", "Long-term goals"],
-  ],
-  status: [
-    ["all", "All statuses"],
-    ["PENDING", "Pending"],
-    ["IN_PROGRESS", "In progress"],
-    ["COMPLETED", "Completed"],
-    ["CANCELLED", "Cancelled"],
-    ["OVERDUE", "Overdue"],
-  ],
-  priority: [
-    ["all", "All priorities"],
-    ["LOW", "Low"],
-    ["MEDIUM", "Medium"],
-    ["HIGH", "High"],
-  ],
-} as const;
 
 export function PersonPlansFilters({
   filters,
@@ -51,7 +30,42 @@ export function PersonPlansFilters({
   filters: PlanFilters;
   onChange: (filters: PlanFilters) => void;
 }) {
+  const t = createTranslator("PersonalPlans");
   const [isOpen, setIsOpen] = useState(false);
+
+  const selectOptions = useMemo(
+    () => ({
+      type: [
+        ["all", t("filters.allTypes")],
+        ["TASK", t("filters.tasks")],
+        ["LONG_TERM_GOAL", t("filters.longTermGoals")],
+      ],
+      status: [
+        ["all", t("filters.allStatuses")],
+        ["PENDING", t("filters.pending")],
+        ["IN_PROGRESS", t("filters.inProgress")],
+        ["COMPLETED", t("filters.completed")],
+        ["CANCELLED", t("filters.cancelled")],
+        ["OVERDUE", t("filters.overdue")],
+      ],
+      priority: [
+        ["all", t("filters.allPriorities")],
+        ["LOW", t("filters.low")],
+        ["MEDIUM", t("filters.medium")],
+        ["HIGH", t("filters.high")],
+      ],
+    }),
+    [t],
+  );
+
+  const filterAriaLabels = useMemo(
+    () => ({
+      type: t("filters.filterByType"),
+      status: t("filters.filterByStatus"),
+      priority: t("filters.filterByPriority"),
+    }),
+    [t],
+  );
 
   const isFiltered =
     JSON.stringify(filters) !== JSON.stringify(EMPTY_PLAN_FILTERS);
@@ -75,8 +89,8 @@ export function PersonPlansFilters({
               <SearchIcon aria-hidden="true" />
             </InputGroupAddon>
             <InputGroupInput
-              aria-label="Search plans"
-              placeholder="Search by title"
+              aria-label={t("filters.searchAria")}
+              placeholder={t("filters.searchPlaceholder")}
               value={filters.search}
               onChange={(event) =>
                 onChange({ ...filters, search: event.target.value })
@@ -89,13 +103,13 @@ export function PersonPlansFilters({
             <Button
               variant="outline"
               className="w-full justify-center sm:w-auto"
-              aria-label="Toggle advanced filters"
+              aria-label={t("filters.toggleFiltersAria")}
             >
               <SlidersHorizontalIcon
                 aria-hidden="true"
                 data-icon="inline-start"
               />
-              <span>Filters</span>
+              <span>{t("filters.toggleFilters")}</span>
               {activeAdvancedFilterCount > 0 && (
                 <span className="ml-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-primary-foreground">
                   {activeAdvancedFilterCount}
@@ -104,7 +118,7 @@ export function PersonPlansFilters({
             </Button>
           </CollapsibleTrigger>
           <Button
-            aria-label="Reset filters"
+            aria-label={t("filters.resetFilters")}
             disabled={!isFiltered}
             size="icon"
             variant="outline"
@@ -122,7 +136,10 @@ export function PersonPlansFilters({
             value={filters[key]}
             onValueChange={(value) => onChange({ ...filters, [key]: value })}
           >
-            <SelectTrigger className="w-full" aria-label={`Filter by ${key}`}>
+            <SelectTrigger
+              className="w-full"
+              aria-label={filterAriaLabels[key]}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -137,9 +154,9 @@ export function PersonPlansFilters({
           </Select>
         ))}
         <DatePickerInput
-          aria-label="Filter by date"
+          aria-label={t("filters.filterByDate")}
           className="w-full"
-          placeholder="Any date"
+          placeholder={t("filters.anyDate")}
           value={filters.date}
           onValueChange={(date) => onChange({ ...filters, date })}
         />

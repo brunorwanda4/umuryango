@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
+import { createTranslator } from "@/i18n/translate";
 import type { ExpenseTransaction } from "./types-and-schemas";
 
 const countedExpenseStatuses = new Set<ExpenseTransaction["status"]>([
@@ -72,27 +73,29 @@ export function ExpenseMetricCards({
     };
   }, [transactions]);
 
+  const t = createTranslator("FamilyExpenses");
+
   const cards = [
     {
-      description: "Total Expenses",
+      description: t("metrics.totalExpenses"),
       value: <CompactMoney currency={currency} value={summary.totalExpenses} />,
       iconImage: "/images/icons/wallet.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Expenses This Month",
+      description: t("metrics.expensesThisMonth"),
       value: <CompactMoney currency={currency} value={summary.monthExpenses} />,
       iconImage: "/images/icons/expense.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Expenses Today",
+      description: t("metrics.expensesToday"),
       value: <CompactMoney currency={currency} value={summary.todayExpenses} />,
       iconImage: "/images/icons/money.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Pending Approval",
+      description: t("metrics.pendingApproval"),
       value: (
         <CompactMoney currency={currency} value={summary.pendingApproval} />
       ),
@@ -100,7 +103,7 @@ export function ExpenseMetricCards({
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Approved Expenses",
+      description: t("metrics.approvedExpenses"),
       value: (
         <CompactMoney currency={currency} value={summary.approvedExpenses} />
       ),
@@ -108,13 +111,13 @@ export function ExpenseMetricCards({
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Expense Records",
+      description: t("metrics.expenseRecords"),
       value: summary.recordCount.toString(),
       iconImage: "/images/icons/transaction.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Largest This Month",
+      description: t("metrics.largestThisMonth"),
       value: (
         <CompactMoney currency={currency} value={summary.largestThisMonth} />
       ),

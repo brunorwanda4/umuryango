@@ -21,6 +21,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { createTranslator } from "@/i18n/translate";
 import { ChartEmptyState } from "./reports-ui-helpers";
 import type { MoneyOverview, ReportsOverview } from "./types";
 import {
@@ -42,6 +43,7 @@ export function ReportsCharts({
   money: MoneyOverview | null;
   reports: ReportsOverview | null;
 }) {
+  const t = createTranslator("FamilyReports");
   const trend = useMemo(() => getTrendData(reports, money), [reports, money]);
   const breakdown = useMemo(
     () => getBreakdownData(reports, money),
@@ -52,10 +54,8 @@ export function ReportsCharts({
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
       <Card>
         <CardHeader>
-          <CardTitle>Money movement</CardTitle>
-          <CardDescription>
-            Approved report or money overview records for the selected period.
-          </CardDescription>
+          <CardTitle>{t("moneyMovementTitle")}</CardTitle>
+          <CardDescription>{t("moneyMovementDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           {trend.length ? (
@@ -120,9 +120,9 @@ export function ReportsCharts({
             </ChartContainer>
           ) : (
             <ChartEmptyState
-              description="Approved income, expense, and contribution records will draw this chart."
+              description={t("noReportTrendDataDesc")}
               icon={BarChart3Icon}
-              title="No report trend data"
+              title={t("noReportTrendData")}
             />
           )}
         </CardContent>
@@ -130,10 +130,8 @@ export function ReportsCharts({
 
       <Card>
         <CardHeader>
-          <CardTitle>Report breakdown</CardTitle>
-          <CardDescription>
-            Money categories or allocation returned by the backend.
-          </CardDescription>
+          <CardTitle>{t("reportBreakdownTitle")}</CardTitle>
+          <CardDescription>{t("reportBreakdownDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           {breakdown.length ? (
@@ -160,7 +158,9 @@ export function ReportsCharts({
                     <ChartTooltipContent
                       formatter={(value) => (
                         <>
-                          <span className="text-muted-foreground">Amount</span>
+                          <span className="text-muted-foreground">
+                            {t("amountLabel")}
+                          </span>
                           <span className="font-mono font-medium">
                             {formatFullMinorUnits(value, currency)}
                           </span>
@@ -178,9 +178,9 @@ export function ReportsCharts({
             </ChartContainer>
           ) : (
             <ChartEmptyState
-              description="Savings, debts, contributions, budgets, and projects will appear here after the API returns them."
+              description={t("noBreakdownDataDesc")}
               icon={PieChartIcon}
-              title="No breakdown data"
+              title={t("noBreakdownData")}
             />
           )}
         </CardContent>

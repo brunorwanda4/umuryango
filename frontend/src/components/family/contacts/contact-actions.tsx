@@ -1,8 +1,11 @@
 import { MessageCircleIcon, PhoneIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import { normalizePhoneForWhatsApp } from "./contact-utils";
 import type { FamilyContact } from "./types-and-schemas";
+
+const t = createTranslator("FamilyContacts");
 
 export interface ContactActionsProps {
   contact: FamilyContact;
@@ -22,7 +25,7 @@ export function ContactActions({ contact, className }: ContactActionsProps) {
         className="md:hidden"
       >
         <PhoneIcon aria-hidden="true" data-icon="inline-start" />
-        Call
+        {t("call")}
       </Button>
       {whatsAppNumber ? (
         <Button

@@ -4,6 +4,7 @@ import { AlertCircleIcon, RefreshCwIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createTranslator } from "@/i18n/translate";
 import { FamilyWorkspacesCard } from "./family-workspaces-card";
 import { LoansOverviewCard } from "./loans-overview-card";
 import { MoneyOverviewCard } from "./money-overview-card";
@@ -14,6 +15,7 @@ import { PlansOverviewCard } from "./plans-overview-card";
 import { RecentActivityCard } from "./recent-activity-card";
 
 export function PersonalOverviewPage() {
+  const t = createTranslator("PersonalOverview");
   const { data, error, isLoading, reload } = usePersonalOverviewData();
 
   if (isLoading) return <PersonalOverviewSkeleton />;
@@ -22,12 +24,16 @@ export function PersonalOverviewPage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>Personal overview could not load</AlertTitle>
+          <AlertTitle>{t("errorLoad")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
-        <Button variant="outline" className="w-fit" onClick={() => void reload()}>
+        <Button
+          variant="outline"
+          className="w-fit"
+          onClick={() => void reload()}
+        >
           <RefreshCwIcon data-icon="inline-start" aria-hidden="true" />
-          Try again
+          {t("tryAgain")}
         </Button>
       </div>
     );
@@ -40,8 +46,10 @@ export function PersonalOverviewPage() {
       {data.warnings.length > 0 ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>Some information needs attention</AlertTitle>
-          <AlertDescription>{[...new Set(data.warnings)].join(" ")}</AlertDescription>
+          <AlertTitle>{t("warningsTitle")}</AlertTitle>
+          <AlertDescription>
+            {[...new Set(data.warnings)].join(" ")}
+          </AlertDescription>
         </Alert>
       ) : null}
       <PersonalSummaryCards data={data} />
@@ -57,13 +65,28 @@ export function PersonalOverviewPage() {
 }
 
 function PersonalOverviewSkeleton() {
-  const summarySkeletons = ["balance", "income", "expenses", "plans", "loans", "families"];
-  const sectionSkeletons = ["money", "plans", "loans", "families", "activity", "actions"];
+  const t = createTranslator("PersonalOverview");
+  const summarySkeletons = [
+    "balance",
+    "income",
+    "expenses",
+    "plans",
+    "loans",
+    "families",
+  ];
+  const sectionSkeletons = [
+    "money",
+    "plans",
+    "loans",
+    "families",
+    "activity",
+    "actions",
+  ];
 
   return (
     <output
       className="mx-auto flex w-full max-w-7xl flex-col gap-6"
-      aria-label="Loading personal overview"
+      aria-label={t("loadingAria")}
     >
       <div className="flex flex-col gap-2">
         <Skeleton className="h-5 w-32" />

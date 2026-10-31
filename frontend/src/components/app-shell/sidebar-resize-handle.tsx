@@ -2,6 +2,7 @@
 
 import { useLayoutEffect } from "react";
 import { useSidebar } from "@/components/ui/sidebar";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 
 const RESIZE_STORAGE_KEY = "sidebar-width";
@@ -73,15 +74,17 @@ export function SidebarResizeHandle({ open }: { open: boolean }) {
     document.addEventListener("mouseup", onUp);
   }
 
+  const t = createTranslator("AppShell.sidebar");
+
   return (
     <button
       type="button"
       data-sidebar="rail"
       data-slot="sidebar-rail"
-      aria-label="Resize Sidebar"
+      aria-label={t("resizeSidebar")}
       tabIndex={-1}
       onMouseDown={handleMouseDown}
-      title={state === "collapsed" ? "Expand Sidebar" : "Resize Sidebar"}
+      title={state === "collapsed" ? t("expandSidebar") : t("resizeSidebar")}
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 transition-colors ease-linear sm:flex",
         "group-data-[side=left]:-right-4 group-data-[side=right]:left-0",

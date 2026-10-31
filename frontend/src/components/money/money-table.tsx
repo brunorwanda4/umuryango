@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { createTranslator } from "@/i18n/translate";
 import type { MoneyActivity } from "./types";
 import {
   formatDate,
@@ -31,6 +32,8 @@ export function MoneyTable({
   records,
   showType = true,
 }: MoneyTableProps) {
+  const t = createTranslator("PersonalMoney.transactionsTable");
+
   if (!records.length) {
     return (
       <div className="flex min-h-36 flex-col items-center justify-center gap-2 rounded-md border border-dashed p-6 text-center">
@@ -46,12 +49,12 @@ export function MoneyTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Record</TableHead>
-          {showType && <TableHead>Type</TableHead>}
-          <TableHead>Category</TableHead>
-          <TableHead>Date</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Amount</TableHead>
+          <TableHead>{t("record")}</TableHead>
+          {showType && <TableHead>{t("type")}</TableHead>}
+          <TableHead>{t("category")}</TableHead>
+          <TableHead>{t("date")}</TableHead>
+          <TableHead>{t("status")}</TableHead>
+          <TableHead className="text-right">{t("amount")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

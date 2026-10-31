@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { createTranslator } from "@/i18n/translate";
 import {
   ALL_CAPABILITIES,
   AUTHORITY_LABELS,
@@ -40,6 +41,9 @@ import {
   KINSHIP_LABELS,
 } from "@/lib/family-access";
 import apiRequest from "@/service/api";
+
+const t = createTranslator("FamilySettings");
+const tCommon = createTranslator("Common");
 
 type Member = {
   id: string;
@@ -80,22 +84,17 @@ type AuditEvent = {
 
 type FamilySettingsPage = "overview" | "general" | "members" | "audit";
 
-const FAMILY_TYPE_OPTIONS: { value: FamilyType; label: string }[] = [
-  { value: "NUCLEAR", label: "Nuclear family" },
-  { value: "JOINT_EXTENDED", label: "Joint / extended family" },
-  { value: "SINGLE_PARENT", label: "Single-parent family" },
-  { value: "BLENDED", label: "Blended family" },
-  { value: "ADOPTIVE", label: "Adoptive family" },
+const FAMILY_TYPE_VALUES: FamilyType[] = [
+  "NUCLEAR",
+  "JOINT_EXTENDED",
+  "SINGLE_PARENT",
+  "BLENDED",
+  "ADOPTIVE",
 ];
 
 const CURRENCY_OPTIONS = ["RWF", "USD", "EUR", "KES", "TZS", "UGX"];
 
-const CADENCE_OPTIONS = [
-  { value: "monthly", label: "Monthly" },
-  { value: "as-needed", label: "As needed" },
-  { value: "project-based", label: "Project based" },
-  { value: "event-based", label: "Event based" },
-];
+const CADENCE_VALUES = ["monthly", "as-needed", "project-based", "event-based"];
 
 export function FamilySettings({
   familySlug,
@@ -117,7 +116,7 @@ export function FamilySettings({
       setFamily(response.data);
       setError(undefined);
     } else {
-      setError(response.message ?? "Unable to load this family.");
+      setError(response.message ?? t("unableToLoad"));
     }
   }, [familySlug]);
 
@@ -128,7 +127,7 @@ export function FamilySettings({
   if (error) {
     return (
       <Alert variant="destructive">
-        <AlertTitle>Cannot open settings</AlertTitle>
+        <AlertTitle>{t("cannotOpenSettings")}</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
@@ -163,7 +162,7 @@ export function FamilySettings({
         canManageSettings ? (
           <GeneralTab familySlug={familySlug} family={family} onSaved={load} />
         ) : (
-          <SettingsPermissionAlert action="manage general family settings" />
+          <SettingsPermissionAlert action={t("actions.manageGeneral")} />
         )
       ) : null}
 
@@ -185,7 +184,7 @@ export function FamilySettings({
         canManageMembers ? (
           <AuditTab familySlug={familySlug} />
         ) : (
-          <SettingsPermissionAlert action="view the family audit log" />
+          <SettingsPermissionAlert action={t("actions.viewAudit")} />
         )
       ) : null}
     </div>
@@ -203,22 +202,22 @@ function SettingsOverview({
 }) {
   const sections = [
     {
-      title: "General",
-      description: "Edit family name, type, currency, and contribution rhythm.",
+      title: t("generalSectionTitle"),
+      description: t("generalSectionDesc"),
       href: `${settingsHref}/general`,
       icon: SettingsIcon,
       enabled: canManageSettings,
     },
     {
-      title: "Members and access",
-      description: "Control capabilities for each family member.",
+      title: t("membersSectionTitle"),
+      description: t("membersSectionDesc"),
       href: `${settingsHref}/members`,
       icon: UsersIcon,
       enabled: true,
     },
     {
-      title: "Audit",
-      description: "Review recent permission and member activity.",
+      title: t("auditSectionTitle"),
+      description: t("auditSectionDesc"),
       href: `${settingsHref}/audit`,
       icon: ClipboardListIcon,
       enabled: canManageMembers,
@@ -233,7 +232,7 @@ function SettingsOverview({
             <div className="flex items-center justify-between gap-3">
               <section.icon className="size-5" aria-hidden="true" />
               {section.enabled ? null : (
-                <Badge variant="outline">No access</Badge>
+                <Badge variant="outline">{t("noAccess")}</Badge>
               )}
             </div>
             <CardTitle className="text-base">{section.title}</CardTitle>
@@ -243,13 +242,13 @@ function SettingsOverview({
             {section.enabled ? (
               <Button asChild variant="outline" className="w-full">
                 <Link href={section.href}>
-                  Open
+                  {tCommon("open")}
                   <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
                 </Link>
               </Button>
             ) : (
               <Button variant="outline" className="w-full" disabled>
-                Restricted
+                {t("restricted")}
               </Button>
             )}
           </CardContent>
@@ -262,20 +261,20 @@ function SettingsOverview({
 function SettingsPermissionAlert({ action }: { action: string }) {
   return (
     <Alert variant="destructive">
-      <AlertTitle>Access restricted</AlertTitle>
+      <AlertTitle>{t("accessRestricted")}</AlertTitle>
       <AlertDescription>
-        You do not have permission to {action}.
+        {t("noPermissionForAction", { action })}
       </AlertDescription>
     </Alert>
   );
 }
 
 function getPageTitle(page: FamilySettingsPage) {
-  if (page === "general") return "General settings";
-  if (page === "members") return "Member access";
-  if (page === "audit") return "Audit log";
+  if (page === "general") return t("general");
+  if (page === "members") return t("memberAccess");
+  if (page === "audit") return t("auditLog");
 
-  return "Family settings";
+  return t("title");
 }
 
 function MemberAccessCard({
@@ -315,7 +314,7 @@ function MemberAccessCard({
     if (response.ok) {
       onChanged();
     } else {
-      setError(response.message ?? "Unable to update access.");
+      setError(response.message ?? t("unableToUpdateAccess"));
     }
   };
 
@@ -331,7 +330,7 @@ function MemberAccessCard({
             ? member.kinshipLabel === "OTHER" && member.kinshipCustom
               ? member.kinshipCustom
               : KINSHIP_LABELS[member.kinshipLabel]
-            : "No relationship set"}
+            : t("noRelationshipSet")}
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2">
@@ -421,17 +420,15 @@ function GeneralTab({
     if (response.ok) {
       onSaved();
     } else {
-      setError(response.message ?? "Unable to save settings.");
+      setError(response.message ?? t("unableToSave"));
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">General</CardTitle>
-        <CardDescription>
-          Family name, type, and money defaults.
-        </CardDescription>
+        <CardTitle className="text-base">{t("general")}</CardTitle>
+        <CardDescription>{t("generalDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {error ? (
@@ -442,7 +439,7 @@ function GeneralTab({
 
         <div className="flex flex-col gap-1.5">
           <label className="font-medium text-sm" htmlFor={nameId}>
-            Family name
+            {t("familyName")}
           </label>
           <Input
             id={nameId}
@@ -453,18 +450,18 @@ function GeneralTab({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="font-medium text-sm">Family type</span>
+          <span className="font-medium text-sm">{t("familyType")}</span>
           <Select
             value={type}
             onValueChange={(value) => setType(value as FamilyType)}
           >
-            <SelectTrigger aria-label="Family type">
+            <SelectTrigger aria-label={t("familyType")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {FAMILY_TYPE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+              {FAMILY_TYPE_VALUES.map((optionValue) => (
+                <SelectItem key={optionValue} value={optionValue}>
+                  {t(`types.${optionValue}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -473,9 +470,9 @@ function GeneralTab({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
-            <span className="font-medium text-sm">Default currency</span>
+            <span className="font-medium text-sm">{t("defaultCurrency")}</span>
             <Select value={currency} onValueChange={setCurrency}>
-              <SelectTrigger aria-label="Default currency">
+              <SelectTrigger aria-label={t("defaultCurrency")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -489,15 +486,17 @@ function GeneralTab({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <span className="font-medium text-sm">Contribution rhythm</span>
+            <span className="font-medium text-sm">
+              {t("contributionRhythm")}
+            </span>
             <Select value={cadence} onValueChange={setCadence}>
-              <SelectTrigger aria-label="Contribution rhythm">
+              <SelectTrigger aria-label={t("contributionRhythm")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {CADENCE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                {CADENCE_VALUES.map((optionValue) => (
+                  <SelectItem key={optionValue} value={optionValue}>
+                    {t(`cadences.${optionValue}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -507,7 +506,7 @@ function GeneralTab({
 
         <div className="flex flex-col gap-1.5">
           <label className="font-medium text-sm" htmlFor={descriptionId}>
-            Family note
+            {t("familyNote")}
           </label>
           <Textarea
             id={descriptionId}
@@ -519,7 +518,7 @@ function GeneralTab({
 
         <div className="flex justify-end">
           <Button onClick={save} disabled={pending}>
-            {pending ? "Saving" : "Save changes"}
+            {pending ? t("saving") : t("saveChanges")}
           </Button>
         </div>
       </CardContent>
@@ -554,12 +553,12 @@ function AuditTab({ familySlug }: { familySlug: string }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Recent changes</CardTitle>
-        <CardDescription>Permission and member activity.</CardDescription>
+        <CardTitle className="text-base">{t("recentChanges")}</CardTitle>
+        <CardDescription>{t("recentChangesDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {events.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No activity yet.</p>
+          <p className="text-muted-foreground text-sm">{t("noActivityYet")}</p>
         ) : (
           events.map((event) => (
             <div

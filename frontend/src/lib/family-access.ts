@@ -1,3 +1,5 @@
+import { createTranslator } from "@/i18n/translate";
+
 export type FamilyAuthority = "HEAD" | "ADMIN" | "MEMBER";
 
 export type FamilyCapability =
@@ -35,47 +37,51 @@ export type FamilyKinship =
   | "CLEANER"
   | "OTHER";
 
+const tAuth = createTranslator("FamilyAccess.authorities");
+const tKin = createTranslator("FamilyAccess.kinships");
+const tCap = createTranslator("FamilyAccess.capabilities");
+
 export const AUTHORITY_LABELS: Record<FamilyAuthority, string> = {
-  HEAD: "Head",
-  ADMIN: "Admin",
-  MEMBER: "Member",
+  HEAD: tAuth("HEAD"),
+  ADMIN: tAuth("ADMIN"),
+  MEMBER: tAuth("MEMBER"),
 };
 
 export const KINSHIP_LABELS: Record<FamilyKinship, string> = {
-  SON: "Son",
-  DAUGHTER: "Daughter",
-  FATHER: "Father",
-  MOTHER: "Mother",
-  BROTHER: "Brother",
-  SISTER: "Sister",
-  UNCLE: "Uncle",
-  AUNT: "Aunt",
-  GRANDFATHER: "Grandfather",
-  GRANDMOTHER: "Grandmother",
-  COUSIN: "Cousin",
-  IN_LAW: "In-law",
-  FAMILY_FRIEND: "Family friend",
-  NEIGHBOR: "Neighbor",
-  CLEANER: "Cleaner",
-  OTHER: "Other",
+  SON: tKin("SON"),
+  DAUGHTER: tKin("DAUGHTER"),
+  FATHER: tKin("FATHER"),
+  MOTHER: tKin("MOTHER"),
+  BROTHER: tKin("BROTHER"),
+  SISTER: tKin("SISTER"),
+  UNCLE: tKin("UNCLE"),
+  AUNT: tKin("AUNT"),
+  GRANDFATHER: tKin("GRANDFATHER"),
+  GRANDMOTHER: tKin("GRANDMOTHER"),
+  COUSIN: tKin("COUSIN"),
+  IN_LAW: tKin("IN_LAW"),
+  FAMILY_FRIEND: tKin("FAMILY_FRIEND"),
+  NEIGHBOR: tKin("NEIGHBOR"),
+  CLEANER: tKin("CLEANER"),
+  OTHER: tKin("OTHER"),
 };
 
 export const CAPABILITY_LABELS: Record<FamilyCapability, string> = {
-  MANAGE_FAMILY_SETTINGS: "Manage family settings",
-  MANAGE_MEMBERS: "Manage members",
-  MANAGE_CONTACTS: "Manage contacts",
-  MANAGE_SAVINGS: "Manage savings",
-  MANAGE_CONTRIBUTIONS: "Manage contributions",
-  RECORD_INCOME: "Record income",
-  RECORD_EXPENSE: "Record expense",
-  APPROVE_EXPENSE: "Approve expense",
-  MANAGE_DEBTS: "Manage debts",
-  MANAGE_PROJECTS: "Manage projects",
-  MANAGE_EVENTS: "Manage events",
-  MANAGE_ANNOUNCEMENTS: "Manage announcements",
-  MANAGE_DOCUMENTS: "Manage documents",
-  VIEW_REPORTS: "View reports",
-  EXPORT_REPORTS: "Export reports",
+  MANAGE_FAMILY_SETTINGS: tCap("MANAGE_FAMILY_SETTINGS"),
+  MANAGE_MEMBERS: tCap("MANAGE_MEMBERS"),
+  MANAGE_CONTACTS: tCap("MANAGE_CONTACTS"),
+  MANAGE_SAVINGS: tCap("MANAGE_SAVINGS"),
+  MANAGE_CONTRIBUTIONS: tCap("MANAGE_CONTRIBUTIONS"),
+  RECORD_INCOME: tCap("RECORD_INCOME"),
+  RECORD_EXPENSE: tCap("RECORD_EXPENSE"),
+  APPROVE_EXPENSE: tCap("APPROVE_EXPENSE"),
+  MANAGE_DEBTS: tCap("MANAGE_DEBTS"),
+  MANAGE_PROJECTS: tCap("MANAGE_PROJECTS"),
+  MANAGE_EVENTS: tCap("MANAGE_EVENTS"),
+  MANAGE_ANNOUNCEMENTS: tCap("MANAGE_ANNOUNCEMENTS"),
+  MANAGE_DOCUMENTS: tCap("MANAGE_DOCUMENTS"),
+  VIEW_REPORTS: tCap("VIEW_REPORTS"),
+  EXPORT_REPORTS: tCap("EXPORT_REPORTS"),
 };
 
 export const ALL_CAPABILITIES = Object.keys(

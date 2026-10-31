@@ -16,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { createTranslator } from "@/i18n/translate";
 import {
   formatLucideIconName,
   getLucideIcon,
@@ -41,7 +42,7 @@ export const LucideIconPicker = forwardRef<
 >(function LucideIconPicker(
   {
     value,
-    placeholder = "Select icon",
+    placeholder,
     invalid = false,
     disabled,
     className,
@@ -51,6 +52,8 @@ export const LucideIconPicker = forwardRef<
   },
   ref,
 ) {
+  const t = createTranslator("Common");
+  const effectivePlaceholder = placeholder ?? t("selectIcon");
   const [open, setOpen] = useState(false);
   const normalizedValue = normalizeLucideIconName(value);
   const selectedIcon = useMemo(
@@ -59,7 +62,8 @@ export const LucideIconPicker = forwardRef<
   );
   const SelectedIcon = getLucideIcon(value);
   const selectedLabel =
-    selectedIcon?.label ?? (value ? formatLucideIconName(value) : placeholder);
+    selectedIcon?.label ??
+    (value ? formatLucideIconName(value) : effectivePlaceholder);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -88,9 +92,9 @@ export const LucideIconPicker = forwardRef<
         className="w-(--radix-popover-trigger-width) p-0"
       >
         <Command>
-          <CommandInput placeholder="Search Lucide icons..." />
+          <CommandInput placeholder={t("searchIcons")} />
           <CommandList className="max-h-80">
-            <CommandEmpty>No icon found.</CommandEmpty>
+            <CommandEmpty>{t("noIconFound")}</CommandEmpty>
             <CommandGroup>
               {lucideIconOptions.map((option) => {
                 const checked =

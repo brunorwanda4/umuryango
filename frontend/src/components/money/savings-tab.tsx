@@ -9,21 +9,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { createTranslator } from "@/i18n/translate";
 import { moneyCurrency, savingsGoals } from "./money-data";
 import { MoneyFormDialog } from "./money-form-dialog";
 import { formatDate, formatStatus, getProgressPercent } from "./utils";
 
 export function SavingsTab() {
+  const t = createTranslator("PersonalMoney.legacyTabs.savings");
+  const tCommon = createTranslator("PersonalMoney");
+
   return (
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>Savings Goals</CardTitle>
-            <CardDescription>
-              Follow goals for emergencies, education, projects, and planned
-              family events.
-            </CardDescription>
+            <CardTitle>{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </div>
           <MoneyFormDialog type="savings" />
         </CardHeader>
@@ -49,7 +50,9 @@ export function SavingsTab() {
               <CardContent className="flex flex-col gap-4">
                 <div className="flex items-end justify-between gap-3">
                   <div>
-                    <p className="text-muted-foreground text-sm">Saved</p>
+                    <p className="text-muted-foreground text-sm">
+                      {t("saved")}
+                    </p>
                     <p className="font-semibold text-xl">
                       <CompactMoney
                         currency={moneyCurrency}
@@ -68,9 +71,11 @@ export function SavingsTab() {
                 <div className="flex flex-col gap-2">
                   <Progress value={progress} />
                   <div className="flex justify-between gap-3 text-muted-foreground text-xs">
-                    <span>{progress}% complete</span>
                     <span>
-                      Target{" "}
+                      {tCommon("percentComplete", { percent: progress })}
+                    </span>
+                    <span>
+                      {t("target")}{" "}
                       <CompactMoney
                         currency={moneyCurrency}
                         value={goal.targetMinorUnits}
@@ -79,7 +84,7 @@ export function SavingsTab() {
                   </div>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  Due {formatDate(goal.dueDate)}
+                  {tCommon("due", { date: formatDate(goal.dueDate) })}
                 </p>
               </CardContent>
             </Card>

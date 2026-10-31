@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
+import { createTranslator } from "@/i18n/translate";
 
 export function ExpenseSummaryCards({
   summary,
@@ -21,6 +22,8 @@ export function ExpenseSummaryCards({
     periodTotalMinorUnits: string;
   };
 }) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
+
   return (
     <CommonOverviewCardDisplay
       cardDescriptionClassName="flex items-center text-sm font-medium leading-5 text-muted-foreground max-sm:text-sm max-sm:font-medium "
@@ -31,7 +34,7 @@ export function ExpenseSummaryCards({
       cards={[
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Total expenses",
+          description: t("summary.totalExpenses"),
           iconSource: {
             image: { src: "/images/icons/wallet.png" },
             line: WalletCardsIcon,
@@ -45,7 +48,7 @@ export function ExpenseSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Expense transactions",
+          description: t("summary.expenseTransactions"),
           iconSource: {
             image: { src: "/images/icons/transaction.png" },
             line: ArrowUpRightIcon,
@@ -54,7 +57,7 @@ export function ExpenseSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "This month's",
+          description: t("summary.thisMonth"),
           iconSource: {
             image: { src: "/images/icons/calendar.png" },
             line: CalendarDaysIcon,
@@ -68,7 +71,7 @@ export function ExpenseSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Largest expense",
+          description: t("summary.largestExpense"),
           iconSource: {
             image: { src: "/images/icons/quality.png" },
             line: TrophyIcon,
@@ -76,7 +79,7 @@ export function ExpenseSummaryCards({
           value: (
             <CompactMoney
               currency="RWF"
-              emptyLabel="No records"
+              emptyLabel={t("summary.noRecords")}
               value={summary.largestExpense?.amountMinorUnits}
             />
           ),

@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import type { ApprovalAnalyticsModel } from "./types";
 
 export function ApprovalSummaryCards({
@@ -23,44 +24,45 @@ export function ApprovalSummaryCards({
   analytics: ApprovalAnalyticsModel;
   currency: string;
 }) {
+  const t = createTranslator("FamilyApprovals");
   const cards = [
     {
-      title: "Pending Approvals",
+      title: t("pendingApprovalsTitle"),
       value: analytics.pendingCount.toLocaleString(),
-      helper: "Records waiting for review",
+      helper: t("pendingApprovalsHelper"),
       icon: FileClockIcon,
     },
     {
-      title: "Approved Today",
+      title: t("approvedToday"),
       value: analytics.approvedToday.toLocaleString(),
-      helper: "Transactions locked today",
+      helper: t("approvedTodayHelper"),
       icon: CheckCircle2Icon,
     },
     {
-      title: "Rejected Today",
+      title: t("rejectedToday"),
       value: analytics.rejectedToday.toLocaleString(),
-      helper: "Rejected with audit history",
+      helper: t("rejectedTodayHelper"),
       icon: XCircleIcon,
     },
     {
-      title: "Total Approved This Month",
+      title: t("totalApprovedThisMonth"),
       value: analytics.approvedThisMonthMinorUnits,
-      helper: "Persisted approved transactions",
+      helper: t("totalApprovedThisMonthHelper"),
       icon: ShieldCheckIcon,
       isMoney: true,
     },
     {
-      title: "Average Approval Time",
+      title: t("averageApprovalTime"),
       value: analytics.averageApprovalHours
         ? `${analytics.averageApprovalHours.toFixed(1)}h`
-        : "No data",
-      helper: "Created to approved timestamp",
+        : t("noData"),
+      helper: t("averageApprovalTimeHelper"),
       icon: Clock3Icon,
     },
     {
-      title: "My Pending Reviews",
+      title: t("myPendingReviews"),
       value: analytics.myPendingReviews.toLocaleString(),
-      helper: "Visible to this account",
+      helper: t("myPendingReviewsHelper"),
       icon: ListChecksIcon,
     },
   ];

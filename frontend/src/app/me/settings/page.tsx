@@ -1,11 +1,20 @@
 import { AlertCircleIcon } from "lucide-react";
+import type { Metadata } from "next";
 import { SidebarIconStyleSettings } from "@/components/app-shell/sidebar-icon-style-settings";
 import { PersonalProfileSettings } from "@/components/settings/personal-profile-settings";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { CurrentUser } from "@/hooks/use-current-user";
+import { createTranslator } from "@/i18n/translate";
+import enMessages from "@/messages/en.json";
 import { serverApiRequest } from "@/service/server-api";
 
+export const metadata: Metadata = {
+  title: enMessages.PersonalSettings.metadataTitle,
+  description: enMessages.PersonalSettings.metadataDescription,
+};
+
 export default async function SettingsPage() {
+  const t = createTranslator("PersonalSettings");
   const response = await serverApiRequest<undefined, { user?: CurrentUser }>(
     "get",
     "/auth/me",
@@ -17,11 +26,8 @@ export default async function SettingsPage() {
   return (
     <div className="flex max-w-4xl flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="font-bold text-2xl tracking-tight">Personal settings</h1>
-        <p className="text-muted-foreground text-sm">
-          Manage your profile, account details, security, and workspace
-          preferences.
-        </p>
+        <h1 className="font-bold text-2xl tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("description")}</p>
       </div>
 
       {user ? (
@@ -29,9 +35,9 @@ export default async function SettingsPage() {
       ) : (
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>Profile unavailable</AlertTitle>
+          <AlertTitle>{t("profileUnavailableTitle")}</AlertTitle>
           <AlertDescription>
-            {response.message ?? "Your profile could not be loaded."}
+            {response.message ?? t("profileUnavailableDesc")}
           </AlertDescription>
         </Alert>
       )}

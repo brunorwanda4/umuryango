@@ -25,6 +25,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createTranslator } from "@/i18n/translate";
 import { TableEmptyState } from "../money-ui-helpers";
 import { formatDate } from "../utils";
 import {
@@ -49,15 +50,17 @@ export function ApprovalQueue({
   onOpenDetails: (approval: ApprovalQueueItem) => void;
   processingId: string | null;
 }) {
+  const t = createTranslator("FamilyApprovals");
+  const tCommon = createTranslator("Common");
   const columns: ColumnDef<ApprovalQueueItem>[] = [
     {
       accessorKey: "type",
-      header: "Type",
+      header: t("typeColumn"),
       cell: ({ row }) => <TypeBadge type={row.original.type} />,
     },
     {
       accessorKey: "title",
-      header: "Title",
+      header: t("titleColumn"),
       cell: ({ row }) => (
         <button
           className="block max-w-[220px] truncate text-left font-medium hover:underline"
@@ -70,19 +73,19 @@ export function ApprovalQueue({
     },
     {
       accessorKey: "category",
-      header: "Category",
+      header: t("categoryColumn"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">{row.original.category}</span>
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: () => <div className="text-right">Amount</div>,
+      header: () => <div className="text-right">{t("amountColumn")}</div>,
       cell: ({ row }) => (
         <div className="whitespace-nowrap text-right font-mono">
           <CompactMoney
             currency={currency}
-            emptyLabel="Not recorded"
+            emptyLabel={tCommon("notRecorded")}
             value={row.original.amountMinorUnits}
           />
         </div>
@@ -90,14 +93,14 @@ export function ApprovalQueue({
     },
     {
       accessorKey: "requestedBy",
-      header: "Requested By",
+      header: t("requestedBy"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">{row.original.requestedBy}</span>
       ),
     },
     {
       accessorKey: "submittedAt",
-      header: "Submitted Date",
+      header: t("submittedDate"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {formatDate(row.original.submittedAt)}
@@ -106,17 +109,17 @@ export function ApprovalQueue({
     },
     {
       accessorKey: "priority",
-      header: "Priority",
+      header: t("priority"),
       cell: ({ row }) => <PriorityBadge priority={row.original.priority} />,
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: t("statusColumn"),
       cell: ({ row }) => <ApprovalStatusBadge status={row.original.status} />,
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Actions</div>,
+      header: () => <div className="text-right">{tCommon("actions")}</div>,
       cell: ({ row }) => {
         const approval = row.original;
         const canUseTransactionAction =
@@ -127,7 +130,7 @@ export function ApprovalQueue({
         return (
           <div className="flex justify-end gap-1">
             <Button
-              aria-label="Open approval details"
+              aria-label={t("openDetailsAria")}
               size="icon-sm"
               type="button"
               variant="ghost"
@@ -138,7 +141,7 @@ export function ApprovalQueue({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  aria-label="Approval actions"
+                  aria-label={t("approvalActionsAria")}
                   size="icon-sm"
                   variant="ghost"
                 >
@@ -148,7 +151,7 @@ export function ApprovalQueue({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onOpenDetails(approval)}>
                   <FileTextIcon className="mr-2 size-4" />
-                  View Details
+                  {t("viewDetails")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   disabled={
@@ -157,7 +160,7 @@ export function ApprovalQueue({
                   onClick={() => onAction(approval, "approve")}
                 >
                   <CheckCircle2Icon className="mr-2 size-4" />
-                  Approve
+                  {t("approve")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   disabled={
@@ -166,15 +169,15 @@ export function ApprovalQueue({
                   onClick={() => onAction(approval, "reject")}
                 >
                   <XCircleIcon className="mr-2 size-4" />
-                  Reject
+                  {t("reject")}
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled>
                   <MessageSquareIcon className="mr-2 size-4" />
-                  Request Changes
+                  {t("requestChanges")}
                 </DropdownMenuItem>
                 <DropdownMenuItem disabled>
                   <UserRoundPlusIcon className="mr-2 size-4" />
-                  Assign Approver
+                  {t("assignApprover")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -187,11 +190,8 @@ export function ApprovalQueue({
   return (
     <Card className="min-w-0">
       <CardHeader>
-        <CardTitle>Approval Queue</CardTitle>
-        <CardDescription>
-          Pending income, expenses, budget requests, large transactions, and
-          other financial records that require review.
-        </CardDescription>
+        <CardTitle>{t("queueTitle")}</CardTitle>
+        <CardDescription>{t("queueDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="min-w-0">
         {approvals.length ? (
@@ -199,8 +199,8 @@ export function ApprovalQueue({
         ) : (
           <TableEmptyState
             icon={FileClockIcon}
-            title="No pending approvals"
-            description="All financial transactions have been reviewed. New income, expenses, or budget requests requiring approval will appear here."
+            title={t("noPendingApprovals")}
+            description={t("noPendingApprovalsDesc")}
           />
         )}
       </CardContent>

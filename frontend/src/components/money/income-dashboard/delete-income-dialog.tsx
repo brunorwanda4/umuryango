@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import type { RecentIncomeRecord } from "./income-dashboard-data";
 
@@ -37,6 +38,7 @@ export function DeleteIncomeDialog({
   open,
   trigger,
 }: DeleteIncomeDialogProps) {
+  const t = createTranslator("PersonalMoney.personalIncome");
   const [isPending, setIsPending] = useState(false);
 
   async function deleteIncome() {
@@ -48,11 +50,11 @@ export function DeleteIncomeDialog({
     setIsPending(false);
 
     if (!response.ok) {
-      toast.error(response.message ?? "Income could not be deleted.");
+      toast.error(response.message ?? t("deleteDialog.deleteError"));
       return;
     }
 
-    toast.success("Income deleted successfully");
+    toast.success(t("deleteDialog.deletedToast"));
     await onSuccess?.();
   }
 
@@ -72,7 +74,7 @@ export function DeleteIncomeDialog({
               variant="ghost"
             >
               <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-              Delete income
+              {t("deleteDialog.confirm")}
             </Button>
           ) : (
             trigger
@@ -81,21 +83,20 @@ export function DeleteIncomeDialog({
       )}
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete income?</AlertDialogTitle>
+          <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            This reverses {income.source} and keeps its audit history. It will
-            no longer be included in income totals.
+            {t("deleteDialog.description", { source: income.source })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("deleteDialog.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={isPending}
             onClick={deleteIncome}
             variant="destructive"
           >
             {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Delete income
+            {t("deleteDialog.confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

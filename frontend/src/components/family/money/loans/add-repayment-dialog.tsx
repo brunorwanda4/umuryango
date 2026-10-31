@@ -1,7 +1,6 @@
 "use client";
 
 import { CommonFormField } from "@/components/common/form/common-form-field";
-import { CompactMoney } from "@/components/common/money/compact-money";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import { toMinorNumber } from "./loan-utils";
 import {
@@ -48,6 +48,7 @@ export function AddRepaymentDialog({
   onSuccess: () => void;
   open: boolean;
 }) {
+  const t = createTranslator("FamilyLoans");
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     RepaymentFormValues,
     LoanRepayment
@@ -73,7 +74,7 @@ export function AddRepaymentDialog({
         family.id,
       )}/money/loans/${encodeURIComponent(loan?.id ?? "")}/repayments`,
     },
-    onSuccessMessage: "Repayment recorded successfully",
+    onSuccessMessage: t("toasts.repaymentRecorded"),
     toastOnSuccess: true,
     toastOnError: true,
     onError: async (message) => {
@@ -101,12 +102,12 @@ export function AddRepaymentDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Add Repayment</DialogTitle>
+          <DialogTitle>{t("repaymentDialogTitle")}</DialogTitle>
           <DialogDescription>
-            Record a payment against {loan?.title ?? "this loan"}. Remaining
-            balance:{" "}
-            <CompactMoney currency={family.defaultCurrency} value={remaining} />
-            .
+            {t("repaymentDialogDesc", {
+              title: loan?.title ?? "this loan",
+              remaining: `${remaining} ${family.defaultCurrency}`,
+            })}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -119,15 +120,14 @@ export function AddRepaymentDialog({
           ) : null}
           {exceedsRemaining ? (
             <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-destructive text-sm">
-              Repayments cannot exceed the remaining balance unless admin
-              overpayment is allowed.
+              {t("exceedsRemainingWarning")}
             </div>
           ) : null}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <CommonFormField
               control={form.control}
               name="amountMinorUnits"
-              label={`Amount paid (${family.defaultCurrency})`}
+              label={t("amountPaidLabel", { currency: family.defaultCurrency })}
               fieldType="money"
               currency={family.defaultCurrency}
               required
@@ -135,7 +135,7 @@ export function AddRepaymentDialog({
             <CommonFormField
               control={form.control}
               name="paymentDate"
-              label="Payment date"
+              label={t("paymentDateLabel")}
               fieldType="date"
               required
             />
@@ -143,7 +143,7 @@ export function AddRepaymentDialog({
           <CommonFormField
             control={form.control}
             name="paymentMethod"
-            label="Payment method"
+            label={t("paymentMethodLabel")}
             fieldType="select"
             selectOptions={paymentMethods}
             required
@@ -152,38 +152,38 @@ export function AddRepaymentDialog({
             <CommonFormField
               control={form.control}
               name="paidBy"
-              label="Paid by"
-              placeholder="Who made the payment?"
+              label={t("paidByLabel")}
+              placeholder={t("paidByPlaceholder")}
               required
             />
             <CommonFormField
               control={form.control}
               name="receivedBy"
-              label="Received by"
-              placeholder="Who received the payment?"
+              label={t("receivedByLabel")}
+              placeholder={t("receivedByPlaceholder")}
               required
             />
           </div>
           <CommonFormField
             control={form.control}
             name="receiptFileName"
-            label="Receipt"
+            label={t("receiptLabel")}
             type="file"
-            description="Attach proof of repayment."
+            description={t("receiptDesc")}
           />
           <CommonFormField
             control={form.control}
             name="notes"
-            label="Notes"
+            label={t("notesLabel")}
             fieldType="textarea"
-            placeholder="Any repayment context or reference number"
+            placeholder={t("notesPlaceholder")}
           />
           <CommonFormField
             control={form.control}
             name="allowOverpayment"
-            label="Allow admin overpayment"
+            label={t("allowOverpaymentLabel")}
             fieldType="checkbox"
-            description="Use only when an administrator intentionally records extra payment."
+            description={t("allowOverpaymentDesc")}
           />
         </form>
         <DialogFooter>
@@ -198,7 +198,7 @@ export function AddRepaymentDialog({
             }
             className="w-full sm:w-auto"
           >
-            {isPending ? "Recording..." : "Record Repayment"}
+            {isPending ? t("recordingRepayment") : t("recordRepaymentBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>

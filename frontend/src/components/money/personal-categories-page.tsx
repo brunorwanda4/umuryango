@@ -20,10 +20,12 @@ import {
 import { PersonalCategoryDialog } from "@/components/money/personal-category-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import apiRequest from "@/service/api";
 
 export function PersonalCategoriesPage() {
+  const t = createTranslator("PersonalMoney.categoriesSection");
   const [familyId, setFamilyId] = useState<string | null>(null);
   const [categories, setCategories] = useState<MoneyCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,12 +62,10 @@ export function PersonalCategoriesPage() {
       setCategories(enrichApiCategories(response.data ?? [], null));
     } else {
       setCategories([]);
-      toast.error(
-        response.message ?? "Failed to load categories from database",
-      );
+      toast.error(response.message ?? t("loadError"));
     }
     setLoading(false);
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadCategories();
@@ -105,8 +105,8 @@ export function PersonalCategoriesPage() {
     await loadCategories();
     toast.success(
       nextStatus === "ACTIVE"
-        ? `${cat.name} is active again`
-        : `${cat.name} has been deactivated`,
+        ? t("statusActivatedToast", { name: cat.name })
+        : t("statusDeactivatedToast", { name: cat.name }),
     );
   };
 
@@ -124,7 +124,7 @@ export function PersonalCategoriesPage() {
     }
 
     await loadCategories();
-    toast.success(`${cat.name} has been deleted`);
+    toast.success(t("deletedToast", { name: cat.name }));
   };
 
   const openCreateDialog = () => {
@@ -154,11 +154,10 @@ export function PersonalCategoriesPage() {
       <div className="flex flex-col gap-1">
         <h1 className="flex items-center gap-3 font-fraunces text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           <ListIcon className="size-8 sm:size-9" aria-hidden="true" />
-          Categories
+          {t("title")}
         </h1>
         <p className="mt-2 mb-2 text-[15px] text-muted-foreground">
-          Manage the income and expense categories used in your personal money
-          records.
+          {t("description")}
         </p>
       </div>
 
@@ -167,19 +166,17 @@ export function PersonalCategoriesPage() {
         <div className="my-4 flex flex-wrap items-center justify-between gap-4 rounded-[16px] border border-border bg-card p-4">
           <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <UsersIcon className="size-5 flex-none text-foreground" />
-            <span>
-              Your personal money workspace could not be loaded categories.
-            </span>
+            <span>{t("noWorkspace")}</span>
           </div>
           <Button asChild size="sm">
-            <Link href="/family">Open family workspaces</Link>
+            <Link href="/family">{t("openFamilyWorkspaces")}</Link>
           </Button>
         </div>
       ) : null}
 
       {/* Segmented View Control (Data / Charts) */}
       <fieldset
-        aria-label="View"
+        aria-label={t("viewAria")}
         className="my-5 inline-flex self-start rounded-full border border-border bg-muted p-1"
       >
         <button
@@ -193,7 +190,7 @@ export function PersonalCategoriesPage() {
               : "text-muted-foreground hover:text-foreground",
           )}
         >
-          Data
+          {t("data")}
         </button>
         <button
           type="button"
@@ -206,7 +203,7 @@ export function PersonalCategoriesPage() {
               : "text-muted-foreground hover:text-foreground",
           )}
         >
-          Charts
+          {t("charts")}
         </button>
       </fieldset>
 
@@ -216,7 +213,7 @@ export function PersonalCategoriesPage() {
           {/* Header row: Title on left, Search on right */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-fraunces text-xl font-semibold tracking-tight text-foreground">
-              Category master data
+              {t("masterDataTitle")}
             </h2>
             <div className="flex h-10 min-w-[220px] items-center gap-2 rounded-xl border border-border bg-muted/60 px-3.5">
               <SearchIcon
@@ -227,8 +224,8 @@ export function PersonalCategoriesPage() {
                 type="search"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search categories..."
-                aria-label="Search categories"
+                placeholder={t("searchPlaceholder")}
+                aria-label={t("searchAria")}
                 className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
             </div>
@@ -248,7 +245,7 @@ export function PersonalCategoriesPage() {
                     : "border border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
               >
-                All
+                {t("all")}
               </button>
               <button
                 type="button"
@@ -261,7 +258,7 @@ export function PersonalCategoriesPage() {
                     : "border border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
               >
-                Income
+                {t("income")}
               </button>
               <button
                 type="button"
@@ -274,7 +271,7 @@ export function PersonalCategoriesPage() {
                     : "border border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
               >
-                Expense
+                {t("expense")}
               </button>
               <button
                 type="button"
@@ -287,7 +284,7 @@ export function PersonalCategoriesPage() {
                     : "border border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
               >
-                Inactive
+                {t("inactive")}
               </button>
             </div>
 
@@ -295,9 +292,7 @@ export function PersonalCategoriesPage() {
               type="button"
               onClick={() => {
                 if (!familyId) {
-                  toast.error(
-                    "Please create or join a family workspace first.",
-                  );
+                  toast.error(t("createWorkspaceFirst"));
                   return;
                 }
                 openCreateDialog();
@@ -305,7 +300,7 @@ export function PersonalCategoriesPage() {
               className="h-9 gap-1.5 rounded-full bg-foreground px-4 text-sm font-semibold text-background shadow-sm hover:bg-foreground/90"
             >
               <PlusIcon className="size-4" />
-              Add category
+              {t("addCategory")}
             </Button>
           </div>
 
@@ -322,19 +317,16 @@ export function PersonalCategoriesPage() {
                 <FolderIcon className="size-7" />
               </div>
               <h3 className="font-fraunces text-xl font-semibold text-foreground">
-                No categories found
+                {t("noCategoriesTitle")}
               </h3>
               <p className="mx-auto mt-1.5 mb-4 max-w-sm text-sm text-muted-foreground">
-                Create a category for income or expenses, such as Salary, Food,
-                or School fees.
+                {t("noCategoriesDesc")}
               </p>
               <Button
                 type="button"
                 onClick={() => {
                   if (!familyId) {
-                    toast.error(
-                      "Please create or join a family workspace first.",
-                    );
+                    toast.error(t("createWorkspaceFirst"));
                     return;
                   }
                   openCreateDialog();
@@ -342,12 +334,12 @@ export function PersonalCategoriesPage() {
                 className="h-10 gap-2 rounded-full bg-foreground px-5 text-sm font-semibold text-background shadow-sm hover:bg-foreground/90"
               >
                 <PlusIcon className="size-4" />
-                Add category
+                {t("addCategory")}
               </Button>
             </div>
           ) : filteredCategories.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
-              No categories match your search or filter.
+              {t("noMatch")}
             </p>
           ) : (
             <div className="flex flex-col">
@@ -373,7 +365,9 @@ export function PersonalCategoriesPage() {
                           {cat.name}
                         </div>
                         <div className="text-[13px] text-muted-foreground">
-                          {isIncome ? "Income" : "Expense"} category
+                          {t("categoryType", {
+                            type: isIncome ? t("income") : t("expense"),
+                          })}
                         </div>
                       </div>
                     </div>
@@ -389,7 +383,7 @@ export function PersonalCategoriesPage() {
                         )}
                       >
                         <span className="size-1.5 rounded-full bg-current" />
-                        {isIncome ? "Income" : "Expense"}
+                        {isIncome ? t("income") : t("expense")}
                       </span>
 
                       {/* Status Badge */}
@@ -402,7 +396,7 @@ export function PersonalCategoriesPage() {
                         )}
                       >
                         <span className="size-1.5 rounded-full bg-current" />
-                        {isActive ? "Active" : "Inactive"}
+                        {isActive ? t("active") : t("inactive")}
                       </span>
 
                       {/* Activate / Deactivate Toggle */}
@@ -412,7 +406,7 @@ export function PersonalCategoriesPage() {
                         onClick={() => handleToggleStatus(cat)}
                         className="h-[34px] rounded-[10px] px-3 text-[13px] font-semibold"
                       >
-                        {isActive ? "Deactivate" : "Activate"}
+                        {isActive ? t("deactivate") : t("activate")}
                       </Button>
 
                       {/* Edit */}
@@ -422,7 +416,7 @@ export function PersonalCategoriesPage() {
                         onClick={() => openEditDialog(cat)}
                         className="h-[34px] rounded-[10px] px-3 text-[13px] font-semibold"
                       >
-                        Edit
+                        {t("edit")}
                       </Button>
 
                       {/* Delete */}
@@ -432,7 +426,7 @@ export function PersonalCategoriesPage() {
                         onClick={() => handleDelete(cat)}
                         className="h-[34px] rounded-[10px] px-3 text-[13px] font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
                       >
-                        Delete
+                        {t("delete")}
                       </Button>
                     </div>
                   </div>
@@ -446,7 +440,7 @@ export function PersonalCategoriesPage() {
         <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
           <div className="mb-3.5 flex items-center justify-between gap-3">
             <h2 className="font-fraunces text-xl font-semibold tracking-tight text-foreground">
-              Categories by type
+              {t("categoriesByType")}
             </h2>
           </div>
 
@@ -459,7 +453,10 @@ export function PersonalCategoriesPage() {
                     viewBox="0 0 160 160"
                     className="size-44 sm:size-48"
                     role="img"
-                    aria-label={`${incomeCount} income and ${expenseCount} expense categories`}
+                    aria-label={t("categoriesDonutAria", {
+                      income: incomeCount,
+                      expense: expenseCount,
+                    })}
                   >
                     <circle
                       r="60"
@@ -509,7 +506,7 @@ export function PersonalCategoriesPage() {
                       textAnchor="middle"
                       className="fill-muted-foreground text-[11px]"
                     >
-                      categories
+                      {t("categoriesCount")}
                     </text>
                   </svg>
                 </div>
@@ -518,7 +515,7 @@ export function PersonalCategoriesPage() {
                 <div className="grid min-w-[200px] gap-3 text-sm">
                   <div className="grid grid-cols-[12px_1fr_auto_44px] items-center gap-2.5">
                     <i className="size-3 rounded-full bg-[#15803D]" />
-                    <span>Income</span>
+                    <span>{t("income")}</span>
                     <b className="text-right font-semibold">{incomeCount}</b>
                     <span className="text-right text-xs text-muted-foreground">
                       {totalCount
@@ -530,7 +527,7 @@ export function PersonalCategoriesPage() {
 
                   <div className="grid grid-cols-[12px_1fr_auto_44px] items-center gap-2.5">
                     <i className="size-3 rounded-full bg-[#B91C1C]" />
-                    <span>Expense</span>
+                    <span>{t("expense")}</span>
                     <b className="text-right font-semibold">{expenseCount}</b>
                     <span className="text-right text-xs text-muted-foreground">
                       {totalCount
@@ -542,7 +539,7 @@ export function PersonalCategoriesPage() {
 
                   <div className="grid grid-cols-[12px_1fr_auto_44px] items-center gap-2.5">
                     <i className="size-3 rounded-full bg-[#1D4ED8]" />
-                    <span>Active</span>
+                    <span>{t("active")}</span>
                     <b className="text-right font-semibold">{activeCount}</b>
                     <span className="text-right text-xs text-muted-foreground">
                       {totalCount
@@ -554,7 +551,7 @@ export function PersonalCategoriesPage() {
 
                   <div className="grid grid-cols-[12px_1fr_auto_44px] items-center gap-2.5">
                     <i className="size-3 rounded-full bg-[#B45309]" />
-                    <span>Inactive</span>
+                    <span>{t("inactive")}</span>
                     <b className="text-right font-semibold">{inactiveCount}</b>
                     <span className="text-right text-xs text-muted-foreground">
                       {totalCount
@@ -568,7 +565,7 @@ export function PersonalCategoriesPage() {
 
               <div>
                 <p className="mb-2 text-xs text-muted-foreground">
-                  Each piece below is one of your categories, in its color.
+                  {t("colorSwatchDesc")}
                 </p>
                 <div className="flex h-3.5 overflow-hidden rounded-full bg-muted">
                   {categories.map((c) => (
@@ -584,12 +581,12 @@ export function PersonalCategoriesPage() {
             </div>
           ) : (
             <p className="py-4 text-sm text-muted-foreground">
-              Add categories to see the chart.
+              {t("addCategoriesToSeeChart")}
             </p>
           )}
 
           <p className="mt-4 text-xs text-muted-foreground">
-            Counts update as you add, activate, or delete categories.
+            {t("countsUpdateNote")}
           </p>
         </section>
       )}

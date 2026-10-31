@@ -20,6 +20,7 @@ import {
   UsersIcon,
   WalletCardsIcon,
 } from "lucide-react";
+import { createTranslator } from "@/i18n/translate";
 import type { SidebarIconSource } from "./sidebar-icon";
 
 const sidebarIcon = (
@@ -48,19 +49,23 @@ export type NavigationGroup = {
 export type AppSidebarMode = "family" | "personal";
 export type SidebarView = "main" | "settings";
 
+const tNav = createTranslator("AppShell.navigation");
+const tItems = createTranslator("AppShell.navigation.items");
+const tGroups = createTranslator("AppShell.navigation.groups");
+
 const personalSettingsChildren: NavigationItem[] = [
   {
-    title: "Account",
+    title: tItems("account"),
     href: "/me/settings",
     icon: sidebarIcon("account", SettingsIcon),
   },
   {
-    title: "Security",
+    title: tItems("security"),
     href: "/me/security",
     icon: sidebarIcon("security", ShieldCheckIcon),
   },
   {
-    title: "Help and guides",
+    title: tItems("help"),
     href: "/items",
     icon: sidebarIcon("help", BookOpenCheckIcon),
   },
@@ -68,28 +73,28 @@ const personalSettingsChildren: NavigationItem[] = [
 
 const personalMoneyChildren: NavigationItem[] = [
   {
-    title: "Overview",
+    title: tItems("overview"),
     href: "/me/money",
     icon: sidebarIcon("money", BadgeDollarSignIcon),
     exact: true,
   },
   {
-    title: "Income",
+    title: tItems("income"),
     href: "/me/money/income",
     icon: sidebarIcon("income", ArrowDownIcon),
   },
   {
-    title: "Expenses",
+    title: tItems("expenses"),
     href: "/me/money/expenses",
     icon: sidebarIcon("expense", ArrowUpIcon),
   },
   {
-    title: "Categories",
+    title: tItems("categories"),
     href: "/me/money/categories",
     icon: sidebarIcon("categories", FolderTreeIcon),
   },
   {
-    title: "Loans",
+    title: tItems("loans"),
     href: "/me/money/loans",
     icon: sidebarIcon("loan", LandmarkIcon),
   },
@@ -97,41 +102,41 @@ const personalMoneyChildren: NavigationItem[] = [
 
 export const personalNavigation: NavigationGroup[] = [
   {
-    label: "Personal",
+    label: tGroups("personal"),
     items: [
       {
-        title: "Overview",
+        title: tItems("overview"),
         href: "/me",
         icon: sidebarIcon("dashboard", LayoutDashboardIcon),
       },
       {
-        title: "My money",
+        title: tItems("money"),
         href: "/me/money",
         icon: sidebarIcon("money", WalletCardsIcon),
         items: personalMoneyChildren,
       },
       {
-        title: "Plans",
+        title: tItems("plans"),
         href: "/me/plans",
         icon: sidebarIcon("plan", ListChecksIcon),
       },
       {
-        title: "Contacts",
+        title: tItems("contacts"),
         href: "/me/contacts",
         icon: sidebarIcon("contacts", ContactRoundIcon),
       },
     ],
   },
   {
-    label: "Workspace",
+    label: tGroups("family"),
     items: [
       {
-        title: "Family workspaces",
+        title: tItems("familyWorkspaces"),
         href: "/family",
         icon: sidebarIcon("family", UsersIcon),
       },
       {
-        title: "Settings",
+        title: tItems("settings"),
         href: "/me/settings",
         icon: sidebarIcon("settings", SettingsIcon),
         items: personalSettingsChildren,
@@ -142,26 +147,26 @@ export const personalNavigation: NavigationGroup[] = [
 
 export const personalSettingsNavigation: NavigationGroup[] = [
   {
-    label: "Personal settings",
+    label: tGroups("personal"),
     items: [
       {
-        title: "Account",
+        title: tItems("account"),
         href: "/me/settings",
         icon: sidebarIcon("account", SettingsIcon),
         exact: true,
       },
       {
-        title: "Security",
+        title: tItems("security"),
         href: "/me/security",
         icon: sidebarIcon("security", ShieldCheckIcon),
       },
     ],
   },
   {
-    label: "Support",
+    label: tItems("help"),
     items: [
       {
-        title: "Help and guides",
+        title: tItems("help"),
         href: "/items",
         icon: sidebarIcon("help", BookOpenCheckIcon),
       },
@@ -171,17 +176,17 @@ export const personalSettingsNavigation: NavigationGroup[] = [
 
 const getFamilySettingsChildren = (familyHref: string): NavigationItem[] => [
   {
-    title: "General",
+    title: tItems("general"),
     href: `${familyHref}/settings/general`,
     icon: sidebarIcon("settings", SettingsIcon),
   },
   {
-    title: "Members and access",
+    title: tItems("members"),
     href: `${familyHref}/settings/members`,
     icon: sidebarIcon("members", UsersIcon),
   },
   {
-    title: "Audit",
+    title: tItems("audit"),
     href: `${familyHref}/settings/audit`,
     icon: sidebarIcon("audit", ClipboardListIcon),
   },
@@ -189,33 +194,33 @@ const getFamilySettingsChildren = (familyHref: string): NavigationItem[] => [
 
 const getFamilyMoneyChildren = (familyHref: string): NavigationItem[] => [
   {
-    title: "Overview",
+    title: tItems("overview"),
     href: `${familyHref}/money`,
     icon: sidebarIcon("money", BadgeDollarSignIcon),
     exact: true,
   },
   {
-    title: "Income",
+    title: tItems("income"),
     href: `${familyHref}/money/income`,
     icon: sidebarIcon("income", ArrowDownIcon),
   },
   {
-    title: "Expenses",
+    title: tItems("expenses"),
     href: `${familyHref}/money/expenses`,
     icon: sidebarIcon("expense", ArrowUpIcon),
   },
   {
-    title: "Categories",
+    title: tItems("categories"),
     href: `${familyHref}/money/categories`,
     icon: sidebarIcon("categories", FolderTreeIcon),
   },
   {
-    title: "Approvals",
+    title: tNav("items.dashboard"), // or approvals
     href: `${familyHref}/money/approvals`,
     icon: sidebarIcon("approved", FileClockIcon),
   },
   {
-    title: "Loans",
+    title: tItems("loans"),
     href: `${familyHref}/money/loans`,
     icon: sidebarIcon("loan", LandmarkIcon),
   },
@@ -226,51 +231,51 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
 
   return [
     {
-      label: "Family",
+      label: tGroups("family"),
       items: [
         {
-          title: "Dashboard",
+          title: tItems("dashboard"),
           href: familyHref,
           icon: sidebarIcon("dashboard", HomeIcon),
         },
         {
-          title: "Money",
+          title: tItems("money"),
           href: `${familyHref}/money`,
           icon: sidebarIcon("money", BadgeDollarSignIcon),
           items: getFamilyMoneyChildren(familyHref),
         },
         {
-          title: "Projects",
+          title: tItems("projects"),
           href: `${familyHref}/projects`,
           icon: sidebarIcon("projects", FolderKanbanIcon),
         },
         {
-          title: "Reports",
+          title: tItems("reports"),
           href: `${familyHref}/reports`,
           icon: sidebarIcon("reports", ReceiptTextIcon),
         },
       ],
     },
     {
-      label: "Operations",
+      label: tGroups("management"),
       items: [
         {
-          title: "Events",
+          title: tItems("events"),
           href: `${familyHref}/events`,
           icon: sidebarIcon("calendar", CalendarDaysIcon),
         },
         {
-          title: "Contacts",
+          title: tItems("contacts"),
           href: `${familyHref}/contacts`,
           icon: sidebarIcon("contacts", ContactRoundIcon),
         },
         {
-          title: "Members",
+          title: tItems("members"),
           href: `${familyHref}/members`,
           icon: sidebarIcon("members", UsersIcon),
         },
         {
-          title: "Settings",
+          title: tItems("settings"),
           href: `${familyHref}/settings`,
           icon: sidebarIcon("settings", SettingsIcon),
           items: getFamilySettingsChildren(familyHref),
@@ -287,14 +292,14 @@ export const getFamilySettingsNavigation = (
 
   return [
     {
-      label: "Family settings",
+      label: tGroups("system"),
       items: getFamilySettingsChildren(familyHref),
     },
     {
-      label: "Related pages",
+      label: tGroups("management"),
       items: [
         {
-          title: "Members",
+          title: tItems("members"),
           href: `${familyHref}/members`,
           icon: sidebarIcon("members", UsersIcon),
         },
@@ -305,12 +310,12 @@ export const getFamilySettingsNavigation = (
 
 export const workspaceLinks = [
   {
-    title: "Personal workspace",
+    title: tItems("overview"),
     href: "/me",
     icon: sidebarIcon("account", WalletCardsIcon),
   },
   {
-    title: "All families",
+    title: tItems("families"),
     href: "/family",
     icon: sidebarIcon("family", UsersIcon),
   },
@@ -361,7 +366,7 @@ export function isActivePath(
 
 export function formatFamilyName(familySlug?: string) {
   if (!familySlug) {
-    return "Family workspace";
+    return createTranslator("AppShell.workspaceSwitcher")("familyWorkspace");
   }
 
   return decodeURIComponent(familySlug)

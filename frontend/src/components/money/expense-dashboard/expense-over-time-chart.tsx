@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDownIcon } from "lucide-react";
+import { useMemo } from "react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -9,33 +10,40 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { createTranslator } from "@/i18n/translate";
 import { formatFullMinorUnits } from "@/lib/format-compact-number";
 import type { ExpenseOverTimeDatum } from "./expense-dashboard-data";
 import { formatCompactAmount } from "./formatters";
-
-const expenseChartConfig = {
-  amount: {
-    color: "var(--chart-1)",
-    label: "Expenses",
-  },
-} satisfies ChartConfig;
 
 export function ExpenseOverTimeChart({
   data,
 }: {
   data: ExpenseOverTimeDatum[];
 }) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
+
+  const expenseChartConfig = useMemo(
+    () =>
+      ({
+        amount: {
+          color: "var(--chart-1)",
+          label: t("charts.expenses"),
+        },
+      }) satisfies ChartConfig,
+    [t],
+  );
+
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between gap-4 px-5 pt-5 pb-1 sm:px-6 sm:pt-6">
         <CardTitle className="font-bold text-base">
-          Expenses over time
+          {t("charts.overTimeTitle")}
         </CardTitle>
         <button
           type="button"
           className="inline-flex h-10 items-center gap-3 rounded-lg border bg-background px-4 font-medium text-sm shadow-xs"
         >
-          This Month
+          {t("charts.thisMonth")}
           <ChevronDownIcon className="size-4 text-muted-foreground" />
         </button>
       </CardHeader>

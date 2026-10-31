@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
 import { cn } from "@/lib/utils";
 import {
@@ -18,6 +19,8 @@ import {
   joinedDateFormatter,
 } from "./dashboard-data";
 import type { FamilyDetail } from "./types";
+
+const t = createTranslator("FamilyDashboard");
 
 const roleDotClass = {
   HEAD: "bg-primary",
@@ -35,15 +38,13 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
         <div>
           <CardTitle className="flex items-center gap-2">
             <UsersIcon className="size-4" aria-hidden="true" />
-            People in this family
+            {t("peopleInFamily")}
           </CardTitle>
-          <CardDescription>
-            Names, roles, and joining dates in one simple list.
-          </CardDescription>
+          <CardDescription>{t("peopleInFamilyDesc")}</CardDescription>
         </div>
         <Button asChild variant="outline" size="sm">
           <Link href={`/family/${family.slug}/members`}>
-            View members
+            {t("viewMembers")}
             <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
           </Link>
         </Button>
@@ -89,8 +90,12 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
                     {member.fullName}
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    {getKinshipLabel(member)} - Joined{" "}
-                    {joinedDateFormatter.format(new Date(member.joinedAt))}
+                    {getKinshipLabel(member)} -{" "}
+                    {t("joinedDate", {
+                      date: joinedDateFormatter.format(
+                        new Date(member.joinedAt),
+                      ),
+                    })}
                   </p>
                 </div>
                 <Badge
@@ -105,7 +110,7 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
         </div>
         {hiddenCount > 0 ? (
           <div className="mt-3 rounded-lg border border-dashed bg-muted/30 p-3 text-center text-muted-foreground text-sm">
-            +{hiddenCount} more member{hiddenCount === 1 ? "" : "s"}
+            {t("moreMembers", { count: hiddenCount })}
           </div>
         ) : null}
       </CardContent>

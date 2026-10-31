@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import { LoanList } from "./loan-list";
 import type { PersonalLoan } from "./types-and-schemas";
 
@@ -15,6 +16,8 @@ export function LoanTabs({
   onPayment: (loan: PersonalLoan) => void;
   onView: (loan: PersonalLoan) => void;
 }) {
+  const t = createTranslator("PersonalLoans");
+
   const render = (items: PersonalLoan[]) => (
     <LoanList
       loans={items}
@@ -27,9 +30,9 @@ export function LoanTabs({
   return (
     <Tabs defaultValue="all" className="gap-4">
       <TabsList className="w-full sm:w-auto">
-        <TabsTrigger value="all">All loans</TabsTrigger>
-        <TabsTrigger value="borrowed">Borrowed</TabsTrigger>
-        <TabsTrigger value="lent">Lent</TabsTrigger>
+        <TabsTrigger value="all">{t("tabs.all")}</TabsTrigger>
+        <TabsTrigger value="borrowed">{t("tabs.borrowed")}</TabsTrigger>
+        <TabsTrigger value="lent">{t("tabs.lent")}</TabsTrigger>
       </TabsList>
       <TabsContent value="all">{render(loans)}</TabsContent>
       <TabsContent value="borrowed">

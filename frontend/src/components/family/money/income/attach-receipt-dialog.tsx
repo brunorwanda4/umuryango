@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import type { FamilyDetail } from "../../dashboard/types";
 
@@ -31,6 +32,7 @@ export function AttachReceiptDialog({
   transaction: ReceiptableTransaction | null;
   onSuccess: () => void;
 }) {
+  const t = createTranslator("FamilyIncome");
   const [fileName, setFileName] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,15 +58,15 @@ export function AttachReceiptDialog({
         payload,
       );
       if (response.ok) {
-        toast.success("Receipt attached successfully.");
+        toast.success(t("receipt.success"));
         onOpenChange(false);
         setFileName("");
         onSuccess();
       } else {
-        setError(response.message ?? "Failed to save receipt.");
+        setError(response.message ?? t("receipt.failed"));
       }
     } catch {
-      setError("Request failed.");
+      setError(t("receipt.requestFailed"));
     } finally {
       setIsPending(false);
     }
@@ -74,12 +76,11 @@ export function AttachReceiptDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Attach Receipt</DialogTitle>
+          <DialogTitle>{t("receipt.attachTitle")}</DialogTitle>
           <DialogDescription>
-            Upload proof of transaction for:{" "}
-            <strong className="font-semibold">
-              {transaction?.description}
-            </strong>
+            {t("receipt.attachDesc", {
+              description: transaction?.description ?? "",
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -93,7 +94,7 @@ export function AttachReceiptDialog({
               className="text-sm font-semibold mb-1 block"
               htmlFor="receipt-file-input"
             >
-              File (Mock Upload)
+              {t("receipt.fileLabel")}
             </label>
             <Input
               id="receipt-file-input"
@@ -113,7 +114,7 @@ export function AttachReceiptDialog({
 
           <DialogFooter className="mt-4">
             <Button type="submit" disabled={isPending} className="w-full">
-              {isPending ? "Uploading..." : "Attach Receipt"}
+              {isPending ? t("receipt.uploading") : t("receipt.attach")}
             </Button>
           </DialogFooter>
         </form>

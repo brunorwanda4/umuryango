@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createTranslator } from "@/i18n/translate";
 import type { ExpenseTransaction } from "./types-and-schemas";
 
 export type ExpenseAction = "view" | "edit" | "delete" | "receipt";
@@ -41,6 +42,7 @@ export function ExpenseActionsDropdown({
   handleDuplicate,
   handleDownloadReceipt,
 }: ExpenseActionsDropdownProps) {
+  const t = createTranslator("FamilyExpenses");
   const isApproved = tx.status === "APPROVED";
   const canEdit = !isApproved || isAdmin;
   const firstReceipt = tx.receipts?.[0];
@@ -65,7 +67,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <EyeIcon className="mr-2 size-4" />
-          View
+          {t("actions.view")}
         </DropdownMenuItem>
         {canEdit ? (
           <DropdownMenuItem
@@ -75,12 +77,12 @@ export function ExpenseActionsDropdown({
             }}
           >
             <PencilIcon className="mr-2 size-4" />
-            Edit
+            {t("actions.edit")}
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem disabled>
             <LockIcon className="mr-2 size-4" />
-            Locked
+            {t("actions.locked")}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem
@@ -90,7 +92,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <Trash2Icon className="mr-2 size-4" />
-          Delete
+          {t("actions.delete")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
@@ -100,7 +102,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <UploadIcon className="mr-2 size-4" />
-          Upload Receipt
+          {t("actions.uploadReceipt")}
         </DropdownMenuItem>
         <DropdownMenuItem
           disabled={!firstReceipt}
@@ -110,7 +112,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <DownloadIcon className="mr-2 size-4" />
-          Download Receipt
+          {t("actions.downloadReceipt")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(event) => {
@@ -123,7 +125,7 @@ export function ExpenseActionsDropdown({
           ) : (
             <SendIcon className="mr-2 size-4" />
           )}
-          Send for Approval
+          {t("actions.sendForApproval")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={(event) => {
@@ -132,7 +134,7 @@ export function ExpenseActionsDropdown({
           }}
         >
           <CopyIcon className="mr-2 size-4" />
-          Duplicate
+          {t("actions.duplicate")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

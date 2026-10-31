@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { PersonalCategoriesPage } from "@/components/money/personal-categories-page";
+import enMessages from "@/messages/en.json";
 
 export const metadata: Metadata = {
-  title: "Categories · Personal workspace",
-  description:
-    "Manage the income and expense categories used in your personal money records.",
+  title: enMessages.PersonalMoney.categoriesMetadataTitle,
+  description: enMessages.PersonalMoney.categoriesMetadataDescription,
 };
 
 export default function CategoriesPage() {

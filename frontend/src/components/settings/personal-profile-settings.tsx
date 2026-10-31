@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
@@ -45,22 +45,29 @@ import {
   publishCurrentUserUpdate,
 } from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator, type Translator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 
-const profileSchema = z.object({
-  fullName: z.string().trim().min(2, "Enter your full name").max(160),
-  email: z.string().trim().email("Enter a valid email address").max(254),
-  phoneNumber: z
-    .string()
-    .trim()
-    .refine(
-      (value) => !value || /^\+?[0-9][0-9\s()-]{6,19}$/.test(value),
-      "Enter a valid phone number",
-    ),
-  gender: z.enum(["female", "male", "custom", "unspecified"]),
-});
+const createProfileSchema = (t: Translator) =>
+  z.object({
+    fullName: z.string().trim().min(2, t("validation.nameMin")).max(160),
+    email: z.string().trim().email(t("validation.emailInvalid")).max(254),
+    phoneNumber: z
+      .string()
+      .trim()
+      .refine(
+        (value) => !value || /^\+?[0-9][0-9\s()-]{6,19}$/.test(value),
+        t("validation.phoneInvalid"),
+      ),
+    gender: z.enum(["female", "male", "custom", "unspecified"]),
+  });
 
-type ProfileFormValues = z.infer<typeof profileSchema>;
+type ProfileFormValues = {
+  fullName: string;
+  email: string;
+  phoneNumber?: string | null;
+  gender: "female" | "male" | "custom" | "unspecified";
+};
 
 type UpdateProfileResponse = {
   user: CurrentUser;
@@ -68,14 +75,8 @@ type UpdateProfileResponse = {
   verificationEmail: string | null;
 };
 
-const genderOptions = [
-  { value: "female", label: "Female" },
-  { value: "male", label: "Male" },
-  { value: "custom", label: "Custom" },
-  { value: "unspecified", label: "Prefer not to say" },
-];
-
 export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
+  const t = createTranslator("PersonalSettings");
   const router = useRouter();
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl);
   const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false);
@@ -84,6 +85,18 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
   const [verificationError, setVerificationError] = useState<string>();
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
+
+  const profileSchema = useMemo(() => createProfileSchema(t), [t]);
+  const genderOptions = useMemo(
+    () => [
+      { value: "female", label: t("genderOptions.female") },
+      { value: "male", label: t("genderOptions.male") },
+      { value: "custom", label: t("genderOptions.custom") },
+      { value: "unspecified", label: t("genderOptions.unspecified") },
+    ],
+    [t],
+  );
+
   const { form, onSubmit, error, success, isPending } = useZodFormSubmit<
     ProfileFormValues,
     UpdateProfileResponse
@@ -103,7 +116,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
       phoneNumber: values.phoneNumber || null,
       gender: values.gender === "unspecified" ? null : values.gender,
     }),
-    onSuccessMessage: "Profile updated successfully.",
+    onSuccessMessage: t("profileUpdated"),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: (data) => {
@@ -128,14 +141,12 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
     });
 
     if (!response.ok) {
-      setVerificationError(
-        response.message ?? "The verification code could not be confirmed.",
-      );
+      setVerificationError(response.message ?? t("verification.confirmFailed"));
       setIsVerifying(false);
       return;
     }
 
-    toast.success("Email address verified.");
+    toast.success(t("verification.verifiedSuccess"));
     setPendingEmail(null);
     setVerificationCode("");
     setIsVerifying(false);
@@ -152,11 +163,9 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
     });
 
     if (!response.ok) {
-      setVerificationError(
-        response.message ?? "A new verification code could not be sent.",
-      );
+      setVerificationError(response.message ?? t("verification.sendFailed"));
     } else {
-      toast.success("A new verification code was sent.");
+      toast.success(t("verification.codeSent"));
     }
 
     setIsResending(false);
@@ -170,14 +179,14 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
     );
 
     if (!response.ok || !response.data?.user) {
-      toast.error(response.message ?? "The avatar could not be updated.");
+      toast.error(response.message ?? t("avatarUpdateFailed"));
       setIsUpdatingAvatar(false);
       return;
     }
 
     setAvatarUrl(response.data.user.avatarUrl);
     publishCurrentUserUpdate(response.data.user);
-    toast.success("Avatar updated.");
+    toast.success(t("avatarUpdated"));
     setIsUpdatingAvatar(false);
     router.refresh();
   };
@@ -188,11 +197,9 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserRoundIcon aria-hidden="true" />
-            Profile
+            {t("profileCardTitle")}
           </CardTitle>
-          <CardDescription>
-            Update the personal details used across your account.
-          </CardDescription>
+          <CardDescription>{t("profileCardDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -205,9 +212,9 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                 <AvatarFallback name={user.fullName} />
               </Avatar>
               <div className="flex min-w-0 flex-1 flex-col gap-1">
-                <p className="font-medium">Profile avatar</p>
+                <p className="font-medium">{t("avatar")}</p>
                 <p className="text-muted-foreground text-sm">
-                  Generate a new DiceBear avatar for your profile.
+                  {t("avatarDescription")}
                 </p>
               </div>
               <Button
@@ -221,7 +228,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                 ) : (
                   <RefreshCwIcon data-icon="inline-start" />
                 )}
-                {isUpdatingAvatar ? "Updating" : "Update avatar"}
+                {isUpdatingAvatar ? t("updatingAvatar") : t("uploadAvatar")}
               </Button>
             </div>
             <FieldGroup>
@@ -229,32 +236,32 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                 <CommonFormField
                   control={form.control}
                   name="fullName"
-                  label="Full name"
+                  label={t("fullName")}
                   required
                   inputProps={{ autoComplete: "name" }}
                 />
                 <CommonFormField
                   control={form.control}
                   name="email"
-                  label="Email address"
+                  label={t("email")}
                   type="email"
                   required
                   inputProps={{ autoComplete: "email" }}
-                  description="A new email must be verified before it replaces your current address."
+                  description={t("emailDescription")}
                 />
                 <CommonFormField
                   control={form.control}
                   name="phoneNumber"
-                  label="Phone number"
+                  label={t("phone")}
                   fieldType="phone"
                   placeholder="+250 788 123 456"
                   inputProps={{ autoComplete: "tel" }}
-                  description="Optional. Used for account and family contact details."
+                  description={t("phoneDescription")}
                 />
                 <CommonFormField
                   control={form.control}
                   name="gender"
-                  label="Gender"
+                  label={t("gender")}
                   fieldType="select"
                   selectOptions={genderOptions}
                 />
@@ -264,7 +271,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
             {error ? (
               <Alert variant="destructive">
                 <AlertCircleIcon aria-hidden="true" />
-                <AlertTitle>Profile not updated</AlertTitle>
+                <AlertTitle>{t("profileNotUpdated")}</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             ) : null}
@@ -272,7 +279,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
             {success && !pendingEmail ? (
               <Alert>
                 <CheckCircle2Icon aria-hidden="true" />
-                <AlertTitle>Changes saved</AlertTitle>
+                <AlertTitle>{t("changesSaved")}</AlertTitle>
                 <AlertDescription>{success}</AlertDescription>
               </Alert>
             ) : null}
@@ -283,7 +290,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                 disabled={isPending || !form.formState.isDirty}
               >
                 {isPending ? <Spinner data-icon="inline-start" /> : null}
-                {isPending ? "Saving" : "Save changes"}
+                {isPending ? t("saving") : t("saveProfile")}
               </Button>
             </div>
           </form>
@@ -293,14 +300,16 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
               <Separator className="my-6" />
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
-                  <h3 className="font-medium">Verify your new email</h3>
+                  <h3 className="font-medium">
+                    {t("verification.pendingTitle")}
+                  </h3>
                   <p className="text-muted-foreground text-sm">
-                    Enter the six-digit code sent to {pendingEmail}.
+                    {t("verification.pendingDesc", { email: pendingEmail })}
                   </p>
                 </div>
                 <Field data-invalid={Boolean(verificationError)}>
                   <FieldLabel htmlFor="profile-email-code">
-                    Verification code
+                    {t("codeLabel")}
                   </FieldLabel>
                   <InputOTP
                     id="profile-email-code"
@@ -331,7 +340,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                     disabled={isVerifying || verificationCode.length !== 6}
                   >
                     {isVerifying ? <Spinner data-icon="inline-start" /> : null}
-                    Verify email
+                    {t("verification.verifyButton")}
                   </Button>
                   <Button
                     type="button"
@@ -340,7 +349,7 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
                     disabled={isResending}
                   >
                     {isResending ? <Spinner data-icon="inline-start" /> : null}
-                    Resend code
+                    {t("verification.resendButton")}
                   </Button>
                 </div>
               </div>
@@ -353,26 +362,24 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <MailCheckIcon aria-hidden="true" />
-            Account
+            {t("account")}
           </CardTitle>
-          <CardDescription>
-            Review your account status and membership date.
-          </CardDescription>
+          <CardDescription>{t("accountDesc")}</CardDescription>
           <CardAction>
             <Badge variant={pendingEmail ? "secondary" : "outline"}>
               {pendingEmail
-                ? "Verification pending"
+                ? t("verificationPending")
                 : user.emailVerified
-                  ? "Email verified"
-                  : "Email not verified"}
+                  ? t("emailVerified")
+                  : t("emailNotVerified")}
             </Badge>
           </CardAction>
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <AccountDetail label="Current email" value={user.email} />
+          <AccountDetail label={t("currentEmail")} value={user.email} />
           <AccountDetail
-            label="Member since"
-            value={formatMemberSince(user.createdAt)}
+            label={t("memberSince")}
+            value={formatMemberSince(user.createdAt, t)}
           />
         </CardContent>
       </Card>
@@ -381,14 +388,12 @@ export function PersonalProfileSettings({ user }: { user: CurrentUser }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <KeyRoundIcon aria-hidden="true" />
-            Security
+            {t("security")}
           </CardTitle>
-          <CardDescription>
-            Manage your password and account security options.
-          </CardDescription>
+          <CardDescription>{t("securityCardDesc")}</CardDescription>
           <CardAction>
             <Button asChild variant="outline" size="sm">
-              <Link href="/me/security">Open security</Link>
+              <Link href="/me/security">{t("openSecurity")}</Link>
             </Button>
           </CardAction>
         </CardHeader>
@@ -412,9 +417,9 @@ function isGenderValue(
   return value === "female" || value === "male" || value === "custom";
 }
 
-function formatMemberSince(value: string) {
+function formatMemberSince(value: string, t: Translator) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unavailable";
+  if (Number.isNaN(date.getTime())) return t("unavailable");
 
   return new Intl.DateTimeFormat("en", {
     month: "long",

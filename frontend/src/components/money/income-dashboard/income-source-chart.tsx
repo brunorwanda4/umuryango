@@ -8,6 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { createTranslator } from "@/i18n/translate";
 import { formatFullMinorUnits } from "@/lib/format-compact-number";
 import { formatRf } from "./formatters";
 import type { IncomeSourceDatum } from "./income-dashboard-data";
@@ -20,6 +21,8 @@ export function IncomeSourceChart({
   data: IncomeSourceDatum[];
   totalIncomeMinorUnits: string;
 }) {
+  const t = createTranslator("PersonalMoney.personalIncome");
+
   const sourceChartConfig = data.reduce<ChartConfig>((config, source) => {
     config[source.name] = {
       color: source.color,
@@ -30,7 +33,9 @@ export function IncomeSourceChart({
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="px-5 pt-5 pb-0 sm:px-6 sm:pt-6">
-        <CardTitle className="font-bold text-base">Income by source</CardTitle>
+        <CardTitle className="font-bold text-base">
+          {t("charts.bySourceTitle")}
+        </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 px-5 pb-5 sm:px-6 lg:grid-cols-[minmax(13rem,1fr)_auto] lg:items-center">
         <ChartContainer
@@ -69,7 +74,7 @@ export function IncomeSourceChart({
               dominantBaseline="middle"
               className="fill-muted-foreground text-sm"
             >
-              Total
+              {t("charts.total")}
             </text>
             <ChartTooltip
               content={

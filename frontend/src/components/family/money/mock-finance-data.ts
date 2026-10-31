@@ -29,7 +29,6 @@ import {
   TreePine,
   TrendingUp,
   Users,
-  Wallet,
   Wrench,
   Zap,
 } from "lucide-react";

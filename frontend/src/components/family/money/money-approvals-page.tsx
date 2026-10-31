@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import { ApprovalAnalytics } from "./approvals/approval-analytics";
@@ -44,6 +45,7 @@ import type { MoneyOverview } from "./types";
 import { normalizeMoneyOverview } from "./utils";
 
 export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
+  const t = createTranslator("FamilyApprovals");
   const { user } = useCurrentUser();
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [money, setMoney] = useState<MoneyOverview | null>(null);
@@ -68,7 +70,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
       );
 
       if (!familyResponse.ok || !familyResponse.data) {
-        throw new Error(familyResponse.message ?? "Failed to load family.");
+        throw new Error(familyResponse.message ?? t("workspaceNotFound"));
       }
 
       const familyData = familyResponse.data;
@@ -93,8 +95,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
       setMoneyMessage(
         overviewResponse.ok
           ? null
-          : (overviewResponse.message ??
-              "Money approval records are not available yet."),
+          : (overviewResponse.message ?? t("approvalSourceUnavailable")),
       );
       setTransactions(
         transactionResponse.ok && transactionResponse.data
@@ -102,11 +103,11 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
           : [],
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred.");
+      setError(err instanceof Error ? err.message : t("toastError"));
     } finally {
       setLoading(false);
     }
-  }, [familyName]);
+  }, [familyName, t]);
 
   useEffect(() => {
     fetchData();
@@ -178,12 +179,12 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
     action: "approve" | "reject",
   ) => {
     if (!family || approval.source !== "transaction") {
-      toast.error("This approval type needs a dedicated backend workflow.");
+      toast.error(t("toastDedicatedBackend"));
       return;
     }
 
     if (!canApprove) {
-      toast.error("You do not have permission to approve financial records.");
+      toast.error(t("toastNoPermission"));
       return;
     }
 
@@ -199,17 +200,15 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
 
       if (response.ok) {
         toast.success(
-          action === "approve"
-            ? "Financial record approved."
-            : "Financial record rejected.",
+          action === "approve" ? t("toastApproved") : t("toastRejected"),
         );
         await fetchData();
         setSelectedApproval(null);
       } else {
-        toast.error(response.message ?? "Approval action failed.");
+        toast.error(response.message ?? t("toastFailed"));
       }
     } catch {
-      toast.error("An error occurred during the approval action.");
+      toast.error(t("toastError"));
     } finally {
       setProcessingId(null);
     }
@@ -226,10 +225,8 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
           <EmptyMedia variant="icon">
             <AlertCircleIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>Money approvals could not load</EmptyTitle>
-          <EmptyDescription>
-            {error || "Family workspace not found."}
-          </EmptyDescription>
+          <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
+          <EmptyDescription>{error || t("workspaceNotFound")}</EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -241,10 +238,12 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex min-w-0 flex-col gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">Financial review center</Badge>
+              <Badge variant="outline">{t("reviewCenterBadge")}</Badge>
               <Badge variant="secondary">{currency}</Badge>
               <Badge variant={canApprove ? "default" : "outline"}>
-                {canApprove ? "Approver access" : "Limited access"}
+                {canApprove
+                  ? t("approverAccessBadge")
+                  : t("limitedAccessBadge")}
               </Badge>
             </div>
             <div className="flex items-center gap-3">
@@ -252,12 +251,11 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
                 <ShieldCheckIcon className="size-5 text-muted-foreground" />
               </span>
               <h1 className="font-bold text-2xl tracking-tight sm:text-3xl">
-                Money Approvals
+                {t("pageTitle")}
               </h1>
             </div>
             <p className="max-w-4xl text-muted-foreground text-sm leading-6">
-              Review and approve financial transactions to keep family finances
-              transparent, secure, and accountable.
+              {t("pageDesc")}
             </p>
           </div>
           <Button
@@ -266,11 +264,11 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
             variant="outline"
           >
             <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-            Money Overview
+            {t("moneyOverviewButton")}
           </Button>
         </div>
         <nav
-          aria-label="Money approval links"
+          aria-label={t("approvalLinksAria")}
           className="flex gap-2 overflow-x-auto pb-1"
         >
           <Button
@@ -279,7 +277,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
             variant="outline"
             className="shrink-0"
           >
-            Income
+            {t("incomeButton")}
           </Button>
           <Button
             href={`/family/${encodeURIComponent(family.slug)}/money/expenses`}
@@ -287,7 +285,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
             variant="outline"
             className="shrink-0"
           >
-            Expenses
+            {t("expensesButton")}
           </Button>
         </nav>
       </header>
@@ -299,11 +297,10 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <AlertCircleIcon className="size-4 text-muted-foreground" />
-              Approval source unavailable
+              {t("approvalSourceUnavailable")}
             </CardTitle>
             <CardDescription>
-              {moneyMessage} The page will show queue data as soon as the
-              backend returns persisted approval records.
+              {t("approvalSourceUnavailableDesc", { message: moneyMessage })}
             </CardDescription>
           </CardHeader>
         </Card>

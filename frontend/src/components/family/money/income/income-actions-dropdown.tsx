@@ -16,6 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import type { FamilyDetail } from "../../dashboard/types";
 import type { IncomeTransaction } from "./types-and-schemas";
@@ -37,6 +38,7 @@ export function IncomeActionsDropdown({
   handleActionClick,
   handleSendApproval,
 }: IncomeActionsDropdownProps) {
+  const t = createTranslator("FamilyIncome");
   const isApproved = tx.status === "APPROVED";
   const canEdit = !isApproved || isAdmin;
 
@@ -60,7 +62,7 @@ export function IncomeActionsDropdown({
           }}
         >
           <EyeIcon className="size-4 mr-2" />
-          View Details
+          {t("actions.view")}
         </DropdownMenuItem>
 
         {canEdit ? (
@@ -71,12 +73,12 @@ export function IncomeActionsDropdown({
             }}
           >
             <PencilIcon className="size-4 mr-2" />
-            Edit Record
+            {t("actions.edit")}
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem disabled className="text-muted-foreground">
             <LockIcon className="size-4 mr-2" />
-            Locked (Approved)
+            {t("actions.locked") || "Locked"}
           </DropdownMenuItem>
         )}
 
@@ -87,7 +89,7 @@ export function IncomeActionsDropdown({
           }}
         >
           <UploadIcon className="size-4 mr-2" />
-          Attach Receipt
+          {t("dialogs.attachReceiptTitle")}
         </DropdownMenuItem>
 
         {tx.status === "PENDING" &&
@@ -100,7 +102,7 @@ export function IncomeActionsDropdown({
               className="text-primary font-medium"
             >
               <CheckCircleIcon className="size-4 mr-2" />
-              Approve Income
+              {t("actions.sendForApproval")}
             </DropdownMenuItem>
           )}
 
@@ -112,7 +114,7 @@ export function IncomeActionsDropdown({
           className="text-destructive focus:text-destructive"
         >
           <Trash2Icon className="size-4 mr-2" />
-          Delete
+          {t("actions.delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

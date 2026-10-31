@@ -14,56 +14,58 @@ import {
 } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import { type SidebarIconStyle, useSidebarIconStyle } from "./sidebar-icon";
-
-const themeOptions: {
-  value: "light" | "dark" | "system";
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}[] = [
-  {
-    value: "light",
-    title: "Light",
-    description: "Clean, bright appearance with high contrast.",
-    icon: SunIcon,
-  },
-  {
-    value: "dark",
-    title: "Dark",
-    description: "Dark surfaces to reduce glare and eye strain.",
-    icon: MoonIcon,
-  },
-  {
-    value: "system",
-    title: "System",
-    description: "Automatically matches your system preferences.",
-    icon: MonitorIcon,
-  },
-];
-
-const iconOptions: {
-  value: SidebarIconStyle;
-  title: string;
-  description: string;
-}[] = [
-  {
-    value: "line",
-    title: "Line icons",
-    description: "Clean, simple icons that match the app controls.",
-  },
-  {
-    value: "image",
-    title: "Image icons",
-    description: "Use the custom image set from the icons folder.",
-  },
-];
 
 export function SidebarIconStyleSettings() {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
   const { style, setStyle } = useSidebarIconStyle();
+  const t = createTranslator("AppShell.appearance");
+
+  const themeOptions: {
+    value: "light" | "dark" | "system";
+    title: string;
+    description: string;
+    icon: LucideIcon;
+  }[] = [
+    {
+      value: "light",
+      title: t("themeLightTitle"),
+      description: t("themeLightDesc"),
+      icon: SunIcon,
+    },
+    {
+      value: "dark",
+      title: t("themeDarkTitle"),
+      description: t("themeDarkDesc"),
+      icon: MoonIcon,
+    },
+    {
+      value: "system",
+      title: t("themeSystemTitle"),
+      description: t("themeSystemDesc"),
+      icon: MonitorIcon,
+    },
+  ];
+
+  const iconOptions: {
+    value: SidebarIconStyle;
+    title: string;
+    description: string;
+  }[] = [
+    {
+      value: "line",
+      title: t("iconLineTitle"),
+      description: t("iconLineDesc"),
+    },
+    {
+      value: "image",
+      title: t("iconImageTitle"),
+      description: t("iconImageDesc"),
+    },
+  ];
 
   useEffect(() => {
     setMounted(true);
@@ -74,24 +76,22 @@ export function SidebarIconStyleSettings() {
   return (
     <Card id="appearance">
       <CardHeader>
-        <CardTitle className="text-base">Appearance</CardTitle>
-        <CardDescription>
-          Customize theme preferences and how navigation icons appear.
-        </CardDescription>
+        <CardTitle className="text-base">{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-3">
           <div>
-            <h3 className="font-medium text-sm">Theme</h3>
+            <h3 className="font-medium text-sm">{t("themeHeading")}</h3>
             <p className="text-muted-foreground text-sm">
-              Select your preferred color scheme or sync with your system.
+              {t("themeSubheading")}
             </p>
           </div>
           <RadioGroup
             value={activeTheme}
             onValueChange={setTheme}
             className="grid gap-3 sm:grid-cols-3"
-            aria-label="Theme preference"
+            aria-label={t("themeAriaLabel")}
           >
             {themeOptions.map((option) => (
               <label
@@ -128,16 +128,16 @@ export function SidebarIconStyleSettings() {
 
         <div className="space-y-3">
           <div>
-            <h3 className="font-medium text-sm">Navigation icons</h3>
+            <h3 className="font-medium text-sm">{t("iconsHeading")}</h3>
             <p className="text-muted-foreground text-sm">
-              Choose how navigation icons appear across the sidebar.
+              {t("iconsSubheading")}
             </p>
           </div>
           <RadioGroup
             value={style}
             onValueChange={(value) => setStyle(value as SidebarIconStyle)}
             className="grid gap-3 sm:grid-cols-2"
-            aria-label="Sidebar icon style"
+            aria-label={t("iconsAriaLabel")}
           >
             {iconOptions.map((option) => (
               <label

@@ -14,7 +14,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import type { ProjectsOverview } from "./types";
+
+const t = createTranslator("FamilyProjects");
+const tDashboard = createTranslator("FamilyDashboard");
 
 export function ProjectMetricCards({
   currency,
@@ -26,58 +30,58 @@ export function ProjectMetricCards({
   const totals = projects?.totals;
   const cards = [
     {
-      title: "Planned budget",
+      title: t("plannedBudget"),
       value: totals?.plannedMinorUnits,
-      description: "Approved target amounts across projects",
+      description: t("plannedBudgetDesc"),
       icon: WalletCardsIcon,
       isMoney: true,
     },
     {
-      title: "Contributed",
+      title: t("contributed"),
       value: totals?.contributedMinorUnits,
-      description: "Verified project contributions received",
+      description: t("contributedDesc"),
       icon: HandCoinsIcon,
       isMoney: true,
     },
     {
-      title: "Outstanding",
+      title: t("outstanding"),
       value: totals?.outstandingMinorUnits,
-      description: "Remaining amount needed for open plans",
+      description: t("outstandingDesc"),
       icon: TargetIcon,
       isMoney: true,
     },
     {
-      title: "Active projects",
+      title: t("activeProjects"),
       value:
         typeof totals?.activeProjectCount === "number"
           ? totals.activeProjectCount.toLocaleString()
-          : "No records",
-      description: "Projects currently being worked on",
+          : tDashboard("noRecords"),
+      description: t("activeProjectsDesc"),
       icon: HammerIcon,
     },
     {
-      title: "Past target date",
+      title: t("pastTargetDate"),
       value:
         typeof totals?.overdueProjectCount === "number"
           ? totals.overdueProjectCount.toLocaleString()
-          : "No records",
-      description: "Projects that need review or a new date",
+          : tDashboard("noRecords"),
+      description: t("pastTargetDateDesc"),
       icon: CalendarClockIcon,
     },
     {
-      title: "Contributors",
+      title: t("contributors"),
       value:
         typeof totals?.contributorCount === "number"
           ? totals.contributorCount.toLocaleString()
-          : "No records",
-      description: "Members who contributed to projects",
+          : tDashboard("noRecords"),
+      description: t("contributorsDesc"),
       icon: UsersRoundIcon,
     },
   ];
 
   return (
     <section
-      aria-label="Family projects summary"
+      aria-label={t("projectsSummaryAria")}
       className="grid gap-4 grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6"
     >
       {cards.map((card) => {
@@ -92,7 +96,7 @@ export function ProjectMetricCards({
                   {card.isMoney ? (
                     <CompactMoney
                       currency={currency}
-                      emptyLabel="No records"
+                      emptyLabel={tDashboard("noRecords")}
                       value={card.value}
                     />
                   ) : (

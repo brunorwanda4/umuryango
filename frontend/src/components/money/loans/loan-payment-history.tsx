@@ -10,6 +10,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import { createTranslator } from "@/i18n/translate";
 import type { LoanPayment } from "./types-and-schemas";
 
 export function LoanPaymentHistory({
@@ -19,9 +20,11 @@ export function LoanPaymentHistory({
   currency: string;
   payments: LoanPayment[];
 }) {
+  const t = createTranslator("PersonalLoans");
+
   if (payments.length === 0)
     return (
-      <p className="text-sm text-muted-foreground">No payments recorded yet.</p>
+      <p className="text-sm text-muted-foreground">{t("details.noPayments")}</p>
     );
   return (
     <ItemGroup>
@@ -46,7 +49,7 @@ export function LoanPaymentHistory({
             ) : null}
             {payment.createdByName ? (
               <p className="text-xs text-muted-foreground">
-                Recorded by {payment.createdByName}
+                {t("details.recordedBy", { name: payment.createdByName })}
               </p>
             ) : null}
           </ItemContent>

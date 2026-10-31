@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { PersonalOverviewPage } from "@/components/me/overview/personal-overview-page";
+import enMessages from "@/messages/en.json";
 
 export const metadata: Metadata = {
-  title: "Overview | Rwanda Family",
-  description:
-    "Review your personal money, plans, debts, family workspaces, and recent activity.",
+  title: enMessages.PersonalOverview.metadataTitle,
+  description: enMessages.PersonalOverview.metadataDescription,
 };
 
 export default function MePage() {

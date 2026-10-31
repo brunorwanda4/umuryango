@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { StatusBadge, TableEmptyState } from "./money-ui-helpers";
 import type { MoneyApprovalRow, MoneyOverview } from "./types";
@@ -26,6 +27,8 @@ export function MoneyApprovalTable({
   money: MoneyOverview | null;
   familyId: string;
 }) {
+  const t = createTranslator("FamilyMoney");
+  const tCommon = createTranslator("Common");
   const approvals = money?.approvals ?? [];
   const [processingId, setProcessingId] = useState<string | null>(null);
 
@@ -37,13 +40,17 @@ export function MoneyApprovalTable({
         `/families/${encodeURIComponent(familyId)}/money/transactions/${id}/${action}`,
       );
       if (response.ok) {
-        toast.success(`Transaction ${action}d successfully`);
+        toast.success(
+          action === "approve"
+            ? t("transactionApproved")
+            : t("transactionRejected"),
+        );
         window.location.reload();
       } else {
-        toast.error(response.message || "Failed to process transaction");
+        toast.error(response.message || t("processFailed"));
       }
     } catch {
-      toast.error("An error occurred");
+      toast.error(tCommon("errors.unexpected"));
     } finally {
       setProcessingId(null);
     }
@@ -52,31 +59,31 @@ export function MoneyApprovalTable({
   const columns: ColumnDef<MoneyApprovalRow>[] = [
     {
       accessorKey: "title",
-      header: "Record",
+      header: t("recordColumn"),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.title}</span>
       ),
     },
     {
       accessorKey: "type",
-      header: "Type",
+      header: t("typeColumn"),
       cell: ({ row }) => formatTitle(row.original.type),
     },
     {
       accessorKey: "submittedBy",
-      header: "Submitted by",
-      cell: ({ row }) => row.original.submittedBy ?? "Unknown",
+      header: t("submittedBy"),
+      cell: ({ row }) => row.original.submittedBy ?? t("unknownUser"),
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: t("filterStatus"),
       cell: ({ row }) => (
         <StatusBadge value={row.original.status ?? "pending"} />
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: () => <div className="text-right">Amount</div>,
+      header: () => <div className="text-right">{t("amountColumn")}</div>,
       cell: ({ row }) => (
         <div className="text-right font-mono">
           <CompactMoney
@@ -89,13 +96,13 @@ export function MoneyApprovalTable({
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Actions</div>,
+      header: () => <div className="text-right">{tCommon("actions")}</div>,
       cell: ({ row }) => (
         <div className="flex justify-end gap-2">
           <Button
             size="icon-sm"
             variant="outline"
-            title="Approve"
+            title={t("FamilyApprovals.approve", undefined)}
             disabled={processingId === row.original.id}
             onClick={() => handleAction(row.original.id, "approve")}
           >
@@ -108,7 +115,7 @@ export function MoneyApprovalTable({
           <Button
             size="icon-sm"
             variant="outline"
-            title="Reject"
+            title={t("FamilyApprovals.reject", undefined)}
             disabled={processingId === row.original.id}
             onClick={() => handleAction(row.original.id, "reject")}
           >
@@ -126,10 +133,8 @@ export function MoneyApprovalTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Approval queue</CardTitle>
-        <CardDescription>
-          Reviewable money records returned by the family API.
-        </CardDescription>
+        <CardTitle>{t("approvalQueueTitle")}</CardTitle>
+        <CardDescription>{t("approvalQueueDesc")}</CardDescription>
       </CardHeader>
       <CardContent>
         {approvals.length ? (
@@ -137,8 +142,8 @@ export function MoneyApprovalTable({
         ) : (
           <TableEmptyState
             icon={FileClockIcon}
-            title="No approvals returned"
-            description="Submitted income, expense, debt, and contribution records that need approval will show here."
+            title={t("noApprovalsTitle")}
+            description={t("noApprovalsDesc")}
           />
         )}
       </CardContent>

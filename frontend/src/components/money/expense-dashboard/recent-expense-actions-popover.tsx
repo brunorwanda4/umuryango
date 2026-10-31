@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { createTranslator } from "@/i18n/translate";
 import { DeleteExpenseDialog } from "./delete-expense-dialog";
 import type {
   ExpenseCategory,
@@ -28,11 +29,13 @@ export function RecentExpenseActionsPopover({
   expense,
   onSuccess,
 }: RecentExpenseActionsPopoverProps) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
+
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
-          aria-label={`Open actions for ${expense.source}`}
+          aria-label={t("actions.openActionsAria", { source: expense.source })}
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
           size="icon-sm"

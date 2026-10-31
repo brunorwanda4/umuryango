@@ -13,10 +13,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createTranslator } from "@/i18n/translate";
 import { formatDate } from "../money/utils";
 import { ContactActions } from "./contact-actions";
 import { ContactBadges } from "./contact-badges";
-import { contactTypeLabel, type FamilyContact } from "./types-and-schemas";
+import type { FamilyContact } from "./types-and-schemas";
+
+const t = createTranslator("FamilyContacts");
+const tCommon = createTranslator("Common");
 
 export interface ContactDetailsDialogProps {
   contact: FamilyContact | null;
@@ -32,7 +36,7 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
         <span className="truncate">{label}</span>
       </dt>
       <dd className="min-w-0 max-w-[60%] break-words text-right font-medium">
-        {value || "Not recorded"}
+        {value || tCommon("notRecorded")}
       </dd>
     </div>
   );
@@ -64,10 +68,10 @@ export function ContactDetailsDialog({
             </div>
             <div className="min-w-0">
               <DialogTitle className="truncate">
-                {contact?.fullName ?? "Contact details"}
+                {contact?.fullName ?? t("detailsTitle")}
               </DialogTitle>
               <DialogDescription className="mt-1">
-                Trusted contact details saved for this family.
+                {t("detailsDesc")}
               </DialogDescription>
             </div>
           </div>
@@ -77,20 +81,26 @@ export function ContactDetailsDialog({
             <ContactBadges contact={contact} className="pt-1" />
             <dl className="grid gap-2 text-sm sm:grid-cols-2">
               <DetailRow
-                label="Type"
-                value={contactTypeLabel(contact.contactType)}
+                label={tCommon("type")}
+                value={t(`types.${contact.contactType}`)}
               />
-              <DetailRow label="Phone" value={contact.phoneNumber} />
-              <DetailRow label="Email" value={contact.email} />
+              <DetailRow label={t("phoneLabel")} value={contact.phoneNumber} />
+              <DetailRow label={t("emailLabel")} value={contact.email} />
               <DetailRow
-                label="Relationship"
+                label={t("relationshipLabel")}
                 value={contact.relationshipToFamily}
               />
-              <DetailRow label="Organization" value={contact.organization} />
-              <DetailRow label="Address" value={contact.address} />
-              <DetailRow label="Created by" value={contact.createdByName} />
               <DetailRow
-                label="Created date"
+                label={t("organizationLabel")}
+                value={contact.organization}
+              />
+              <DetailRow label={t("addressLabel")} value={contact.address} />
+              <DetailRow
+                label={tCommon("createdBy")}
+                value={contact.createdByName}
+              />
+              <DetailRow
+                label={tCommon("createdDate")}
                 value={formatDate(contact.createdAt)}
               />
             </dl>
@@ -98,7 +108,7 @@ export function ContactDetailsDialog({
               <div className="rounded-lg border bg-muted/20 p-4 text-sm">
                 <div className="flex items-center gap-2 font-medium">
                   <HeartHandshakeIcon className="size-4 text-muted-foreground" />
-                  Notes
+                  {t("notesLabel")}
                 </div>
                 <p className="mt-2 whitespace-pre-wrap text-muted-foreground">
                   {contact.notes}
@@ -115,7 +125,7 @@ export function ContactDetailsDialog({
                   onClick={() => onEdit(contact)}
                 >
                   <PencilIcon aria-hidden="true" data-icon="inline-start" />
-                  Update
+                  {tCommon("update")}
                 </Button>
                 <Button
                   type="button"
@@ -124,7 +134,7 @@ export function ContactDetailsDialog({
                   onClick={() => onDelete(contact)}
                 >
                   <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-                  Delete
+                  {tCommon("delete")}
                 </Button>
               </div>
             </div>

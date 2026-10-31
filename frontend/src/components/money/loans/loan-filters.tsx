@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 import type {
   PersonalLoanFilters,
   PersonalLoanStatus,
@@ -32,6 +33,7 @@ export function LoanFilters({
   people: { id: string; name: string }[];
   onChange: (filters: PersonalLoanFilters) => void;
 }) {
+  const t = createTranslator("PersonalLoans");
   const activeFilterCount =
     Number(filters.status !== "all") + Number(filters.personId !== "all");
   const selectedPerson = people.find(
@@ -39,8 +41,14 @@ export function LoanFilters({
   );
   const statusLabel =
     filters.status === "all"
-      ? "All statuses"
-      : filters.status.charAt(0) + filters.status.slice(1).toLowerCase();
+      ? t("filters.allStatuses")
+      : filters.status === "ACTIVE"
+        ? t("filters.active")
+        : filters.status === "REPAID"
+          ? t("filters.repaid")
+          : filters.status === "OVERDUE"
+            ? t("filters.overdue")
+            : t("filters.cancelled");
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border bg-card p-3 sm:flex-row">
@@ -49,8 +57,8 @@ export function LoanFilters({
           <SearchIcon aria-hidden="true" />
         </InputGroupAddon>
         <InputGroupInput
-          aria-label="Search loans"
-          placeholder="Search by loan or person"
+          aria-label={t("filters.searchAria")}
+          placeholder={t("filters.searchPlaceholder")}
           value={filters.search}
           onChange={(event) =>
             onChange({ ...filters, search: event.target.value })
@@ -62,24 +70,26 @@ export function LoanFilters({
           <Button
             variant="outline"
             className="w-full justify-center sm:w-auto"
-            aria-label="Add loan filters"
+            aria-label={t("filters.addFiltersAria")}
           >
             <SlidersHorizontalIcon
               aria-hidden="true"
               data-icon="inline-start"
             />
             {activeFilterCount > 0
-              ? `${activeFilterCount} filter${activeFilterCount === 1 ? "" : "s"}`
-              : "Filters"}
+              ? t("filters.filtersCount", {
+                  count: activeFilterCount,
+                })
+              : t("filters.filters")}
           </Button>
         </PopoverTrigger>
         <PopoverContent align="end" className="w-[min(22rem,calc(100vw-2rem))]">
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="font-medium text-sm">Add filters</p>
+                <p className="font-medium text-sm">{t("filters.addFilters")}</p>
                 <p className="text-muted-foreground text-xs">
-                  Narrow loans by status or person.
+                  {t("filters.narrowDesc")}
                 </p>
               </div>
               {activeFilterCount > 0 ? (
@@ -91,7 +101,7 @@ export function LoanFilters({
                   }
                 >
                   <XIcon aria-hidden="true" data-icon="inline-start" />
-                  Clear
+                  {t("filters.clear")}
                 </Button>
               ) : null}
             </div>
@@ -104,16 +114,25 @@ export function LoanFilters({
                 })
               }
             >
-              <SelectTrigger className="w-full" aria-label="Filter by status">
+              <SelectTrigger
+                className="w-full"
+                aria-label={t("filters.filterByStatusAria")}
+              >
                 <SelectValue placeholder={statusLabel} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="REPAID">Repaid</SelectItem>
-                  <SelectItem value="OVERDUE">Overdue</SelectItem>
-                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                  <SelectItem value="all">
+                    {t("filters.allStatuses")}
+                  </SelectItem>
+                  <SelectItem value="ACTIVE">{t("filters.active")}</SelectItem>
+                  <SelectItem value="REPAID">{t("filters.repaid")}</SelectItem>
+                  <SelectItem value="OVERDUE">
+                    {t("filters.overdue")}
+                  </SelectItem>
+                  <SelectItem value="CANCELLED">
+                    {t("filters.cancelled")}
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -123,14 +142,17 @@ export function LoanFilters({
                 onChange({ ...filters, personId: value })
               }
             >
-              <SelectTrigger className="w-full" aria-label="Filter by person">
+              <SelectTrigger
+                className="w-full"
+                aria-label={t("filters.filterByPersonAria")}
+              >
                 <SelectValue
-                  placeholder={selectedPerson?.name ?? "All people"}
+                  placeholder={selectedPerson?.name ?? t("filters.allPeople")}
                 />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="all">All people</SelectItem>
+                  <SelectItem value="all">{t("filters.allPeople")}</SelectItem>
                   {people.map((person) => (
                     <SelectItem key={person.id} value={person.id}>
                       {person.name}

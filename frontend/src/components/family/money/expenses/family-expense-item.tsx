@@ -3,6 +3,7 @@
 import { ReceiptTextIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { createTranslator } from "@/i18n/translate";
 import { FamilyTransactionItem } from "../family-transaction-item";
 import {
   formatTransactionPaymentMethod,
@@ -36,11 +37,12 @@ export function FamilyExpenseItem({
   handleDuplicate,
   handleDownloadReceipt,
 }: FamilyExpenseItemProps) {
+  const t = createTranslator("FamilyExpenses");
   const categoryName = tx.category.name;
   const categoryStyle = getTransactionCategoryStyle(categoryName);
   const paymentStyle = getTransactionPaymentStyle(tx.paymentMethod);
   const firstReceipt = tx.receipts?.[0];
-  const title = tx.description || categoryName || "Expense Transaction";
+  const title = tx.description || categoryName || t("dialogs.addTitle");
 
   const counterparty = tx.receivedFrom
     ? { label: "To", name: tx.receivedFrom }
@@ -67,7 +69,7 @@ export function FamilyExpenseItem({
       variant="outline"
       className="hidden sm:inline-flex text-xs font-normal h-6"
     >
-      No receipt
+      {t("table.noReceipt")}
     </Badge>
   );
 

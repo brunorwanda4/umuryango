@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/common/pages/page-title";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { CategoryDeleteDialog } from "./categories/category-delete-dialog";
 import { CategoryFilters } from "./categories/category-filters";
@@ -48,6 +49,7 @@ function MoneyCategoriesWorkspace({
   familyId: string;
   money: MoneyOverview | null;
 }) {
+  const t = createTranslator("FamilyCategories");
   const [categories, setCategories] = useState<MoneyCategory[]>(demoCategories);
   const [loading, setLoading] = useState(true);
   const [apiMessage, setApiMessage] = useState<string>();
@@ -79,15 +81,10 @@ function MoneyCategoriesWorkspace({
         setApiMessage(undefined);
       } else if (response.ok) {
         setCategories(demoCategories);
-        setApiMessage(
-          "No saved categories were returned yet, so recommended Rwanda Family demo categories are shown.",
-        );
+        setApiMessage(t("demoNotice"));
       } else {
         setCategories(demoCategories);
-        setApiMessage(
-          response.message ??
-            "Saved categories are not available, so demo categories are shown.",
-        );
+        setApiMessage(response.message ?? t("unavailableNotice"));
       }
 
       setLoading(false);
@@ -96,7 +93,7 @@ function MoneyCategoriesWorkspace({
     return () => {
       active = false;
     };
-  }, [familyId, money]);
+  }, [familyId, money, t]);
 
   const stats = useMemo(() => getCategoryStats(categories), [categories]);
   const visibleCategories = useMemo(
@@ -124,8 +121,8 @@ function MoneyCategoriesWorkspace({
     );
     toast.success(
       status === "ACTIVE"
-        ? `${category.name} is active again`
-        : `${category.name} has been archived`,
+        ? t("activeAgain", { name: category.name })
+        : t("archived", { name: category.name }),
     );
   };
 
@@ -145,7 +142,7 @@ function MoneyCategoriesWorkspace({
       );
 
       if (!response.ok) {
-        toast.error(response.message ?? "Category could not be deleted");
+        toast.error(response.message ?? t("deleteFailed"));
         return;
       }
     }
@@ -153,15 +150,15 @@ function MoneyCategoriesWorkspace({
     setCategories((currentCategories) =>
       currentCategories.filter((item) => item.id !== deleteCategory.id),
     );
-    toast.success(`${deleteCategory.name} deleted`);
+    toast.success(t("deleted", { name: deleteCategory.name }));
     setDeleteCategory(null);
   };
 
   return (
     <div className="flex flex-col gap-6">
       <PageTitle
-        title="Categories"
-        description="Manage your family's money categories."
+        title={t("pageTitle")}
+        description={t("pageDescription")}
         actions={
           <CreateCategoryForm
             existingCategories={categories}

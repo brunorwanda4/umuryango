@@ -1,6 +1,7 @@
 import { PlusIcon } from "lucide-react";
 import type { PersonPlan } from "@/components/plans/types-and-schemas";
 import { Button } from "@/components/ui/button";
+import { createTranslator } from "@/i18n/translate";
 import { formatFullRwf } from "./formatters";
 
 export interface PersonalMoneySavingsCardProps {
@@ -14,17 +15,19 @@ export function PersonalMoneySavingsCard({
   currency,
   onAddGoal,
 }: PersonalMoneySavingsCardProps) {
+  const t = createTranslator("PersonalMoney");
+
   if (!goal) {
     return (
       <section className="flex flex-col justify-between rounded-[20px] border border-border bg-card p-5 shadow-sm">
         <div>
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-fraunces text-xl font-semibold text-foreground">
-              Next savings goal
+              {t("savingsSnapshot.title")}
             </h2>
           </div>
           <p className="text-sm text-muted-foreground">
-            No active savings goal set yet.
+            {t("savingsSnapshot.noGoals")}
           </p>
         </div>
         <div className="mt-4">
@@ -36,7 +39,7 @@ export function PersonalMoneySavingsCard({
             className="rounded-full font-semibold"
           >
             <PlusIcon className="size-4" data-icon="inline-start" />
-            Create savings goal
+            {t("savingsSnapshot.createGoal")}
           </Button>
         </div>
       </section>
@@ -52,26 +55,32 @@ export function PersonalMoneySavingsCard({
     <section className="rounded-[20px] border border-border bg-card p-5 shadow-sm">
       <div className="mb-3.5">
         <h2 className="font-fraunces text-xl font-semibold text-foreground">
-          Next savings goal
+          {t("savingsSnapshot.title")}
         </h2>
         <p className="text-sm text-muted-foreground">{goal.title}</p>
       </div>
 
       <div className="flex flex-col">
         <div className="flex justify-between py-2 text-[15px]">
-          <span className="text-muted-foreground">Saved</span>
+          <span className="text-muted-foreground">
+            {t("savingsSnapshot.saved")}
+          </span>
           <b className="font-semibold text-foreground">
             {formatFullRwf(saved, currency)}
           </b>
         </div>
         <div className="flex justify-between border-t border-border py-2 text-[15px]">
-          <span className="text-muted-foreground">Target</span>
+          <span className="text-muted-foreground">
+            {t("savingsSnapshot.target")}
+          </span>
           <b className="font-semibold text-foreground">
             {formatFullRwf(target, currency)}
           </b>
         </div>
         <div className="flex justify-between border-t border-border py-2 text-[15px]">
-          <span className="text-muted-foreground">Remaining</span>
+          <span className="text-muted-foreground">
+            {t("savingsSnapshot.remaining")}
+          </span>
           <b className="font-semibold text-foreground">
             {formatFullRwf(remaining, currency)}
           </b>

@@ -23,6 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 
 type CategoryNameSource = {
   id?: string;
@@ -73,6 +74,7 @@ export function CreateCategoryForm({
   onOpenChange?: (open: boolean) => void;
   trigger?: ReactNode;
 }) {
+  const t = createTranslator("FamilyCategories");
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
   const setOpen = onOpenChange ?? setInternalOpen;
@@ -105,7 +107,7 @@ export function CreateCategoryForm({
       method: "post",
       url: `/families/${encodeURIComponent(familyId)}/money/categories${personal ? "/mine" : ""}`,
     },
-    onSuccessMessage: "Category created successfully",
+    onSuccessMessage: t("createdSuccess"),
     toastOnSuccess: true,
     onSuccess: async (category) => {
       setOpen(false);
@@ -139,18 +141,15 @@ export function CreateCategoryForm({
           {trigger ?? (
             <Button size="sm">
               <FolderPlusIcon aria-hidden="true" data-icon="inline-start" />
-              Create category
+              {t("createCategoryBtn")}
             </Button>
           )}
         </DialogTrigger>
       )}
       <DialogContent className="max-h-[96vh] overflow-y-auto lg:max-h-[calc(100vh-2rem)] lg:max-w-4xl lg:overflow-y-hidden">
         <DialogHeader>
-          <DialogTitle>Create Category</DialogTitle>
-          <DialogDescription>
-            Add reusable master data for future income and expense records.
-            Category names must be unique within the same type.
-          </DialogDescription>
+          <DialogTitle>{t("createCategoryDialogTitle")}</DialogTitle>
+          <DialogDescription>{t("createCategoryDialogDesc")}</DialogDescription>
         </DialogHeader>
         <form
           id="category-form"
@@ -172,7 +171,7 @@ export function CreateCategoryForm({
               onClick={() => setOpen(false)}
               className=" w-fit"
             >
-              Cancel
+              {t("cancel")}
             </Button>
           </DialogClose>
           <Button
@@ -181,7 +180,7 @@ export function CreateCategoryForm({
             disabled={isPending}
             className="w-fit"
           >
-            {isPending ? "Creating..." : "Create category"}
+            {isPending ? t("creating") : t("createCategoryBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>

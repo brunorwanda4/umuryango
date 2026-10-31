@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import { LoanFormFields } from "./loan-form-fields";
@@ -56,6 +57,7 @@ export function CreateLoanDialog({
   onSuccess: () => void;
   open: boolean;
 }) {
+  const t = createTranslator("FamilyLoans");
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     LoanFormValues,
     LoanRecord
@@ -95,7 +97,7 @@ export function CreateLoanDialog({
       method: "post",
       url: `/families/${encodeURIComponent(family.id)}/money/loans`,
     },
-    onSuccessMessage: "Loan recorded successfully",
+    onSuccessMessage: t("toasts.loanRecorded"),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -116,16 +118,13 @@ export function CreateLoanDialog({
       <DialogTrigger asChild>
         <Button size="sm">
           <PlusIcon aria-hidden="true" data-icon="inline-start" />
-          Add Loan
+          {t("createTitle")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Add Loan</DialogTitle>
-          <DialogDescription>
-            Record money borrowed or lent, repayment terms, documents, and
-            approval state.
-          </DialogDescription>
+          <DialogTitle>{t("createTitle")}</DialogTitle>
+          <DialogDescription>{t("createDesc")}</DialogDescription>
         </DialogHeader>
         <form
           id="create-loan-form"
@@ -148,7 +147,7 @@ export function CreateLoanDialog({
             disabled={isPending}
             className="w-full sm:w-auto"
           >
-            {isPending ? "Saving..." : "Save Loan"}
+            {isPending ? t("saving") : t("saveLoan")}
           </Button>
         </DialogFooter>
       </DialogContent>

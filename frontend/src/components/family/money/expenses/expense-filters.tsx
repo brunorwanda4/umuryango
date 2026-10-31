@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import type { Category } from "./types-and-schemas";
 import { paymentMethods } from "./types-and-schemas";
@@ -69,6 +70,8 @@ export function ExpenseFilters({
   categories: Category[];
   family: FamilyDetail;
 }) {
+  const t = createTranslator("FamilyExpenses");
+  const tCommon = createTranslator("Common");
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const activeAdvancedFiltersCount = [
     filterCategory !== "all",
@@ -93,7 +96,7 @@ export function ExpenseFilters({
             <div className="relative min-w-0 flex-1">
               <SearchIcon className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search title, payee, notes..."
+                placeholder={t("filters.searchPlaceholder")}
                 className="pl-8"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -111,7 +114,7 @@ export function ExpenseFilters({
                     aria-hidden="true"
                     data-icon="inline-start"
                   />
-                  More filters
+                  {t("filters.moreFilters")}
                   {activeAdvancedFiltersCount > 0
                     ? ` (${activeAdvancedFiltersCount})`
                     : null}
@@ -133,10 +136,12 @@ export function ExpenseFilters({
             <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-4 xl:grid-cols-6">
               <Select value={filterCategory} onValueChange={setFilterCategory}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All categories" />
+                  <SelectValue placeholder={t("filters.allCategories")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All categories</SelectItem>
+                  <SelectItem value="all">
+                    {t("filters.allCategories")}
+                  </SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category.id} value={category.id}>
                       {category.name}
@@ -150,10 +155,12 @@ export function ExpenseFilters({
                 onValueChange={setFilterPaymentMethod}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All payments" />
+                  <SelectValue placeholder={t("filters.allPayments")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All payments</SelectItem>
+                  <SelectItem value="all">
+                    {t("filters.allPayments")}
+                  </SelectItem>
                   {paymentMethods.map((method) => (
                     <SelectItem key={method.value} value={method.value}>
                       {method.label}
@@ -164,24 +171,36 @@ export function ExpenseFilters({
 
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All statuses" />
+                  <SelectValue placeholder={t("filters.allStatuses")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="DRAFT">Draft</SelectItem>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="APPROVED">Approved</SelectItem>
-                  <SelectItem value="REJECTED">Rejected</SelectItem>
-                  <SelectItem value="REVERSED">Reversed</SelectItem>
+                  <SelectItem value="all">
+                    {t("filters.allStatuses")}
+                  </SelectItem>
+                  <SelectItem value="DRAFT">
+                    {tCommon("status.draft")}
+                  </SelectItem>
+                  <SelectItem value="PENDING">
+                    {tCommon("status.pending")}
+                  </SelectItem>
+                  <SelectItem value="APPROVED">
+                    {tCommon("status.approved")}
+                  </SelectItem>
+                  <SelectItem value="REJECTED">
+                    {tCommon("status.rejected")}
+                  </SelectItem>
+                  <SelectItem value="REVERSED">
+                    {tCommon("status.reversed")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={filterMember} onValueChange={setFilterMember}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All members" />
+                  <SelectValue placeholder={t("filters.allMembers")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All members</SelectItem>
+                  <SelectItem value="all">{t("filters.allMembers")}</SelectItem>
                   {family.members.map((member) => (
                     <SelectItem key={member.id} value={member.fullName}>
                       {member.fullName}
@@ -192,13 +211,17 @@ export function ExpenseFilters({
 
               <Input
                 inputMode="numeric"
-                placeholder={`Min amount (${family.defaultCurrency})`}
+                placeholder={t("filters.minAmount", {
+                  currency: family.defaultCurrency,
+                })}
                 value={minAmount}
                 onChange={(event) => setMinAmount(event.target.value)}
               />
               <Input
                 inputMode="numeric"
-                placeholder={`Max amount (${family.defaultCurrency})`}
+                placeholder={t("filters.maxAmount", {
+                  currency: family.defaultCurrency,
+                })}
                 value={maxAmount}
                 onChange={(event) => setMaxAmount(event.target.value)}
               />
@@ -207,7 +230,7 @@ export function ExpenseFilters({
             <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
                 <span className="shrink-0 text-muted-foreground text-xs">
-                  Expense date range:
+                  {t("filters.dateRange")}
                 </span>
                 <div className="flex min-w-0 w-full flex-wrap items-center gap-2 md:w-auto">
                   <Input
@@ -216,7 +239,9 @@ export function ExpenseFilters({
                     value={startDate}
                     onChange={(event) => setStartDate(event.target.value)}
                   />
-                  <span className="text-muted-foreground text-xs">to</span>
+                  <span className="text-muted-foreground text-xs">
+                    {t("filters.to")}
+                  </span>
                   <Input
                     type="date"
                     className="h-8 max-w-[160px] min-w-0"
@@ -232,7 +257,7 @@ export function ExpenseFilters({
                 className="w-full md:w-auto"
               >
                 <FilterXIcon className="size-4" data-icon="inline-start" />
-                Reset Filters
+                {t("filters.resetFilters")}
               </Button>
             </div>
           </CollapsibleContent>

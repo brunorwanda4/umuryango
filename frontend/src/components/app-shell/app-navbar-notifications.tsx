@@ -19,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 
 type NotificationItem = {
@@ -33,6 +34,7 @@ type NotificationItem = {
 export default function AppNavbarNotifications() {
   const router = useRouter();
   const pathname = usePathname();
+  const t = createTranslator("AppShell.navbar");
 
   // Parse family slug if present in the pathname
   const familySlugMatch = pathname.match(/^\/family\/([^/]+)/);
@@ -75,7 +77,9 @@ export default function AppNavbarNotifications() {
   };
 
   const markAsRead = (id: string) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, unread: false } : n)));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, unread: false } : n)),
+    );
   };
 
   // Get notification type icon
@@ -104,12 +108,14 @@ export default function AppNavbarNotifications() {
           {unreadCount > 0 && (
             <span className="absolute top-1.5 right-1.5 flex size-2 rounded-full bg-primary ring-2 ring-background animate-pulse" />
           )}
-          <span className="sr-only">Notifications</span>
+          <span className="sr-only">{t("notifications")}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-1 md:w-96">
         <div className="flex items-center justify-between px-3 py-2">
-          <DropdownMenuLabel className="p-0 font-semibold text-sm">Notifications</DropdownMenuLabel>
+          <DropdownMenuLabel className="p-0 font-semibold text-sm">
+            {t("notifications")}
+          </DropdownMenuLabel>
           {unreadCount > 0 && (
             <button
               type="button"
@@ -117,7 +123,7 @@ export default function AppNavbarNotifications() {
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
               <CheckIcon className="size-3" />
-              Mark all read
+              {t("markAllRead")}
             </button>
           )}
         </div>
@@ -126,7 +132,7 @@ export default function AppNavbarNotifications() {
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
               <InboxIcon className="size-8 opacity-40 mb-2" />
-              <span className="text-xs">No notifications yet</span>
+              <span className="text-xs">{t("noNotificationsYet")}</span>
             </div>
           ) : (
             notifications.map((notification) => (
@@ -146,7 +152,9 @@ export default function AppNavbarNotifications() {
                     <p
                       className={cn(
                         "text-xs truncate font-medium",
-                        notification.unread ? "text-foreground" : "text-muted-foreground",
+                        notification.unread
+                          ? "text-foreground"
+                          : "text-muted-foreground",
                       )}
                     >
                       {notification.title}
@@ -171,7 +179,7 @@ export default function AppNavbarNotifications() {
           onClick={() => router.push(isFamilyView ? familyHref : "/me")}
           className="justify-center text-xs text-muted-foreground font-medium py-2 rounded-xl focus:bg-accent"
         >
-          View all activity
+          {t("viewAllActivity")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -4,6 +4,7 @@ import { PencilIcon } from "lucide-react";
 import type * as React from "react";
 import { MoneyFormDialog } from "@/components/money/money-form-dialog";
 import { Button } from "@/components/ui/button";
+import { createTranslator } from "@/i18n/translate";
 import type {
   IncomeCategory,
   RecentIncomeRecord,
@@ -28,6 +29,8 @@ export function UpdateIncomeDialog({
   open,
   trigger,
 }: UpdateIncomeDialogProps) {
+  const t = createTranslator("PersonalMoney.personalIncome");
+
   return (
     <MoneyFormDialog
       type="income"
@@ -56,7 +59,7 @@ export function UpdateIncomeDialog({
             variant="ghost"
           >
             <PencilIcon aria-hidden="true" data-icon="inline-start" />
-            Update income
+            {t("actions.edit")}
           </Button>
         ) : (
           trigger

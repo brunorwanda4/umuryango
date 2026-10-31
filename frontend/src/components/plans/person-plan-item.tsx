@@ -33,15 +33,16 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Progress } from "@/components/ui/progress";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import {
-  formatPlanStatus,
+  isOverdue,
   type PersonPlan,
   type PersonPlanStatus,
 } from "./types-and-schemas";
 
-function formatDate(value: string | null) {
-  if (!value) return "No date";
+function formatDate(value: string | null, noDateLabel: string) {
+  if (!value) return noDateLabel;
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
   }).format(new Date(value));
@@ -57,9 +58,20 @@ function formatMoney(value: string | null, currency: string) {
 }
 
 function StatusBadge({ plan }: { plan: PersonPlan }) {
+  const t = createTranslator("PersonalPlans");
+  const label = isOverdue(plan)
+    ? t("items.overdue")
+    : plan.status === "COMPLETED"
+      ? t("filters.completed")
+      : plan.status === "IN_PROGRESS"
+        ? t("filters.inProgress")
+        : plan.status === "CANCELLED"
+          ? t("filters.cancelled")
+          : t("filters.pending");
+
   return (
     <Badge variant={plan.status === "COMPLETED" ? "default" : "secondary"}>
-      {formatPlanStatus(plan)}
+      {label}
     </Badge>
   );
 }
@@ -71,6 +83,7 @@ function PlanActions({
   onStatus,
   onView,
 }: PlanItemProps) {
+  const t = createTranslator("PersonalPlans");
   const completed = plan.status === "COMPLETED";
   return (
     <DropdownMenu>
@@ -78,7 +91,7 @@ function PlanActions({
         <Button
           size="icon"
           variant="ghost"
-          aria-label={`Actions for ${plan.title}`}
+          aria-label={t("items.actionsFor", { title: plan.title })}
         >
           <MoreHorizontalIcon aria-hidden="true" />
         </Button>
@@ -86,10 +99,10 @@ function PlanActions({
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={() => onView(plan)}>
-            <EyeIcon aria-hidden="true" /> View
+            <EyeIcon aria-hidden="true" /> {t("items.view")}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => onEdit(plan)}>
-            <Edit3Icon aria-hidden="true" /> Edit
+            <Edit3Icon aria-hidden="true" /> {t("items.edit")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => onStatus(plan, completed ? "PENDING" : "COMPLETED")}
@@ -99,11 +112,11 @@ function PlanActions({
             ) : (
               <CheckCircle2Icon aria-hidden="true" />
             )}
-            Mark {completed ? "incomplete" : "complete"}
+            {completed ? t("items.markIncomplete") : t("items.markComplete")}
           </DropdownMenuItem>
           {plan.type === "TASK" ? (
             <DropdownMenuItem onSelect={() => onEdit(plan)}>
-              <CalendarClockIcon aria-hidden="true" /> Reschedule
+              <CalendarClockIcon aria-hidden="true" /> {t("items.reschedule")}
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuGroup>
@@ -113,7 +126,7 @@ function PlanActions({
             variant="destructive"
             onSelect={() => onDelete(plan)}
           >
-            <Trash2Icon aria-hidden="true" /> Delete
+            <Trash2Icon aria-hidden="true" /> {t("items.delete")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -130,8 +143,18 @@ export type PlanItemProps = {
 };
 
 export function PersonTaskItem(props: PlanItemProps) {
+  const t = createTranslator("PersonalPlans");
   const { plan, onStatus } = props;
   const completed = plan.status === "COMPLETED";
+
+  const priorityLabel = plan.priority
+    ? plan.priority === "LOW"
+      ? t("items.low")
+      : plan.priority === "MEDIUM"
+        ? t("items.medium")
+        : t("items.high")
+    : t("items.noPriority");
+
   return (
     <Item
       asChild
@@ -141,7 +164,11 @@ export function PersonTaskItem(props: PlanItemProps) {
       <li>
         <ItemMedia>
           <Checkbox
-            aria-label={`Mark ${plan.title} ${completed ? "incomplete" : "complete"}`}
+            aria-label={
+              completed
+                ? t("items.markTitleIncomplete", { title: plan.title })
+                : t("items.markTitleComplete", { title: plan.title })
+            }
             checked={completed}
             onCheckedChange={(checked) =>
               onStatus(plan, checked ? "COMPLETED" : "PENDING")
@@ -157,7 +184,7 @@ export function PersonTaskItem(props: PlanItemProps) {
           <ItemDescription className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="inline-flex items-center gap-1">
               <CalendarDaysIcon aria-hidden="true" />
-              {formatDate(plan.dueDate)}
+              {formatDate(plan.dueDate, t("items.noDate"))}
             </span>
             {plan.dueTime ? (
               <span className="inline-flex items-center gap-1">
@@ -168,17 +195,13 @@ export function PersonTaskItem(props: PlanItemProps) {
             {plan.reminderAt ? (
               <span className="inline-flex items-center gap-1">
                 <BellIcon aria-hidden="true" />
-                Reminder set
+                {t("items.reminderSet")}
               </span>
             ) : null}
           </ItemDescription>
         </ItemContent>
         <ItemActions className="ml-auto">
-          <Badge variant="outline">
-            {plan.priority
-              ? `${plan.priority[0]}${plan.priority.slice(1).toLowerCase()}`
-              : "No priority"}
-          </Badge>
+          <Badge variant="outline">{priorityLabel}</Badge>
           <StatusBadge plan={plan} />
           <PlanActions {...props} />
         </ItemActions>
@@ -188,6 +211,7 @@ export function PersonTaskItem(props: PlanItemProps) {
 }
 
 export function PersonGoalItem(props: PlanItemProps) {
+  const t = createTranslator("PersonalPlans");
   const { plan } = props;
   const completedMilestones = plan.milestones.filter(
     (item) => item.completedAt,
@@ -218,12 +242,18 @@ export function PersonGoalItem(props: PlanItemProps) {
             <ItemDescription>{plan.description}</ItemDescription>
           ) : null}
           <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
-            <span>Target {formatDate(plan.targetDate)}</span>
-            <span>{plan.progress}% completed</span>
+            <span>
+              {t("items.targetDate", {
+                date: formatDate(plan.targetDate, t("items.noDate")),
+              })}
+            </span>
+            <span>
+              {t("items.completedPercent", { progress: plan.progress })}
+            </span>
           </div>
           <Progress
             value={plan.progress}
-            aria-label={`${plan.title} progress`}
+            aria-label={t("items.progressAria", { title: plan.title })}
           />
         </ItemContent>
         <ItemActions className="ml-auto">
@@ -236,13 +266,21 @@ export function PersonGoalItem(props: PlanItemProps) {
             ) : (
               <CircleIcon aria-hidden="true" />
             )}
-            {completedMilestones} of {plan.milestones.length} milestones
+            {t("items.milestonesProgress", {
+              completed: completedMilestones,
+              total: plan.milestones.length,
+            })}
           </span>
           {plan.needsMoney ? (
             <span>
-              {formatMoney(plan.currentAmountMinorUnits, plan.currency)} of{" "}
-              {formatMoney(plan.targetAmountMinorUnits, plan.currency)} /{" "}
-              {formatMoney(remaining.toString(), plan.currency)} remaining
+              {t("items.financialProgress", {
+                current: formatMoney(
+                  plan.currentAmountMinorUnits,
+                  plan.currency,
+                ),
+                target: formatMoney(plan.targetAmountMinorUnits, plan.currency),
+                remaining: formatMoney(remaining.toString(), plan.currency),
+              })}
             </span>
           ) : null}
         </ItemFooter>

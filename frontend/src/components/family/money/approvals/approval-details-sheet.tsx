@@ -20,6 +20,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { createTranslator } from "@/i18n/translate";
 import { formatDate, formatTitle } from "../utils";
 import {
   ApprovalStatusBadge,
@@ -46,6 +47,8 @@ export function ApprovalDetailsSheet({
   onOpenChange: (open: boolean) => void;
   processingId: string | null;
 }) {
+  const t = createTranslator("FamilyApprovals");
+  const tCommon = createTranslator("Common");
   const isOpen = Boolean(approval);
   const canUseTransactionAction =
     Boolean(approval) &&
@@ -60,10 +63,7 @@ export function ApprovalDetailsSheet({
           <>
             <SheetHeader>
               <SheetTitle>{approval.title}</SheetTitle>
-              <SheetDescription>
-                Review the source record, financial context, people, comments,
-                and approval history before taking action.
-              </SheetDescription>
+              <SheetDescription>{t("detailsSheetDesc")}</SheetDescription>
             </SheetHeader>
             <div className="flex flex-col gap-4 px-6 pb-6">
               <div className="flex flex-wrap gap-2">
@@ -72,33 +72,36 @@ export function ApprovalDetailsSheet({
                 <PriorityBadge priority={approval.priority} />
               </div>
 
-              <DetailSection title="General Information">
+              <DetailSection title={t("sectionGeneral")}>
                 <DetailRow
-                  label="Transaction Type"
+                  label={t("transactionType")}
                   value={formatTitle(approval.type)}
                 />
-                <DetailRow label="Title" value={approval.title} />
-                <DetailRow label="Category" value={approval.category} />
+                <DetailRow label={t("titleColumn")} value={approval.title} />
                 <DetailRow
-                  label="Amount"
+                  label={t("categoryColumn")}
+                  value={approval.category}
+                />
+                <DetailRow
+                  label={t("amountColumn")}
                   value={
                     <CompactMoney
                       currency={currency}
-                      emptyLabel="Not recorded"
+                      emptyLabel={tCommon("notRecorded")}
                       value={approval.amountMinorUnits}
                     />
                   }
                   mono
                 />
                 <DetailRow
-                  label="Date"
+                  label={t("dateColumn")}
                   value={formatDate(
                     approval.transaction?.date ?? approval.submittedAt,
                   )}
                 />
                 <div className="rounded-md border p-3">
                   <p className="font-medium text-muted-foreground text-xs">
-                    Description
+                    {tCommon("description")}
                   </p>
                   <p className="mt-1 whitespace-pre-wrap text-sm leading-6">
                     {approval.description}
@@ -106,48 +109,46 @@ export function ApprovalDetailsSheet({
                 </div>
               </DetailSection>
 
-              <DetailSection title="Financial Information">
+              <DetailSection title={t("sectionFinancial")}>
                 <DetailRow
-                  label="Payment Method"
+                  label={t("paymentMethod")}
                   value={approval.paymentMethod}
                 />
-                <DetailRow label="Receipt" value={approval.receipt} />
-                <DetailRow label="Budget" value={approval.budget} />
+                <DetailRow label={t("receipt")} value={approval.receipt} />
+                <DetailRow label={t("budget")} value={approval.budget} />
                 <DetailRow
-                  label="Related Project"
+                  label={t("relatedProject")}
                   value={approval.relatedProject}
                 />
               </DetailSection>
 
-              <DetailSection title="People">
-                <DetailRow label="Requested By" value={approval.requestedBy} />
+              <DetailSection title={t("sectionPeople")}>
                 <DetailRow
-                  label="Current Approver"
+                  label={t("requestedBy")}
+                  value={approval.requestedBy}
+                />
+                <DetailRow
+                  label={t("currentApprover")}
                   value={approval.currentApprover}
                 />
                 <DetailRow
-                  label="Previous Approvers"
+                  label={t("previousApprovers")}
                   value={
                     approval.previousApprovers.length
                       ? approval.previousApprovers.join(", ")
-                      : "None yet"
+                      : t("noneYet")
                   }
                 />
               </DetailSection>
 
-              <DetailSection title="Comments">
-                <Textarea
-                  disabled
-                  placeholder="Approval comments need a backend approval-comments API before they can be saved."
-                />
+              <DetailSection title={t("sectionComments")}>
+                <Textarea disabled placeholder={t("commentsPlaceholder")} />
                 <p className="text-muted-foreground text-xs leading-5">
-                  Comments are prepared for timestamped persistence. Saving is
-                  disabled until the backend exposes immutable approval
-                  comments.
+                  {t("commentsNote")}
                 </p>
               </DetailSection>
 
-              <DetailSection title="Actions">
+              <DetailSection title={t("sectionActions")}>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <Button
                     disabled={
@@ -159,7 +160,7 @@ export function ApprovalDetailsSheet({
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    Approve
+                    {t("approve")}
                   </Button>
                   <Button
                     disabled={
@@ -169,48 +170,48 @@ export function ApprovalDetailsSheet({
                     onClick={() => onAction(approval, "reject")}
                   >
                     <XCircleIcon aria-hidden="true" data-icon="inline-start" />
-                    Reject
+                    {t("reject")}
                   </Button>
                   <Button disabled variant="outline">
                     <MessageSquareIcon
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    Request Changes
+                    {t("requestChanges")}
                   </Button>
                   <Button disabled variant="outline">
                     <ArrowLeftIcon
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    Return to Draft
+                    {t("returnToDraft")}
                   </Button>
                   <Button disabled={!canAssign} variant="outline">
                     <UserRoundPlusIcon
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    Assign Approver
+                    {t("assignApprover")}
                   </Button>
                   <Button disabled variant="outline">
                     <ReceiptTextIcon
                       aria-hidden="true"
                       data-icon="inline-start"
                     />
-                    View Receipt
+                    {t("viewReceipt")}
                   </Button>
                   <Button disabled variant="outline">
                     <DownloadIcon aria-hidden="true" data-icon="inline-start" />
-                    Download Attachment
+                    {t("downloadAttachment")}
                   </Button>
                 </div>
               </DetailSection>
 
-              <DetailSection title="Approval History">
+              <DetailSection title={t("sectionHistory")}>
                 <ApprovalTimeline approval={approval} />
               </DetailSection>
 
-              <DetailSection title="Notifications">
+              <DetailSection title={t("sectionNotifications")}>
                 <div className="grid gap-2">
                   {[
                     "Creator is notified when approved.",

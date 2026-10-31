@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { ReportFact } from "./reports-ui-helpers";
 import type { ReportsOverview } from "./types";
 import {
@@ -29,14 +30,19 @@ export function ReportTypesGrid({
   hasSourceRecords: boolean;
   reports: ReportsOverview | null;
 }) {
+  const t = createTranslator("FamilyReports");
+  const tCommon = createTranslator("Common");
+
   return (
     <section
-      aria-label="Available report types"
+      aria-label={t("availableReportTypesAria")}
       className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3"
     >
       {reportTypes.map((reportType) => {
         const Icon = reportType.icon;
         const recentReport = findRecentReport(reports, reportType.type);
+        const title = t(`cards.${reportType.type}.title`);
+        const description = t(`cards.${reportType.type}.description`);
 
         return (
           <Card key={reportType.type}>
@@ -44,21 +50,21 @@ export function ReportTypesGrid({
               <CardAction>
                 <Icon className="size-4 text-muted-foreground" />
               </CardAction>
-              <CardTitle>{reportType.title}</CardTitle>
-              <CardDescription>{reportType.description}</CardDescription>
+              <CardTitle>{title}</CardTitle>
+              <CardDescription>{description}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <ReportFact
-                  label="Status"
+                  label={t("statusColumn")}
                   value={
                     recentReport?.status
                       ? formatTitle(recentReport.status)
-                      : "Not generated"
+                      : t("statusNotGenerated")
                   }
                 />
                 <ReportFact
-                  label="Last generated"
+                  label={t("lastGenerated")}
                   value={formatDateTime(recentReport?.generatedAt)}
                 />
               </div>
@@ -70,16 +76,16 @@ export function ReportTypesGrid({
                     variant="outline"
                   >
                     <EyeIcon aria-hidden="true" data-icon="inline-start" />
-                    View source
+                    {t("viewSource")}
                   </Button>
                 ) : null}
                 <Button
                   disabled={!canExportReports || !hasSourceRecords}
                   size="sm"
-                  title="Report generation needs the backend report export workflow."
+                  title={t("reportExportWorkflowTitle")}
                 >
                   <DownloadIcon aria-hidden="true" data-icon="inline-start" />
-                  Export
+                  {tCommon("export")}
                 </Button>
               </div>
             </CardContent>

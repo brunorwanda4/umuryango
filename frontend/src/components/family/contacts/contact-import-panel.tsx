@@ -4,12 +4,15 @@ import { FileUpIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import {
   type ImportedContact,
   parseGoogleCsv,
   parseVcard,
 } from "./contact-utils";
+
+const t = createTranslator("FamilyContacts");
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -33,24 +36,25 @@ function ContactFilePreview({
       </p>
       <p className="mt-1 text-muted-foreground">
         {formatFileSize(file.size)} ·{" "}
-        {file.name.toLowerCase().endsWith(".vcf") ? "vCard" : "CSV"} file
+        {file.name.toLowerCase().endsWith(".vcf") ? "vCard" : "CSV"}
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         {[
-          ["Contacts", contacts.length],
-          ["With phone", withPhone],
-          ["With email", withEmail],
+          [t("title"), contacts.length],
+          [t("withPhone"), withPhone],
+          [t("withEmail"), withEmail],
         ].map(([label, value]) => (
-          <div key={label} className="rounded-md border bg-background p-2">
+          <div
+            key={String(label)}
+            className="rounded-md border bg-background p-2"
+          >
             <p className="font-semibold">{value}</p>
             <p className="text-muted-foreground text-xs">{label}</p>
           </div>
         ))}
       </div>
       {contacts.length > 1000 ? (
-        <p className="mt-2 text-muted-foreground text-xs">
-          Only the first 1,000 contacts will be imported.
-        </p>
+        <p className="mt-2 text-muted-foreground text-xs">{t("limitHint")}</p>
       ) : null}
     </div>
   );
@@ -77,13 +81,13 @@ export function ContactImportPanel({
         : parseGoogleCsv(await file.text());
       if (!contacts.length) {
         setSelectedImport(null);
-        toast.error("No contacts were found in that file.");
+        toast.error(t("importEmpty"));
         return;
       }
       setSelectedImport({ file, contacts });
     } catch {
       setSelectedImport(null);
-      toast.error("The contact file could not be read.");
+      toast.error(t("importFileError"));
     }
   };
 
@@ -98,17 +102,20 @@ export function ContactImportPanel({
         contacts: selectedImport.contacts.slice(0, 1000),
       });
       if (!response.ok || !response.data) {
-        toast.error(response.message ?? "Contacts could not be imported.");
+        toast.error(response.message ?? t("importError"));
         return;
       }
       toast.success(
-        `${response.data.created} added, ${response.data.merged} matched existing contacts.`,
+        t("importSuccess", {
+          created: response.data.created,
+          merged: response.data.merged,
+        }),
       );
       setSelectedImport(null);
       if (importInputRef.current) importInputRef.current.value = "";
       onImported?.();
     } catch {
-      toast.error("The contact file could not be uploaded.");
+      toast.error(t("importUploadError"));
     } finally {
       setImporting(false);
     }
@@ -116,10 +123,7 @@ export function ContactImportPanel({
 
   return (
     <div className="flex min-h-60 flex-col gap-3">
-      <p className="text-muted-foreground text-sm">
-        Import a Google Contacts CSV or vCard file. Existing contacts are
-        matched by phone or email.
-      </p>
+      <p className="text-muted-foreground text-sm">{t("importDescription")}</p>
       <input
         ref={importInputRef}
         className="hidden"
@@ -139,7 +143,7 @@ export function ContactImportPanel({
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button type="button" disabled={importing} onClick={handleImport}>
               <FileUpIcon aria-hidden="true" data-icon="inline-start" />
-              {importing ? "Uploading..." : "Upload contacts"}
+              {importing ? t("uploading") : t("uploadContacts")}
             </Button>
             <Button
               type="button"
@@ -147,7 +151,7 @@ export function ContactImportPanel({
               disabled={importing}
               onClick={() => importInputRef.current?.click()}
             >
-              Choose another file
+              {t("chooseAnotherFile")}
             </Button>
           </div>
         </>
@@ -159,7 +163,7 @@ export function ContactImportPanel({
           onClick={() => importInputRef.current?.click()}
         >
           <FileUpIcon aria-hidden="true" data-icon="inline-start" />
-          Choose contact file
+          {t("chooseContactFile")}
         </Button>
       )}
     </div>

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 
@@ -46,6 +47,7 @@ import {
 } from "./utils";
 
 export function FamilyReportsWorkspace({ familyName }: { familyName: string }) {
+  const t = createTranslator("FamilyReports");
   const [period, setPeriod] = useState<ReportPeriod>("month");
   const [reportType, setReportType] = useState<ReportTypeFilter>("all");
   const [state, setState] = useState<FetchState>({ status: "loading" });
@@ -66,7 +68,7 @@ export function FamilyReportsWorkspace({ familyName }: { familyName: string }) {
       if (!familyResponse.ok || !familyResponse.data) {
         setState({
           status: "error",
-          message: familyResponse.message ?? "Unable to load this family.",
+          message: familyResponse.message ?? t("loadErrorTitle"),
         });
         return;
       }
@@ -78,8 +80,7 @@ export function FamilyReportsWorkspace({ familyName }: { familyName: string }) {
           status: "success",
           family,
           reports: null,
-          reportsMessage:
-            "Your current family role cannot view report data for this workspace.",
+          reportsMessage: t("roleRestrictedReports"),
           money: null,
           contributions: null,
           projects: null,
@@ -157,7 +158,7 @@ export function FamilyReportsWorkspace({ familyName }: { familyName: string }) {
     return () => {
       active = false;
     };
-  }, [familyName, period, reportType]);
+  }, [familyName, period, reportType, t]);
 
   if (state.status === "loading") {
     return <FamilyReportsSkeleton />;
@@ -170,10 +171,10 @@ export function FamilyReportsWorkspace({ familyName }: { familyName: string }) {
           <EmptyMedia variant="icon">
             <FileBarChartIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>Family reports could not load</EmptyTitle>
+          <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
           <EmptyDescription>
-            {state.message} You may not have access, or the family workspace no
-            longer exists. <Link href="/family">Back to your families</Link>
+            {t("loadErrorDesc", { message: state.message })}{" "}
+            <Link href="/family">{t("backToFamilies")}</Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -228,6 +229,7 @@ function ReportsWorkspaceContent({
   reportsMessage?: string;
   reportType: ReportTypeFilter;
 }) {
+  const t = createTranslator("FamilyReports");
   const currency =
     reports?.currency ??
     money?.currency ??
@@ -261,11 +263,9 @@ function ReportsWorkspaceContent({
       {reportsMessage ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>Waiting for report records</AlertTitle>
+          <AlertTitle>{t("waitingForReportRecordsTitle")}</AlertTitle>
           <AlertDescription>
-            The reports page is ready to show generated reports, source records,
-            exports, and charts. Report totals stay empty until the backend
-            returns persisted report data. API detail: {reportsMessage}
+            {t("waitingForReportRecordsDesc", { detail: reportsMessage })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -286,10 +286,10 @@ function ReportsWorkspaceContent({
       <Tabs defaultValue="overview" className="gap-4">
         <div className="overflow-x-auto">
           <TabsList className="min-w-max">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="types">Report types</TabsTrigger>
-            <TabsTrigger value="records">Source records</TabsTrigger>
-            <TabsTrigger value="exports">Exports</TabsTrigger>
+            <TabsTrigger value="overview">{t("overviewTab")}</TabsTrigger>
+            <TabsTrigger value="types">{t("reportTypesTab")}</TabsTrigger>
+            <TabsTrigger value="records">{t("sourceRecordsTab")}</TabsTrigger>
+            <TabsTrigger value="exports">{t("exportsTab")}</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="overview" className="flex flex-col gap-4">

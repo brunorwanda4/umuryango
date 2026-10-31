@@ -1,5 +1,6 @@
-import { ArrowDownIcon, Calendar, Pen, PiggyBankIcon } from "lucide-react";
+import { Calendar, Pen, PiggyBankIcon } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
+import { createTranslator } from "@/i18n/translate";
 import CommonOverviewCardDisplay from "../common/overview-card-display";
 import type { MoneySummary } from "./types";
 
@@ -9,27 +10,33 @@ interface MoneySummaryCardsProps {
 }
 
 const MeMoneyIncomeCard = ({ currency, summary }: MoneySummaryCardsProps) => {
+  const t = createTranslator("PersonalMoney.personalIncome");
   const iconClassName = "size-5 shrink-0 text-muted-foreground";
   const cards = [
     {
-      description: "Total income",
+      description: t("summary.totalIncome"),
       // icon: <ArrowDownIcon className={iconClassName} />,
       iconImage: "/images/icons/money.png",
-      value: <CompactMoney currency={currency} value={summary.totalIncomeMinorUnits} />,
+      value: (
+        <CompactMoney
+          currency={currency}
+          value={summary.totalIncomeMinorUnits}
+        />
+      ),
     },
     {
-      description: "Income Transactions",
+      description: t("summary.incomeTransactions"),
       icon: <Pen className={iconClassName} />,
       value: 90,
     },
 
     {
-      description: "This Month's",
+      description: t("summary.thisMonth"),
       icon: <Calendar className={iconClassName} />,
       value: 9000,
     },
     {
-      description: "Largest Income",
+      description: t("summary.largestIncome"),
       icon: <PiggyBankIcon className={iconClassName} />,
       value: 9000,
     },

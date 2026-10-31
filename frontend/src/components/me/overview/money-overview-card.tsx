@@ -2,6 +2,7 @@
 
 import { ArrowRightIcon, ReceiptTextIcon } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
+import { createTranslator } from "@/i18n/translate";
 import {
   formatFullMinorUnits,
   toChartNumber,
@@ -35,18 +37,26 @@ import {
 import type { PersonalOverviewData } from "./personal-overview-data";
 import { addMinorUnits } from "./personal-overview-data";
 
-const chartConfig = {
-  amount: { label: "Amount", color: "var(--chart-1)" },
-} satisfies ChartConfig;
-
 export function MoneyOverviewCard({ data }: { data: PersonalOverviewData }) {
+  const t = createTranslator("PersonalOverview.moneyCard");
   const income = data.income?.summary.periodTotalMinorUnits ?? "0";
   const expenses = data.expenses?.summary.periodTotalMinorUnits ?? "0";
   const remaining = addMinorUnits(income) - addMinorUnits(expenses);
+  const chartConfig = useMemo(
+    () =>
+      ({
+        amount: { label: t("amount"), color: "var(--chart-1)" },
+      }) satisfies ChartConfig,
+    [t],
+  );
   const chartData = [
-    { name: "Income", amount: toChartNumber(income), fill: "var(--chart-2)" },
     {
-      name: "Expenses",
+      name: t("income"),
+      amount: toChartNumber(income),
+      fill: "var(--chart-2)",
+    },
+    {
+      name: t("expenses"),
       amount: toChartNumber(expenses),
       fill: "var(--chart-1)",
     },
@@ -62,14 +72,12 @@ export function MoneyOverviewCard({ data }: { data: PersonalOverviewData }) {
   return (
     <Card className="min-w-0">
       <CardHeader>
-        <CardTitle>Money overview</CardTitle>
-        <CardDescription>
-          Your personal income and expenses this month.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
         <CardAction>
           <Button asChild size="sm" variant="ghost">
             <Link href="/me/money">
-              My money
+              {t("openMoney")}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
@@ -82,27 +90,25 @@ export function MoneyOverviewCard({ data }: { data: PersonalOverviewData }) {
               <EmptyMedia variant="icon">
                 <ReceiptTextIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>No money records yet</EmptyTitle>
-              <EmptyDescription>
-                Start by adding your income or expenses.
-              </EmptyDescription>
+              <EmptyTitle>{t("noMoneyRecords")}</EmptyTitle>
+              <EmptyDescription>{t("noMoneyRecordsDesc")}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
           <>
             <div className="grid grid-cols-3 gap-3">
               <MiniStat
-                label="Income"
+                label={t("income")}
                 currency={data.currency}
                 value={income}
               />
               <MiniStat
-                label="Expenses"
+                label={t("expenses")}
                 currency={data.currency}
                 value={expenses}
               />
               <MiniStat
-                label="Remaining"
+                label={t("remaining")}
                 currency={data.currency}
                 value={remaining.toString()}
               />
@@ -143,10 +149,10 @@ export function MoneyOverviewCard({ data }: { data: PersonalOverviewData }) {
             </ChartContainer>
             <Separator />
             <div className="flex flex-col gap-3">
-              <p className="font-medium text-sm">Recent transactions</p>
+              <p className="font-medium text-sm">{t("recentTransactions")}</p>
               {records.length === 0 ? (
                 <p className="text-muted-foreground text-sm">
-                  No recent transactions.
+                  {t("noRecentTransactions")}
                 </p>
               ) : (
                 records.map((record) => (
@@ -180,10 +186,10 @@ export function MoneyOverviewCard({ data }: { data: PersonalOverviewData }) {
       </CardContent>
       <CardFooter className="flex flex-wrap gap-2 border-t">
         <Button asChild size="sm">
-          <Link href="/me/money/income">Add income</Link>
+          <Link href="/me/money/income">{t("addIncome")}</Link>
         </Button>
         <Button asChild size="sm" variant="outline">
-          <Link href="/me/money/expenses">Add expense</Link>
+          <Link href="/me/money/expenses">{t("addExpense")}</Link>
         </Button>
       </CardFooter>
     </Card>

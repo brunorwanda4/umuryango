@@ -23,6 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { createTranslator } from "@/i18n/translate";
 
 export type ViewTransactionDialogProps = {
   title: string;
@@ -82,6 +83,7 @@ export function ViewTransactionDialog({
   const [internalOpen, setInternalOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const t = createTranslator("Common");
   const isOpen = open ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
 
@@ -102,7 +104,7 @@ export function ViewTransactionDialog({
                 variant="ghost"
               >
                 <EyeIcon aria-hidden="true" data-icon="inline-start" />
-                View
+                {t("view")}
               </Button>
             )}
           </DialogTrigger>
@@ -143,7 +145,9 @@ export function ViewTransactionDialog({
               </div>
               <div className="flex items-center gap-3 border-b px-4 py-3.5">
                 <TagIcon className="text-muted-foreground size-4 shrink-0" />
-                <dt className="text-muted-foreground text-sm">Category</dt>
+                <dt className="text-muted-foreground text-sm">
+                  {t("category")}
+                </dt>
                 <dd className="ml-auto">
                   <Badge className={categoryClassName}>{category}</Badge>
                 </dd>
@@ -151,7 +155,7 @@ export function ViewTransactionDialog({
               <div className="flex items-center gap-3 px-4 py-3.5">
                 <PaymentIcon className="text-muted-foreground size-4 shrink-0" />
                 <dt className="text-muted-foreground text-sm">
-                  Payment method
+                  {t("paymentMethod")}
                 </dt>
                 <dd className="ml-auto text-right text-sm font-medium">
                   {paymentMethod}
@@ -187,7 +191,7 @@ export function ViewTransactionDialog({
                 type="button"
                 variant="outline"
               >
-                Close
+                {t("close")}
               </Button>
             </DialogClose>
           </DialogFooter>

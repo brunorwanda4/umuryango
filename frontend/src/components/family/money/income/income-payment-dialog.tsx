@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import type { CurrentUser } from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
@@ -93,6 +94,7 @@ export function IncomePaymentDialog({
   onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
   onSuccess: () => void;
 }) {
+  const t = createTranslator("FamilyIncome");
   const [openCreatePayer, setOpenCreatePayer] = useState(false);
   const [payerName, setPayerName] = useState("");
   const [payerPhone, setPayerPhone] = useState("");
@@ -174,7 +176,7 @@ export function IncomePaymentDialog({
   const handleCreatePayer = async () => {
     const fullName = payerName.trim();
     if (!fullName) {
-      setPayerCreateError("Payer name is required.");
+      setPayerCreateError(t("form.payerRequired"));
       return;
     }
 
@@ -198,9 +200,7 @@ export function IncomePaymentDialog({
       );
 
       if (!response.ok || !response.data) {
-        setPayerCreateError(
-          response.message ?? "Could not create payer contact.",
-        );
+        setPayerCreateError(response.message ?? t("form.payerError"));
         return;
       }
 
@@ -213,7 +213,7 @@ export function IncomePaymentDialog({
       setPayerPhone("");
       setOpenCreatePayer(false);
     } catch {
-      setPayerCreateError("Could not create payer contact.");
+      setPayerCreateError(t("form.payerError"));
     } finally {
       setIsCreatingPayer(false);
     }
@@ -250,11 +250,8 @@ export function IncomePaymentDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Record Payment</DialogTitle>
-          <DialogDescription>
-            Save only the money received now. The monthly income setup stays the
-            same.
-          </DialogDescription>
+          <DialogTitle>{t("paymentDialog.title")}</DialogTitle>
+          <DialogDescription>{t("paymentDialog.desc")}</DialogDescription>
         </DialogHeader>
 
         {paymentSource ? (
@@ -266,19 +263,25 @@ export function IncomePaymentDialog({
             </div>
             <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
               <div>
-                <span className="text-muted-foreground">Payer: </span>
+                <span className="text-muted-foreground">
+                  {t("paymentDialog.payerLabel")}
+                </span>
                 <span className="font-medium">
-                  {paymentSource.receivedFrom ?? "Not recorded"}
+                  {paymentSource.receivedFrom ?? t("paymentDialog.notRecorded")}
                 </span>
               </div>
               <div>
-                <span className="text-muted-foreground">Category: </span>
+                <span className="text-muted-foreground">
+                  {t("paymentDialog.categoryLabel")}
+                </span>
                 <span className="font-medium">
                   {paymentSource.category.name}
                 </span>
               </div>
               <div>
-                <span className="text-muted-foreground">Expected: </span>
+                <span className="text-muted-foreground">
+                  {t("paymentDialog.expectedLabel")}
+                </span>
                 <span className="font-medium">
                   <CompactMoney
                     currency={family.defaultCurrency}
@@ -287,7 +290,9 @@ export function IncomePaymentDialog({
                 </span>
               </div>
               <div>
-                <span className="text-muted-foreground">Left now: </span>
+                <span className="text-muted-foreground">
+                  {t("paymentDialog.leftLabel")}
+                </span>
                 <span className="font-medium">
                   <CompactMoney
                     currency={family.defaultCurrency}
@@ -296,7 +301,9 @@ export function IncomePaymentDialog({
                 </span>
               </div>
               <div>
-                <span className="text-muted-foreground">Due date: </span>
+                <span className="text-muted-foreground">
+                  {t("paymentDialog.dueDateLabel")}
+                </span>
                 <span className="font-medium">
                   {paymentSource.dueDate
                     ? formatDate(paymentSource.dueDate)
@@ -310,7 +317,7 @@ export function IncomePaymentDialog({
         {!hasPaymentSource ? (
           <Alert variant="destructive">
             <AlertCircleIcon aria-hidden="true" />
-            <AlertTitle>Payment source missing</AlertTitle>
+            <AlertTitle>{t("paymentDialog.sourceMissingTitle")}</AlertTitle>
             <AlertDescription>{missingPaymentSourceMessage}</AlertDescription>
           </Alert>
         ) : null}
@@ -328,18 +335,20 @@ export function IncomePaymentDialog({
             <CommonFormField
               control={form.control}
               name="amountMinorUnits"
-              label={`Amount paid now (${family.defaultCurrency})`}
+              label={t("paymentDialog.amountLabel", {
+                currency: family.defaultCurrency,
+              })}
               fieldType="money"
               currency={family.defaultCurrency}
-              placeholder="e.g. 150,000"
-              description="Enter only what was paid now."
+              placeholder={t("paymentDialog.amountPlaceholder")}
+              description={t("paymentDialog.amountDesc")}
               required
             />
 
             <CommonFormField
               control={form.control}
               name="date"
-              label="Payment date"
+              label={t("paymentDialog.dateLabel")}
               fieldType="date"
               required
             />
@@ -349,7 +358,7 @@ export function IncomePaymentDialog({
             <CommonFormField
               control={form.control}
               name="paymentMethod"
-              label="Payment method"
+              label={t("paymentDialog.methodLabel")}
               fieldType="select"
               selectOptions={[
                 { label: "Cash", value: "CASH" },
@@ -359,34 +368,34 @@ export function IncomePaymentDialog({
                 { label: "Cheque", value: "CHEQUE" },
                 { label: "Other", value: "OTHER" },
               ]}
-              placeholder="Select payment method"
+              placeholder={t("paymentDialog.methodPlaceholder")}
               required
             />
 
             <CommonFormField
               control={form.control}
               name="receivedBy"
-              label="Received by"
+              label={t("paymentDialog.receivedByLabel")}
               fieldType="select"
               selectOptions={family.members.map((member) => ({
                 label: member.fullName,
                 value: member.fullName,
               }))}
-              placeholder="Select member"
+              placeholder={t("paymentDialog.receivedByPlaceholder")}
             />
           </div>
 
           <CommonFormField
             control={form.control}
             name="receivedFromContactId"
-            label="Person who paid"
+            label={t("paymentDialog.paidByLabel")}
             fieldType="custom"
             placeholder={
               activeContacts.length === 0
-                ? "Create payer contact"
-                : "Select payer contact"
+                ? t("paymentDialog.createPayer")
+                : t("paymentDialog.paidByPlaceholder")
             }
-            description="Defaults to the last payer saved on this recurring income."
+            description={t("paymentDialog.paidByDesc")}
             render={({ field, id, invalid, disabled }) => (
               <>
                 <Select
@@ -412,8 +421,8 @@ export function IncomePaymentDialog({
                     <SelectValue
                       placeholder={
                         activeContacts.length === 0
-                          ? "Create payer contact"
-                          : "Select payer contact"
+                          ? t("paymentDialog.createPayer")
+                          : t("paymentDialog.paidByPlaceholder")
                       }
                     />
                   </SelectTrigger>
@@ -426,8 +435,8 @@ export function IncomePaymentDialog({
                       ))}
                       <SelectItem value={CREATE_PAYER_CONTACT_VALUE}>
                         {activeContacts.length === 0
-                          ? "Create payer contact"
-                          : "Create another payer contact"}
+                          ? t("paymentDialog.createPayer")
+                          : t("paymentDialog.createAnotherPayer")}
                       </SelectItem>
                     </SelectGroup>
                   </SelectContent>
@@ -442,9 +451,9 @@ export function IncomePaymentDialog({
                 >
                   <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                      <DialogTitle>Create payer contact</DialogTitle>
+                      <DialogTitle>{t("form.createPayerTitle")}</DialogTitle>
                       <DialogDescription>
-                        Save the person who paid, then use them on this payment.
+                        {t("form.createPayerDesc")}
                       </DialogDescription>
                     </DialogHeader>
 
@@ -460,7 +469,7 @@ export function IncomePaymentDialog({
                           htmlFor="payment-payer-contact-name"
                           className="font-medium text-sm"
                         >
-                          Payer name
+                          {t("form.payerNameLabel")}
                         </label>
                         <Input
                           id="payment-payer-contact-name"
@@ -472,7 +481,7 @@ export function IncomePaymentDialog({
                               handleCreatePayer();
                             }
                           }}
-                          placeholder="e.g. Jean Tenant"
+                          placeholder={t("form.payerNamePlaceholder")}
                         />
                       </div>
 
@@ -481,7 +490,7 @@ export function IncomePaymentDialog({
                           htmlFor="payment-payer-contact-phone"
                           className="font-medium text-sm"
                         >
-                          Phone number
+                          {t("form.payerPhoneLabel")}
                         </label>
                         <Input
                           id="payment-payer-contact-phone"
@@ -495,7 +504,7 @@ export function IncomePaymentDialog({
                               handleCreatePayer();
                             }
                           }}
-                          placeholder="+250 788 000 000"
+                          placeholder={t("form.payerPhonePlaceholder")}
                         />
                       </div>
                     </div>
@@ -507,7 +516,9 @@ export function IncomePaymentDialog({
                         disabled={isCreatingPayer}
                         className="w-full"
                       >
-                        {isCreatingPayer ? "Saving..." : "Save payer contact"}
+                        {isCreatingPayer
+                          ? t("form.savingPayer")
+                          : t("form.savePayer")}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -519,17 +530,17 @@ export function IncomePaymentDialog({
           <CommonFormField
             control={form.control}
             name="notes"
-            label="Payment note"
+            label={t("paymentDialog.notesLabel")}
             fieldType="textarea"
-            placeholder="e.g. Paid before due date, balance will come later"
+            placeholder={t("paymentDialog.notesPlaceholder")}
           />
 
           <CommonFormField
             control={form.control}
             name="fileName"
-            label="Receipt/Proof (Mock Upload)"
+            label={t("paymentDialog.proofLabel")}
             type="file"
-            description="Upload proof of this payment"
+            description={t("paymentDialog.proofDesc")}
           />
         </form>
 
@@ -541,7 +552,9 @@ export function IncomePaymentDialog({
             className="w-full"
             title={!hasPaymentSource ? missingPaymentSourceMessage : undefined}
           >
-            {isPending ? "Recording..." : "Record payment"}
+            {isPending
+              ? t("paymentDialog.recording")
+              : t("paymentDialog.submit")}
           </Button>
         </DialogFooter>
       </DialogContent>

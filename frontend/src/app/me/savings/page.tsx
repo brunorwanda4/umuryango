@@ -1,3 +1,6 @@
+import { createTranslator } from "@/i18n/translate";
+
 export default async function SavingsGoalsPage() {
-  return <div>Savings goals page</div>;
+  const t = createTranslator("PersonalSettings");
+  return <div>{t("savingsGoalsPage")}</div>;
 }

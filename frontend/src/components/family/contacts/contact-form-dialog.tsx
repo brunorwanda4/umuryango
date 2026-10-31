@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import { ContactImportPanel } from "./contact-import-panel";
 import { getDefaultValues } from "./contact-utils";
 import {
@@ -23,6 +24,9 @@ import {
   contactTypeOptions,
   type FamilyContact,
 } from "./types-and-schemas";
+
+const t = createTranslator("FamilyContacts");
+const tCommon = createTranslator("Common");
 
 export interface ContactFormDialogProps {
   contact?: FamilyContact | null;
@@ -41,6 +45,24 @@ export function ContactFormDialog({
   onOpenChange,
   onSuccess,
 }: ContactFormDialogProps) {
+  const localizedContactTypeOptions = useMemo(
+    () =>
+      contactTypeOptions.map((opt) => ({
+        ...opt,
+        label: t(`types.${opt.value}`),
+      })),
+    [],
+  );
+
+  const localizedStatusOptions = useMemo(
+    () =>
+      contactStatusOptions.map((opt) => ({
+        ...opt,
+        label: t(`statuses.${opt.value}`),
+      })),
+    [],
+  );
+
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     ContactFormValues,
     FamilyContact
@@ -65,8 +87,7 @@ export function ContactFormDialog({
               family.id,
             )}/contacts/${encodeURIComponent(contact?.id ?? "")}`,
     },
-    onSuccessMessage:
-      mode === "create" ? "Contact saved successfully" : "Contact updated",
+    onSuccessMessage: t("saveSuccess"),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -95,16 +116,16 @@ export function ContactFormDialog({
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            {mode === "create" ? "Add Contact" : "Edit Contact"}
+            {mode === "create" ? t("dialogCreateTitle") : t("dialogEditTitle")}
           </DialogTitle>
           <DialogDescription>
-            Save trusted people and organizations connected to this family.
+            {mode === "create" ? t("dialogCreateDesc") : t("dialogEditDesc")}
           </DialogDescription>
         </DialogHeader>
         <Tabs defaultValue="form" className="gap-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="form">Add manually</TabsTrigger>
-            <TabsTrigger value="file">Upload file</TabsTrigger>
+            <TabsTrigger value="form">{t("addManually")}</TabsTrigger>
+            <TabsTrigger value="file">{t("uploadFile")}</TabsTrigger>
           </TabsList>
           <TabsContent value="form">
             <form
@@ -120,25 +141,25 @@ export function ContactFormDialog({
               <CommonFormField
                 control={form.control}
                 name="fullName"
-                label="Full name"
-                placeholder="e.g. Dr. Aline Uwase"
+                label={t("fullNameLabel")}
+                placeholder={t("fullNamePlaceholder")}
                 required
               />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <CommonFormField
                   control={form.control}
                   name="contactType"
-                  label="Contact type"
+                  label={t("contactTypeLabel")}
                   fieldType="select"
-                  selectOptions={contactTypeOptions}
+                  selectOptions={localizedContactTypeOptions}
                   required
                 />
                 <CommonFormField
                   control={form.control}
                   name="status"
-                  label="Status"
+                  label={t("statusLabel")}
                   fieldType="select"
-                  selectOptions={contactStatusOptions}
+                  selectOptions={localizedStatusOptions}
                   required
                 />
               </div>
@@ -146,58 +167,58 @@ export function ContactFormDialog({
                 <CommonFormField
                   control={form.control}
                   name="phoneNumber"
-                  label="Phone number"
+                  label={t("phoneLabel")}
                   fieldType="phone"
-                  placeholder="+250 788 000 000"
+                  placeholder={t("phonePlaceholder")}
                 />
                 <CommonFormField
                   control={form.control}
                   name="email"
-                  label="Email"
+                  label={t("emailLabel")}
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder={t("emailPlaceholder")}
                 />
               </div>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <CommonFormField
                   control={form.control}
                   name="relationshipToFamily"
-                  label="Relationship to family"
-                  placeholder="Family doctor, neighbor, aunt, lender"
+                  label={t("relationshipLabel")}
+                  placeholder={t("relationshipPlaceholder")}
                 />
                 <CommonFormField
                   control={form.control}
                   name="organization"
-                  label="Organization/company"
-                  placeholder="Clinic, bank, SACCO, school, business"
+                  label={t("organizationLabel")}
+                  placeholder={t("organizationPlaceholder")}
                 />
               </div>
               <CommonFormField
                 control={form.control}
                 name="address"
-                label="Address"
-                placeholder="Street, cell, sector, district, or city"
+                label={t("addressLabel")}
+                placeholder={t("addressPlaceholder")}
               />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <CommonFormField
                   control={form.control}
                   name="isEmergencyContact"
-                  label="Emergency contact"
+                  label={t("isEmergencyLabel")}
                   fieldType="checkbox"
                 />
                 <CommonFormField
                   control={form.control}
                   name="isLoanContact"
-                  label="Loan contact"
+                  label={t("isLoanLabel")}
                   fieldType="checkbox"
                 />
               </div>
               <CommonFormField
                 control={form.control}
                 name="notes"
-                label="Notes"
+                label={t("notesLabel")}
                 fieldType="textarea"
-                placeholder="Useful context, availability, lending terms, or emergency notes"
+                placeholder={t("notesPlaceholder")}
               />
             </form>
             <DialogFooter>
@@ -207,7 +228,7 @@ export function ContactFormDialog({
                 disabled={isPending}
                 className="w-full sm:w-auto"
               >
-                {isPending ? "Saving..." : "Save Contact"}
+                {isPending ? tCommon("saving") : tCommon("save")}
               </Button>
             </DialogFooter>
           </TabsContent>

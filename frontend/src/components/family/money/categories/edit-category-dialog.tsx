@@ -13,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { CategoryFormFields } from "./category-form-fields";
 import {
@@ -37,6 +38,7 @@ export function EditCategoryDialog({
   onUpdated: (category: MoneyCategory) => void;
   personal?: boolean;
 }) {
+  const t = createTranslator("FamilyCategories");
   const schema = useMemo(
     () => getEditCategorySchema(categories, category?.id),
     [categories, category?.id],
@@ -75,7 +77,7 @@ export function EditCategoryDialog({
       );
 
       if (!response.ok) {
-        toast.error(response.message ?? "Category could not be updated");
+        toast.error(response.message ?? t("updateFailed"));
         setPending(false);
         return;
       }
@@ -91,7 +93,7 @@ export function EditCategoryDialog({
       type: values.type,
       updatedAt: todayIso(),
     });
-    toast.success(`${values.name} updated`);
+    toast.success(t("updateSuccess", { name: values.name }));
     setPending(false);
   };
 
@@ -103,11 +105,8 @@ export function EditCategoryDialog({
     >
       <DialogContent className="max-h-[96vh] overflow-y-auto lg:max-h-[calc(100vh-2rem)] lg:max-w-4xl lg:overflow-y-hidden">
         <DialogHeader>
-          <DialogTitle>Edit Category</DialogTitle>
-          <DialogDescription>
-            Update reusable category settings. Names remain unique within each
-            type.
-          </DialogDescription>
+          <DialogTitle>{t("editCategoryDialogTitle")}</DialogTitle>
+          <DialogDescription>{t("editCategoryDialogDesc")}</DialogDescription>
         </DialogHeader>
         <form
           className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6"
@@ -123,7 +122,7 @@ export function EditCategoryDialog({
             form="edit-category-form"
             type="submit"
           >
-            {pending ? "Saving..." : "Save category"}
+            {pending ? t("savingBtn") : t("saveCategoryBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>

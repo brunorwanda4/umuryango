@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import { FamilyMoneySkeleton } from "./family-money-skeleton";
@@ -63,6 +64,7 @@ export function MoneyLoansPage({
   familyName: string;
   initialData?: MoneyLoansPageInitialData;
 }) {
+  const t = createTranslator("FamilyLoans");
   const [family, setFamily] = useState<FamilyDetail | null>(
     initialData?.family ?? null,
   );
@@ -238,10 +240,8 @@ export function MoneyLoansPage({
           <EmptyMedia variant="icon">
             <AlertCircleIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>Loans could not load</EmptyTitle>
-          <EmptyDescription>
-            {error || "Family workspace not found."}
-          </EmptyDescription>
+          <EmptyTitle>{t("failedToLoad")}</EmptyTitle>
+          <EmptyDescription>{error || t("workspaceNotFound")}</EmptyDescription>
         </EmptyHeader>
       </Empty>
     );
@@ -263,8 +263,8 @@ export function MoneyLoansPage({
           ) : null
         }
         badge={canManageLoans ? "Manager access" : "View access"}
-        title="Loans"
-        description="     Manage family loans, borrowed money, lent money, repayments, due dates, and loan records in one secure place."
+        title={t("pageTitle")}
+        description={t("pageDescription")}
       />
 
       <Separator />

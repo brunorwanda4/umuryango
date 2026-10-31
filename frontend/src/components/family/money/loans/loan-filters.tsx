@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { createTranslator } from "@/i18n/translate";
 import {
   type LoanFiltersState,
   loanStatuses,
@@ -33,6 +34,7 @@ export function LoanFilters({
   onChange: (filters: LoanFiltersState) => void;
   onReset: () => void;
 }) {
+  const t = createTranslator("FamilyLoans");
   const update = (patch: Partial<LoanFiltersState>) =>
     onChange({ ...filters, ...patch });
 
@@ -43,7 +45,7 @@ export function LoanFilters({
           <div className="relative md:col-span-2 xl:col-span-2">
             <SearchIcon className="absolute top-2.5 left-2.5 size-4 text-muted-foreground" />
             <Input
-              placeholder="Search loans, borrowers, lenders..."
+              placeholder={t("searchPlaceholder")}
               className="pl-8"
               value={filters.search}
               onChange={(event) => update({ search: event.target.value })}
@@ -56,10 +58,10 @@ export function LoanFilters({
             }
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="All loan types" />
+              <SelectValue placeholder={t("allLoanTypes")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All loan types</SelectItem>
+              <SelectItem value="all">{t("allLoanTypes")}</SelectItem>
               {loanTypes.map((type) => (
                 <SelectItem key={type.value} value={type.value}>
                   {type.label}
@@ -74,10 +76,10 @@ export function LoanFilters({
             }
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="All statuses" />
+              <SelectValue placeholder={t("allStatuses")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="all">{t("allStatuses")}</SelectItem>
               {loanStatuses.map((status) => (
                 <SelectItem key={status.value} value={status.value}>
                   {status.label}
@@ -90,10 +92,10 @@ export function LoanFilters({
             onValueChange={(borrower) => update({ borrower })}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="All borrowers" />
+              <SelectValue placeholder={t("allBorrowers")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All borrowers</SelectItem>
+              <SelectItem value="all">{t("allBorrowers")}</SelectItem>
               {borrowers.map((borrower) => (
                 <SelectItem key={borrower} value={borrower}>
                   {borrower}
@@ -106,10 +108,10 @@ export function LoanFilters({
             onValueChange={(lender) => update({ lender })}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="All lenders" />
+              <SelectValue placeholder={t("allLenders")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All lenders</SelectItem>
+              <SelectItem value="all">{t("allLenders")}</SelectItem>
               {lenders.map((lender) => (
                 <SelectItem key={lender} value={lender}>
                   {lender}
@@ -174,7 +176,7 @@ export function LoanFilters({
             </div>
           </div>
           <div className="flex items-center justify-between gap-3 rounded-md border bg-background px-3 py-2 text-sm xl:min-w-40">
-            <span id="loan-overdue-filter-label">Overdue only</span>
+            <span id="loan-overdue-filter-label">{t("overdueOnly")}</span>
             <Switch
               aria-labelledby="loan-overdue-filter-label"
               checked={filters.overdueOnly}
@@ -189,7 +191,7 @@ export function LoanFilters({
             className="w-full xl:w-auto"
           >
             <FilterXIcon aria-hidden="true" data-icon="inline-start" />
-            Reset Filters
+            {t("resetFiltersBtn")}
           </Button>
         </div>
       </CardContent>

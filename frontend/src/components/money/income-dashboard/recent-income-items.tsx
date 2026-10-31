@@ -18,6 +18,7 @@ import {
   ItemDescription,
   ItemTitle,
 } from "@/components/ui/item";
+import { createTranslator } from "@/i18n/translate";
 import type {
   IncomeCategory,
   RecentIncomeRecord,
@@ -38,6 +39,8 @@ export function RecentIncomeItems({
   familyId,
   onSuccess,
 }: RecentIncomeItemsProps) {
+  const t = createTranslator("PersonalMoney.personalIncome");
+
   if (data.length === 0) {
     return (
       <div className="px-5 pb-5 sm:px-6">
@@ -46,10 +49,8 @@ export function RecentIncomeItems({
             <EmptyMedia variant="icon">
               <SearchIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>No income found</EmptyTitle>
-            <EmptyDescription>
-              Try another search term to find matching income records.
-            </EmptyDescription>
+            <EmptyTitle>{t("items.noIncomeTitle")}</EmptyTitle>
+            <EmptyDescription>{t("items.noIncomeDesc")}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>
@@ -82,6 +83,7 @@ function RecentIncomeItem({
   income: RecentIncomeRecord;
   onSuccess: () => void | Promise<void>;
 }) {
+  const t = createTranslator("PersonalMoney.personalIncome");
   const [isViewOpen, setIsViewOpen] = useState(false);
   const PaymentIcon = income.paymentIcon;
 
@@ -94,7 +96,7 @@ function RecentIncomeItem({
           variant="outline"
         >
           <button
-            aria-label={`View income details for ${income.source}`}
+            aria-label={t("table.viewIncomeAria", { source: income.source })}
             className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             onClick={() => setIsViewOpen(true)}
             type="button"

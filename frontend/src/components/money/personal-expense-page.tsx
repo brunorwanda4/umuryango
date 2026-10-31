@@ -6,10 +6,12 @@ import { SidebarIcon } from "@/components/app-shell/sidebar-icon";
 import { PageTitle } from "@/components/common/pages/page-title";
 import { ExpenseDashboard } from "@/components/money/expense-dashboard";
 import { useExpensePageData } from "@/hooks/use-expense-page-data";
+import { createTranslator } from "@/i18n/translate";
 import { ExpensePageActions } from "./expense-page-actions";
 import { getMonthPeriod } from "./utils";
 
 export function PersonalExpensePage() {
+  const t = createTranslator("PersonalMoney.personalExpenses");
   const [period, setPeriod] = useState(() =>
     getMonthPeriod(new Date().toISOString().slice(0, 7)),
   );
@@ -24,7 +26,7 @@ export function PersonalExpensePage() {
   return (
     <div className="flex flex-col gap-5">
       <PageTitle
-        title="Expenses"
+        title={t("title")}
         icon={
           <SidebarIcon
             className="size-6"
@@ -34,7 +36,7 @@ export function PersonalExpensePage() {
             }}
           />
         }
-        description="Track your personal spending on food, transport, health, rent, and other costs."
+        description={t("description")}
         actions={
           <ExpensePageActions
             canRecordExpense={Boolean(family)}

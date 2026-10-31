@@ -14,6 +14,7 @@ import { CompactMoney } from "@/components/common/money/compact-money";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import { formatDate } from "../utils";
 import { IncomeTable } from "./income-table";
@@ -139,6 +140,7 @@ export function EveryTimeIncomePanel({
   handleSendApproval,
   setOpenCreate,
 }: EveryTimeIncomePanelProps) {
+  const t = createTranslator("FamilyIncome");
   const summary = useMemo(() => {
     const sources = new Map<string, SourceSummary>();
 
@@ -251,14 +253,13 @@ export function EveryTimeIncomePanel({
           <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
             <CalendarClockIcon className="size-6 text-muted-foreground" />
           </span>
-          <h3 className="font-semibold text-lg">No every-time income yet</h3>
+          <h3 className="font-semibold text-lg">{t("panels.noEveryTime")}</h3>
           <p className="mt-1 mb-6 max-w-sm text-muted-foreground text-sm">
-            Add monthly rent, salary, business income, or other money the family
-            expects again and again.
+            {t("panels.noEveryTimeDesc")}
           </p>
           <Button size="sm" onClick={() => setOpenCreate(true)}>
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            Add Every-Time Income
+            {t("panels.addEveryTime")}
           </Button>
         </CardContent>
       </Card>
@@ -271,7 +272,7 @@ export function EveryTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              Expected
+              {t("panels.expected")}
             </CardTitle>
             <WalletIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -288,7 +289,7 @@ export function EveryTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              Paid
+              {t("panels.paid")}
             </CardTitle>
             <CoinsIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -305,7 +306,7 @@ export function EveryTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              Left
+              {t("panels.left")}
             </CardTitle>
             <AlertCircleIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -322,7 +323,7 @@ export function EveryTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              Overdue
+              {t("panels.overdue")}
             </CardTitle>
             <CalendarClockIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -368,7 +369,7 @@ export function EveryTimeIncomePanel({
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <div className="text-muted-foreground text-xs">
-                        Expected
+                        {t("panels.expected")}
                       </div>
                       <div className="font-mono">
                         <CompactMoney
@@ -378,7 +379,9 @@ export function EveryTimeIncomePanel({
                       </div>
                     </div>
                     <div>
-                      <div className="text-muted-foreground text-xs">Paid</div>
+                      <div className="text-muted-foreground text-xs">
+                        {t("panels.paid")}
+                      </div>
                       <div className="font-mono">
                         <CompactMoney
                           currency={currency}
@@ -388,7 +391,7 @@ export function EveryTimeIncomePanel({
                     </div>
                     <div>
                       <div className="text-muted-foreground text-xs">
-                        Must pay left
+                        {t("panels.mustPayLeft")}
                       </div>
                       <div className="font-mono font-semibold">
                         <CompactMoney
@@ -400,10 +403,11 @@ export function EveryTimeIncomePanel({
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-muted-foreground text-xs">
-                      {source.recordCount} record
-                      {source.recordCount === 1 ? "" : "s"}
+                      {t("panels.recordCount", { count: source.recordCount })}
                       {source.nextDueDate
-                        ? ` - next due ${formatDate(source.nextDueDate)}`
+                        ? t("panels.nextDue", {
+                            date: formatDate(source.nextDueDate),
+                          })
                         : ""}
                     </span>
                     <div className="flex flex-wrap gap-1.5">
@@ -419,11 +423,11 @@ export function EveryTimeIncomePanel({
               <CardContent className="pt-0">
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3">
                   <span className="text-muted-foreground text-xs">
-                    Click card to{" "}
-                    {canEditManagedTransaction
-                      ? "change payment"
-                      : "view record"}
-                    , paid date, amount, or due date.
+                    {t("panels.cardHint", {
+                      action: canEditManagedTransaction
+                        ? t("panels.changePayment")
+                        : t("panels.viewRecord"),
+                    })}
                   </span>
                   <div className="flex flex-wrap gap-2">
                     <Button
@@ -439,7 +443,7 @@ export function EveryTimeIncomePanel({
                       }}
                     >
                       <PencilIcon aria-hidden="true" data-icon="inline-start" />
-                      Manage
+                      {t("panels.manage")}
                     </Button>
                     <Button
                       type="button"
@@ -455,7 +459,7 @@ export function EveryTimeIncomePanel({
                       }}
                     >
                       <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                      Add payment
+                      {t("panels.addPayment")}
                     </Button>
                   </div>
                 </div>

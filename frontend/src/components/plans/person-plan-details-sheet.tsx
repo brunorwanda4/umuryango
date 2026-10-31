@@ -32,19 +32,20 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import {
-  formatPlanStatus,
+  isOverdue,
   type PersonPlan,
   type PersonPlanMilestone,
 } from "./types-and-schemas";
 
-function date(value: string | null) {
+function date(value: string | null, notSetLabel: string) {
   return value
     ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
         new Date(value),
       )
-    : "Not set";
+    : notSetLabel;
 }
 
 function money(value: string | null, currency: string) {
@@ -73,6 +74,7 @@ export function PersonPlanDetailsSheet({
   onUpdated: (planId: string) => void;
   plan: PersonPlan | null;
 }) {
+  const t = createTranslator("PersonalPlans");
   const [newMilestone, setNewMilestone] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -88,7 +90,7 @@ export function PersonPlanDetailsSheet({
     const response = await apiRequest(method, path, body);
     setPending(false);
     if (!response.ok) {
-      toast.error("Milestone could not be updated", {
+      toast.error(t("details.milestoneUpdateError"), {
         description: response.message,
       });
       return false;
@@ -108,7 +110,7 @@ export function PersonPlanDetailsSheet({
       )
     ) {
       setNewMilestone("");
-      toast.success("Milestone added");
+      toast.success(t("details.milestoneAdded"));
     }
   };
 
@@ -149,6 +151,24 @@ export function PersonPlanDetailsSheet({
   const current = BigInt(plan.currentAmountMinorUnits ?? "0");
   const remaining = target > current ? target - current : BigInt(0);
 
+  const statusLabel = isOverdue(plan)
+    ? t("items.overdue")
+    : plan.status === "COMPLETED"
+      ? t("filters.completed")
+      : plan.status === "IN_PROGRESS"
+        ? t("filters.inProgress")
+        : plan.status === "CANCELLED"
+          ? t("filters.cancelled")
+          : t("filters.pending");
+
+  const priorityLabel = plan.priority
+    ? plan.priority === "LOW"
+      ? t("items.low")
+      : plan.priority === "MEDIUM"
+        ? t("items.medium")
+        : t("items.high")
+    : null;
+
   return (
     <Sheet open onOpenChange={onOpenChange} syncWithSearchParams={false}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
@@ -156,15 +176,15 @@ export function PersonPlanDetailsSheet({
           <SheetTitle>{plan.title}</SheetTitle>
           <SheetDescription>
             {plan.type === "TASK"
-              ? "Personal task details"
-              : "Long-term goal details"}
+              ? t("details.taskDetails")
+              : t("details.goalDetails")}
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-6 px-4 pb-6">
           <div className="flex flex-wrap gap-2">
-            <Badge>{formatPlanStatus(plan)}</Badge>
-            {plan.priority ? (
-              <Badge variant="outline">{plan.priority.toLowerCase()}</Badge>
+            <Badge>{statusLabel}</Badge>
+            {priorityLabel ? (
+              <Badge variant="outline">{priorityLabel}</Badge>
             ) : null}
           </div>
           {plan.description ? (
@@ -173,25 +193,46 @@ export function PersonPlanDetailsSheet({
           <dl className="grid grid-cols-2 gap-4">
             {plan.type === "TASK" ? (
               <>
-                <Detail label="Due date" value={date(plan.dueDate)} />
-                <Detail label="Time" value={plan.dueTime || "Not set"} />
-                <Detail label="Reminder" value={date(plan.reminderAt)} />
+                <Detail
+                  label={t("details.dueDate")}
+                  value={date(plan.dueDate, t("details.notSet"))}
+                />
+                <Detail
+                  label={t("details.time")}
+                  value={plan.dueTime || t("details.notSet")}
+                />
+                <Detail
+                  label={t("details.reminder")}
+                  value={date(plan.reminderAt, t("details.notSet"))}
+                />
               </>
             ) : (
               <>
-                <Detail label="Start date" value={date(plan.startDate)} />
-                <Detail label="Target date" value={date(plan.targetDate)} />
+                <Detail
+                  label={t("details.startDate")}
+                  value={date(plan.startDate, t("details.notSet"))}
+                />
+                <Detail
+                  label={t("details.targetDate")}
+                  value={date(plan.targetDate, t("details.notSet"))}
+                />
               </>
             )}
-            <Detail label="Created" value={date(plan.createdAt)} />
+            <Detail
+              label={t("details.created")}
+              value={date(plan.createdAt, t("details.notSet"))}
+            />
             {plan.completedAt ? (
-              <Detail label="Completed" value={date(plan.completedAt)} />
+              <Detail
+                label={t("details.completed")}
+                value={date(plan.completedAt, t("details.notSet"))}
+              />
             ) : null}
           </dl>
           {plan.note ? (
             <>
               <Separator />
-              <Detail label="Notes" value={plan.note} />
+              <Detail label={t("details.notes")} value={plan.note} />
             </>
           ) : null}
           {plan.type === "LONG_TERM_GOAL" ? (
@@ -203,7 +244,7 @@ export function PersonPlanDetailsSheet({
               >
                 <div className="flex items-center justify-between gap-3">
                   <h3 id="goal-progress-heading" className="font-semibold">
-                    Progress
+                    {t("details.progress")}
                   </h3>
                   <span className="text-sm text-muted-foreground">
                     {plan.progress}%
@@ -213,15 +254,15 @@ export function PersonPlanDetailsSheet({
                 {plan.needsMoney ? (
                   <dl className="grid grid-cols-3 gap-3">
                     <Detail
-                      label="Target"
+                      label={t("details.target")}
                       value={money(plan.targetAmountMinorUnits, plan.currency)}
                     />
                     <Detail
-                      label="Current"
+                      label={t("details.current")}
                       value={money(plan.currentAmountMinorUnits, plan.currency)}
                     />
                     <Detail
-                      label="Remaining"
+                      label={t("details.remaining")}
                       value={money(remaining.toString(), plan.currency)}
                     />
                   </dl>
@@ -234,11 +275,15 @@ export function PersonPlanDetailsSheet({
               >
                 <div>
                   <h3 id="milestones-heading" className="font-semibold">
-                    Milestones
+                    {t("details.milestones")}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {plan.milestones.filter((item) => item.completedAt).length}{" "}
-                    of {plan.milestones.length} completed
+                    {t("details.milestonesCompleted", {
+                      completed: plan.milestones.filter(
+                        (item) => item.completedAt,
+                      ).length,
+                      total: plan.milestones.length,
+                    })}
                   </p>
                 </div>
                 <form
@@ -250,20 +295,20 @@ export function PersonPlanDetailsSheet({
                 >
                   <Field>
                     <FieldLabel htmlFor="new-milestone">
-                      Add a milestone
+                      {t("details.addMilestone")}
                     </FieldLabel>
                     <Input
                       id="new-milestone"
                       value={newMilestone}
                       onChange={(event) => setNewMilestone(event.target.value)}
-                      placeholder="e.g. Set the total budget"
+                      placeholder={t("details.milestonePlaceholder")}
                     />
                   </Field>
                   <Button
                     type="submit"
                     size="icon"
                     disabled={pending || newMilestone.trim().length < 2}
-                    aria-label="Add milestone"
+                    aria-label={t("details.addMilestoneAria")}
                   >
                     <PlusIcon aria-hidden="true" />
                   </Button>
@@ -273,7 +318,12 @@ export function PersonPlanDetailsSheet({
                     <Item key={milestone.id} size="sm" variant="outline">
                       <Checkbox
                         checked={Boolean(milestone.completedAt)}
-                        aria-label={`Mark ${milestone.title} ${milestone.completedAt ? "incomplete" : "complete"}`}
+                        aria-label={t("details.markMilestoneAria", {
+                          title: milestone.title,
+                          status: milestone.completedAt
+                            ? t("items.markIncomplete")
+                            : t("items.markComplete"),
+                        })}
                         onCheckedChange={(checked) =>
                           void updateMilestone(milestone, {
                             completed: Boolean(checked),
@@ -287,7 +337,7 @@ export function PersonPlanDetailsSheet({
                             onChange={(event) =>
                               setEditTitle(event.target.value)
                             }
-                            aria-label="Milestone title"
+                            aria-label={t("details.milestoneTitleAria")}
                           />
                         ) : (
                           <ItemTitle
@@ -305,7 +355,7 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label="Save milestone"
+                              aria-label={t("details.saveMilestoneAria")}
                               disabled={editTitle.trim().length < 2}
                               onClick={() =>
                                 void updateMilestone(milestone, {
@@ -318,7 +368,7 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label="Cancel editing"
+                              aria-label={t("details.cancelEditingAria")}
                               onClick={() => setEditing(null)}
                             >
                               <XIcon />
@@ -329,7 +379,7 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label="Move milestone up"
+                              aria-label={t("details.moveMilestoneUpAria")}
                               disabled={index === 0 || pending}
                               onClick={() => void reorder(index, -1)}
                             >
@@ -338,7 +388,7 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label="Move milestone down"
+                              aria-label={t("details.moveMilestoneDownAria")}
                               disabled={
                                 index === plan.milestones.length - 1 || pending
                               }
@@ -349,7 +399,7 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label="Edit milestone"
+                              aria-label={t("details.editMilestoneAria")}
                               onClick={() => {
                                 setEditing(milestone.id);
                                 setEditTitle(milestone.title);
@@ -360,7 +410,7 @@ export function PersonPlanDetailsSheet({
                             <Button
                               size="icon"
                               variant="ghost"
-                              aria-label="Delete milestone"
+                              aria-label={t("details.deleteMilestoneAria")}
                               onClick={() =>
                                 void request(
                                   "delete",

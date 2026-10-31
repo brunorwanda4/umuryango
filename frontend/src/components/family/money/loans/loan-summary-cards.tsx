@@ -17,6 +17,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { isLoanDueThisMonth, isLoanOverdue, toMinorNumber } from "./loan-utils";
 import type { LoanRecord } from "./types-and-schemas";
 
@@ -27,6 +28,8 @@ export function LoanSummaryCards({
   currency: string;
   loans: LoanRecord[];
 }) {
+  const t = createTranslator("FamilyLoans");
+
   const summary = loans.reduce(
     (totals, loan) => {
       const original = toMinorNumber(loan.originalAmountMinorUnits);
@@ -61,54 +64,54 @@ export function LoanSummaryCards({
 
   const cards = [
     {
-      title: "Total Borrowed",
-      description: "Money the family owes to others.",
+      title: t("cards.totalBorrowedTitle"),
+      description: t("cards.totalBorrowedDesc"),
       value: summary.borrowed,
       icon: BanknoteArrowDownIcon,
       isMoney: true,
     },
     {
-      title: "Total Lent",
-      description: "Money the family expects back.",
+      title: t("cards.totalLentTitle"),
+      description: t("cards.totalLentDesc"),
       value: summary.lent,
       icon: BanknoteArrowUpIcon,
       isMoney: true,
     },
     {
-      title: "Total Outstanding Balance",
-      description: "Remaining balances across open loans.",
+      title: t("cards.totalOutstandingTitle"),
+      description: t("cards.totalOutstandingDesc"),
       value: summary.outstanding,
       icon: CircleDollarSignIcon,
       isMoney: true,
     },
     {
-      title: "Total Paid",
-      description: "Repayments recorded so far.",
+      title: t("cards.totalPaidTitle"),
+      description: t("cards.totalPaidDesc"),
       value: summary.paid,
       icon: HandCoinsIcon,
       isMoney: true,
     },
     {
-      title: "Due This Month",
-      description: "Open loans with due dates this month.",
+      title: t("cards.dueThisMonthTitle"),
+      description: t("cards.dueThisMonthDesc"),
       value: summary.dueThisMonth.toLocaleString(),
       icon: CalendarClockIcon,
     },
     {
-      title: "Overdue Loans",
-      description: "Loans that need immediate follow-up.",
+      title: t("cards.overdueLoansTitle"),
+      description: t("cards.overdueLoansDesc"),
       value: summary.overdue.toLocaleString(),
       icon: AlertTriangleIcon,
     },
     {
-      title: "Active Loans",
-      description: "Loans still being tracked.",
+      title: t("cards.activeLoansTitle"),
+      description: t("cards.activeLoansDesc"),
       value: summary.active.toLocaleString(),
       icon: ListChecksIcon,
     },
     {
-      title: "Completed Loans",
-      description: "Loans fully repaid and locked.",
+      title: t("cards.completedLoansTitle"),
+      description: t("cards.completedLoansDesc"),
       value: summary.completed.toLocaleString(),
       icon: CheckCircle2Icon,
     },

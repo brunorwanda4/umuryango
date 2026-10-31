@@ -13,7 +13,11 @@ import {
   hasCapability,
   KINSHIP_LABELS,
 } from "@/lib/family-access";
-import type { DashboardModule, FamilyDetail, FamilyMemberSummary } from "./types";
+import type {
+  DashboardModule,
+  FamilyDetail,
+  FamilyMemberSummary,
+} from "./types";
 
 export const MOCK_MEMBERS: FamilyMemberSummary[] = [
   {
@@ -145,7 +149,8 @@ export function enrichWithDemoData(family: FamilyDetail): FamilyDetail {
 
 export function getVisibleMembers(family: FamilyDetail) {
   const sorted = family.members.toSorted(
-    (first, second) => new Date(first.joinedAt).getTime() - new Date(second.joinedAt).getTime(),
+    (first, second) =>
+      new Date(first.joinedAt).getTime() - new Date(second.joinedAt).getTime(),
   );
 
   const realMembers = sorted.filter((m) => !m.id.startsWith("demo-"));
@@ -311,7 +316,9 @@ export function getLatestFamilyActivityDate(family: FamilyDetail) {
     return null;
   }
 
-  return dates.reduce((latest, date) => (date.getTime() > latest.getTime() ? date : latest));
+  return dates.reduce((latest, date) =>
+    date.getTime() > latest.getTime() ? date : latest,
+  );
 }
 
 export function formatRelativeTime(date: Date): string {
@@ -340,7 +347,9 @@ export function canOpenModule(family: FamilyDetail, module: DashboardModule) {
     return true;
   }
 
-  return module.requiredCapabilities.some((capability) => hasCapability(family, capability));
+  return module.requiredCapabilities.some((capability) =>
+    hasCapability(family, capability),
+  );
 }
 
 export function getFamilyReadiness(family: FamilyDetail) {

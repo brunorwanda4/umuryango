@@ -13,8 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import type { ProjectsOverview } from "./types";
+
+const t = createTranslator("FamilyProjects");
+const tDashboard = createTranslator("FamilyDashboard");
 
 export function ProjectOperationsGrid({
   family,
@@ -25,34 +29,38 @@ export function ProjectOperationsGrid({
 }) {
   const items = [
     {
-      title: "Family members",
-      description: "People available to assign to project work.",
+      title: tDashboard("familyMembers"),
+      description: t("availableMembersDesc"),
       value: family.memberCount.toLocaleString(),
       icon: UsersRoundIcon,
     },
     {
-      title: "Report source",
-      description: "Reports must come from persisted project records.",
-      value: `${projects?.sourceRecordCount ?? 0} records`,
+      title: t("reportSourceTitle"),
+      description: t("reportSourceDesc"),
+      value: t("sourceRecordCount", {
+        count: projects?.sourceRecordCount ?? 0,
+      }),
       icon: CheckCircle2Icon,
     },
     {
-      title: "Contribution cadence",
-      description: "Default family cadence for planned collections.",
+      title: t("contributionCadenceTitle"),
+      description: t("contributionCadenceDesc"),
       value: family.contributionCadence,
       icon: CalendarClockIcon,
     },
     {
-      title: "Project permission",
-      description: "Backend must enforce manage-project actions.",
-      value: hasCapability(family, "MANAGE_PROJECTS") ? "Allowed" : "View only",
+      title: t("projectPermissionTitle"),
+      description: t("projectPermissionDesc"),
+      value: hasCapability(family, "MANAGE_PROJECTS")
+        ? t("permissionAllowed")
+        : t("permissionViewOnly"),
       icon: FolderKanbanIcon,
     },
   ];
 
   return (
     <section
-      aria-label="Project operations"
+      aria-label={t("operationsAria")}
       className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       {items.map((item) => {

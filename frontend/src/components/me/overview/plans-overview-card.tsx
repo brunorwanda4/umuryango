@@ -18,8 +18,10 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { createTranslator, type Translator } from "@/i18n/translate";
 
 export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
+  const t = createTranslator("PersonalOverview.plansCard");
   const now = new Date();
   const today = toLocalDate(now);
   const weekEnd = new Date(now);
@@ -32,14 +34,14 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
     .slice(0, 3);
   const stats = [
     {
-      label: "Due today",
+      label: t("dueToday"),
       value: plans.filter(
         (plan) =>
           plan.dueDate?.slice(0, 10) === today && plan.status !== "COMPLETED",
       ).length,
     },
     {
-      label: "Due this week",
+      label: t("dueThisWeek"),
       value: plans.filter((plan) => {
         const date = plan.dueDate ? new Date(plan.dueDate) : null;
         return (
@@ -48,7 +50,7 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
       }).length,
     },
     {
-      label: "Long-term goals",
+      label: t("longTermGoals"),
       value: plans.filter(
         (plan) =>
           plan.type === "LONG_TERM_GOAL" &&
@@ -57,7 +59,7 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
       ).length,
     },
     {
-      label: "Completed",
+      label: t("completed"),
       value: plans.filter((plan) => plan.status === "COMPLETED").length,
     },
   ];
@@ -65,12 +67,12 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Plans overview</CardTitle>
-        <CardDescription>Upcoming tasks and longer-term goals.</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
         <CardAction>
           <Button asChild size="sm" variant="ghost">
             <Link href="/me/plans">
-              View all
+              {t("viewAll")}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
@@ -91,15 +93,13 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
               <EmptyMedia variant="icon">
                 <CalendarDaysIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>No plans yet</EmptyTitle>
-              <EmptyDescription>
-                Create your first plan to track important tasks and goals.
-              </EmptyDescription>
+              <EmptyTitle>{t("noPlansYet")}</EmptyTitle>
+              <EmptyDescription>{t("noPlansYetDesc")}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
           <div className="flex flex-col gap-3">
-            <p className="font-medium text-sm">Upcoming</p>
+            <p className="font-medium text-sm">{t("upcoming")}</p>
             {upcoming.map((plan) => (
               <div
                 key={plan.id}
@@ -108,11 +108,11 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
                 <div className="min-w-0">
                   <p className="truncate font-medium text-sm">{plan.title}</p>
                   <p className="text-muted-foreground text-xs">
-                    {formatPlanDate(plan)}
+                    {formatPlanDate(plan, t)}
                   </p>
                 </div>
                 <Badge variant="outline">
-                  {plan.type === "TASK" ? "Task" : `${plan.progress}%`}
+                  {plan.type === "TASK" ? t("task") : `${plan.progress}%`}
                 </Badge>
               </div>
             ))}
@@ -135,14 +135,14 @@ function toLocalDate(date: Date) {
   return `${year}-${month}-${day}`;
 }
 
-function formatPlanDate(plan: PersonPlan) {
+function formatPlanDate(plan: PersonPlan, t: Translator) {
   const value = plan.dueDate ?? plan.targetDate;
-  if (!value) return "No date set";
+  if (!value) return t("noDateSet");
   const date = new Date(value);
   const today = toLocalDate(new Date());
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  if (value.slice(0, 10) === today) return "Today";
-  if (value.slice(0, 10) === toLocalDate(tomorrow)) return "Tomorrow";
+  if (value.slice(0, 10) === today) return t("today");
+  if (value.slice(0, 10) === toLocalDate(tomorrow)) return t("tomorrow");
   return date.toLocaleDateString("en", { month: "short", day: "numeric" });
 }

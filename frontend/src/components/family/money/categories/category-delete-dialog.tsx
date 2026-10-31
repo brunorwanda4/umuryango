@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { createTranslator } from "@/i18n/translate";
 import type { MoneyCategory } from "./types-and-constants";
 
 export function CategoryDeleteDialog({
@@ -19,6 +20,7 @@ export function CategoryDeleteDialog({
   onConfirm: () => void;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = createTranslator("FamilyCategories");
   const isUsed = Boolean(category && category.transactionsCount > 0);
 
   return (
@@ -30,20 +32,21 @@ export function CategoryDeleteDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {isUsed
-              ? "Archive this category instead?"
-              : "Delete this category?"}
+            {isUsed ? t("archiveConfirmTitle") : t("deletePromptTitle")}
           </AlertDialogTitle>
           <AlertDialogDescription>
             {isUsed
-              ? `${category?.name} is used by ${category?.transactionsCount} transactions. Categories already used by transactions cannot be deleted because reports and audit history must remain intact. Archive it to prevent future use.`
-              : `${category?.name} has no transactions using it. Deleting removes it from the reusable category list.`}
+              ? t("archiveUsedDesc", {
+                  name: category?.name ?? "",
+                  count: category?.transactionsCount ?? 0,
+                })
+              : t("deleteUnusedDesc", { name: category?.name ?? "" })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm}>
-            {isUsed ? "Archive category" : "Delete category"}
+            {isUsed ? t("archiveCategoryBtn") : t("deleteCategoryBtn")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import type { ReportsOverview } from "./types";
 import { getSourceRecordCount } from "./utils";
@@ -28,40 +29,44 @@ export function ReportOperationsGrid({
   hasSourceRecords: boolean;
   reports: ReportsOverview | null;
 }) {
+  const t = createTranslator("FamilyReports");
   const totals = reports?.totals;
   const items = [
     {
-      title: "Report permission",
-      description: "Backend must authorize every protected report action.",
-      value: hasCapability(family, "VIEW_REPORTS") ? "Allowed" : "View only",
+      title: t("reportPermissionTitle"),
+      description: t("reportPermissionDesc"),
+      value: hasCapability(family, "VIEW_REPORTS")
+        ? t("permissionAllowed")
+        : t("permissionViewOnly"),
       icon: ShieldCheckIcon,
     },
     {
-      title: "Report source",
-      description: "Generated from persisted family records only.",
-      value: `${getSourceRecordCount(reports).toLocaleString()} records`,
+      title: t("reportSourceTitle"),
+      description: t("reportSourceDesc"),
+      value: t("recordsCount", { count: getSourceRecordCount(reports) }),
       icon: CheckCircle2Icon,
     },
     {
-      title: "Pending approvals",
-      description: "Draft or rejected financial records stay out of reports.",
+      title: t("pendingApprovalsTitle"),
+      description: t("pendingApprovalsDesc"),
       value:
         typeof totals?.pendingApprovalCount === "number"
           ? totals.pendingApprovalCount.toLocaleString()
-          : "No queue",
+          : t("noQueue"),
       icon: FileClockIcon,
     },
     {
-      title: "Export readiness",
-      description: "PDF and Excel exports need permission and source records.",
-      value: canExportReports && hasSourceRecords ? "Ready" : "Restricted",
+      title: t("exportReadinessTitle"),
+      description: t("exportReadinessDesc"),
+      value:
+        canExportReports && hasSourceRecords ? t("ready") : t("restricted"),
       icon: DownloadIcon,
     },
   ];
 
   return (
     <section
-      aria-label="Report operations"
+      aria-label={t("reportOperationsAria")}
       className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       {items.map((item) => {

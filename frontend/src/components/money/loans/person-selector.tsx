@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import {
   getPersonRelationship,
   type PersonalLoanFormValues,
@@ -51,6 +52,7 @@ export function AddTrustedPersonDialog({
   onOpenChange: (open: boolean) => void;
   open: boolean;
 }) {
+  const t = createTranslator("PersonalLoans");
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     ContactFormValues,
     FamilyContact
@@ -86,7 +88,7 @@ export function AddTrustedPersonDialog({
       method: "post",
       url: `/families/${encodeURIComponent(familyId)}/contacts`,
     },
-    onSuccessMessage: "Person added",
+    onSuccessMessage: t("person.personAddedToast"),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: (person) => {
@@ -108,15 +110,13 @@ export function AddTrustedPersonDialog({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add new person</DialogTitle>
-          <DialogDescription>
-            Save a trusted family member or friend, then continue the loan.
-          </DialogDescription>
+          <DialogTitle>{t("person.addNewPerson")}</DialogTitle>
+          <DialogDescription>{t("person.dialogDesc")}</DialogDescription>
         </DialogHeader>
         <Tabs defaultValue="form" className="gap-4">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="form">Add manually</TabsTrigger>
-            <TabsTrigger value="file">Upload file</TabsTrigger>
+            <TabsTrigger value="form">{t("person.tabManual")}</TabsTrigger>
+            <TabsTrigger value="file">{t("person.tabUpload")}</TabsTrigger>
           </TabsList>
           <TabsContent value="form">
             <form
@@ -130,35 +130,35 @@ export function AddTrustedPersonDialog({
               <CommonFormField
                 control={form.control}
                 name="fullName"
-                label="Full name"
-                placeholder="e.g. Aline Uwase"
+                label={t("person.fullName")}
+                placeholder={t("person.fullNamePlaceholder")}
                 required
               />
               <CommonFormField
                 control={form.control}
                 name="contactType"
-                label="Relationship"
+                label={t("person.relationship")}
                 fieldType="select"
                 selectOptions={[
-                  { label: "Family", value: "RELATIVE" },
-                  { label: "Friend", value: "FAMILY_FRIEND" },
-                  { label: "Neighbor", value: "NEIGHBOR" },
-                  { label: "Other trusted person", value: "OTHER" },
+                  { label: t("person.types.family"), value: "RELATIVE" },
+                  { label: t("person.types.friend"), value: "FAMILY_FRIEND" },
+                  { label: t("person.types.neighbor"), value: "NEIGHBOR" },
+                  { label: t("person.types.other"), value: "OTHER" },
                 ]}
                 required
               />
               <CommonFormField
                 control={form.control}
                 name="phoneNumber"
-                label="Phone number"
+                label={t("person.phoneNumber")}
                 fieldType="phone"
                 placeholder="+250 788 000 000"
               />
               <CommonFormField
                 control={form.control}
                 name="relationshipToFamily"
-                label="Relationship details"
-                placeholder="e.g. Aunt, cousin, close friend"
+                label={t("person.relationshipDetails")}
+                placeholder={t("person.relationshipDetailsPlaceholder")}
               />
               <DialogFooter>
                 <Button
@@ -167,7 +167,7 @@ export function AddTrustedPersonDialog({
                   className="w-full sm:w-auto"
                 >
                   <UserPlusIcon aria-hidden="true" data-icon="inline-start" />
-                  {isPending ? "Adding..." : "Add person"}
+                  {isPending ? t("person.adding") : t("person.submitAdd")}
                 </Button>
               </DialogFooter>
             </form>
@@ -200,6 +200,7 @@ export function PersonSelector({
   onContactsImported: () => void;
   onPersonCreated: (person: FamilyContact) => void;
 }) {
+  const t = createTranslator("PersonalLoans");
   const [openPerson, setOpenPerson] = useState(false);
   const [personPickerOpen, setPersonPickerOpen] = useState(false);
 
@@ -208,7 +209,7 @@ export function PersonSelector({
       <CommonFormField
         control={control}
         name="personContactId"
-        label="Person"
+        label={t("person.personLabel")}
         fieldType="custom"
         required
         render={({ field, id, invalid }) => (
@@ -224,7 +225,7 @@ export function PersonSelector({
                   variant="outline"
                 >
                   {contacts.find((contact) => contact.id === field.value)
-                    ?.fullName ?? "Choose a saved person"}
+                    ?.fullName ?? t("person.chooseSavedPerson")}
                   <span className="text-muted-foreground text-xs">
                     {contacts.find((contact) => contact.id === field.value)
                       ?.phoneNumber ?? ""}
@@ -233,9 +234,9 @@ export function PersonSelector({
               </PopoverTrigger>
               <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                 <Command className="h-auto min-h-0">
-                  <CommandInput placeholder="Search by name or phone..." />
+                  <CommandInput placeholder={t("person.searchPlaceholder")} />
                   <CommandList>
-                    <CommandEmpty>No person found.</CommandEmpty>
+                    <CommandEmpty>{t("person.noPersonFound")}</CommandEmpty>
                     {contacts.map((contact) => (
                       <CommandItem
                         key={contact.id}
@@ -271,7 +272,7 @@ export function PersonSelector({
               onClick={() => setOpenPerson(true)}
             >
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              Add new person
+              {t("person.addNewPerson")}
             </Button>
           </div>
         )}

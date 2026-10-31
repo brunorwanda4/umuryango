@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import { LoanFormFields } from "./loan-form-fields";
@@ -63,6 +64,7 @@ export function EditLoanDialog({
   onSuccess: () => void;
   open: boolean;
 }) {
+  const t = createTranslator("FamilyLoans");
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     LoanFormValues,
     LoanRecord
@@ -101,7 +103,7 @@ export function EditLoanDialog({
         family.id,
       )}/money/loans/${encodeURIComponent(loan?.id ?? "")}`,
     },
-    onSuccessMessage: "Loan updated successfully",
+    onSuccessMessage: t("toasts.loanUpdated"),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -121,10 +123,8 @@ export function EditLoanDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Edit Loan</DialogTitle>
-          <DialogDescription>
-            Completed loans are locked unless an administrator reopens them.
-          </DialogDescription>
+          <DialogTitle>{t("editTitle")}</DialogTitle>
+          <DialogDescription>{t("editDesc")}</DialogDescription>
         </DialogHeader>
         <form
           id="edit-loan-form"
@@ -147,7 +147,7 @@ export function EditLoanDialog({
             disabled={isPending || !loan || loan.status === "COMPLETED"}
             className="w-full sm:w-auto"
           >
-            {isPending ? "Saving..." : "Save Changes"}
+            {isPending ? t("saving") : t("saveChanges")}
           </Button>
         </DialogFooter>
       </DialogContent>

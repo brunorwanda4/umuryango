@@ -27,15 +27,15 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { createTranslator } from "@/i18n/translate";
 import { formatDate } from "../money/utils";
 import { ContactActions } from "./contact-actions";
 import { ContactBadges } from "./contact-badges";
 import { ContactFilters } from "./contact-filters";
-import {
-  type ContactFiltersState,
-  contactTypeLabel,
-  type FamilyContact,
-} from "./types-and-schemas";
+import type { ContactFiltersState, FamilyContact } from "./types-and-schemas";
+
+const t = createTranslator("FamilyContacts");
+const tCommon = createTranslator("Common");
 
 export interface ContactListProps {
   contacts: FamilyContact[];
@@ -67,44 +67,45 @@ export function ContactList({
   const columns: ColumnDef<FamilyContact>[] = [
     {
       accessorKey: "fullName",
-      header: "Name",
+      header: tCommon("name"),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.fullName}</span>
       ),
     },
     {
       accessorKey: "contactType",
-      header: "Type",
-      cell: ({ row }) => contactTypeLabel(row.original.contactType),
+      header: tCommon("type"),
+      cell: ({ row }) => t(`types.${row.original.contactType}`),
     },
     {
       accessorKey: "phoneNumber",
-      header: "Phone",
-      cell: ({ row }) => row.original.phoneNumber || "Not recorded",
+      header: tCommon("phone"),
+      cell: ({ row }) => row.original.phoneNumber || tCommon("notRecorded"),
     },
     {
       accessorKey: "relationshipToFamily",
-      header: "Relationship",
-      cell: ({ row }) => row.original.relationshipToFamily || "Not recorded",
+      header: t("relationshipLabel"),
+      cell: ({ row }) =>
+        row.original.relationshipToFamily || tCommon("notRecorded"),
     },
     {
       accessorKey: "organization",
-      header: "Organization",
-      cell: ({ row }) => row.original.organization || "Not recorded",
+      header: t("organizationLabel"),
+      cell: ({ row }) => row.original.organization || tCommon("notRecorded"),
     },
     {
       id: "status",
-      header: "Status",
+      header: tCommon("status"),
       cell: ({ row }) => <ContactBadges contact={row.original} />,
     },
     {
       accessorKey: "createdAt",
-      header: "Created",
+      header: tCommon("createdDate"),
       cell: ({ row }) => formatDate(row.original.createdAt),
     },
     {
       id: "actions",
-      header: "Actions",
+      header: tCommon("actions"),
       cell: ({ row }) => {
         const contact = row.original;
 
@@ -115,7 +116,7 @@ export function ContactList({
                 <Button
                   size="icon"
                   variant="ghost"
-                  aria-label={`Open actions for ${contact.fullName}`}
+                  aria-label={t("openActionsFor", { name: contact.fullName })}
                 >
                   <MoreVerticalIcon aria-hidden="true" />
                 </Button>
@@ -123,18 +124,18 @@ export function ContactList({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onView(contact)}>
                   <EyeIcon className="mr-2 size-4" />
-                  View
+                  {tCommon("view")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onEdit(contact)}>
                   <PencilIcon className="mr-2 size-4" />
-                  Edit
+                  {tCommon("edit")}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => onDelete(contact)}
                 >
                   <Trash2Icon className="mr-2 size-4" />
-                  Delete
+                  {tCommon("delete")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -147,7 +148,7 @@ export function ContactList({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contacts</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <ContactFilters
         filters={filters}
@@ -189,13 +190,13 @@ export function ContactList({
                       </div>
                       <div className="text-muted-foreground text-sm">
                         {contact.relationshipToFamily ||
-                          contactTypeLabel(contact.contactType)}
+                          t(`types.${contact.contactType}`)}
                       </div>
                     </div>
                     <ContactBadges contact={contact} />
                   </div>
                   <div className="text-sm">
-                    {contact.phoneNumber || contact.email || "No phone/email"}
+                    {contact.phoneNumber || contact.email || t("noPhoneEmail")}
                   </div>
                   <ContactActions contact={contact} />
                   <div className="flex gap-2">
@@ -205,7 +206,7 @@ export function ContactList({
                       onClick={() => onView(contact)}
                     >
                       <EyeIcon aria-hidden="true" data-icon="inline-start" />
-                      View
+                      {tCommon("view")}
                     </Button>
                     <Button
                       size="sm"
@@ -213,7 +214,7 @@ export function ContactList({
                       onClick={() => onEdit(contact)}
                     >
                       <PencilIcon aria-hidden="true" data-icon="inline-start" />
-                      Edit
+                      {tCommon("edit")}
                     </Button>
                     <Button
                       size="sm"
@@ -221,7 +222,7 @@ export function ContactList({
                       onClick={() => onDelete(contact)}
                     >
                       <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-                      Delete
+                      {tCommon("delete")}
                     </Button>
                   </div>
                 </div>
@@ -235,10 +236,13 @@ export function ContactList({
                 onClick={() => onPageChange(pageIndex - 1)}
               >
                 <ChevronLeftIcon aria-hidden="true" data-icon="inline-start" />
-                Previous
+                {tCommon("previous")}
               </Button>
               <span className="text-muted-foreground text-sm">
-                Page {pageIndex + 1} of {totalPages}
+                {tCommon("pageOfTotal", {
+                  page: pageIndex + 1,
+                  total: totalPages,
+                })}
               </span>
               <Button
                 size="sm"
@@ -246,7 +250,7 @@ export function ContactList({
                 disabled={pageIndex + 1 >= totalPages}
                 onClick={() => onPageChange(pageIndex + 1)}
               >
-                Next
+                {tCommon("next")}
                 <ChevronRightIcon aria-hidden="true" data-icon="inline-end" />
               </Button>
             </div>
@@ -272,15 +276,13 @@ export function ContactList({
               <EmptyMedia variant="icon">
                 <UsersRoundIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>No contacts found</EmptyTitle>
-              <EmptyDescription>
-                Add trusted people and organizations the family may need.
-              </EmptyDescription>
+              <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
+              <EmptyDescription>{t("emptyDescription")}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button size="sm" onClick={onAddContact}>
                 <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                Add Contact
+                {t("addContact")}
               </Button>
             </EmptyContent>
           </Empty>

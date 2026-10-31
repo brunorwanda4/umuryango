@@ -11,11 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 import {
   type ContactFiltersState,
   contactStatusOptions,
   contactTypeOptions,
 } from "./types-and-schemas";
+
+const t = createTranslator("FamilyContacts");
+const tCommon = createTranslator("Common");
 
 export interface ContactFiltersProps {
   filters: ContactFiltersState;
@@ -42,7 +46,7 @@ export function ContactFilters({
                   search: event.target.value,
                 }))
               }
-              placeholder="Search contacts"
+              placeholder={t("searchPlaceholder")}
               className="pl-9"
             />
           </div>
@@ -57,13 +61,13 @@ export function ContactFilters({
             }
           >
             <SelectTrigger className="min-w-0 flex-1 basis-32 md:w-52 md:flex-none">
-              <SelectValue placeholder="Contact type" />
+              <SelectValue placeholder={t("contactTypePlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All types</SelectItem>
+              <SelectItem value="all">{t("allTypes")}</SelectItem>
               {contactTypeOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                  {t(`types.${option.value}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -79,13 +83,13 @@ export function ContactFilters({
             }
           >
             <SelectTrigger className="min-w-0 flex-1 basis-32 md:w-44 md:flex-none">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("filterStatus")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="all">{t("allStatuses")}</SelectItem>
               {contactStatusOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
-                  {option.label}
+                  {t(`statuses.${option.value}`)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -107,7 +111,7 @@ export function ContactFilters({
                 }))
               }
             />
-            Emergency only
+            {t("emergencyOnly")}
           </Label>
           <Label
             htmlFor="contacts-loan-only"
@@ -123,10 +127,10 @@ export function ContactFilters({
                 }))
               }
             />
-            Loan contacts only
+            {t("loanOnly")}
           </Label>
           <Button size="sm" variant="outline" onClick={onReset}>
-            Reset
+            {tCommon("reset")}
           </Button>
         </div>
       </div>

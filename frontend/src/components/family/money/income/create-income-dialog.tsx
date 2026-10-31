@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import type { CurrentUser } from "@/hooks/use-current-user";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
@@ -81,6 +82,7 @@ export function CreateIncomeDialog({
   onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
   onSuccess: () => void;
 }) {
+  const t = createTranslator("FamilyIncome");
   const defaultReceivedBy =
     family.members.find((member) => member.userId === currentUser?.id)
       ?.fullName ??
@@ -132,7 +134,7 @@ export function CreateIncomeDialog({
       method: "post",
       url: `/families/${encodeURIComponent(family.id)}/money/transactions`,
     },
-    onSuccessMessage: "Income transaction recorded successfully",
+    onSuccessMessage: t("toasts.recordedSuccess"),
     toastOnSuccess: true,
     onSuccess: async (data, values) => {
       // If mock file upload was requested
@@ -180,10 +182,8 @@ export function CreateIncomeDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Add Income</DialogTitle>
-          <DialogDescription>
-            Record new family income details.
-          </DialogDescription>
+          <DialogTitle>{t("dialogs.addTitle")}</DialogTitle>
+          <DialogDescription>{t("dialogs.addDesc")}</DialogDescription>
         </DialogHeader>
 
         <form
@@ -214,7 +214,7 @@ export function CreateIncomeDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending ? "Recording..." : "Add Income"}
+            {isPending ? t("dialogs.recording") : t("addIncome")}
           </Button>
         </DialogFooter>
       </DialogContent>

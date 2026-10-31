@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import type { RecentExpenseRecord } from "./expense-dashboard-data";
 
@@ -37,6 +38,7 @@ export function DeleteExpenseDialog({
   open,
   trigger,
 }: DeleteExpenseDialogProps) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
   const [isPending, setIsPending] = useState(false);
 
   async function deleteExpense() {
@@ -48,11 +50,11 @@ export function DeleteExpenseDialog({
     setIsPending(false);
 
     if (!response.ok) {
-      toast.error(response.message ?? "Expense could not be deleted.");
+      toast.error(response.message ?? t("deleteDialog.deleteError"));
       return;
     }
 
-    toast.success("Expense deleted successfully");
+    toast.success(t("deleteDialog.deletedToast"));
     await onSuccess?.();
   }
 
@@ -72,7 +74,7 @@ export function DeleteExpenseDialog({
               variant="ghost"
             >
               <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-              Delete expense
+              {t("deleteDialog.confirm")}
             </Button>
           ) : (
             trigger
@@ -81,21 +83,20 @@ export function DeleteExpenseDialog({
       )}
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete expense?</AlertDialogTitle>
+          <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            This reverses {expense.source} and keeps its audit history. It will
-            no longer be included in expense totals.
+            {t("deleteDialog.description", { source: expense.source })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("deleteDialog.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={isPending}
             onClick={deleteExpense}
             variant="destructive"
           >
             {isPending ? <Spinner data-icon="inline-start" /> : null}
-            Delete expense
+            {t("deleteDialog.confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

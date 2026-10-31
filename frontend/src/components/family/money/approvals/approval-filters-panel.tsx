@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 import type { ApprovalFilters } from "./types";
 
 export function ApprovalFiltersPanel({
@@ -30,6 +31,7 @@ export function ApprovalFiltersPanel({
   onFiltersChange: (filters: ApprovalFilters) => void;
   onReset: () => void;
 }) {
+  const t = createTranslator("FamilyApprovals");
   const updateFilter = (key: keyof ApprovalFilters, value: string) => {
     onFiltersChange({ ...filters, [key]: value });
   };
@@ -37,30 +39,28 @@ export function ApprovalFiltersPanel({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle>Filters</CardTitle>
-        <CardDescription>
-          Narrow the queue by type, status, people, dates, amount, and priority.
-        </CardDescription>
+        <CardTitle>{t("filtersTitle")}</CardTitle>
+        <CardDescription>{t("filtersDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="relative sm:col-span-2">
           <SearchIcon className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" />
           <Input
-            aria-label="Search approvals"
+            aria-label={t("searchApprovalsAria")}
             className="pl-9"
-            placeholder="Search title, category, requester..."
+            placeholder={t("searchPlaceholder")}
             value={filters.search}
             onChange={(event) => updateFilter("search", event.target.value)}
           />
         </div>
         <FilterSelect
-          label="Type"
+          label={t("typeColumn")}
           value={filters.type}
           onChange={(value) => updateFilter("type", value)}
           options={[
-            ["all", "All types"],
-            ["INCOME", "Income"],
-            ["EXPENSE", "Expense"],
+            ["all", t("allTypes")],
+            ["INCOME", t("incomeButton")],
+            ["EXPENSE", t("expensesButton")],
             ["BUDGET", "Budget"],
             ["CONTRIBUTION", "Contribution"],
             ["TRANSACTION", "Transaction"],
@@ -68,11 +68,11 @@ export function ApprovalFiltersPanel({
           ]}
         />
         <FilterSelect
-          label="Status"
+          label={t("statusColumn")}
           value={filters.status}
           onChange={(value) => updateFilter("status", value)}
           options={[
-            ["all", "All statuses"],
+            ["all", t("allStatuses")],
             ["PENDING", "Pending"],
             ["APPROVED", "Approved"],
             ["REJECTED", "Rejected"],
@@ -81,55 +81,55 @@ export function ApprovalFiltersPanel({
           ]}
         />
         <FilterSelect
-          label="Category"
+          label={t("categoryColumn")}
           value={filters.category}
           onChange={(value) => updateFilter("category", value)}
           options={[
-            ["all", "All categories"],
+            ["all", t("allCategories")],
             ...categories.map((category) => [category, category] as const),
           ]}
         />
         <FilterSelect
-          label="Requested By"
+          label={t("requestedBy")}
           value={filters.requestedBy}
           onChange={(value) => updateFilter("requestedBy", value)}
           options={[
-            ["all", "All requesters"],
+            ["all", t("allRequesters")],
             ...requesters.map((requester) => [requester, requester] as const),
           ]}
         />
         <Input
-          aria-label="Start date"
+          aria-label={t("startDate")}
           type="date"
           value={filters.startDate}
           onChange={(event) => updateFilter("startDate", event.target.value)}
         />
         <Input
-          aria-label="End date"
+          aria-label={t("endDate")}
           type="date"
           value={filters.endDate}
           onChange={(event) => updateFilter("endDate", event.target.value)}
         />
         <Input
-          aria-label="Minimum amount"
+          aria-label={t("minAmount")}
           inputMode="numeric"
-          placeholder="Min amount"
+          placeholder={t("minAmount")}
           value={filters.minAmount}
           onChange={(event) => updateFilter("minAmount", event.target.value)}
         />
         <Input
-          aria-label="Maximum amount"
+          aria-label={t("maxAmount")}
           inputMode="numeric"
-          placeholder="Max amount"
+          placeholder={t("maxAmount")}
           value={filters.maxAmount}
           onChange={(event) => updateFilter("maxAmount", event.target.value)}
         />
         <FilterSelect
-          label="Priority"
+          label={t("priority")}
           value={filters.priority}
           onChange={(value) => updateFilter("priority", value)}
           options={[
-            ["all", "All priorities"],
+            ["all", t("allPriorities")],
             ["LOW", "Low"],
             ["NORMAL", "Normal"],
             ["HIGH", "High"],
@@ -142,7 +142,7 @@ export function ApprovalFiltersPanel({
           variant="outline"
           onClick={onReset}
         >
-          Reset filters
+          {t("resetFilters")}
         </Button>
       </CardContent>
     </Card>

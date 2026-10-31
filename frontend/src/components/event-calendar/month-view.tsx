@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   addDays,
@@ -34,6 +34,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { createTranslator } from "@/i18n/translate";
 
 interface MonthViewProps {
   currentDate: Date;
@@ -48,6 +49,7 @@ export function MonthView({
   onEventSelect,
   onEventCreate,
 }: MonthViewProps) {
+  const t = createTranslator("EventCalendar");
   const days = useMemo(() => {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(monthStart);
@@ -224,7 +226,9 @@ export function MonthView({
                             >
                               <span>
                                 + {remainingCount}{" "}
-                                <span className="max-sm:sr-only">more</span>
+                                <span className="max-sm:sr-only">
+                                  {t("more")}
+                                </span>
                               </span>
                             </button>
                           </PopoverTrigger>

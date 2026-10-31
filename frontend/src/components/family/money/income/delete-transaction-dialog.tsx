@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import type { FamilyDetail } from "../../dashboard/types";
 import type { IncomeTransaction } from "./types-and-schemas";
@@ -26,6 +27,7 @@ export function DeleteTransactionDialog({
   transaction: IncomeTransaction | null;
   onSuccess: () => void;
 }) {
+  const t = createTranslator("FamilyIncome");
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,14 +42,14 @@ export function DeleteTransactionDialog({
         `/families/${encodeURIComponent(family.id)}/money/transactions/${transaction.id}`,
       );
       if (response.ok) {
-        toast.success("Income record reversed successfully.");
+        toast.success(t("reverse.success"));
         onOpenChange(false);
         onSuccess();
       } else {
-        setError(response.message ?? "Deletion failed.");
+        setError(response.message ?? t("reverse.failed"));
       }
     } catch {
-      setError("Request failed.");
+      setError(t("receipt.requestFailed"));
     } finally {
       setIsPending(false);
     }
@@ -58,12 +60,9 @@ export function DeleteTransactionDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-destructive flex items-center gap-2">
-            Reverse Income Record
+            {t("reverse.title")}
           </DialogTitle>
-          <DialogDescription>
-            Are you sure you want to reverse/soft-delete this income record?
-            This action cannot be undone, and will log a reversal audit event.
-          </DialogDescription>
+          <DialogDescription>{t("reverse.desc")}</DialogDescription>
         </DialogHeader>
 
         {error && (
@@ -87,14 +86,14 @@ export function DeleteTransactionDialog({
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            Cancel
+            {t("reverse.cancel")}
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
           >
-            {isPending ? "Reversing..." : "Confirm Reversal"}
+            {isPending ? t("reverse.reversing") : t("reverse.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

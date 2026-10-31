@@ -21,6 +21,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import { formatDate } from "../utils";
 import { ApprovalStatusBadge, LoanStatusBadge } from "./loan-status-badge";
 import {
@@ -41,15 +42,14 @@ export function LoanDetailsSheet({
   loan: LoanRecord | null;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = createTranslator("FamilyLoans");
+
   return (
     <Sheet open={Boolean(loan)} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-2xl">
         <SheetHeader>
-          <SheetTitle>{loan?.title ?? "Loan Details"}</SheetTitle>
-          <SheetDescription>
-            Loan terms, repayment schedule, documents, approvals, and audit
-            history.
-          </SheetDescription>
+          <SheetTitle>{loan?.title ?? t("dialogs.detailsTitle")}</SheetTitle>
+          <SheetDescription>{t("dialogs.detailsDesc")}</SheetDescription>
         </SheetHeader>
         {loan ? (
           <ScrollArea className="min-h-0 flex-1 px-6 pb-6">
@@ -62,7 +62,7 @@ export function LoanDetailsSheet({
               <div className="rounded-md border p-4">
                 <div className="mb-3 flex items-center justify-between gap-4">
                   <span className="text-muted-foreground text-sm">
-                    Repayment progress
+                    {t("details.repaymentProgress")}
                   </span>
                   <span className="font-medium text-sm">
                     {getLoanProgress(loan)}%
@@ -72,7 +72,7 @@ export function LoanDetailsSheet({
               </div>
               <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <DetailItem
-                  label="Original amount"
+                  label={t("details.originalAmount")}
                   value={
                     <CompactMoney
                       currency={currency}
@@ -81,7 +81,7 @@ export function LoanDetailsSheet({
                   }
                 />
                 <DetailItem
-                  label="Total expected payment"
+                  label={t("details.totalExpectedPayment")}
                   value={
                     <CompactMoney
                       currency={currency}
@@ -93,7 +93,7 @@ export function LoanDetailsSheet({
                   }
                 />
                 <DetailItem
-                  label="Paid amount"
+                  label={t("details.paidAmount")}
                   value={
                     <CompactMoney
                       currency={currency}
@@ -102,7 +102,7 @@ export function LoanDetailsSheet({
                   }
                 />
                 <DetailItem
-                  label="Remaining balance"
+                  label={t("details.remainingBalance")}
                   value={
                     <CompactMoney
                       currency={currency}
@@ -111,22 +111,28 @@ export function LoanDetailsSheet({
                   }
                 />
                 <DetailItem
-                  label="Interest rate"
+                  label={t("details.interestRate")}
                   value={formatInterestRate(loan.interestRateBasisPoints)}
                 />
                 <DetailItem
-                  label="Repayment schedule"
+                  label={t("details.repaymentSchedule")}
                   value={repaymentFrequencyLabel(loan.repaymentFrequency)}
                 />
                 <DetailItem
-                  label="Start date"
+                  label={t("details.startDate")}
                   value={formatDate(loan.startDate)}
                 />
-                <DetailItem label="Due date" value={formatDate(loan.dueDate)} />
-                <DetailItem label="Borrower" value={loan.borrower} />
-                <DetailItem label="Lender" value={loan.lender} />
                 <DetailItem
-                  label="Payment method"
+                  label={t("details.dueDate")}
+                  value={formatDate(loan.dueDate)}
+                />
+                <DetailItem
+                  label={t("details.borrower")}
+                  value={loan.borrower}
+                />
+                <DetailItem label={t("details.lender")} value={loan.lender} />
+                <DetailItem
+                  label={t("details.paymentMethod")}
                   value={formatPaymentMethod(loan.paymentMethod)}
                 />
                 <DetailItem
@@ -156,7 +162,7 @@ export function LoanDetailsSheet({
               </section>
               {loan.notes ? (
                 <div className="rounded-md border p-4">
-                  <p className="font-medium text-sm">Notes</p>
+                  <p className="font-medium text-sm">{t("details.notes")}</p>
                   <p className="mt-2 text-muted-foreground text-sm leading-6">
                     {loan.notes}
                   </p>
@@ -165,14 +171,24 @@ export function LoanDetailsSheet({
               <Separator />
               <Tabs defaultValue="repayments" className="gap-4">
                 <TabsList className="w-full justify-start overflow-x-auto">
-                  <TabsTrigger value="repayments">Repayments</TabsTrigger>
-                  <TabsTrigger value="documents">Documents</TabsTrigger>
+                  <TabsTrigger value="repayments">
+                    {t("details.tabRepayments", {
+                      count: loan.repayments?.length ?? 0,
+                    })}
+                  </TabsTrigger>
+                  <TabsTrigger value="documents">
+                    {t("details.tabDocuments", {
+                      count: loan.documents?.length ?? 0,
+                    })}
+                  </TabsTrigger>
                   <TabsTrigger value="approvals">Approval Timeline</TabsTrigger>
-                  <TabsTrigger value="audit">Audit History</TabsTrigger>
+                  <TabsTrigger value="audit">
+                    {t("details.tabAudit")}
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="repayments">
                   <TimelineList
-                    emptyTitle="No repayments yet"
+                    emptyTitle={t("details.noRepayments")}
                     icon={ReceiptTextIcon}
                     items={(loan.repayments ?? []).map((repayment) => ({
                       id: repayment.id,
@@ -190,7 +206,7 @@ export function LoanDetailsSheet({
                 </TabsContent>
                 <TabsContent value="documents">
                   <TimelineList
-                    emptyTitle="No documents attached"
+                    emptyTitle={t("details.noDocuments")}
                     icon={FileTextIcon}
                     items={(loan.documents ?? []).map((document) => ({
                       id: document.id,
@@ -218,7 +234,7 @@ export function LoanDetailsSheet({
                 </TabsContent>
                 <TabsContent value="audit">
                   <TimelineList
-                    emptyTitle="No audit history returned"
+                    emptyTitle={t("details.noAuditLogs")}
                     icon={HistoryIcon}
                     items={(loan.auditHistory ?? []).map((entry) => ({
                       id: entry.id,

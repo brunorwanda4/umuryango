@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import type { Category } from "./types-and-schemas";
 
@@ -60,6 +61,8 @@ export function IncomeFilters({
   categories: Category[];
   family: FamilyDetail;
 }) {
+  const t = createTranslator("FamilyIncome");
+  const tCommon = createTranslator("Common");
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const activeAdvancedFiltersCount = [
     filterCategory !== "all",
@@ -82,7 +85,7 @@ export function IncomeFilters({
             <div className="relative min-w-0 flex-1">
               <SearchIcon className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search income title/payer..."
+                placeholder={t("filters.searchPlaceholder")}
                 className="pl-8"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -100,7 +103,7 @@ export function IncomeFilters({
                     aria-hidden="true"
                     data-icon="inline-start"
                   />
-                  More filters
+                  {tCommon("filters.moreFilters") || "More filters"}
                   {activeAdvancedFiltersCount > 0
                     ? ` (${activeAdvancedFiltersCount})`
                     : null}
@@ -122,10 +125,12 @@ export function IncomeFilters({
             <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-4 xl:grid-cols-5">
               <Select value={filterCategory} onValueChange={setFilterCategory}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All Categories" />
+                  <SelectValue placeholder={t("filters.allCategories")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="all">
+                    {t("filters.allCategories")}
+                  </SelectItem>
                   {categories.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
@@ -139,10 +144,12 @@ export function IncomeFilters({
                 onValueChange={setFilterPaymentMethod}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All Payments" />
+                  <SelectValue placeholder={t("filters.allPayments")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Payments</SelectItem>
+                  <SelectItem value="all">
+                    {t("filters.allPayments")}
+                  </SelectItem>
                   <SelectItem value="CASH">Cash</SelectItem>
                   <SelectItem value="MOBILE_MONEY">Mobile Money</SelectItem>
                   <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
@@ -154,23 +161,33 @@ export function IncomeFilters({
 
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All Statuses" />
+                  <SelectValue placeholder={t("filters.allStatuses")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="APPROVED">Approved</SelectItem>
-                  <SelectItem value="REJECTED">Rejected</SelectItem>
-                  <SelectItem value="REVERSED">Reversed</SelectItem>
+                  <SelectItem value="all">
+                    {t("filters.allStatuses")}
+                  </SelectItem>
+                  <SelectItem value="PENDING">
+                    {tCommon("status.pending")}
+                  </SelectItem>
+                  <SelectItem value="APPROVED">
+                    {tCommon("status.approved")}
+                  </SelectItem>
+                  <SelectItem value="REJECTED">
+                    {tCommon("status.rejected")}
+                  </SelectItem>
+                  <SelectItem value="REVERSED">
+                    {tCommon("status.reversed")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={filterMember} onValueChange={setFilterMember}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All Members" />
+                  <SelectValue placeholder={t("filters.allMembers")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Members</SelectItem>
+                  <SelectItem value="all">{t("filters.allMembers")}</SelectItem>
                   {family.members.map((m) => (
                     <SelectItem key={m.id} value={m.fullName}>
                       {m.fullName}
@@ -186,7 +203,7 @@ export function IncomeFilters({
                 className="w-full"
               >
                 <FilterXIcon className="size-4" data-icon="inline-start" />
-                Reset Filters
+                {t("filters.resetFilters")}
               </Button>
             </div>
 

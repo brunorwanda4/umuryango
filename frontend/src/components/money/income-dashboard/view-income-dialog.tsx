@@ -4,6 +4,7 @@ import type * as React from "react";
 import { ViewTransactionDialog } from "@/components/common/money/view-transaction-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { createTranslator } from "@/i18n/translate";
 import { DeleteIncomeDialog } from "./delete-income-dialog";
 import type {
   IncomeCategory,
@@ -32,20 +33,21 @@ export function ViewIncomeDialog({
   searchParamValue,
   trigger,
 }: ViewIncomeDialogProps) {
+  const t = createTranslator("PersonalMoney.personalIncome");
   const { user: currentUser } = useCurrentUser();
 
   return (
     <ViewTransactionDialog
-      amountLabel="Amount received"
+      amountLabel={t("viewDialog.amountReceived")}
       amountMinorUnits={income.amountMinorUnits}
       category={income.category}
       categoryClassName={income.categoryClassName}
       currency={income.currency}
       date={income.date}
-      dateLabel="Date received"
-      deleteLabel="Delete income"
-      detailsDescription="Review the recorded income and payment information."
-      detailsTitle="Income details"
+      dateLabel={t("viewDialog.dateReceived")}
+      deleteLabel={t("viewDialog.deleteIncome")}
+      detailsDescription={t("viewDialog.detailsDesc")}
+      detailsTitle={t("viewDialog.detailsTitle")}
       description={income.description}
       leading={
         <Avatar className="size-11 shrink-0 rounded-lg">
@@ -84,7 +86,7 @@ export function ViewIncomeDialog({
       searchParamValue={searchParamValue ?? `view-income-${income.id}`}
       title={income.source}
       trigger={trigger}
-      updateLabel="Update income"
+      updateLabel={t("viewDialog.updateIncome")}
     />
   );
 }

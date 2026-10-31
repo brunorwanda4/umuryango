@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { DateRangePickerInput } from "@/components/ui/calendar-day";
+import { createTranslator } from "@/i18n/translate";
 import { formatMonthPeriod } from "./utils";
 
 /**
@@ -20,6 +21,7 @@ export function IncomeMonthPicker({
   period: { from: string; to: string };
   onPeriodChange: (period: { from: string; to: string }) => void;
 }) {
+  const t = createTranslator("PersonalMoney");
   const periodLabel = useMemo(
     () => formatMonthPeriod(period.from, period.to),
     [period.from, period.to],
@@ -35,7 +37,7 @@ export function IncomeMonthPicker({
       align="end"
       calendarMonths={1}
       displayValue={periodLabel}
-      placeholder="Pick a period"
+      placeholder={t("pickPeriod")}
       required
       onValueChange={(value) => {
         if (value.from && value.to) {

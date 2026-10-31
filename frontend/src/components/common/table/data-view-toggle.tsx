@@ -4,6 +4,7 @@ import { ListIcon, TableIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import type { DataViewMode } from "@/hooks/use-persistent-view-mode";
+import { createTranslator } from "@/i18n/translate";
 
 type DataViewToggleProps = {
   value: DataViewMode;
@@ -11,8 +12,10 @@ type DataViewToggleProps = {
 };
 
 export function DataViewToggle({ value, onValueChange }: DataViewToggleProps) {
+  const t = createTranslator("Common");
+
   return (
-    <ButtonGroup aria-label="Choose data view">
+    <ButtonGroup aria-label={t("chooseView")}>
       <Button
         aria-pressed={value === "table"}
         size="sm"
@@ -21,7 +24,7 @@ export function DataViewToggle({ value, onValueChange }: DataViewToggleProps) {
         onClick={() => onValueChange("table")}
       >
         <TableIcon aria-hidden="true" data-icon="inline-start" />
-        Table
+        {t("tableView")}
       </Button>
       <Button
         aria-pressed={value === "items"}
@@ -31,7 +34,7 @@ export function DataViewToggle({ value, onValueChange }: DataViewToggleProps) {
         onClick={() => onValueChange("items")}
       >
         <ListIcon aria-hidden="true" data-icon="inline-start" />
-        Items
+        {t("itemsView")}
       </Button>
     </ButtonGroup>
   );

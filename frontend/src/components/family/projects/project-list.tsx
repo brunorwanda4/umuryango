@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { createTranslator } from "@/i18n/translate";
 import {
   ProjectFact,
   StatusBadge,
@@ -22,6 +23,9 @@ import {
   formatDate,
   formatTitle,
 } from "./utils";
+
+const t = createTranslator("FamilyProjects");
+const tDashboard = createTranslator("FamilyDashboard");
 
 export function ProjectList({
   currency,
@@ -37,11 +41,8 @@ export function ProjectList({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Project plans</CardTitle>
-        <CardDescription>
-          Family goals with budgets, dates, owners, members, and contribution
-          progress.
-        </CardDescription>
+        <CardTitle>{t("projectPlansTitle")}</CardTitle>
+        <CardDescription>{t("projectPlansDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {rows.length ? (
@@ -75,38 +76,40 @@ export function ProjectList({
                 </div>
                 <div className="flex flex-wrap gap-2 lg:justify-end">
                   <Badge variant="secondary">
-                    {project.ownerName ?? "No owner assigned"}
+                    {project.ownerName ?? t("noOwnerAssigned")}
                   </Badge>
                   <Badge variant="outline">
                     {typeof project.memberCount === "number"
-                      ? `${project.memberCount.toLocaleString()} members`
-                      : "Members not set"}
+                      ? tDashboard("membersCount", {
+                          count: project.memberCount,
+                        })
+                      : t("membersNotSet")}
                   </Badge>
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
                 <ProjectFact
-                  label="Target amount"
+                  label={t("targetAmount")}
                   value={
                     <CompactMoney
                       currency={currency}
-                      emptyLabel="No records"
+                      emptyLabel={tDashboard("noRecords")}
                       value={project.targetAmountMinorUnits}
                     />
                   }
                 />
                 <ProjectFact
-                  label="Contributed"
+                  label={t("contributed")}
                   value={
                     <CompactMoney
                       currency={currency}
-                      emptyLabel="No records"
+                      emptyLabel={tDashboard("noRecords")}
                       value={project.contributedMinorUnits}
                     />
                   }
                 />
                 <ProjectFact
-                  label="Target date"
+                  label={t("targetDate")}
                   value={formatDate(project.targetDate)}
                 />
               </div>
@@ -114,10 +117,16 @@ export function ProjectList({
                 <Progress value={clampPercent(project.percentFunded)} />
                 <p className="text-muted-foreground text-xs">
                   {typeof project.percentFunded === "number"
-                    ? `${Math.round(clampPercent(project.percentFunded))}% funded`
-                    : "Funding percent must come from persisted records."}
+                    ? t("percentFunded", {
+                        percent: Math.round(
+                          clampPercent(project.percentFunded),
+                        ),
+                      })
+                    : t("fundingPercentMissing")}
                   {project.contributionStrategy
-                    ? ` Contribution plan: ${formatTitle(project.contributionStrategy)}.`
+                    ? ` ${t("contributionPlan", {
+                        strategy: formatTitle(project.contributionStrategy),
+                      })}`
                     : ""}
                 </p>
               </div>
@@ -125,9 +134,9 @@ export function ProjectList({
           ))
         ) : (
           <TableEmptyState
-            description="Saved plans such as buying a vehicle, building a house, education support, and family business projects will appear here."
+            description={t("noProjectPlansDesc")}
             icon={FolderKanbanIcon}
-            title="No project plans returned"
+            title={t("noProjectPlansTitle")}
           />
         )}
       </CardContent>

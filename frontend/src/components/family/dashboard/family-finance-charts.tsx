@@ -27,6 +27,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { createTranslator } from "@/i18n/translate";
+
+const t = createTranslator("FamilyDashboard");
 
 const COLORS = [
   "var(--chart-1)",
@@ -38,11 +41,11 @@ const COLORS = [
 
 const barChartConfig = {
   income: {
-    label: "Income",
+    label: t("income"),
     color: "var(--chart-4)",
   },
   expenses: {
-    label: "Expenses",
+    label: t("expenses"),
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
@@ -120,15 +123,13 @@ export function FamilyFinanceCharts({
     <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Cash flow analytics</CardTitle>
-          <CardDescription>
-            Compare family income and expenses by period.
-          </CardDescription>
+          <CardTitle>{t("cashFlowAnalyticsTitle")}</CardTitle>
+          <CardDescription>{t("cashFlowAnalyticsDesc")}</CardDescription>
         </CardHeader>
 
         <CardContent>
           {!hasCashFlowData ? (
-            <EmptyChart message="No cash flow data available yet." />
+            <EmptyChart message={t("noCashFlowData")} />
           ) : (
             <ChartContainer
               config={barChartConfig}
@@ -170,7 +171,7 @@ export function FamilyFinanceCharts({
 
                 <Bar
                   dataKey="income"
-                  name="Income"
+                  name={t("income")}
                   fill="var(--color-income)"
                   radius={[8, 8, 0, 0]}
                   maxBarSize={44}
@@ -178,7 +179,7 @@ export function FamilyFinanceCharts({
 
                 <Bar
                   dataKey="expenses"
-                  name="Expenses"
+                  name={t("expenses")}
                   fill="var(--color-expenses)"
                   radius={[8, 8, 0, 0]}
                   maxBarSize={44}
@@ -192,15 +193,13 @@ export function FamilyFinanceCharts({
       <div className=" flex flex-col lg:flex-row gap-6">
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Expense breakdown</CardTitle>
-            <CardDescription>
-              See where family money is mostly spent.
-            </CardDescription>
+            <CardTitle>{t("expenseBreakdownTitle")}</CardTitle>
+            <CardDescription>{t("expenseBreakdownDesc")}</CardDescription>
           </CardHeader>
 
           <CardContent>
             {!hasPieData ? (
-              <EmptyChart message="No expense breakdown data available yet." />
+              <EmptyChart message={t("noExpenseBreakdownData")} />
             ) : (
               <ChartContainer
                 config={{ ...barChartConfig, ...pieChartConfig }}
@@ -242,7 +241,7 @@ export function FamilyFinanceCharts({
                     dominantBaseline="middle"
                     className="fill-muted-foreground text-xs"
                   >
-                    Total expenses
+                    {t("totalExpenses")}
                   </text>
 
                   <ChartTooltip
@@ -270,15 +269,13 @@ export function FamilyFinanceCharts({
         {/* ── Income breakdown donut ── */}
         <Card className="shadow-sm">
           <CardHeader>
-            <CardTitle>Income breakdown</CardTitle>
-            <CardDescription>
-              See where family income is coming from.
-            </CardDescription>
+            <CardTitle>{t("incomeBreakdownTitle")}</CardTitle>
+            <CardDescription>{t("incomeBreakdownDesc")}</CardDescription>
           </CardHeader>
 
           <CardContent>
             {!hasIncomePieData ? (
-              <EmptyChart message="No income breakdown data available yet." />
+              <EmptyChart message={t("noIncomeBreakdownData")} />
             ) : (
               <ChartContainer
                 config={{ ...barChartConfig, ...incomePieChartConfig }}
@@ -320,7 +317,7 @@ export function FamilyFinanceCharts({
                     dominantBaseline="middle"
                     className="fill-muted-foreground text-xs"
                   >
-                    Total income
+                    {t("totalIncome")}
                   </text>
 
                   <ChartTooltip

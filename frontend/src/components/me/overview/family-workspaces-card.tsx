@@ -18,6 +18,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { createTranslator } from "@/i18n/translate";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
 import type { OverviewFamily } from "./personal-overview-data";
 
@@ -26,17 +27,17 @@ export function FamilyWorkspacesCard({
 }: {
   families: OverviewFamily[];
 }) {
+  const t = createTranslator("PersonalOverview.familyWorkspaces");
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Family workspaces</CardTitle>
-        <CardDescription>
-          Quick access to the families you belong to.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
         <CardAction>
           <Button asChild size="sm" variant="ghost">
             <Link href="/family">
-              View all
+              {t("viewAll")}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
@@ -49,10 +50,8 @@ export function FamilyWorkspacesCard({
               <EmptyMedia variant="icon">
                 <UsersIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>No family workspaces yet</EmptyTitle>
-              <EmptyDescription>
-                Create or join a family workspace to collaborate with others.
-              </EmptyDescription>
+              <EmptyTitle>{t("emptyTitle")}</EmptyTitle>
+              <EmptyDescription>{t("emptyDesc")}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
@@ -77,13 +76,13 @@ export function FamilyWorkspacesCard({
                   </div>
                   <p className="truncate text-muted-foreground text-xs">
                     {family.memberCount === null
-                      ? (family.description ?? "Family workspace")
-                      : `${family.memberCount} ${family.memberCount === 1 ? "member" : "members"}`}
+                      ? (family.description ?? t("workspace"))
+                      : t("memberCount", { count: family.memberCount })}
                   </p>
                 </div>
                 <Button asChild size="sm" variant="outline">
                   <Link href={`/family/${encodeURIComponent(family.slug)}`}>
-                    Open workspace
+                    {t("openWorkspace")}
                   </Link>
                 </Button>
               </div>
@@ -95,7 +94,7 @@ export function FamilyWorkspacesCard({
         <Button asChild size="sm" variant="outline">
           <Link href="/family/new">
             <PlusIcon data-icon="inline-start" aria-hidden="true" />
-            Create family workspace
+            {t("createWorkspace")}
           </Link>
         </Button>
       </CardFooter>

@@ -2,6 +2,7 @@
 
 import { Loader2Icon, MenuIcon } from "lucide-react";
 import Link, { useLinkStatus } from "next/link";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import { SidebarIcon, type SidebarIconSource } from "./sidebar-icon";
 import {
@@ -19,10 +20,13 @@ function getMobileNavigationItems(
   const preferredHrefs =
     mode === "family"
       ? [
-          items.find((item) => item.title === "Dashboard")?.href,
-          items.find((item) => item.title === "Money")?.href,
-          items.find((item) => item.title === "Projects")?.href,
-          items.find((item) => item.title === "Reports")?.href,
+          items.find(
+            (item) =>
+              item.href.endsWith("/family") || !item.href.includes("/", 8),
+          )?.href ?? items[0]?.href,
+          items.find((item) => item.href.endsWith("/money"))?.href,
+          items.find((item) => item.href.endsWith("/projects"))?.href,
+          items.find((item) => item.href.endsWith("/reports"))?.href,
         ]
       : ["/me", "/me/money", "/me/plans", "/family"];
   const preferred = preferredHrefs
@@ -34,8 +38,10 @@ function getMobileNavigationItems(
 }
 
 function getMobileNavigationLabel(title: string) {
-  if (title === "Overview") return "Home";
-  if (title === "Family workspaces") return "Families";
+  const tNav = createTranslator("AppShell.navigation.items");
+  if (title === tNav("overview") || title === "Overview") return tNav("home");
+  if (title === tNav("familyWorkspaces") || title === "Family workspaces")
+    return tNav("families");
 
   return title;
 }
@@ -79,6 +85,7 @@ export function MobileBottomNavigation({
   pathname: string;
   currentHash: string;
 }) {
+  const t = createTranslator("AppShell.sidebar");
   const items = getMobileNavigationItems(mode, navigation);
   const hasActiveItem = items.some((item) =>
     isActivePath(pathname, item.href, currentHash, item.exact),
@@ -86,7 +93,7 @@ export function MobileBottomNavigation({
 
   return (
     <nav
-      aria-label="Primary mobile navigation"
+      aria-label={t("primaryMobileNavigation")}
       className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
     >
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
@@ -116,7 +123,7 @@ export function MobileBottomNavigation({
         })}
         <button
           type="button"
-          aria-label="Open all navigation links"
+          aria-label={t("openAllNavigationLinks")}
           aria-current={!hasActiveItem ? "page" : undefined}
           className={cn(
             "flex min-h-14 min-w-0 flex-col items-center justify-center gap-1  px-1 text-muted-foreground text-xs transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30",
@@ -127,7 +134,7 @@ export function MobileBottomNavigation({
         >
           <MenuIcon aria-hidden="true" className="size-5 shrink-0" />
           <span className="w-full truncate text-center font-medium text-[0.65rem] leading-none">
-            More
+            {t("more")}
           </span>
         </button>
       </div>

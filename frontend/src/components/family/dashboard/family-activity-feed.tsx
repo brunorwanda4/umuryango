@@ -13,11 +13,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
 import type { MoneyOverview } from "../money/types";
 import { formatMinorUnits, formatTitle } from "../money/utils";
 import { formatRelativeTime, getKinshipLabel } from "./dashboard-data";
 import type { FamilyDetail } from "./types";
+
+const t = createTranslator("FamilyDashboard");
 
 const MAX_ENTRIES = 6;
 
@@ -57,7 +60,7 @@ function buildActivityEntries(
       type: "member_joined",
       name: member.fullName,
       avatarUrl: member.avatarUrl,
-      description: `joined as ${roleLabel} - ${kinship}`,
+      description: t("memberJoined", { role: roleLabel, kinship }),
       timestamp: joinedAt,
     });
   }
@@ -70,7 +73,7 @@ function buildActivityEntries(
       type: "family_created",
       name: family.name,
       avatarUrl: null,
-      description: "family was created",
+      description: t("familyCreated"),
       timestamp: createdAt,
     });
   }
@@ -97,13 +100,13 @@ function buildActivityEntries(
         : isExpense
           ? "expense_recorded"
           : "contribution_paid",
-      name: record.createdBy ?? "Family",
+      name: record.createdBy ?? family.name,
       avatarUrl: null,
       description: isIncome
-        ? `recorded income of ${amount} from ${category}`
+        ? t("recordedIncome", { amount, category })
         : isExpense
-          ? `recorded an expense of ${amount} for ${category}`
-          : `recorded ${amount} for ${category}`,
+          ? t("recordedExpense", { amount, category })
+          : t("recordedTransaction", { amount, category }),
       timestamp,
     });
   }
@@ -126,10 +129,10 @@ export function FamilyActivityFeed({
   return (
     <Card className="card card-border gap-0 rounded-[20px] py-5 shadow-sm">
       <CardHeader className="px-5 pb-3.5">
-        <CardTitle className="font-fraunces text-xl">Recent activity</CardTitle>
-        <CardDescription>
-          Your latest personal and family actions.
-        </CardDescription>
+        <CardTitle className="font-fraunces text-xl">
+          {t("recentActivityTitle")}
+        </CardTitle>
+        <CardDescription>{t("recentActivityDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="px-5">
         <div className="flex flex-col">

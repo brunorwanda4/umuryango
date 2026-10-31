@@ -18,6 +18,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { LoanDetailsSheet } from "./loan-details-sheet";
 import { LoanFilters } from "./loan-filters";
@@ -55,6 +56,7 @@ function LoansSkeleton() {
 }
 
 export function LoansPage() {
+  const t = createTranslator("PersonalLoans");
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [contacts, setContacts] = useState<FamilyContact[]>([]);
   const [categories, setCategories] = useState<LoanCategory[]>([]);
@@ -78,10 +80,7 @@ export function LoansPage() {
     );
     const workspace = workspaceResponse.data;
     if (!workspaceResponse.ok || !workspace) {
-      setError(
-        workspaceResponse.message ??
-          "Your personal money workspace could not be loaded.",
-      );
+      setError(workspaceResponse.message ?? t("page.workspaceNotFound"));
       setLoading(false);
       return;
     }
@@ -103,7 +102,7 @@ export function LoansPage() {
       ]);
 
     if (!loansResponse.ok) {
-      setError(loansResponse.message ?? "Personal loans could not be loaded.");
+      setError(loansResponse.message ?? t("page.loadErrorTitle"));
     } else {
       setFamily(workspace);
       setContacts((contactsResponse.data?.items ?? []).filter(isTrustedPerson));
@@ -111,7 +110,7 @@ export function LoansPage() {
       setLoans(normalizePersonalLoans(loansResponse.data));
     }
     setLoading(false);
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -147,13 +146,13 @@ export function LoansPage() {
       <div className="flex flex-col gap-4">
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>Loans could not load</AlertTitle>
+          <AlertTitle>{t("page.loadErrorTitle")}</AlertTitle>
           <AlertDescription>
-            {error ?? "Family workspace not found."}
+            {error ?? t("page.workspaceNotFound")}
           </AlertDescription>
         </Alert>
         <Button variant="outline" onClick={() => void load()}>
-          Try again
+          {t("page.tryAgain")}
         </Button>
       </div>
     );
@@ -176,16 +175,13 @@ export function LoansPage() {
             <EmptyMedia variant="icon">
               <UserPlusIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>Add a person first</EmptyTitle>
-            <EmptyDescription>
-              Loans must be connected to a family member, friend, or trusted
-              person.
-            </EmptyDescription>
+            <EmptyTitle>{t("person.emptyTitle")}</EmptyTitle>
+            <EmptyDescription>{t("person.emptyDesc")}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button onClick={() => setOpenPerson(true)}>
               <UserPlusIcon aria-hidden="true" data-icon="inline-start" />
-              Add person
+              {t("person.addPerson")}
             </Button>
           </EmptyContent>
         </Empty>

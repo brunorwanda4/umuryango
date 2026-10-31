@@ -9,9 +9,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { StatusBadge, TableEmptyState } from "./projects-ui-helpers";
 import type { ProjectContributionRow, ProjectsOverview } from "./types";
 import { formatDate } from "./utils";
+
+const t = createTranslator("FamilyProjects");
+const tCommon = createTranslator("Common");
+const tDashboard = createTranslator("FamilyDashboard");
 
 export function ProjectContributionTable({
   currency,
@@ -24,35 +29,35 @@ export function ProjectContributionTable({
   const columns: ColumnDef<ProjectContributionRow>[] = [
     {
       accessorKey: "projectName",
-      header: "Project",
+      header: t("projectColumn"),
       cell: ({ row }) => (
         <span className="font-medium">{row.original.projectName}</span>
       ),
     },
     {
       accessorKey: "contributorName",
-      header: "Contributor",
+      header: t("contributorColumn"),
     },
     {
       accessorKey: "paidAt",
-      header: "Date",
+      header: tCommon("date"),
       cell: ({ row }) => formatDate(row.original.paidAt),
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: tCommon("status"),
       cell: ({ row }) => (
         <StatusBadge value={row.original.status ?? "pending"} />
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: () => <div className="text-right">Amount</div>,
+      header: () => <div className="text-right">{tCommon("amount")}</div>,
       cell: ({ row }) => (
         <div className="text-right font-mono">
           <CompactMoney
             currency={currency}
-            emptyLabel="No records"
+            emptyLabel={tDashboard("noRecords")}
             value={row.original.amountMinorUnits}
           />
         </div>
@@ -63,19 +68,17 @@ export function ProjectContributionTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Project contributions</CardTitle>
-        <CardDescription>
-          Contributions linked to a family project and verified by the backend.
-        </CardDescription>
+        <CardTitle>{t("projectContributionsTitle")}</CardTitle>
+        <CardDescription>{t("projectContributionsDesc")}</CardDescription>
       </CardHeader>
       <CardContent>
         {contributions.length ? (
           <CommonDataTable columns={columns} data={contributions} />
         ) : (
           <TableEmptyState
-            description="Member payments and pledges connected to projects will show here once saved."
+            description={t("noProjectContributionsDesc")}
             icon={HandCoinsIcon}
-            title="No project contributions returned"
+            title={t("noProjectContributionsTitle")}
           />
         )}
       </CardContent>

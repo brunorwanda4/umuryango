@@ -6,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 import { CategorySearch } from "./category-search";
 import type {
   CategorySort,
@@ -32,25 +33,27 @@ export function CategoryFilters({
   statusFilter: "ALL" | CategoryStatus;
   typeFilter: "ALL" | CategoryType;
 }) {
+  const t = createTranslator("FamilyCategories");
+
   return (
     <div className="grid min-w-0 gap-3 md:grid-cols-2 2xl:grid-cols-[minmax(16rem,1fr)_12rem_12rem_14rem]">
       <CategorySearch
         value={search}
         onChange={setSearch}
-        placeholder="Search by name or description"
+        placeholder={t("searchNameDesc")}
       />
       <Select
         value={typeFilter}
         onValueChange={(value) => setTypeFilter(value as "ALL" | CategoryType)}
       >
-        <SelectTrigger aria-label="Filter by type" className="w-full">
+        <SelectTrigger aria-label={t("filterTypeAria")} className="w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="ALL">All types</SelectItem>
-            <SelectItem value="INCOME">Income</SelectItem>
-            <SelectItem value="EXPENSE">Expense</SelectItem>
+            <SelectItem value="ALL">{t("allTypes")}</SelectItem>
+            <SelectItem value="INCOME">{t("income")}</SelectItem>
+            <SelectItem value="EXPENSE">{t("expense")}</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -60,14 +63,14 @@ export function CategoryFilters({
           setStatusFilter(value as "ALL" | CategoryStatus)
         }
       >
-        <SelectTrigger aria-label="Filter by status" className="w-full">
+        <SelectTrigger aria-label={t("filterStatusAria")} className="w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="ALL">All statuses</SelectItem>
-            <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="INACTIVE">Inactive</SelectItem>
+            <SelectItem value="ALL">{t("allStatuses")}</SelectItem>
+            <SelectItem value="ACTIVE">{t("active")}</SelectItem>
+            <SelectItem value="INACTIVE">{t("inactive")}</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -75,15 +78,17 @@ export function CategoryFilters({
         value={sort}
         onValueChange={(value) => setSort(value as CategorySort)}
       >
-        <SelectTrigger aria-label="Sort categories" className="w-full">
+        <SelectTrigger aria-label={t("sortAria")} className="w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="updated-desc">Last updated</SelectItem>
-            <SelectItem value="name-asc">Name A to Z</SelectItem>
-            <SelectItem value="transactions-desc">Most used</SelectItem>
-            <SelectItem value="total-desc">Highest value</SelectItem>
+            <SelectItem value="updated-desc">{t("sortUpdatedDesc")}</SelectItem>
+            <SelectItem value="name-asc">{t("sortNameAsc")}</SelectItem>
+            <SelectItem value="transactions-desc">
+              {t("sortMostUsed")}
+            </SelectItem>
+            <SelectItem value="total-desc">{t("sortHighestValue")}</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>

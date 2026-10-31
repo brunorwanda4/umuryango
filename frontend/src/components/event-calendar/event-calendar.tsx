@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   addDays,
@@ -44,6 +44,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 
 export interface EventCalendarProps {
@@ -63,6 +64,7 @@ export function EventCalendar({
   className,
   initialView = "month",
 }: EventCalendarProps) {
+  const t = createTranslator("EventCalendar");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<CalendarView>(initialView);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
@@ -171,7 +173,7 @@ export function EventCalendar({
   const handleEventSave = (event: CalendarEvent) => {
     if (event.id) {
       onEventUpdate?.(event);
-      toast(`Event "${event.title}" updated`, {
+      toast(t("eventUpdated", { title: event.title }), {
         description: format(new Date(event.start), "MMM d, yyyy"),
         position: "bottom-left",
       });
@@ -180,7 +182,7 @@ export function EventCalendar({
         ...event,
         id: Math.random().toString(36).substring(2, 11),
       });
-      toast(`Event "${event.title}" added`, {
+      toast(t("eventAdded", { title: event.title }), {
         description: format(new Date(event.start), "MMM d, yyyy"),
         position: "bottom-left",
       });
@@ -196,7 +198,7 @@ export function EventCalendar({
     setSelectedEvent(null);
 
     if (deletedEvent) {
-      toast(`Event "${deletedEvent.title}" deleted`, {
+      toast(t("eventDeleted", { title: deletedEvent.title }), {
         description: format(new Date(deletedEvent.start), "MMM d, yyyy"),
         position: "bottom-left",
       });
@@ -206,7 +208,7 @@ export function EventCalendar({
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
     onEventUpdate?.(updatedEvent);
 
-    toast(`Event "${updatedEvent.title}" moved`, {
+    toast(t("eventMoved", { title: updatedEvent.title }), {
       description: format(new Date(updatedEvent.start), "MMM d, yyyy"),
       position: "bottom-left",
     });
@@ -252,6 +254,13 @@ export function EventCalendar({
     return format(currentDate, "MMMM yyyy");
   }, [currentDate, view]);
 
+  const viewLabels: Record<CalendarView, string> = {
+    month: t("month"),
+    week: t("week"),
+    day: t("day"),
+    agenda: t("agenda"),
+  };
+
   return (
     <div
       className="flex flex-col rounded-lg border has-data-[slot=month-view]:flex-1"
@@ -281,11 +290,11 @@ export function EventCalendar({
                 className="min-[480px]:hidden"
                 data-icon="inline-start"
               />
-              <span className="max-[479px]:sr-only">Today</span>
+              <span className="max-[479px]:sr-only">{t("today")}</span>
             </Button>
             <div className="flex items-center sm:gap-2">
               <Button
-                aria-label="Previous"
+                aria-label={t("previous")}
                 onClick={handlePrevious}
                 size="icon"
                 variant="ghost"
@@ -293,7 +302,7 @@ export function EventCalendar({
                 <ChevronLeftIcon aria-hidden="true" />
               </Button>
               <Button
-                aria-label="Next"
+                aria-label={t("next")}
                 onClick={handleNext}
                 size="icon"
                 variant="ghost"
@@ -314,7 +323,7 @@ export function EventCalendar({
                       {view.charAt(0).toUpperCase()}
                     </span>
                     <span className="max-[479px]:sr-only">
-                      {view.charAt(0).toUpperCase() + view.slice(1)}
+                      {viewLabels[view]}
                     </span>
                   </span>
                   <ChevronDownIcon
@@ -326,16 +335,16 @@ export function EventCalendar({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-32">
                 <DropdownMenuItem onClick={() => setView("month")}>
-                  Month <DropdownMenuShortcut>M</DropdownMenuShortcut>
+                  {t("month")} <DropdownMenuShortcut>M</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setView("week")}>
-                  Week <DropdownMenuShortcut>W</DropdownMenuShortcut>
+                  {t("week")} <DropdownMenuShortcut>W</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setView("day")}>
-                  Day <DropdownMenuShortcut>D</DropdownMenuShortcut>
+                  {t("day")} <DropdownMenuShortcut>D</DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setView("agenda")}>
-                  Agenda <DropdownMenuShortcut>A</DropdownMenuShortcut>
+                  {t("agenda")} <DropdownMenuShortcut>A</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -352,7 +361,7 @@ export function EventCalendar({
                 className="sm:-ms-1 opacity-60"
                 data-icon="inline-start"
               />
-              <span className="max-sm:sr-only">New event</span>
+              <span className="max-sm:sr-only">{t("newEvent")}</span>
             </Button>
           </div>
         </div>

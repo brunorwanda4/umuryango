@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import { cn } from "@/lib/utils";
 import type { FamilyDetail } from "../../dashboard/types";
@@ -52,6 +53,8 @@ export function IncomeTable({
   handleSendApproval: (tx: IncomeTransaction) => void;
   setOpenCreate: (open: boolean) => void;
 }) {
+  const t = createTranslator("FamilyIncome");
+  const _tCommon = createTranslator("Common");
   const [viewMode, setViewMode] = usePersistentViewMode(
     FAMILY_INCOME_VIEW_MODE_STORAGE_KEY,
   );
@@ -59,7 +62,7 @@ export function IncomeTable({
   const columns: ColumnDef<IncomeTransaction>[] = [
     {
       accessorKey: "date",
-      header: "Date",
+      header: t("table.columnDate"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {formatDate(row.original.date)}
@@ -68,23 +71,23 @@ export function IncomeTable({
     },
     {
       accessorKey: "description",
-      header: "Title",
+      header: t("table.columnTitle"),
       cell: ({ row }) => (
         <span className="block max-w-[180px] truncate font-medium">
-          {row.original.description || "Income Transaction"}
+          {row.original.description || t("table.columnTitle")}
         </span>
       ),
     },
     {
       accessorKey: "category.name",
-      header: "Category",
+      header: t("table.columnCategory"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">{row.original.category.name}</span>
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: "Paid",
+      header: t("table.columnAmount"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap font-mono">
           <CompactMoney
@@ -113,7 +116,7 @@ export function IncomeTable({
     },
     {
       accessorKey: "receivedFrom",
-      header: "Paid By",
+      header: t("table.columnReceivedFrom"),
       cell: ({ row }) => (
         <span className="block max-w-[150px] truncate">
           {row.original.receivedFrom || "-"}
@@ -131,7 +134,7 @@ export function IncomeTable({
     },
     {
       accessorKey: "paymentMethod",
-      header: "Payment Method",
+      header: t("table.columnPaymentMethod"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {row.original.paymentMethod
@@ -165,7 +168,7 @@ export function IncomeTable({
     },
     {
       accessorKey: "status",
-      header: "Approval",
+      header: t("table.columnStatus"),
       cell: ({ row }) => {
         const status = row.original.status;
 
@@ -197,7 +200,9 @@ export function IncomeTable({
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Actions</div>,
+      header: () => (
+        <div className="text-right">{t("table.columnActions")}</div>
+      ),
       cell: ({ row }) => (
         <div className="flex justify-end">
           <IncomeActionsDropdown
@@ -215,7 +220,7 @@ export function IncomeTable({
   return (
     <Card className="min-w-0">
       <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-        <CardTitle>Income History</CardTitle>
+        <CardTitle>{t("table.historyTitle")}</CardTitle>
         <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
       <CardContent
@@ -227,7 +232,9 @@ export function IncomeTable({
               columns={columns}
               data={filteredTransactions}
               getRowAriaLabel={(row) =>
-                `View details for ${row.original.description || "Income Transaction"}`
+                t("table.viewDetailsAria", {
+                  title: row.original.description || "Income Transaction",
+                })
               }
               onRowClick={(row) => handleActionClick(row.original, "view")}
               rowClassName={() => "hover:bg-muted/50 cursor-pointer"}
@@ -247,15 +254,14 @@ export function IncomeTable({
             <span className="flex size-12 items-center justify-center rounded-full bg-muted mb-4">
               <CoinsIcon className="size-6 text-muted-foreground" />
             </span>
-            <h3 className="font-semibold text-lg">No income recorded yet</h3>
+            <h3 className="font-semibold text-lg">{t("table.emptyTitle")}</h3>
             <p className="text-muted-foreground text-sm max-w-sm mt-1 mb-6">
-              Start by adding salary, business income, family contributions,
-              gifts, donations, or other money received by the family.
+              {t("table.emptyDesc")}
             </p>
             {hasCapability(family, "RECORD_INCOME") && (
               <Button size="sm" onClick={() => setOpenCreate(true)}>
                 <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                Add Income
+                {t("addIncome")}
               </Button>
             )}
           </div>

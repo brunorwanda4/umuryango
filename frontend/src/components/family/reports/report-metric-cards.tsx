@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import type {
   ContributionsOverview,
   MoneyOverview,
@@ -36,80 +37,81 @@ export function ReportMetricCards({
   projects: ProjectsOverview | null;
   reports: ReportsOverview | null;
 }) {
+  const t = createTranslator("FamilyReports");
   const totals = reports?.totals;
   const cards = [
     {
-      title: "Cash balance",
+      title: t("cashBalanceTitle"),
       value:
         totals?.cashBalanceMinorUnits ?? money?.totals?.cashBalanceMinorUnits,
-      description: "Server-approved family position",
+      description: t("cashBalanceDesc"),
       icon: WalletCardsIcon,
       isMoney: true,
     },
     {
-      title: "Income",
+      title: t("incomeTitle"),
       value: totals?.incomeMinorUnits ?? money?.totals?.incomeMinorUnits,
-      description: "Approved money received",
+      description: t("incomeDesc"),
       icon: ReceiptTextIcon,
       isMoney: true,
     },
     {
-      title: "Expenses",
+      title: t("expensesTitle"),
       value: totals?.expenseMinorUnits ?? money?.totals?.expenseMinorUnits,
-      description: "Approved money spent",
+      description: t("expensesDesc"),
       icon: PieChartIcon,
       isMoney: true,
     },
     {
-      title: "Contributions",
+      title: t("contributionsTitle"),
       value:
         totals?.contributionsPaidMinorUnits ??
         money?.totals?.contributionsPaidMinorUnits ??
         contributions?.totals?.collectedMinorUnits,
-      description: "Verified family commitments",
+      description: t("contributionsDesc"),
       icon: HandCoinsIcon,
       isMoney: true,
     },
     {
-      title: "Savings",
+      title: t("savingsTitle"),
       value: totals?.savingsMinorUnits ?? money?.totals?.savingsMinorUnits,
-      description: "Saved toward family goals",
+      description: t("savingsDesc"),
       icon: TargetIcon,
       isMoney: true,
     },
     {
-      title: "Debts",
+      title: t("debtsTitle"),
       value:
         totals?.debtOutstandingMinorUnits ??
         money?.totals?.debtOutstandingMinorUnits,
-      description: "Outstanding borrowed or lent money",
+      description: t("debtsDesc"),
       icon: LandmarkIcon,
       isMoney: true,
     },
     {
-      title: "Project budgets",
+      title: t("projectBudgetsTitle"),
       value:
         totals?.projectPlannedMinorUnits ?? projects?.totals?.plannedMinorUnits,
-      description: "Approved target amounts across projects",
+      description: t("projectBudgetsDesc"),
       icon: FolderKanbanIcon,
       isMoney: true,
     },
     {
-      title: "Generated reports",
+      title: t("generatedReportsTitle"),
       value:
         typeof totals?.reportCount === "number"
           ? totals.reportCount.toLocaleString()
           : typeof reports?.reports?.length === "number"
             ? reports.reports.length.toLocaleString()
-            : "No records",
-      description: "Reports returned by the API",
+            : t("noSourceRecords"),
+      description: t("generatedReportsDesc"),
       icon: FileBarChartIcon,
     },
   ];
 
   return (
     <section
-      aria-label="Family reports summary"
+      aria-label={t("reportsSummaryAria")}
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
     >
       {cards.map((card) => {

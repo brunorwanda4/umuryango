@@ -40,6 +40,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import { FamilyProjectsSkeleton } from "./family-projects-skeleton";
@@ -89,6 +90,8 @@ export function ProjectDetailWorkspace({
   projectName: string;
   initialData?: ProjectDetailWorkspaceInitialData;
 }) {
+  const t = createTranslator("FamilyProjects");
+  const _tCommon = createTranslator("Common");
   const [state, setState] = useState<ProjectDetailFetchState>(
     initialData?.family
       ? {
@@ -113,7 +116,7 @@ export function ProjectDetailWorkspace({
     if (!familyResponse.ok || !familyResponse.data) {
       setState({
         status: "error",
-        message: familyResponse.message ?? "Unable to load this family.",
+        message: familyResponse.message ?? t("detailsUnavailableTitle"),
       });
       return;
     }
@@ -133,10 +136,9 @@ export function ProjectDetailWorkspace({
         : null,
       projectsMessage: projectsResponse.ok
         ? undefined
-        : (projectsResponse.message ??
-          "Project records are not available from the API yet."),
+        : (projectsResponse.message ?? t("projectRecordsUnavailableDesc")),
     });
-  }, [familyName]);
+  }, [familyName, t]);
 
   useEffect(() => {
     if (!initialData) {
@@ -155,10 +157,10 @@ export function ProjectDetailWorkspace({
           <EmptyMedia variant="icon">
             <FolderKanbanIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>Project details could not load</EmptyTitle>
+          <EmptyTitle>{t("detailsUnavailableTitle")}</EmptyTitle>
           <EmptyDescription>
-            {state.message} You may not have access, or the family workspace no
-            longer exists. <Link href="/family">Back to your families</Link>
+            {t("detailsUnavailableDesc", { message: state.message })}{" "}
+            <Link href="/family">{t("backToFamilies")}</Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -189,6 +191,7 @@ function ProjectDetailContent({
   projectsMessage?: string;
   projectName: string;
 }) {
+  const t = createTranslator("FamilyProjects");
   const project = useMemo(
     () => findProjectByRouteSlug(projects?.projects ?? [], projectName),
     [projects, projectName],
@@ -241,10 +244,9 @@ function ProjectDetailContent({
       {projectsMessage ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>Waiting for saved project records</AlertTitle>
+          <AlertTitle>{t("waitingForRecordsTitle")}</AlertTitle>
           <AlertDescription>
-            This page only shows project money, contributions, and updates when
-            the backend returns persisted records. API detail: {projectsMessage}
+            {t("waitingForRecordsDesc", { detail: projectsMessage })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -253,9 +255,11 @@ function ProjectDetailContent({
       <Tabs defaultValue="overview" className="gap-4">
         <div className="overflow-x-auto">
           <TabsList className="min-w-max">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="contributions">Contributions</TabsTrigger>
-            <TabsTrigger value="plan">Plan</TabsTrigger>
+            <TabsTrigger value="overview">{t("overviewTab")}</TabsTrigger>
+            <TabsTrigger value="contributions">
+              {t("contributionsTab")}
+            </TabsTrigger>
+            <TabsTrigger value="plan">{t("planTab")}</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="overview">
@@ -292,12 +296,13 @@ function ProjectDetailHeader({
   project: ProjectRow;
   sourceRecordCount: number;
 }) {
+  const t = createTranslator("FamilyProjects");
   return (
     <header className="flex flex-col gap-4">
       <Button asChild className="w-fit" size="sm" variant="outline">
         <Link href={`/family/${encodeURIComponent(familyName)}/projects`}>
           <ArrowLeftIcon aria-hidden="true" data-icon="inline-start" />
-          Projects
+          {t("projectsButton")}
         </Link>
       </Button>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -311,22 +316,21 @@ function ProjectDetailHeader({
               <Badge variant="outline">{formatTitle(project.category)}</Badge>
             ) : null}
             <Badge variant={sourceRecordCount > 1 ? "outline" : "secondary"}>
-              {sourceRecordCount.toLocaleString()} source records
+              {t("sourceRecordsBadge", { count: sourceRecordCount })}
             </Badge>
           </div>
           <p className="max-w-4xl text-muted-foreground text-sm leading-6">
-            {project.description ??
-              "Manage the project plan, target date, contribution progress, responsible members, and updates from saved family records."}
+            {project.description ?? t("defaultProjectDescription")}
           </p>
         </div>
         {canManageContributions ? (
           <Button
             disabled
             size="sm"
-            title="Contribution recording endpoint is not available yet."
+            title={t("recordContributionDisabledTitle")}
           >
             <HandCoinsIcon aria-hidden="true" data-icon="inline-start" />
-            Record contribution
+            {t("recordContribution")}
           </Button>
         ) : null}
       </div>
@@ -341,39 +345,40 @@ function ProjectDetailMetrics({
   currency: string;
   project: ProjectRow;
 }) {
+  const t = createTranslator("FamilyProjects");
   const cards = [
     {
-      title: "Target amount",
+      title: t("targetBudget"),
       value: project.targetAmountMinorUnits,
-      description: "Saved project budget target",
+      description: t("savedProjectBudgetTarget"),
       icon: WalletCardsIcon,
       isMoney: true,
     },
     {
-      title: "Contributed",
+      title: t("contributed"),
       value: project.contributedMinorUnits,
-      description: "Verified contributions received",
+      description: t("verifiedContributionsReceived"),
       icon: HandCoinsIcon,
       isMoney: true,
     },
     {
-      title: "Outstanding",
+      title: t("outstanding"),
       value: project.outstandingMinorUnits,
-      description: "Remaining amount from persisted records",
+      description: t("remainingFromPersistedRecords"),
       icon: TargetIcon,
       isMoney: true,
     },
     {
-      title: "Target date",
+      title: t("targetDate"),
       value: formatDate(project.targetDate),
-      description: getTargetDateDescription(project),
+      description: getTargetDateDescription(project, t),
       icon: CalendarClockIcon,
     },
   ];
 
   return (
     <section
-      aria-label="Project financial summary"
+      aria-label={t("projectFinancialSummaryAria")}
       className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
     >
       {cards.map((card) => {
@@ -417,31 +422,30 @@ function ProjectProgressCard({
   currency: string;
   project: ProjectRow;
 }) {
+  const t = createTranslator("FamilyProjects");
   const progress = clampPercent(project.percentFunded);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Project progress</CardTitle>
-        <CardDescription>
-          Funding, dates, owner, and contribution strategy for this project.
-        </CardDescription>
+        <CardTitle>{t("projectProgressTitle")}</CardTitle>
+        <CardDescription>{t("projectProgressDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-3 text-sm">
-            <span className="font-medium">Funding progress</span>
+            <span className="font-medium">{t("fundingProgress")}</span>
             <span className="text-muted-foreground">
               {typeof project.percentFunded === "number"
                 ? `${Math.round(progress)}%`
-                : "No percentage"}
+                : t("noPercentage")}
             </span>
           </div>
           <Progress value={progress} />
         </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <ProjectFact
-            label="Contributed"
+            label={t("contributed")}
             value={
               <CompactMoney
                 currency={currency}
@@ -451,31 +455,31 @@ function ProjectProgressCard({
             }
           />
           <ProjectFact
-            label="Start date"
+            label={t("startDate")}
             value={formatDate(project.startDate)}
           />
           <ProjectFact
-            label="Target date"
+            label={t("targetDate")}
             value={formatDate(project.targetDate)}
           />
           <ProjectFact
-            label="Responsible member"
-            value={project.ownerName ?? "No owner assigned"}
+            label={t("responsibleMember")}
+            value={project.ownerName ?? t("noOwnerAssigned")}
           />
           <ProjectFact
-            label="Participants"
+            label={t("participants")}
             value={
               typeof project.memberCount === "number"
-                ? `${project.memberCount.toLocaleString()} members`
-                : "Members not set"
+                ? t("membersCount", { count: project.memberCount })
+                : t("membersNotSet")
             }
           />
           <ProjectFact
-            label="Contribution plan"
+            label={t("contributionPlanLabel")}
             value={
               project.contributionStrategy
                 ? formatTitle(project.contributionStrategy)
-                : "Not set"
+                : t("notSet")
             }
           />
         </div>
@@ -495,36 +499,39 @@ function ProjectManagementOverview({
   project: ProjectRow;
   sourceRecordCount: number;
 }) {
+  const t = createTranslator("FamilyProjects");
   const items = [
     {
-      title: "Project manager",
-      description: "Responsible person for follow-up and records.",
-      value: project.ownerName ?? "Not assigned",
+      title: t("projectManager"),
+      description: t("projectManagerDesc"),
+      value: project.ownerName ?? t("notAssigned"),
       icon: UsersRoundIcon,
     },
     {
-      title: "Family cadence",
-      description: "Default collection rhythm for planned contributions.",
+      title: t("familyCadence"),
+      description: t("familyCadenceDesc"),
       value: family.contributionCadence,
       icon: CalendarClockIcon,
     },
     {
-      title: "Project permission",
-      description: "Backend must enforce manage-project changes.",
-      value: canManageProjects ? "Allowed" : "View only",
+      title: t("projectPermission"),
+      description: t("projectPermissionDesc"),
+      value: canManageProjects
+        ? t("permissionAllowed")
+        : t("permissionViewOnly"),
       icon: ShieldCheckIcon,
     },
     {
-      title: "Report source",
-      description: "Project reports should use persisted records only.",
-      value: `${sourceRecordCount.toLocaleString()} records`,
+      title: t("reportSource"),
+      description: t("reportSourceDesc"),
+      value: t("recordsCount", { count: sourceRecordCount }),
       icon: CheckCircle2Icon,
     },
   ];
 
   return (
     <section
-      aria-label="Project management overview"
+      aria-label={t("operationsAria")}
       className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       {items.map((item) => (
@@ -543,20 +550,17 @@ function ProjectContributionSection({
   currency: string;
   projects: ProjectsOverview;
 }) {
+  const t = createTranslator("FamilyProjects");
   return (
     <div className="flex flex-col gap-4">
       <Alert>
         <AlertCircleIcon aria-hidden="true" />
         <AlertTitle>
           {canManageContributions
-            ? "Contribution entry is read-only for now"
-            : "Contribution entry requires permission"}
+            ? t("contributionEntryReadOnly")
+            : t("contributionEntryRequiresPermission")}
         </AlertTitle>
-        <AlertDescription>
-          Verified contribution rows below come from saved backend records.
-          Recording a new project contribution needs a dedicated backend
-          mutation with authorization, idempotency, and audit logging.
-        </AlertDescription>
+        <AlertDescription>{t("contributionAlertDesc")}</AlertDescription>
       </Alert>
       <ProjectContributionTable currency={currency} projects={projects} />
     </div>
@@ -570,32 +574,29 @@ function ProjectPlanSection({
   family: FamilyDetail;
   project: ProjectRow;
 }) {
+  const t = createTranslator("FamilyProjects");
   const checklist = [
     {
-      title: "Confirm budget and rules",
-      description:
-        "Keep the target amount, approval rules, and contribution strategy clear before collecting money.",
-      status: project.targetAmountMinorUnits ? "Ready" : "Needs amount",
+      title: t("confirmBudgetRules"),
+      description: t("confirmBudgetRulesDesc"),
+      status: project.targetAmountMinorUnits ? t("ready") : t("needsAmount"),
     },
     {
-      title: "Assign responsible members",
-      description:
-        "Choose who follows construction, purchases, suppliers, receipts, and family updates.",
-      status: project.ownerName ? "Assigned" : "Needs owner",
+      title: t("assignResponsibleMembers"),
+      description: t("assignResponsibleMembersDesc"),
+      status: project.ownerName ? t("assigned") : t("needsOwner"),
     },
     {
-      title: "Collect project contributions",
-      description:
-        "Every payment should be saved as a project contribution before totals change.",
+      title: t("collectProjectContributions"),
+      description: t("collectProjectContributionsDesc"),
       status: project.contributionStrategy
         ? formatTitle(project.contributionStrategy)
-        : "Needs plan",
+        : t("needsPlan"),
     },
     {
-      title: "Keep documents attached",
-      description:
-        "Receipts, contracts, land documents, and supplier records should stay linked to the project.",
-      status: "Document workflow",
+      title: t("keepDocumentsAttached"),
+      description: t("keepDocumentsAttachedDesc"),
+      status: t("documentWorkflow"),
     },
   ];
 
@@ -603,10 +604,8 @@ function ProjectPlanSection({
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
       <Card>
         <CardHeader>
-          <CardTitle>Planning checklist</CardTitle>
-          <CardDescription>
-            Practical steps for keeping this project organized and auditable.
-          </CardDescription>
+          <CardTitle>{t("planningChecklist")}</CardTitle>
+          <CardDescription>{t("planningChecklistDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {checklist.map((item) => (
@@ -640,25 +639,23 @@ function ProjectPlanSection({
           <CardAction>
             <FileTextIcon className="size-4 text-muted-foreground" />
           </CardAction>
-          <CardTitle>Project file</CardTitle>
-          <CardDescription>
-            Documents and approvals should remain tied to this project.
-          </CardDescription>
+          <CardTitle>{t("projectFile")}</CardTitle>
+          <CardDescription>{t("projectFileDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 text-sm">
-          <ProjectFact label="Family" value={family.name} />
+          <ProjectFact label={t("familyLabel")} value={family.name} />
           <ProjectFact
-            label="Target date"
+            label={t("targetDate")}
             value={formatDate(project.targetDate)}
           />
           <ProjectFact
-            label="Status"
+            label={t("projectStatus")}
             value={formatTitle(project.status ?? "planned")}
           />
           <TableEmptyState
-            description="Linked receipts, contracts, agreements, and project reports will appear here when the document API returns project attachments."
+            description={t("noLinkedDocsDesc")}
             icon={FileTextIcon}
-            title="No linked documents returned"
+            title={t("noLinkedDocsReturned")}
           />
         </CardContent>
       </Card>
@@ -700,22 +697,22 @@ function ProjectRecordsUnavailable({
   familyName: string;
   message?: string;
 }) {
+  const t = createTranslator("FamilyProjects");
   return (
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <FolderKanbanIcon aria-hidden="true" />
         </EmptyMedia>
-        <EmptyTitle>Project records are not available</EmptyTitle>
+        <EmptyTitle>{t("projectRecordsUnavailable")}</EmptyTitle>
         <EmptyDescription>
-          This detail page needs saved project records from the backend before
-          it can show budgets, contributions, and planning history.
+          {t("projectRecordsUnavailableDesc")}
           {message ? ` API detail: ${message}` : ""}
         </EmptyDescription>
       </EmptyHeader>
       <Button asChild variant="outline">
         <Link href={`/family/${encodeURIComponent(familyName)}/projects`}>
-          Back to projects
+          {t("backToProjects")}
         </Link>
       </Button>
     </Empty>
@@ -731,23 +728,26 @@ function ProjectNotFound({
   projectName: string;
   projects: ProjectsOverview;
 }) {
+  const t = createTranslator("FamilyProjects");
   return (
     <Empty>
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <FolderKanbanIcon aria-hidden="true" />
         </EmptyMedia>
-        <EmptyTitle>Project not found</EmptyTitle>
+        <EmptyTitle>{t("projectNotFound")}</EmptyTitle>
         <EmptyDescription>
-          No saved project matched "{formatTitle(projectName)}" in this family.
+          {t("projectNotFoundMatched", {
+            projectName: formatTitle(projectName),
+          })}
           {projects.projects?.length
-            ? " Open the projects list and choose one of the saved project names."
-            : " No saved projects were returned by the API."}
+            ? ` ${t("openProjectsList")}`
+            : ` ${t("noSavedProjectsReturned")}`}
         </EmptyDescription>
       </EmptyHeader>
       <Button asChild variant="outline">
         <Link href={`/family/${encodeURIComponent(familyName)}/projects`}>
-          Back to projects
+          {t("backToProjects")}
         </Link>
       </Button>
     </Empty>
@@ -773,24 +773,27 @@ function scopeProjectUpdates(updates: ProjectUpdateRow[], project: ProjectRow) {
   );
 }
 
-function getTargetDateDescription(project: ProjectRow) {
+function getTargetDateDescription(
+  project: ProjectRow,
+  t: ReturnType<typeof createTranslator>,
+) {
   if (!project.targetDate) {
-    return "No target date returned";
+    return t("noTargetDate");
   }
 
   const status = project.status?.toLowerCase();
 
   if (status === "completed") {
-    return "Project marked completed";
+    return t("projectMarkedCompleted");
   }
 
   const targetDate = new Date(project.targetDate);
 
   if (Number.isNaN(targetDate.getTime())) {
-    return "Invalid target date";
+    return t("invalidTargetDate");
   }
 
   return targetDate < new Date()
-    ? "Needs review or a new date"
-    : "Upcoming project milestone";
+    ? t("needsReviewOrNewDate")
+    : t("upcomingMilestone");
 }

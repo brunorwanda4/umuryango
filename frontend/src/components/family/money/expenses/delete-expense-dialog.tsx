@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import type { FamilyDetail } from "../../dashboard/types";
 import type { ExpenseTransaction } from "./types-and-schemas";
@@ -26,6 +27,7 @@ export function DeleteExpenseDialog({
   transaction: ExpenseTransaction | null;
   onSuccess: () => void;
 }) {
+  const t = createTranslator("FamilyExpenses");
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,14 +45,14 @@ export function DeleteExpenseDialog({
       );
 
       if (response.ok) {
-        toast.success("Expense record reversed successfully.");
+        toast.success(t("toasts.reversedSuccess"));
         onOpenChange(false);
         onSuccess();
       } else {
-        setError(response.message ?? "Expense could not be deleted.");
+        setError(response.message ?? t("toasts.deleteFailed"));
       }
     } catch {
-      setError("Request failed.");
+      setError(t("toasts.requestFailed"));
     } finally {
       setIsPending(false);
     }
@@ -61,12 +63,9 @@ export function DeleteExpenseDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-destructive">
-            Delete Expense Record
+            {t("dialogs.deleteTitle")}
           </DialogTitle>
-          <DialogDescription>
-            This will reverse the expense and keep an audit record for family
-            accountability.
-          </DialogDescription>
+          <DialogDescription>{t("dialogs.deleteDesc")}</DialogDescription>
         </DialogHeader>
 
         {error ? (
@@ -90,14 +89,14 @@ export function DeleteExpenseDialog({
             onClick={() => onOpenChange(false)}
             disabled={isPending}
           >
-            Cancel
+            {t("dialogs.cancel")}
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
           >
-            {isPending ? "Deleting..." : "Delete Expense"}
+            {isPending ? t("dialogs.deleting") : t("dialogs.deleteExpense")}
           </Button>
         </DialogFooter>
       </DialogContent>

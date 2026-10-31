@@ -8,21 +8,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { debtRecords, moneyCurrency } from "./money-data";
 import { MoneyFormDialog } from "./money-form-dialog";
 import { formatDate, formatStatus, getStatusBadgeVariant } from "./utils";
 
 export function DebtsTab() {
+  const t = createTranslator("PersonalMoney.legacyTabs.debts");
+  const tCommon = createTranslator("PersonalMoney");
+
   return (
     <div className="flex flex-col gap-4">
       <Card>
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>Debts And Loans</CardTitle>
-            <CardDescription>
-              Monitor borrowed money, lent money, due dates, and outstanding
-              balances.
-            </CardDescription>
+            <CardTitle>{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </div>
           <MoneyFormDialog type="debt" />
         </CardHeader>
@@ -42,7 +43,7 @@ export function DebtsTab() {
             <CardContent className="flex flex-col gap-4">
               <div className="flex flex-wrap gap-2">
                 <Badge variant="outline">
-                  {debt.kind === "borrowed" ? "Borrowed" : "Lent"}
+                  {debt.kind === "borrowed" ? t("borrowed") : t("lent")}
                 </Badge>
                 <Badge variant={getStatusBadgeVariant(debt.status)}>
                   {formatStatus(debt.status)}
@@ -50,7 +51,9 @@ export function DebtsTab() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-muted-foreground text-sm">Principal</p>
+                  <p className="text-muted-foreground text-sm">
+                    {t("principal")}
+                  </p>
                   <p className="font-medium">
                     <CompactMoney
                       currency={moneyCurrency}
@@ -59,7 +62,9 @@ export function DebtsTab() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground text-sm">Outstanding</p>
+                  <p className="text-muted-foreground text-sm">
+                    {tCommon("outstanding")}
+                  </p>
                   <p className="font-medium">
                     <CompactMoney
                       currency={moneyCurrency}
@@ -69,7 +74,7 @@ export function DebtsTab() {
                 </div>
               </div>
               <p className="text-muted-foreground text-sm">
-                Due {formatDate(debt.dueDate)}
+                {tCommon("due", { date: formatDate(debt.dueDate) })}
               </p>
             </CardContent>
           </Card>

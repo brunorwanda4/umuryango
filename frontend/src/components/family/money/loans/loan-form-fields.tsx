@@ -8,6 +8,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import {
@@ -28,10 +29,11 @@ export function LoanFormFields({
   control: Control<LoanFormValues>;
   family: FamilyDetail;
 }) {
+  const t = createTranslator("FamilyLoans");
   const [showOptionalFields, setShowOptionalFields] = useState(false);
   const loanType = useWatch({ control, name: "type" });
   const contactOptions = [
-    { label: "Manual entry", value: "__manual" },
+    { label: t("form.manualEntry"), value: "__manual" },
     ...contacts
       .filter((contact) => contact.status === "ACTIVE")
       .map((contact) => ({
@@ -51,15 +53,15 @@ export function LoanFormFields({
       <CommonFormField
         control={control}
         name="title"
-        label="Loan title"
-        placeholder="e.g. School fees support loan"
+        label={t("form.loanTitleLabel")}
+        placeholder={t("form.loanTitlePlaceholder")}
         required
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <CommonFormField
           control={control}
           name="type"
-          label="Loan type"
+          label={t("form.loanTypeLabel")}
           fieldType="select"
           selectOptions={loanTypes}
           required
@@ -67,10 +69,10 @@ export function LoanFormFields({
         <CommonFormField
           control={control}
           name="amountMinorUnits"
-          label={`Amount (${family.defaultCurrency})`}
+          label={t("form.amountLabel", { currency: family.defaultCurrency })}
           fieldType="money"
           currency={family.defaultCurrency}
-          placeholder="e.g. 500,000"
+          placeholder={t("form.amountPlaceholder")}
           required
         />
       </div>
@@ -78,14 +80,14 @@ export function LoanFormFields({
         <CommonFormField
           control={control}
           name="startDate"
-          label="Start date"
+          label={t("form.startDateLabel")}
           fieldType="date"
           required
         />
         <CommonFormField
           control={control}
           name="dueDate"
-          label="Due date"
+          label={t("form.dueDateLabel")}
           fieldType="date"
           required
         />
@@ -96,7 +98,7 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="borrowerContactId"
-              label="Borrower"
+              label={t("form.borrowerLabel")}
               fieldType="select"
               selectOptions={contactOptions}
               description="Choose a saved borrower from family contacts."
@@ -104,8 +106,8 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="borrower"
-              label="Manual borrower"
-              placeholder="Enter borrower if not saved"
+              label={t("form.manualBorrowerLabel")}
+              placeholder={t("form.manualBorrowerPlaceholder")}
             />
           </>
         ) : (
@@ -113,7 +115,7 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="lenderContactId"
-              label="Lender"
+              label={t("form.lenderLabel")}
               fieldType="select"
               selectOptions={contactOptions}
               description="Choose a saved lender from family contacts."
@@ -121,8 +123,8 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="lender"
-              label="Manual lender"
-              placeholder="Enter lender if not saved"
+              label={t("form.manualLenderLabel")}
+              placeholder={t("form.manualLenderPlaceholder")}
             />
           </>
         )}
@@ -141,13 +143,13 @@ export function LoanFormFields({
         <CommonFormField
           control={control}
           name="category"
-          label="Category"
+          label={t("form.categoryLabel")}
           placeholder="e.g. Education, business, emergency"
         />
         <CommonFormField
           control={control}
           name="status"
-          label="Status"
+          label={t("form.statusLabel")}
           fieldType="select"
           selectOptions={loanStatuses}
           required
@@ -156,9 +158,9 @@ export function LoanFormFields({
       <CommonFormField
         control={control}
         name="notes"
-        label="Notes"
+        label={t("form.notesLabel")}
         fieldType="textarea"
-        placeholder="Repayment agreement, guarantor, reminder, or family context"
+        placeholder={t("form.notesPlaceholder")}
       />
       <Collapsible
         open={showOptionalFields}
@@ -176,7 +178,7 @@ export function LoanFormFields({
                 aria-hidden="true"
                 data-icon="inline-start"
               />
-              Optional loan details
+              {t("form.optionalSettings")}
             </span>
             <ChevronDownIcon
               aria-hidden="true"
@@ -194,15 +196,15 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="interestRatePercent"
-              label="Interest rate"
-              placeholder="e.g. 12.5"
+              label={t("form.interestRateLabel")}
+              placeholder={t("form.interestRatePlaceholder")}
               inputProps={{ inputMode: "decimal" }}
               description="Enter annual percentage, if applicable."
             />
             <CommonFormField
               control={control}
               name="paymentMethod"
-              label="Payment method"
+              label={t("form.paymentMethodLabel")}
               fieldType="select"
               selectOptions={paymentMethods}
               required
@@ -210,7 +212,7 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="repaymentFrequency"
-              label="Repayment frequency"
+              label={t("form.repaymentFrequencyLabel")}
               fieldType="select"
               selectOptions={repaymentFrequencies}
               required
@@ -220,14 +222,14 @@ export function LoanFormFields({
             <CommonFormField
               control={control}
               name="documentFileName"
-              label="Loan document"
+              label={t("docFileLabel")}
               type="file"
-              description="Attach the agreement or proof document."
+              description={t("docFileDesc")}
             />
             <CommonFormField
               control={control}
               name="approvalStatus"
-              label="Approval status"
+              label={t("details.approvalStatus")}
               fieldType="select"
               selectOptions={loanApprovalStatuses}
               required

@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import { ExpenseChartsSection } from "./expense-dashboard/expense-charts-section";
 import {
   type ExpenseCategory,
@@ -30,6 +31,7 @@ export function ExpenseDashboard({
   isLoading: boolean;
   onRetry: () => void | Promise<void>;
 }) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
   const dashboard = useMemo(
     () => (data ? mapExpenseDashboard(data) : null),
     [data],
@@ -43,10 +45,8 @@ export function ExpenseDashboard({
     return (
       <Alert variant="destructive">
         <AlertCircleIcon aria-hidden="true" />
-        <AlertTitle>Expenses could not be loaded</AlertTitle>
-        <AlertDescription>
-          {error ?? "No family workspace is available for expense records."}
-        </AlertDescription>
+        <AlertTitle>{t("loadError")}</AlertTitle>
+        <AlertDescription>{error ?? t("noWorkspace")}</AlertDescription>
         <Button
           className="mt-3 w-fit"
           onClick={onRetry}
@@ -54,7 +54,7 @@ export function ExpenseDashboard({
           variant="outline"
         >
           <RefreshCwIcon data-icon="inline-start" />
-          Try again
+          {t("tryAgain")}
         </Button>
       </Alert>
     );
@@ -65,8 +65,8 @@ export function ExpenseDashboard({
       <ExpenseSummaryCards summary={data.summary} />
       <Tabs defaultValue="data">
         <TabsList>
-          <TabsTrigger value="data">Data</TabsTrigger>
-          <TabsTrigger value="charts">Charts</TabsTrigger>
+          <TabsTrigger value="data">{t("dataTab")}</TabsTrigger>
+          <TabsTrigger value="charts">{t("chartsTab")}</TabsTrigger>
         </TabsList>
         <TabsContent value="data">
           <RecentExpenseTable

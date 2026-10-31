@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import apiRequest from "@/service/api";
 
@@ -39,6 +40,7 @@ export function PersonalCategoryDialog({
   existingCategories: MoneyCategory[];
   onSuccess: () => void | Promise<void>;
 }) {
+  const t = createTranslator("PersonalMoney.categoryDialog");
   const [name, setName] = useState("");
   const [type, setType] = useState<"INCOME" | "EXPENSE">("EXPENSE");
   const [color, setColor] = useState(CATEGORY_COLORS[0]);
@@ -66,7 +68,7 @@ export function PersonalCategoryDialog({
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-      setError("Enter a name. Each category name must be unique.");
+      setError(t("uniqueName"));
       return;
     }
 
@@ -78,12 +80,12 @@ export function PersonalCategoryDialog({
     );
 
     if (isDuplicate) {
-      setError("Enter a name. Each category name must be unique.");
+      setError(t("uniqueName"));
       return;
     }
 
     if (!familyId) {
-      setError("No family workspace found. Create a workspace first.");
+      setError(t("noWorkspace"));
       return;
     }
 
@@ -103,20 +105,12 @@ export function PersonalCategoryDialog({
     });
 
     if (!response.ok) {
-      setError(
-        response.message ??
-          response.error ??
-          "Failed to save category. Please try again.",
-      );
+      setError(response.message ?? response.error ?? t("saveFailed"));
       setIsPending(false);
       return;
     }
 
-    toast.success(
-      isEdit
-        ? "Category updated successfully"
-        : "Category created successfully",
-    );
+    toast.success(isEdit ? t("updated") : t("created"));
     setIsPending(false);
     onOpenChange(false);
     await onSuccess();
@@ -130,7 +124,7 @@ export function PersonalCategoryDialog({
       >
         <DialogHeader className="p-0">
           <DialogTitle className="font-fraunces text-[22px] font-semibold text-foreground">
-            {category ? "Edit category" : "Add category"}
+            {category ? t("editTitle") : t("addTitle")}
           </DialogTitle>
         </DialogHeader>
 
@@ -141,7 +135,7 @@ export function PersonalCategoryDialog({
               htmlFor="cat-name-input"
               className="text-[13px] font-medium text-muted-foreground"
             >
-              Category name
+              {t("name")}
             </label>
             <input
               id="cat-name-input"
@@ -152,7 +146,7 @@ export function PersonalCategoryDialog({
                 setName(e.target.value);
                 if (error) setError(null);
               }}
-              placeholder="e.g. Salary, Food"
+              placeholder={t("namePlaceholder")}
               className="h-12 w-full rounded-xl border border-border bg-muted/60 px-3.5 text-base text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-ring"
               autoFocus
             />
@@ -164,7 +158,7 @@ export function PersonalCategoryDialog({
               htmlFor="cat-type-select"
               className="text-[13px] font-medium text-muted-foreground"
             >
-              Type
+              {t("type")}
             </label>
             <select
               id="cat-type-select"
@@ -175,15 +169,15 @@ export function PersonalCategoryDialog({
               }}
               className="h-12 w-full rounded-xl border border-border bg-muted/60 px-3 text-base text-foreground outline-none focus:ring-2 focus:ring-ring"
             >
-              <option value="INCOME">Income</option>
-              <option value="EXPENSE">Expense</option>
+              <option value="INCOME">{t("income")}</option>
+              <option value="EXPENSE">{t("expense")}</option>
             </select>
           </div>
 
           {/* Color Swatch Field */}
           <div className="mb-3.5 flex flex-col gap-2">
             <span className="text-[13px] font-medium text-muted-foreground">
-              Color
+              {t("color")}
             </span>
             <div className="flex flex-wrap gap-2.5">
               {CATEGORY_COLORS.map((c) => {
@@ -192,7 +186,7 @@ export function PersonalCategoryDialog({
                   <button
                     key={c}
                     type="button"
-                    aria-label={`Color ${c}`}
+                    aria-label={t("colorAria", { color: c })}
                     aria-pressed={isSelected}
                     onClick={() => setColor(c)}
                     style={{
@@ -226,14 +220,14 @@ export function PersonalCategoryDialog({
               onClick={() => onOpenChange(false)}
               className="h-11 flex-1 rounded-xl text-sm font-semibold"
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button
               type="submit"
               disabled={isPending}
               className="h-11 flex-1 rounded-xl bg-foreground text-sm font-semibold text-background hover:bg-foreground/90"
             >
-              {isPending ? "Saving..." : "Save"}
+              {isPending ? t("saving") : t("save")}
             </Button>
           </div>
         </form>

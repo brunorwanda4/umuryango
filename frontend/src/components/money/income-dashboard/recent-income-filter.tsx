@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 
 type RecentIncomeFilterProps = {
   category: string;
@@ -38,6 +39,7 @@ export function RecentIncomeFilter({
   onPaymentMethodChange,
   onSearchChange,
 }: RecentIncomeFilterProps) {
+  const t = createTranslator("PersonalMoney.personalIncome");
   const hasSearch = search.trim().length > 0;
 
   return (
@@ -48,8 +50,8 @@ export function RecentIncomeFilter({
             <SearchIcon aria-hidden="true" />
           </InputGroupAddon>
           <InputGroupInput
-            aria-label="Search recent income"
-            placeholder="Search income"
+            aria-label={t("filters.searchAria")}
+            placeholder={t("filters.searchPlaceholder")}
             type="search"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
@@ -57,7 +59,7 @@ export function RecentIncomeFilter({
           {hasSearch ? (
             <InputGroupAddon align="inline-end">
               <InputGroupButton
-                aria-label="Clear income search"
+                aria-label={t("filters.clearSearchAria")}
                 size="icon-xs"
                 type="button"
                 variant="ghost"
@@ -72,12 +74,12 @@ export function RecentIncomeFilter({
           <Select value={category} onValueChange={onCategoryChange}>
             <SelectTrigger
               className="w-full min-w-0 sm:w-44"
-              aria-label="Filter by category"
+              aria-label={t("filters.filterCategoryAria")}
             >
-              <SelectValue placeholder="Category" />
+              <SelectValue placeholder={t("filters.categoryPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All categories</SelectItem>
+              <SelectItem value="all">{t("filters.allCategories")}</SelectItem>
               {categoryOptions.map((option) => (
                 <SelectItem key={option.id} value={option.id}>
                   {option.name}
@@ -88,23 +90,33 @@ export function RecentIncomeFilter({
           <Select value={paymentMethod} onValueChange={onPaymentMethodChange}>
             <SelectTrigger
               className="w-full min-w-0 sm:w-44"
-              aria-label="Filter by payment method"
+              aria-label={t("filters.filterPaymentMethodAria")}
             >
-              <SelectValue placeholder="Payment method" />
+              <SelectValue
+                placeholder={t("filters.paymentMethodPlaceholder")}
+              />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All payment methods</SelectItem>
-              <SelectItem value="MOBILE_MONEY">Mobile Money</SelectItem>
-              <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
-              <SelectItem value="CASH">Cash</SelectItem>
-              <SelectItem value="SAVINGS_WALLET">Savings Wallet</SelectItem>
+              <SelectItem value="all">
+                {t("filters.allPaymentMethods")}
+              </SelectItem>
+              <SelectItem value="MOBILE_MONEY">
+                {t("filters.mobileMoney")}
+              </SelectItem>
+              <SelectItem value="BANK_TRANSFER">
+                {t("filters.bankTransfer")}
+              </SelectItem>
+              <SelectItem value="CASH">{t("filters.cash")}</SelectItem>
+              <SelectItem value="SAVINGS_WALLET">
+                {t("filters.savingsWallet")}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
       <div className="flex items-center justify-between gap-3 sm:justify-end">
         <p className="text-muted-foreground text-xs">
-          Showing {resultCount} of {totalCount}
+          {t("filters.showingCount", { count: resultCount, total: totalCount })}
         </p>
       </div>
     </div>

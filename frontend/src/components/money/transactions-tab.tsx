@@ -5,24 +5,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { moneyCurrency, recentActivities } from "./money-data";
 import { MoneyTable } from "./money-table";
 
 export function TransactionsTab() {
+  const t = createTranslator("PersonalMoney.legacyTabs.transactions");
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>All Transactions</CardTitle>
-        <CardDescription>
-          View income, expenses, savings transfers, debt activity, and
-          repayments together.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <MoneyTable
           currency={moneyCurrency}
-          emptyDescription="All money activity will show here once records are connected."
-          emptyTitle="No transactions yet"
+          emptyDescription={t("emptyDescription")}
+          emptyTitle={t("emptyTitle")}
           records={recentActivities}
         />
       </CardContent>

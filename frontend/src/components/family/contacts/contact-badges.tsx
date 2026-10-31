@@ -1,6 +1,9 @@
 import { Badge } from "@/components/ui/badge";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import type { FamilyContact } from "./types-and-schemas";
+
+const t = createTranslator("FamilyContacts");
 
 export interface ContactBadgesProps {
   contact: FamilyContact;
@@ -11,12 +14,14 @@ export function ContactBadges({ contact, className }: ContactBadgesProps) {
   return (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
       <Badge variant={contact.status === "ACTIVE" ? "default" : "outline"}>
-        {contact.status === "ACTIVE" ? "Active" : "Inactive"}
+        {t(`statuses.${contact.status}`)}
       </Badge>
       {contact.isEmergencyContact ? (
-        <Badge variant="destructive">Emergency</Badge>
+        <Badge variant="destructive">{t("badgeEmergency")}</Badge>
       ) : null}
-      {contact.isLoanContact ? <Badge variant="secondary">Loan</Badge> : null}
+      {contact.isLoanContact ? (
+        <Badge variant="secondary">{t("badgeLoan")}</Badge>
+      ) : null}
     </div>
   );
 }

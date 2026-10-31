@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import { cn } from "@/lib/utils";
 import type { FamilyDetail } from "../../dashboard/types";
@@ -52,6 +53,7 @@ export function ExpenseTable({
   handleDownloadReceipt: (transaction: ExpenseTransaction) => void;
   setOpenCreate: (open: boolean) => void;
 }) {
+  const t = createTranslator("FamilyExpenses");
   const [viewMode, setViewMode] = usePersistentViewMode(
     FAMILY_EXPENSES_VIEW_MODE_STORAGE_KEY,
   );
@@ -59,7 +61,7 @@ export function ExpenseTable({
   const columns: ColumnDef<ExpenseTransaction>[] = [
     {
       accessorKey: "date",
-      header: "Date",
+      header: t("table.columnDate"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {formatDate(row.original.date)}
@@ -68,23 +70,23 @@ export function ExpenseTable({
     },
     {
       accessorKey: "description",
-      header: "Title",
+      header: t("table.columnTitle"),
       cell: ({ row }) => (
         <span className="block max-w-[220px] truncate font-medium">
-          {row.original.description || "Expense Transaction"}
+          {row.original.description || t("dialogs.addTitle")}
         </span>
       ),
     },
     {
       id: "category",
-      header: "Category",
+      header: t("table.columnCategory"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">{row.original.category.name}</span>
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: "Amount",
+      header: t("table.columnAmount"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap font-mono">
           <CompactMoney
@@ -96,25 +98,25 @@ export function ExpenseTable({
     },
     {
       accessorKey: "receivedFrom",
-      header: "Paid To",
+      header: t("table.columnPaidTo"),
       cell: ({ row }) => (
         <span className="block max-w-[160px] truncate">
-          {row.original.receivedFrom || "Not recorded"}
+          {row.original.receivedFrom || t("table.notRecorded")}
         </span>
       ),
     },
     {
       accessorKey: "receivedBy",
-      header: "Paid By",
+      header: t("table.columnPaidBy"),
       cell: ({ row }) => (
         <span className="block max-w-[160px] truncate">
-          {row.original.receivedBy || "Not recorded"}
+          {row.original.receivedBy || t("table.notRecorded")}
         </span>
       ),
     },
     {
       accessorKey: "paymentMethod",
-      header: "Payment Method",
+      header: t("table.columnPaymentMethod"),
       cell: ({ row }) => (
         <span className="whitespace-nowrap">
           {formatPaymentMethod(row.original.paymentMethod)}
@@ -123,12 +125,12 @@ export function ExpenseTable({
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: t("table.columnStatus"),
       cell: ({ row }) => <ExpenseStatusBadge status={row.original.status} />,
     },
     {
       id: "receipt",
-      header: "Receipt",
+      header: t("table.columnReceipt"),
       cell: ({ row }) => {
         const firstReceipt = row.original.receipts?.[0];
         return firstReceipt ? (
@@ -142,13 +144,15 @@ export function ExpenseTable({
             <span className="truncate">{firstReceipt.fileName}</span>
           </Button>
         ) : (
-          <Badge variant="outline">No receipt</Badge>
+          <Badge variant="outline">{t("table.noReceipt")}</Badge>
         );
       },
     },
     {
       id: "actions",
-      header: () => <span className="flex justify-end">Actions</span>,
+      header: () => (
+        <span className="flex justify-end">{t("table.columnActions")}</span>
+      ),
       cell: ({ row }) => (
         <div className="flex justify-end">
           <ExpenseActionsDropdown
@@ -168,10 +172,8 @@ export function ExpenseTable({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
         <div className="space-y-1">
-          <CardTitle>Expense History</CardTitle>
-          <CardDescription>
-            Every recorded family expense with receipts, approvals, and actions.
-          </CardDescription>
+          <CardTitle>{t("table.historyTitle")}</CardTitle>
+          <CardDescription>{t("table.historyDesc")}</CardDescription>
         </div>
         <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
@@ -182,7 +184,9 @@ export function ExpenseTable({
               columns={columns}
               data={filteredTransactions}
               getRowAriaLabel={(row) =>
-                `View details for ${row.original.description || "Expense Transaction"}`
+                t("table.viewDetailsAria", {
+                  title: row.original.description || t("dialogs.addTitle"),
+                })
               }
               onRowClick={(row) => handleActionClick(row.original, "view")}
               rowClassName={() => "hover:bg-muted/50 cursor-pointer"}
@@ -203,15 +207,14 @@ export function ExpenseTable({
             <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
               <ReceiptTextIcon className="size-6 text-muted-foreground" />
             </span>
-            <h3 className="font-semibold text-lg">No expenses recorded yet</h3>
+            <h3 className="font-semibold text-lg">{t("table.emptyTitle")}</h3>
             <p className="mt-1 mb-6 max-w-sm text-muted-foreground text-sm">
-              Record your family&apos;s spending to keep track of where money
-              goes and improve financial planning.
+              {t("table.emptyDesc")}
             </p>
             {hasCapability(family, "RECORD_EXPENSE") ? (
               <Button size="sm" onClick={() => setOpenCreate(true)}>
                 <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                Add Expense
+                {t("addExpense")}
               </Button>
             ) : null}
           </div>

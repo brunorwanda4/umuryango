@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { FamilyMoneySkeleton } from "./family-money-skeleton";
 import { MoneyApprovalTable } from "./money-approval-table";
@@ -27,6 +28,7 @@ import type { FetchState, MoneyOverview, MoneyPeriod } from "./types";
 import { normalizeMoneyOverview, periodLabels } from "./utils";
 
 export function FamilyMoneyWorkspace({ familyName }: { familyName: string }) {
+  const t = createTranslator("FamilyMoney");
   const [period, setPeriod] = useState<MoneyPeriod>("month");
   const [state, setState] = useState<FetchState>({ status: "loading" });
 
@@ -46,7 +48,7 @@ export function FamilyMoneyWorkspace({ familyName }: { familyName: string }) {
       if (!familyResponse.ok || !familyResponse.data) {
         setState({
           status: "error",
-          message: familyResponse.message ?? "Unable to load this family.",
+          message: familyResponse.message ?? t("loadErrorTitle"),
         });
         return;
       }
@@ -68,15 +70,14 @@ export function FamilyMoneyWorkspace({ familyName }: { familyName: string }) {
           : null,
         moneyMessage: moneyResponse.ok
           ? undefined
-          : (moneyResponse.message ??
-            "Money records are not available from the API yet."),
+          : (moneyResponse.message ?? t("waitingForRecordsTitle")),
       });
     })();
 
     return () => {
       active = false;
     };
-  }, [familyName, period]);
+  }, [familyName, period, t]);
 
   if (state.status === "loading") {
     return <FamilyMoneySkeleton />;
@@ -89,10 +90,10 @@ export function FamilyMoneyWorkspace({ familyName }: { familyName: string }) {
           <EmptyMedia variant="icon">
             <WalletCardsIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>Family money could not load</EmptyTitle>
+          <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
           <EmptyDescription>
-            {state.message} You may not have access, or the family workspace no
-            longer exists. <Link href="/family">Back to your families</Link>
+            {t("loadErrorDesc", { message: state.message })}{" "}
+            <Link href="/family">{t("backToFamilies")}</Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -123,12 +124,13 @@ function MoneyWorkspaceContent({
   period: MoneyPeriod;
   onPeriodChange: (period: MoneyPeriod) => void;
 }) {
+  const t = createTranslator("FamilyMoney");
   const currency = money?.currency ?? family.defaultCurrency;
   const periodLabel = money?.period?.label ?? periodLabels[period];
 
   return (
     <div className="flex flex-col gap-6">
-      <PageTitle title="Money Workspace" />
+      <PageTitle title={t("workspaceTitle")} />
       <Separator />
       <MoneyFilters
         period={period}
@@ -138,12 +140,9 @@ function MoneyWorkspaceContent({
       {moneyMessage ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>Waiting for saved money records</AlertTitle>
+          <AlertTitle>{t("waitingForRecordsTitle")}</AlertTitle>
           <AlertDescription>
-            This screen is ready for income, expenses, contributions, savings,
-            debts, budgets, and approvals. Charts and totals stay empty until
-            the backend returns persisted family money records. API detail:{" "}
-            {moneyMessage}
+            {t("waitingForRecordsDesc", { detail: moneyMessage })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -155,9 +154,9 @@ function MoneyWorkspaceContent({
       <Tabs defaultValue="overview" className="gap-4">
         <div className="overflow-x-auto">
           <TabsList className="min-w-max">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="approvals">Approvals</TabsTrigger>
-            <TabsTrigger value="records">Records</TabsTrigger>
+            <TabsTrigger value="overview">{t("overviewTab")}</TabsTrigger>
+            <TabsTrigger value="approvals">{t("approvalsTab")}</TabsTrigger>
+            <TabsTrigger value="records">{t("recordsTab")}</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="overview" className="flex flex-col gap-4">

@@ -22,11 +22,14 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { createTranslator } from "@/i18n/translate";
 
 export default function AppNavbarSearch() {
   const router = useRouter();
   const pathname = usePathname();
   const [openSearch, setOpenSearch] = useState(false);
+  const tSearch = createTranslator("AppShell.search");
+  const tNav = createTranslator("AppShell.navbar");
 
   // Parse family slug if present in the pathname
   const familySlugMatch = pathname.match(/^\/family\/([^/]+)/);
@@ -62,7 +65,7 @@ export default function AppNavbarSearch() {
         >
           <div className="flex items-center gap-2">
             <SearchIcon className="size-3.5 shrink-0 opacity-70" />
-            <span>Search...</span>
+            <span>{tNav("searchPlaceholder")}</span>
           </div>
           <kbd className="pointer-events-none inline-flex h-4 select-none items-center gap-0.5 rounded border border-border/50 bg-muted px-1.5 font-mono text-[9px] font-medium opacity-100">
             <span className="text-2xs">⌘</span>K
@@ -70,92 +73,92 @@ export default function AppNavbarSearch() {
         </button>
       </div>
 
-      {/* Mobile Search Button Trigger (rendered inline elsewhere, but we can expose it or just render it here if absolute/fixed layout or sibling flex wrapper is used. Wait! If we render it here, it will be placed in the flex container. But wait, in the flex container, the desktop search is flex-1 and mobile search is md:hidden. This is perfect, they are rendered sequentially but styled with md:flex / md:hidden respectively!) */}
+      {/* Mobile Search Button Trigger */}
       <button
         type="button"
         onClick={() => setOpenSearch(true)}
         className="md:hidden flex size-9 items-center justify-center rounded-xl text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
       >
         <SearchIcon className="size-[18px]" />
-        <span className="sr-only">Search</span>
+        <span className="sr-only">{tNav("searchAction")}</span>
       </button>
 
       {/* Command Search Dialog */}
       <CommandDialog open={openSearch} onOpenChange={setOpenSearch}>
-        <CommandInput placeholder="Search pages and actions..." />
+        <CommandInput placeholder={tSearch("placeholder")} />
         <CommandList className="py-2 animate-in fade-in-50 duration-200">
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>{tSearch("noResults")}</CommandEmpty>
 
           {isFamilyView && (
-            <CommandGroup heading="Family Scope">
+            <CommandGroup heading={tSearch("familyScope")}>
               <CommandItem onSelect={() => handleNavigate(familyHref)}>
                 <HomeIcon className="mr-2 size-4" />
-                <span>Family Dashboard</span>
+                <span>{tSearch("familyDashboard")}</span>
               </CommandItem>
               <CommandItem
                 onSelect={() => handleNavigate(`${familyHref}/money`)}
               >
                 <CreditCardIcon className="mr-2 size-4" />
-                <span>Family Money Overview</span>
+                <span>{tSearch("familyMoneyOverview")}</span>
               </CommandItem>
               <CommandItem
                 onSelect={() => handleNavigate(`${familyHref}/money/expenses`)}
               >
                 <TrendingUpIcon className="mr-2 size-4" />
-                <span>Family Expenses</span>
+                <span>{tSearch("familyExpenses")}</span>
               </CommandItem>
               <CommandItem
                 onSelect={() => handleNavigate(`${familyHref}/projects`)}
               >
                 <FolderKanbanIcon className="mr-2 size-4" />
-                <span>Family Projects</span>
+                <span>{tSearch("familyProjects")}</span>
               </CommandItem>
               <CommandItem
                 onSelect={() => handleNavigate(`${familyHref}/reports`)}
               >
                 <ReceiptTextIcon className="mr-2 size-4" />
-                <span>Family Reports</span>
+                <span>{tSearch("familyReports")}</span>
               </CommandItem>
               <CommandItem
                 onSelect={() => handleNavigate(`${familyHref}/settings`)}
               >
                 <SettingsIcon className="mr-2 size-4" />
-                <span>Family Settings</span>
+                <span>{tSearch("familySettings")}</span>
               </CommandItem>
             </CommandGroup>
           )}
 
-          <CommandGroup heading="Personal Scope">
+          <CommandGroup heading={tSearch("personalScope")}>
             <CommandItem onSelect={() => handleNavigate("/me")}>
               <HomeIcon className="mr-2 size-4" />
-              <span>Personal Dashboard</span>
+              <span>{tSearch("personalDashboard")}</span>
             </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/me/money")}>
               <CreditCardIcon className="mr-2 size-4" />
-              <span>My Money</span>
+              <span>{tSearch("myMoney")}</span>
             </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/me/documents")}>
               <FileTextIcon className="mr-2 size-4" />
-              <span>My Documents</span>
+              <span>{tSearch("myDocuments")}</span>
             </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/me/settings")}>
               <SettingsIcon className="mr-2 size-4" />
-              <span>Account Settings</span>
+              <span>{tSearch("accountSettings")}</span>
             </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/me/security")}>
               <ShieldCheckIcon className="mr-2 size-4" />
-              <span>Security Settings</span>
+              <span>{tSearch("securitySettings")}</span>
             </CommandItem>
           </CommandGroup>
 
-          <CommandGroup heading="Quick Navigations">
+          <CommandGroup heading={tSearch("quickNavigations")}>
             <CommandItem onSelect={() => handleNavigate("/family")}>
               <UsersIcon className="mr-2 size-4" />
-              <span>Browse Families</span>
+              <span>{tSearch("browseFamilies")}</span>
             </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/family/new")}>
               <UsersIcon className="mr-2 size-4" />
-              <span>Create a New Family</span>
+              <span>{tSearch("createNewFamily")}</span>
             </CommandItem>
           </CommandGroup>
         </CommandList>

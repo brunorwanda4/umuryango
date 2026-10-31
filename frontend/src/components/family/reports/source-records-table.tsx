@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { StatusBadge, TableEmptyState } from "./reports-ui-helpers";
 import type {
   MoneyOverview,
@@ -27,6 +28,7 @@ export function SourceRecordsTable({
   money: MoneyOverview | null;
   reports: ReportsOverview | null;
 }) {
+  const t = createTranslator("FamilyReports");
   const records = useMemo(
     () => getSourceRecords(reports, money),
     [reports, money],
@@ -34,36 +36,38 @@ export function SourceRecordsTable({
   const columns: ColumnDef<ReportSourceRecordRow>[] = [
     {
       accessorKey: "title",
-      header: "Record",
+      header: t("recordColumn"),
       cell: ({ row }) => (
         <div className="flex flex-col gap-1">
           <span className="font-medium">{row.original.title}</span>
           <span className="text-muted-foreground text-xs">
-            Created by {row.original.createdBy ?? "Unknown"}
+            {t("createdBy", {
+              name: row.original.createdBy ?? t("unknownUser"),
+            })}
           </span>
         </div>
       ),
     },
     {
       accessorKey: "module",
-      header: "Module",
+      header: t("moduleColumn"),
       cell: ({ row }) => formatTitle(row.original.module),
     },
     {
       accessorKey: "date",
-      header: "Date",
+      header: t("dateColumn"),
       cell: ({ row }) => formatDate(row.original.date),
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: t("statusColumn"),
       cell: ({ row }) => (
         <StatusBadge value={row.original.status ?? "recorded"} />
       ),
     },
     {
       accessorKey: "amountMinorUnits",
-      header: () => <div className="text-right">Amount</div>,
+      header: () => <div className="text-right">{t("amountColumn")}</div>,
       cell: ({ row }) => (
         <div className="text-right font-mono">
           <CompactMoney
@@ -79,19 +83,17 @@ export function SourceRecordsTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Source records</CardTitle>
-        <CardDescription>
-          Persisted records used by report previews and generated files.
-        </CardDescription>
+        <CardTitle>{t("sourceRecordsTitle")}</CardTitle>
+        <CardDescription>{t("sourceRecordsDesc")}</CardDescription>
       </CardHeader>
       <CardContent>
         {records.length ? (
           <CommonDataTable columns={columns} data={records} />
         ) : (
           <TableEmptyState
-            description="Income, expenses, contribution payments, savings movements, debts, budgets, projects, and generated report inputs will appear here."
+            description={t("noSourceRecordsDesc")}
             icon={ReceiptTextIcon}
-            title="No source records returned"
+            title={t("noSourceRecordsTitle")}
           />
         )}
       </CardContent>

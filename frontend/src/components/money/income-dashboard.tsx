@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import { IncomeChartsSection } from "./income-dashboard/income-charts-section";
 import {
   type IncomeCategory,
@@ -31,6 +32,7 @@ export function IncomeDashboard({
   isLoading: boolean;
   onRetry: () => void | Promise<void>;
 }) {
+  const t = createTranslator("PersonalMoney.personalIncome");
   const dashboard = useMemo(
     () => (data ? mapIncomeDashboard(data) : null),
     [data],
@@ -44,10 +46,8 @@ export function IncomeDashboard({
     return (
       <Alert variant="destructive" className="flex flex-col gap-4">
         <AlertCircleIcon aria-hidden="true" />
-        <AlertTitle>Income could not be loaded</AlertTitle>
-        <AlertDescription>
-          {error ?? "No family workspace is available for income records."}
-        </AlertDescription>
+        <AlertTitle>{t("loadError")}</AlertTitle>
+        <AlertDescription>{error ?? t("noWorkspace")}</AlertDescription>
         <Button
           className="mt-3 w-fit"
           onClick={onRetry}
@@ -55,7 +55,7 @@ export function IncomeDashboard({
           variant="outline"
         >
           <RefreshCwIcon data-icon="inline-start" />
-          Try again
+          {t("tryAgain")}
         </Button>
       </Alert>
     );
@@ -65,11 +65,8 @@ export function IncomeDashboard({
     return (
       <div className="grid place-content-center w-fill h-screen">
         <Alert className="flex flex-col gap-4">
-          <AlertTitle>Create an income category</AlertTitle>
-          <AlertDescription>
-            Add your first category before recording income, such as Salary,
-            Business, or Gifts.
-          </AlertDescription>
+          <AlertTitle>{t("createCategoryTitle")}</AlertTitle>
+          <AlertDescription>{t("createCategoryDesc")}</AlertDescription>
           <CreateCategoryForm
             defaultType="INCOME"
             existingCategories={categories}
@@ -87,8 +84,8 @@ export function IncomeDashboard({
       <IncomeSummaryCards summary={data.summary} />
       <Tabs defaultValue="data">
         <TabsList>
-          <TabsTrigger value="data">Data</TabsTrigger>
-          <TabsTrigger value="charts">Charts</TabsTrigger>
+          <TabsTrigger value="data">{t("dataTab")}</TabsTrigger>
+          <TabsTrigger value="charts">{t("chartsTab")}</TabsTrigger>
         </TabsList>
         <TabsContent value="data">
           <RecentIncomeTable

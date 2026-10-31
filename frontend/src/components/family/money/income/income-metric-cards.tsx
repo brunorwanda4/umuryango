@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
+import { createTranslator } from "@/i18n/translate";
 import { normalizeMinorUnitString } from "../utils";
 import type { IncomeTransaction } from "./types-and-schemas";
 
@@ -106,33 +107,35 @@ export function IncomeMetricCards({
     };
   }, [transactions]);
 
+  const t = createTranslator("FamilyIncome");
+
   const cards = [
     {
-      description: "Total Income",
+      description: t("metrics.totalIncome"),
       value: <CompactMoney currency={currency} value={summary.totalRecorded} />,
       iconImage: "/images/icons/wallet.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Income This Month",
+      description: t("metrics.incomeThisMonth"),
       value: <CompactMoney currency={currency} value={summary.monthRecorded} />,
       iconImage: "/images/icons/income.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Income Today",
+      description: t("metrics.incomeToday"),
       value: <CompactMoney currency={currency} value={summary.todayRecorded} />,
       iconImage: "/images/icons/money.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Pending Income",
+      description: t("metrics.pendingIncome"),
       value: <CompactMoney currency={currency} value={summary.pendingAmount} />,
       iconImage: "/images/icons/clock.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Approved Income",
+      description: t("metrics.approvedIncome"),
       value: (
         <CompactMoney currency={currency} value={summary.approvedAmount} />
       ),
@@ -140,19 +143,19 @@ export function IncomeMetricCards({
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Rent Balance",
+      description: t("metrics.rentBalance"),
       value: <CompactMoney currency={currency} value={summary.rentBalance} />,
       iconImage: "/images/icons/salary.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Overdue Rent",
+      description: t("metrics.overdueRent"),
       value: String(summary.overdueRentCount),
       iconImage: "/images/icons/calendar.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Income Records",
+      description: t("metrics.incomeRecords"),
       value: String(summary.recordCount),
       iconImage: "/images/icons/transaction.png",
       className: "rounded-2xl border-border/80 py-0 shadow-sm",

@@ -19,6 +19,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import type {
   ExpenseCategory,
@@ -40,6 +41,8 @@ export function RecentExpenseItems({
   familyId,
   onSuccess,
 }: RecentExpenseItemsProps) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
+
   if (data.length === 0) {
     return (
       <div className="px-5 pb-5 sm:px-6">
@@ -48,10 +51,8 @@ export function RecentExpenseItems({
             <EmptyMedia variant="icon">
               <SearchIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>No expenses found</EmptyTitle>
-            <EmptyDescription>
-              Try another search term to find matching expense records.
-            </EmptyDescription>
+            <EmptyTitle>{t("items.noExpensesTitle")}</EmptyTitle>
+            <EmptyDescription>{t("items.noExpensesDesc")}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>
@@ -84,6 +85,7 @@ function RecentExpenseItem({
   expense: RecentExpenseRecord;
   onSuccess: () => void | Promise<void>;
 }) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
   const [isViewOpen, setIsViewOpen] = useState(false);
   const SourceIcon = expense.icon;
   const PaymentIcon = expense.paymentIcon;
@@ -97,7 +99,7 @@ function RecentExpenseItem({
           variant="outline"
         >
           <button
-            aria-label={`View expense details for ${expense.source}`}
+            aria-label={t("table.viewExpenseAria", { source: expense.source })}
             className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             onClick={() => setIsViewOpen(true)}
             type="button"

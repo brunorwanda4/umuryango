@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createTranslator } from "@/i18n/translate";
 import { formatCompactRwf } from "./formatters";
 
 export interface PersonalMoneyOverviewCardsProps {
@@ -40,6 +41,8 @@ export function PersonalMoneyOverviewCards({
     );
   }
 
+  const t = createTranslator("PersonalMoney");
+
   return (
     <CommonOverviewCardDisplay
       cardDescriptionClassName="text-sm font-medium leading-5 text-muted-foreground"
@@ -50,7 +53,7 @@ export function PersonalMoneyOverviewCards({
       cards={[
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: "Total income",
+          description: t("cards.totalIncome"),
           iconSource: {
             image: { src: "/images/icons/income.png" },
             line: TrendingDownIcon,
@@ -60,7 +63,7 @@ export function PersonalMoneyOverviewCards({
         },
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: "Total expenses",
+          description: t("cards.totalExpenses"),
           iconSource: {
             image: { src: "/images/icons/expense.png" },
             line: TrendingUpIcon,
@@ -70,7 +73,7 @@ export function PersonalMoneyOverviewCards({
         },
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: "Balance",
+          description: t("cards.balance"),
           iconSource: {
             image: { src: "/images/icons/wallet.png" },
             line: WalletCardsIcon,
@@ -80,7 +83,7 @@ export function PersonalMoneyOverviewCards({
         },
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: "Savings",
+          description: t("cards.savings"),
           iconSource: {
             image: { src: "/images/icons/savings.png" },
             line: CoinsIcon,
@@ -90,7 +93,7 @@ export function PersonalMoneyOverviewCards({
         },
         {
           className: "border-border/80 py-0 shadow-sm",
-          description: "Debts",
+          description: t("cards.debts"),
           iconSource: {
             image: { src: "/images/icons/debt.png" },
             line: LandmarkIcon,

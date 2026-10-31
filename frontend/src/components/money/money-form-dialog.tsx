@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 
 type MoneyFormType = "income" | "expense" | "savings" | "debt";
@@ -84,7 +85,7 @@ const moneyFormSchema = z.object({
     .max(180, "Must be 180 characters or fewer"),
 });
 
-const formConfig: Record<
+const _formConfig: Record<
   MoneyFormType,
   {
     action: string;
@@ -132,7 +133,7 @@ const formConfig: Record<
   },
 };
 
-const accountOptions = [
+const _accountOptions = [
   { value: "MOBILE_MONEY", label: "Mobile money" },
   { value: "BANK_TRANSFER", label: "Bank account" },
   { value: "CASH", label: "Cash" },
@@ -168,7 +169,69 @@ export function MoneyFormDialog({
   triggerSize = "sm",
   type,
 }: MoneyFormDialogProps) {
-  const config = formConfig[type];
+  const t = createTranslator("PersonalMoney.moneyForm");
+
+  const config = useMemo(() => {
+    const configs: Record<
+      MoneyFormType,
+      {
+        action: string;
+        description: string;
+        title: string;
+        transactionType?: "INCOME" | "EXPENSE";
+        updateAction: string;
+        updateDescription: string;
+        updateTitle: string;
+      }
+    > = {
+      debt: {
+        action: t("actions.addDebt"),
+        description: t("descriptions.addDebt"),
+        title: t("titles.addDebt"),
+        updateAction: t("actions.updateDebt"),
+        updateDescription: t("descriptions.updateDebt"),
+        updateTitle: t("titles.updateDebt"),
+      },
+      expense: {
+        action: t("actions.addExpense"),
+        description: t("descriptions.addExpense"),
+        title: t("titles.addExpense"),
+        transactionType: "EXPENSE",
+        updateAction: t("actions.updateExpense"),
+        updateDescription: t("descriptions.updateExpense"),
+        updateTitle: t("titles.updateExpense"),
+      },
+      income: {
+        action: t("actions.addIncome"),
+        description: t("descriptions.addIncome"),
+        title: t("titles.addIncome"),
+        transactionType: "INCOME",
+        updateAction: t("actions.updateIncome"),
+        updateDescription: t("descriptions.updateIncome"),
+        updateTitle: t("titles.updateIncome"),
+      },
+      savings: {
+        action: t("actions.addSavings"),
+        description: t("descriptions.addSavings"),
+        title: t("titles.addSavings"),
+        updateAction: t("actions.updateSavings"),
+        updateDescription: t("descriptions.updateSavings"),
+        updateTitle: t("titles.updateSavings"),
+      },
+    };
+    return configs[type];
+  }, [t, type]);
+
+  const accountOptions = useMemo(
+    () => [
+      { value: "MOBILE_MONEY", label: t("accounts.mobileMoney") },
+      { value: "BANK_TRANSFER", label: t("accounts.bankTransfer") },
+      { value: "CASH", label: t("accounts.cash") },
+      { value: "SAVINGS_WALLET", label: t("accounts.savingsWallet") },
+    ],
+    [t],
+  );
+
   const isUpdate = mode === "update";
   const [internalOpen, setInternalOpen] = useState(false);
   const [openCreateCategory, setOpenCreateCategory] = useState(false);
@@ -200,12 +263,20 @@ export function MoneyFormDialog({
   const canCreateCategoryInline = Boolean(familyId && config.transactionType);
   const categoryTypeLabel = config.transactionType?.toLowerCase();
   const entryLabel =
-    config.transactionType === "EXPENSE" ? "Expense" : "Income";
+    config.transactionType === "EXPENSE"
+      ? t("fields.expense")
+      : t("fields.source");
   const entryLabelLower = entryLabel.toLowerCase();
   const titleField =
     config.transactionType === "EXPENSE"
-      ? { label: "Expense", placeholder: "Example: Groceries" }
-      : { label: "Source", placeholder: "Example: July salary" };
+      ? {
+          label: t("fields.expense"),
+          placeholder: t("fields.expensePlaceholder"),
+        }
+      : {
+          label: t("fields.source"),
+          placeholder: t("fields.sourcePlaceholder"),
+        };
   const categoryOptions = [
     ...activeCategories.map((category) => ({
       value: category.id,
@@ -216,8 +287,10 @@ export function MoneyFormDialog({
           {
             value: CREATE_CATEGORY_VALUE,
             label: activeCategories.length
-              ? `Create another ${categoryTypeLabel} category`
-              : `Other / create ${categoryTypeLabel} category`,
+              ? t("fields.createAnotherCategory", {
+                  type: categoryTypeLabel ?? "",
+                })
+              : t("fields.createCategory", { type: categoryTypeLabel ?? "" }),
           },
         ]
       : []),
@@ -255,7 +328,10 @@ export function MoneyFormDialog({
         ...(isUpdate ? {} : { idempotencyKey: idempotencyKeyRef.current }),
       };
     },
-    onSuccessMessage: `${entryLabel} ${isUpdate ? "updated" : "recorded"} successfully`,
+    onSuccessMessage: t("savedToast", {
+      type: entryLabel,
+      mode: isUpdate ? t("updatedMode") : t("recordedMode"),
+    }),
     toastOnSuccess: true,
     onSuccess: async () => {
       idempotencyKeyRef.current = undefined;
@@ -319,7 +395,9 @@ export function MoneyFormDialog({
         >
           {error ? (
             <Alert variant="destructive">
-              <AlertTitle>{entryLabel} was not saved</AlertTitle>
+              <AlertTitle>
+                {t("notSavedToast", { type: entryLabel })}
+              </AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           ) : null}
@@ -334,7 +412,7 @@ export function MoneyFormDialog({
             <CommonFormField
               control={form.control}
               name="amountMinorUnits"
-              label="Amount"
+              label={t("fields.amount")}
               fieldType="money"
               currency="RWF"
               placeholder="0"
@@ -343,10 +421,10 @@ export function MoneyFormDialog({
             <CommonFormField
               control={form.control}
               name="categoryId"
-              label="Category"
+              label={t("fields.category")}
               fieldType="custom"
               disabled={!activeCategories.length && !canCreateCategoryInline}
-              placeholder="Select category"
+              placeholder={t("fields.selectCategory")}
               required
               render={({ field, id, invalid, disabled }) => (
                 <>
@@ -371,7 +449,7 @@ export function MoneyFormDialog({
                       onBlur={field.onBlur}
                       ref={field.ref}
                     >
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t("fields.selectCategory")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -414,16 +492,16 @@ export function MoneyFormDialog({
             <CommonFormField
               control={form.control}
               name="account"
-              label="Account"
+              label={t("fields.account")}
               fieldType="select"
-              placeholder="Select account"
+              placeholder={t("fields.selectAccount")}
               required
               selectOptions={accountOptions}
             />
             <CommonFormField
               control={form.control}
               name="date"
-              label="Date"
+              label={t("fields.date")}
               fieldType="date"
               required
             />
@@ -431,26 +509,28 @@ export function MoneyFormDialog({
               <CommonFormField
                 control={form.control}
                 name="notes"
-                label="Notes"
+                label={t("fields.notes")}
                 fieldType="textarea"
-                placeholder={`Optional details about this ${entryLabelLower}`}
+                placeholder={t("fields.notesPlaceholder", {
+                  type: entryLabelLower,
+                })}
               />
             </div>
           </FieldGroup>
           {!activeCategories.length ? (
             <p className="text-sm text-muted-foreground">
-              Add an {entryLabelLower} category before saving this record.
+              {t("fields.addCategoryWarning", { type: entryLabelLower })}
             </p>
           ) : null}
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline">
-                Cancel
+                {t("fields.cancel")}
               </Button>
             </DialogClose>
             <Button disabled={!canSubmit || isPending} type="submit">
               {isPending ? <Spinner data-icon="inline-start" /> : null}
-              {isUpdate ? "Save changes" : "Save entry"}
+              {isUpdate ? t("fields.saveChanges") : t("fields.saveEntry")}
             </Button>
           </DialogFooter>
         </form>

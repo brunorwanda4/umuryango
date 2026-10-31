@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import { AUTHORITY_LABELS, hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import { CreateProjectDialog } from "./create-project-dialog";
@@ -31,6 +32,10 @@ import type {
   ProjectsOverview,
 } from "./types";
 import { normalizeProjectsOverview, statusLabels } from "./utils";
+
+const t = createTranslator("FamilyProjects");
+const tCommon = createTranslator("Common");
+const tDashboard = createTranslator("FamilyDashboard");
 
 export type FamilyProjectsWorkspaceInitialData = {
   family: FamilyDetail | null;
@@ -48,7 +53,7 @@ export function FamilyProjectsWorkspace({
 }) {
   const [status, setStatus] = useState<ProjectStatusFilter>("active");
   const [state, setState] = useState<FetchState>(
-    initialData && initialData.family
+    initialData?.family
       ? {
           status: "success",
           family: initialData.family,
@@ -108,7 +113,7 @@ export function FamilyProjectsWorkspace({
       return;
     }
     load();
-  }, [load, initialData]);
+  }, [load, initialData, isFirstMount, status]);
 
   if (state.status === "loading") {
     return <FamilyProjectsSkeleton />;
@@ -121,10 +126,11 @@ export function FamilyProjectsWorkspace({
           <EmptyMedia variant="icon">
             <FolderKanbanIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>Family projects could not load</EmptyTitle>
+          <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
           <EmptyDescription>
             {state.message} You may not have access, or the family workspace no
-            longer exists. <Link href="/family">Back to your families</Link>
+            longer exists.{" "}
+            <Link href="/family">{tDashboard("backToFamilies")}</Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -162,7 +168,7 @@ function ProjectsWorkspaceContent({
   status: ProjectStatusFilter;
 }) {
   const currency = projects?.currency ?? family.defaultCurrency;
-  const hasSourceRecords = Boolean(
+  const _hasSourceRecords = Boolean(
     projects && (projects.sourceRecordCount ?? 0) > 0,
   );
   const canManageProjects = hasCapability(family, "MANAGE_PROJECTS");
@@ -171,7 +177,7 @@ function ProjectsWorkspaceContent({
   return (
     <div className="flex flex-col gap-6">
       <PageTitle
-        title="Family Projects"
+        title={t("title")}
         badge={AUTHORITY_LABELS[family.authority]}
         actions={
           <div className="flex flex-wrap gap-2 lg:justify-end">
@@ -185,7 +191,7 @@ function ProjectsWorkspaceContent({
             {canExportReports ? (
               <Button size="sm" variant="outline">
                 <DownloadIcon aria-hidden="true" data-icon="inline-start" />
-                Export
+                {tCommon("export")}
               </Button>
             ) : null}
           </div>
@@ -201,12 +207,9 @@ function ProjectsWorkspaceContent({
       {projectsMessage ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>Waiting for saved project records</AlertTitle>
+          <AlertTitle>{t("waitingForRecordsTitle")}</AlertTitle>
           <AlertDescription>
-            This screen is ready for family plans such as buying a car, building
-            a house, assigning members, and tracking contributions. Totals stay
-            empty until the backend returns persisted project records. API
-            detail: {projectsMessage}
+            {t("waitingForRecordsDesc", { detail: projectsMessage })}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -214,9 +217,11 @@ function ProjectsWorkspaceContent({
       <Tabs defaultValue="projects" className="gap-4">
         <div className="overflow-x-auto">
           <TabsList className="min-w-max">
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="contributions">Contributions</TabsTrigger>
-            <TabsTrigger value="operations">Operations</TabsTrigger>
+            <TabsTrigger value="projects">{t("projectsTab")}</TabsTrigger>
+            <TabsTrigger value="contributions">
+              {t("contributionsTab")}
+            </TabsTrigger>
+            <TabsTrigger value="operations">{t("operationsTab")}</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="projects">

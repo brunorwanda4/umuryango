@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import type { CurrentUser } from "@/hooks/use-current-user";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { SidebarIcon } from "./sidebar-icon";
 import { type AppSidebarMode, workspaceLinks } from "./sidebar-utils";
@@ -90,11 +91,12 @@ export function WorkspaceSwitcher({
 }) {
   const router = useRouter();
   const recentFamilies = useRecentFamilies();
+  const t = createTranslator("AppShell.workspaceSwitcher");
   const workspaceTitle =
-    mode === "family" ? currentFamilyName : "Personal workspace";
+    mode === "family" ? currentFamilyName : t("personalWorkspace");
   const title = user?.fullName ?? workspaceTitle;
   const description =
-    user?.email ?? (mode === "family" ? "Family workspace" : "Your money");
+    user?.email ?? (mode === "family" ? t("familyWorkspace") : t("yourMoney"));
 
   async function handleLogout() {
     await apiRequest("post", "/auth/logout");
@@ -123,7 +125,7 @@ export function WorkspaceSwitcher({
         </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="start">
-        <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("workspaces")}</DropdownMenuLabel>
         <DropdownMenuGroup>
           {currentFamilyHref ? (
             <DropdownMenuItem asChild>
@@ -145,7 +147,7 @@ export function WorkspaceSwitcher({
         {recentFamilies.length ? (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Recent families</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("recentFamilies")}</DropdownMenuLabel>
             <DropdownMenuGroup>
               {recentFamilies.map((family) => (
                 <DropdownMenuItem key={family.id} asChild>
@@ -163,20 +165,20 @@ export function WorkspaceSwitcher({
           <DropdownMenuItem asChild>
             <Link href="/family">
               <SidebarIcon icon={menuIcons.members} className="size-4" />
-              Manage family access
+              {t("manageFamilyAccess")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/family/new">
               <SidebarIcon icon={menuIcons.createFamily} className="size-4" />
-              Create family
+              {t("createFamily")}
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
           <LogOutIcon aria-hidden="true" />
-          Log out
+          {t("logOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

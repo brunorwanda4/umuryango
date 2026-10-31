@@ -8,10 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import type { PersonalOverviewData } from "./personal-overview-data";
 import { addMinorUnits } from "./personal-overview-data";
 
 export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
+  const t = createTranslator("PersonalOverview.summaryCards");
   const allIncome = data.income?.summary.allTimeTotalMinorUnits;
   const allExpenses = data.expenses?.summary.allTimeTotalMinorUnits;
   const balance = addMinorUnits(allIncome) - addMinorUnits(allExpenses);
@@ -30,7 +32,7 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
       <Card className="family-balance-card gap-0 rounded-[22px] border py-[22px] text-white shadow-xl">
         <CardHeader className="px-[22px]">
           <CardDescription className="font-mono text-[17px] font-semibold uppercase tracking-[0.14em] text-white/90">
-            Total balance ({data.currency})
+            {t("totalBalance", { currency: data.currency })}
           </CardDescription>
         </CardHeader>
         <CardContent className="mt-7 flex flex-1 flex-col px-[22px]">
@@ -42,19 +44,19 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
             />
             {!moneyAvailable ? (
               <p className="mt-2 text-sm text-white/70">
-                Money data unavailable
+                {t("moneyUnavailable")}
               </p>
             ) : null}
           </Link>
           <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
             <BalanceStat
               currency={data.currency}
-              label="Income this month"
+              label={t("incomeThisMonth")}
               value={income}
             />
             <BalanceStat
               currency={data.currency}
-              label="Spent this month"
+              label={t("spentThisMonth")}
               value={expenses}
             />
           </div>
@@ -64,28 +66,29 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
       <Card className={cardClassName}>
         <CardHeader className="px-5 pb-3.5">
           <CardTitle className="font-fraunces text-xl">
-            Quick add data
+            {t("quickAddTitle")}
           </CardTitle>
-          <CardDescription>
-            Add a personal income or expense record.
-          </CardDescription>
+          <CardDescription>{t("quickAddDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 px-5">
           <div className="grid grid-cols-3 gap-2">
-            <SummaryMetric label="Active plans" value={activePlans} />
-            <SummaryMetric label="Active loans" value={activeLoans} />
-            <SummaryMetric label="Workspaces" value={data.families.length} />
+            <SummaryMetric label={t("activePlans")} value={activePlans} />
+            <SummaryMetric label={t("activeLoans")} value={activeLoans} />
+            <SummaryMetric
+              label={t("workspaces")}
+              value={data.families.length}
+            />
           </div>
           <div className="grid gap-2.5 sm:grid-cols-2">
             <QuickAddLink
               href="/me/money/income"
-              label="Add income"
+              label={t("addIncome")}
               icon={ArrowDownLeftIcon}
               iconClassName="text-emerald-500"
             />
             <QuickAddLink
               href="/me/money/expenses"
-              label="Add expense"
+              label={t("addExpense")}
               icon={ArrowUpRightIcon}
               iconClassName="text-destructive"
             />

@@ -13,6 +13,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { FamilyMoneySkeleton } from "../money/family-money-skeleton";
 import { ContactDetailsDialog } from "./contact-details-dialog";
@@ -31,6 +32,8 @@ import {
   EMPTY_CONTACT_FILTERS,
   type FamilyContact,
 } from "./types-and-schemas";
+
+const t = createTranslator("FamilyContacts");
 
 export function FamilyContactsPage({
   familyName,
@@ -157,9 +160,15 @@ export function FamilyContactsPage({
 
   const handleDelete = async (contact: FamilyContact) => {
     if (!family) return;
+    const workspaceName = personal
+      ? t("workspacePersonal")
+      : t("workspaceFamily");
     if (
       !window.confirm(
-        `Delete ${contact.fullName} from ${personal ? "personal" : "family"} contacts?`,
+        t("deleteConfirm", {
+          name: contact.fullName,
+          workspace: workspaceName,
+        }),
       )
     ) {
       return;
@@ -171,10 +180,10 @@ export function FamilyContactsPage({
     );
 
     if (response.ok) {
-      toast.success("Contact deleted.");
+      toast.success(t("deleteSuccess"));
       fetchData();
     } else {
-      toast.error(response.message ?? "Could not delete contact.");
+      toast.error(response.message ?? t("deleteError"));
     }
   };
 
@@ -187,7 +196,7 @@ export function FamilyContactsPage({
         ? parseVcard(text)
         : parseGoogleCsv(text);
       if (!imported.length) {
-        toast.error("No contacts were found in that file.");
+        toast.error(t("importEmpty"));
         return;
       }
 
@@ -198,16 +207,19 @@ export function FamilyContactsPage({
         contacts: imported.slice(0, 1000),
       });
       if (!response.ok || !response.data) {
-        toast.error(response.message ?? "Contacts could not be imported.");
+        toast.error(response.message ?? t("importError"));
         return;
       }
 
       toast.success(
-        `${response.data.created} added, ${response.data.merged} matched existing contacts.`,
+        t("importSuccess", {
+          created: response.data.created,
+          merged: response.data.merged,
+        }),
       );
       await fetchData();
     } catch {
-      toast.error("The contact file could not be read.");
+      toast.error(t("importFileError"));
     } finally {
       setImporting(false);
     }
@@ -222,10 +234,14 @@ export function FamilyContactsPage({
           <EmptyMedia variant="icon">
             <AlertCircleIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>Contacts could not load</EmptyTitle>
+          <EmptyTitle>{t("loadErrorTitle")}</EmptyTitle>
           <EmptyDescription>
             {error ||
-              `${personal ? "Personal" : "Family"} workspace not found.`}
+              t("workspaceNotFound", {
+                workspace: personal
+                  ? t("workspacePersonal")
+                  : t("workspaceFamily"),
+              })}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

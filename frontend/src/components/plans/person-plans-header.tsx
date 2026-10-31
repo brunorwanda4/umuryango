@@ -1,9 +1,7 @@
-import { ArrowLeftIcon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { createTranslator } from "@/i18n/translate";
 import type { PlanPerson } from "./types-and-schemas";
 
 export function PersonPlansHeader({
@@ -13,6 +11,7 @@ export function PersonPlansHeader({
   person: PlanPerson;
   onAdd: () => void;
 }) {
+  const t = createTranslator("PersonalPlans");
   const firstName = person.fullName.split(" ")[0] || person.fullName;
 
   return (
@@ -29,14 +28,14 @@ export function PersonPlansHeader({
                 width={24}
               />
               <h1 className="truncate font-bricolage text-2xl font-bold sm:text-3xl">
-                {firstName}&apos;s plans
+                {t("personPlansTitle", { name: firstName })}
               </h1>
             </div>
           </div>
         </div>
         <Button onClick={onAdd} className="w-full sm:w-auto">
           <PlusIcon aria-hidden="true" data-icon="inline-start" />
-          Add plan
+          {t("addPlan")}
         </Button>
       </div>
     </header>

@@ -45,6 +45,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import {
   AUTHORITY_LABELS,
   type FamilyAuthority,
@@ -54,6 +55,10 @@ import {
   KINSHIP_LABELS,
 } from "@/lib/family-access";
 import apiRequest from "@/service/api";
+
+const t = createTranslator("FamilyMembers");
+const tCommon = createTranslator("Common");
+const tDashboard = createTranslator("FamilyDashboard");
 
 type AssignableAuthority = Exclude<FamilyAuthority, "HEAD">;
 
@@ -129,7 +134,7 @@ export default function FamilyMembersPage({
       } else {
         setState({
           status: "error",
-          message: response.message ?? "Unable to load this family.",
+          message: response.message ?? t("unableToLoad"),
         });
       }
     },
@@ -151,10 +156,10 @@ export default function FamilyMembersPage({
           <EmptyMedia variant="icon">
             <UsersIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>Family not found</EmptyTitle>
+          <EmptyTitle>{tDashboard("familyNotFound")}</EmptyTitle>
           <EmptyDescription>
-            {state.message} You may not have access, or it no longer exists.{" "}
-            <Link href="/family">Back to your families</Link>
+            {tDashboard("familyNotFoundDesc", { error: state.message })}{" "}
+            <Link href="/family">{tDashboard("backToFamilies")}</Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -185,10 +190,12 @@ function MembersManager({
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="font-bold text-2xl tracking-tight">Members</h1>
+          <h1 className="font-bold text-2xl tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground text-sm">
-            {family.memberCount}{" "}
-            {family.memberCount === 1 ? "member" : "members"} in {family.name}
+            {t("membersInFamily", {
+              count: family.memberCount,
+              familyName: family.name,
+            })}
           </p>
         </div>
         {canManage ? (
@@ -202,12 +209,10 @@ function MembersManager({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UsersIcon className="size-4" aria-hidden="true" />
-            Family members
+            {t("title")}
           </CardTitle>
           <CardDescription>
-            {canManage
-              ? "Manage who belongs to this family and what they can do."
-              : "People who belong to this family."}
+            {canManage ? t("descriptionManage") : t("descriptionView")}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-1">
@@ -260,7 +265,7 @@ function MemberRow({
     if (response.ok) {
       onChanged();
     } else {
-      setError(response.message ?? "Unable to update this member.");
+      setError(response.message ?? t("unableToUpdate"));
     }
   };
 
@@ -278,7 +283,9 @@ function MemberRow({
             {member.fullName}
           </span>
           <span className="text-muted-foreground text-xs">
-            Joined {joinedFormatter.format(new Date(member.joinedAt))}
+            {tDashboard("joinedDate", {
+              date: joinedFormatter.format(new Date(member.joinedAt)),
+            })}
           </span>
           {member.kinshipLabel ? (
             <span className="text-muted-foreground text-xs">
@@ -298,7 +305,7 @@ function MemberRow({
               }
               disabled={pending}
             >
-              <SelectTrigger className="w-32" aria-label="Member authority">
+              <SelectTrigger className="w-32" aria-label={t("memberAuthority")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -328,9 +335,9 @@ const addMemberSchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, "Email is required.")
+    .min(1, t("emailRequired"))
     .refine((value) => emailPattern.test(value), {
-      message: "Enter a valid email address.",
+      message: t("emailInvalid"),
     }),
   authority: z.enum(["ADMIN", "MEMBER"]),
 });
@@ -349,15 +356,13 @@ function AddMemberDialog({
       <DialogTrigger asChild>
         <Button>
           <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
-          Add member
+          {t("inviteMember")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add a family member</DialogTitle>
-          <DialogDescription>
-            Send an invite by email. They join once they accept.
-          </DialogDescription>
+          <DialogTitle>{t("inviteTitle")}</DialogTitle>
+          <DialogDescription>{t("inviteDesc")}</DialogDescription>
         </DialogHeader>
         <AddMemberForm
           familySlug={familySlug}
@@ -393,7 +398,7 @@ function AddMemberForm({
         email: values.email.trim().toLowerCase(),
         authority: values.authority,
       }),
-      onSuccessMessage: "Invite sent.",
+      onSuccessMessage: t("inviteSuccess"),
       onSuccess: () => {
         form.reset();
         onAdded();
@@ -409,7 +414,7 @@ function AddMemberForm({
     >
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>Could not add member</AlertTitle>
+          <AlertTitle>{t("addMemberError")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
@@ -425,7 +430,7 @@ function AddMemberForm({
         <CommonFormField
           control={form.control}
           name="email"
-          label="Email address"
+          label={t("inviteEmail")}
           placeholder="member@example.com"
           type="email"
           required
@@ -434,7 +439,7 @@ function AddMemberForm({
         <CommonFormField
           control={form.control}
           name="authority"
-          label="Authority"
+          label={t("inviteRole")}
           fieldType="select"
           selectOptions={ASSIGNABLE_AUTHORITIES}
           required
@@ -444,17 +449,17 @@ function AddMemberForm({
       <DialogFooter>
         <DialogClose asChild>
           <Button type="button" variant="outline">
-            Cancel
+            {tCommon("cancel")}
           </Button>
         </DialogClose>
         <Button type="submit" disabled={isPending}>
           {isPending ? (
             <>
               <Spinner data-icon="inline-start" />
-              Sending
+              {t("sending")}
             </>
           ) : (
-            "Send invite"
+            t("sendInvite")
           )}
         </Button>
       </DialogFooter>

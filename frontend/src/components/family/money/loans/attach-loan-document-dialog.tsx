@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import {
   type DocumentFormValues,
@@ -32,6 +33,7 @@ export function AttachLoanDocumentDialog({
   onSuccess: () => void;
   open: boolean;
 }) {
+  const t = createTranslator("FamilyLoans");
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     DocumentFormValues,
     LoanDocument
@@ -56,7 +58,7 @@ export function AttachLoanDocumentDialog({
         family.id,
       )}/money/loans/${encodeURIComponent(loan?.id ?? "")}/documents`,
     },
-    onSuccessMessage: "Loan document attached successfully",
+    onSuccessMessage: t("toasts.documentAttached"),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -76,10 +78,8 @@ export function AttachLoanDocumentDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Attach Document</DialogTitle>
-          <DialogDescription>
-            Add an agreement, proof, receipt, or supporting loan document.
-          </DialogDescription>
+          <DialogTitle>{t("attachDocTitle")}</DialogTitle>
+          <DialogDescription>{t("attachDocDesc")}</DialogDescription>
         </DialogHeader>
         <form
           id="attach-loan-document-form"
@@ -92,16 +92,16 @@ export function AttachLoanDocumentDialog({
           <CommonFormField
             control={form.control}
             name="fileName"
-            label="Document"
+            label={t("docFileLabel")}
             type="file"
-            description="Private uploads should be stored in Bunny Storage when the backend endpoint is available."
+            description={t("docFileDesc")}
           />
           <CommonFormField
             control={form.control}
             name="notes"
-            label="Notes"
+            label={t("notesLabel")}
             fieldType="textarea"
-            placeholder="What does this document prove?"
+            placeholder={t("notesPlaceholder")}
           />
         </form>
         <DialogFooter>
@@ -111,7 +111,7 @@ export function AttachLoanDocumentDialog({
             disabled={isPending || !loan}
             className="w-full sm:w-auto"
           >
-            {isPending ? "Attaching..." : "Attach Document"}
+            {isPending ? t("saving") : t("attachDocBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>

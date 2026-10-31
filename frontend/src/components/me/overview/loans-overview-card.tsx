@@ -20,6 +20,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Progress } from "@/components/ui/progress";
+import { createTranslator } from "@/i18n/translate";
 import { addMinorUnits } from "./personal-overview-data";
 
 export function LoansOverviewCard({
@@ -29,6 +30,7 @@ export function LoansOverviewCard({
   currency: string;
   loans: PersonalLoan[];
 }) {
+  const t = createTranslator("PersonalOverview.loansCard");
   const active = loans.filter(
     (loan) => loan.status === "ACTIVE" || loan.status === "OVERDUE",
   );
@@ -45,14 +47,12 @@ export function LoansOverviewCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Loans and debts</CardTitle>
-        <CardDescription>
-          Money you have borrowed or lent to trusted people.
-        </CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
         <CardAction>
           <Button asChild size="sm" variant="ghost">
             <Link href="/me/money/loans">
-              Open loans
+              {t("openLoans")}
               <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
             </Link>
           </Button>
@@ -61,21 +61,21 @@ export function LoansOverviewCard({
       <CardContent className="flex flex-col gap-5">
         <div className="grid grid-cols-2 gap-3">
           <LoanStat
-            label="Total borrowed"
+            label={t("totalBorrowed")}
             currency={currency}
             value={addMinorUnits(
               ...borrowed.map((loan) => loan.originalAmountMinorUnits),
             ).toString()}
           />
           <LoanStat
-            label="Total lent"
+            label={t("totalLent")}
             currency={currency}
             value={addMinorUnits(
               ...lent.map((loan) => loan.originalAmountMinorUnits),
             ).toString()}
           />
           <LoanStat
-            label="Remaining"
+            label={t("remainingStat")}
             currency={currency}
             value={addMinorUnits(
               ...active.map((loan) => loan.remainingBalanceMinorUnits),
@@ -83,7 +83,9 @@ export function LoansOverviewCard({
           />
           <div className="rounded-xl bg-muted p-3">
             <p className="font-semibold text-lg">{dueSoon.length}</p>
-            <p className="text-muted-foreground text-xs">Due in 7 days</p>
+            <p className="text-muted-foreground text-xs">
+              {t("dueInSevenDays")}
+            </p>
           </div>
         </div>
         {loans.length === 0 ? (
@@ -92,10 +94,8 @@ export function LoansOverviewCard({
               <EmptyMedia variant="icon">
                 <HandCoinsIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>No loans or debts yet</EmptyTitle>
-              <EmptyDescription>
-                Borrowed and lent money will appear here.
-              </EmptyDescription>
+              <EmptyTitle>{t("noLoansYet")}</EmptyTitle>
+              <EmptyDescription>{t("noLoansDesc")}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
@@ -117,10 +117,15 @@ export function LoansOverviewCard({
                         {loan.title}
                       </p>
                       <p className="text-muted-foreground text-xs">
-                        {loan.person.name} · Due{" "}
-                        {new Date(loan.dueDate).toLocaleDateString("en", {
-                          month: "short",
-                          day: "numeric",
+                        {t("duePersonDate", {
+                          name: loan.person.name,
+                          date: new Date(loan.dueDate).toLocaleDateString(
+                            "en",
+                            {
+                              month: "short",
+                              day: "numeric",
+                            },
+                          ),
                         })}
                       </p>
                     </div>
@@ -129,12 +134,15 @@ export function LoansOverviewCard({
                         loan.status === "OVERDUE" ? "destructive" : "outline"
                       }
                     >
-                      {loan.type === "BORROWED" ? "Borrowed" : "Lent"}
+                      {loan.type === "BORROWED" ? t("borrowed") : t("lent")}
                     </Badge>
                   </div>
                   <Progress
                     value={progress}
-                    aria-label={`${loan.title} is ${progress}% repaid`}
+                    aria-label={t("repaidAria", {
+                      title: loan.title,
+                      progress,
+                    })}
                   />
                 </div>
               );

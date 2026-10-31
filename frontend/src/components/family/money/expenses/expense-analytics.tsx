@@ -22,6 +22,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { createTranslator } from "@/i18n/translate";
 import { ChartEmptyState } from "../money-ui-helpers";
 import type { MoneyBudgetRow } from "../types";
 import {
@@ -50,6 +51,7 @@ export function ExpenseAnalytics({
   budgets: MoneyBudgetRow[];
   currency: string;
 }) {
+  const t = createTranslator("FamilyExpenses");
   const approved = useMemo(
     () =>
       transactions.filter((transaction) => transaction.status === "APPROVED"),
@@ -86,9 +88,9 @@ export function ExpenseAnalytics({
     () =>
       summarizeBy(
         approved,
-        (transaction) => transaction.receivedBy || "Not recorded",
+        (transaction) => transaction.receivedBy || t("table.notRecorded"),
       ).sort((a, b) => b.amount - a.amount),
-    [approved],
+    [approved, t],
   );
 
   const byPaymentMethod = useMemo(
@@ -120,34 +122,63 @@ export function ExpenseAnalytics({
   return (
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <AmountChart
-        title="Expenses by Category"
-        description="Approved spending grouped by expense category."
+        title={t("analytics.byCategoryTitle")}
+        description={t("analytics.byCategoryDesc")}
         data={byCategory}
         currency={currency}
         layout="vertical"
+        emptyTitle={t("analytics.noApprovedExpensesTitle")}
+        emptyDescription={t("analytics.noApprovedExpensesDesc")}
+        amountLabel={t("analytics.amount")}
       />
-      <TrendChart data={monthlyTrend} currency={currency} />
+      <TrendChart
+        data={monthlyTrend}
+        currency={currency}
+        title={t("analytics.monthlyTrendTitle")}
+        description={t("analytics.monthlyTrendDesc")}
+        emptyTitle={t("analytics.noMonthlyTrendTitle")}
+        emptyDescription={t("analytics.noMonthlyTrendDesc")}
+        amountLabel={t("analytics.amount")}
+      />
       <AmountChart
-        title="Spending by Family Member"
-        description="Who paid expenses on behalf of the family."
+        title={t("analytics.byMemberTitle")}
+        description={t("analytics.byMemberDesc")}
         data={byMember}
         currency={currency}
         layout="vertical"
+        emptyTitle={t("analytics.noApprovedExpensesTitle")}
+        emptyDescription={t("analytics.noApprovedExpensesDesc")}
+        amountLabel={t("analytics.amount")}
       />
       <AmountChart
-        title="Spending by Payment Method"
-        description="Cash, mobile money, cards, bank transfer, and other methods."
+        title={t("analytics.byPaymentMethodTitle")}
+        description={t("analytics.byPaymentMethodDesc")}
         data={byPaymentMethod}
         currency={currency}
         layout="vertical"
+        emptyTitle={t("analytics.noApprovedExpensesTitle")}
+        emptyDescription={t("analytics.noApprovedExpensesDesc")}
+        amountLabel={t("analytics.amount")}
       />
-      <BudgetActualChart data={budgetActual} currency={currency} />
+      <BudgetActualChart
+        data={budgetActual}
+        currency={currency}
+        title={t("analytics.budgetVsActualTitle")}
+        description={t("analytics.budgetVsActualDesc")}
+        emptyTitle={t("analytics.noBudgetComparisonTitle")}
+        emptyDescription={t("analytics.noBudgetComparisonDesc")}
+        budgetLabel={t("analytics.budget")}
+        actualLabel={t("analytics.actual")}
+      />
       <AmountChart
-        title="Top Expense Categories"
-        description="Highest spending categories in the current records."
+        title={t("analytics.topCategoriesTitle")}
+        description={t("analytics.topCategoriesDesc")}
         data={topCategories}
         currency={currency}
         layout="horizontal"
+        emptyTitle={t("analytics.noApprovedExpensesTitle")}
+        emptyDescription={t("analytics.noApprovedExpensesDesc")}
+        amountLabel={t("analytics.amount")}
       />
     </section>
   );
@@ -179,12 +210,18 @@ function AmountChart({
   data,
   currency,
   layout,
+  emptyTitle,
+  emptyDescription,
+  amountLabel,
 }: {
   title: string;
   description: string;
   data: { label: string; amount: number }[];
   currency: string;
   layout: "horizontal" | "vertical";
+  emptyTitle: string;
+  emptyDescription: string;
+  amountLabel: string;
 }) {
   return (
     <Card>
@@ -245,7 +282,9 @@ function AmountChart({
                   <ChartTooltipContent
                     formatter={(value) => (
                       <>
-                        <span className="text-muted-foreground">Amount</span>
+                        <span className="text-muted-foreground">
+                          {amountLabel}
+                        </span>
                         <span className="font-mono font-medium">
                           {formatFullMinorUnits(value, currency)}
                         </span>
@@ -264,8 +303,8 @@ function AmountChart({
         ) : (
           <ChartEmptyState
             icon={BarChart3Icon}
-            title="No approved expenses"
-            description="Approved expense records will populate this chart."
+            title={emptyTitle}
+            description={emptyDescription}
           />
         )}
       </CardContent>
@@ -276,17 +315,25 @@ function AmountChart({
 function TrendChart({
   data,
   currency,
+  title,
+  description,
+  emptyTitle,
+  emptyDescription,
+  amountLabel,
 }: {
   data: { label: string; amount: number }[];
   currency: string;
+  title: string;
+  description: string;
+  emptyTitle: string;
+  emptyDescription: string;
+  amountLabel: string;
 }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Monthly Spending Trend</CardTitle>
-        <CardDescription>
-          Approved expenses over time by transaction month.
-        </CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         {data.length ? (
@@ -307,7 +354,9 @@ function TrendChart({
                   <ChartTooltipContent
                     formatter={(value) => (
                       <>
-                        <span className="text-muted-foreground">Amount</span>
+                        <span className="text-muted-foreground">
+                          {amountLabel}
+                        </span>
                         <span className="font-mono font-medium">
                           {formatFullMinorUnits(value, currency)}
                         </span>
@@ -329,8 +378,8 @@ function TrendChart({
         ) : (
           <ChartEmptyState
             icon={BarChart3Icon}
-            title="No monthly trend yet"
-            description="Approved expense dates will draw this trend."
+            title={emptyTitle}
+            description={emptyDescription}
           />
         )}
       </CardContent>
@@ -341,17 +390,27 @@ function TrendChart({
 function BudgetActualChart({
   data,
   currency,
+  title,
+  description,
+  emptyTitle,
+  emptyDescription,
+  budgetLabel,
+  actualLabel,
 }: {
   data: { label: string; budget: number; actual: number }[];
   currency: string;
+  title: string;
+  description: string;
+  emptyTitle: string;
+  emptyDescription: string;
+  budgetLabel: string;
+  actualLabel: string;
 }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Budget vs Actual Spending</CardTitle>
-        <CardDescription>
-          Budget limits compared with recorded spending.
-        </CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         {data.length ? (
@@ -373,7 +432,7 @@ function BudgetActualChart({
                     formatter={(value, name) => (
                       <>
                         <span className="text-muted-foreground">
-                          {name === "budget" ? "Budget" : "Actual"}
+                          {name === "budget" ? budgetLabel : actualLabel}
                         </span>
                         <span className="font-mono font-medium">
                           {formatFullMinorUnits(value, currency)}
@@ -390,8 +449,8 @@ function BudgetActualChart({
         ) : (
           <ChartEmptyState
             icon={BarChart3Icon}
-            title="No budget comparison"
-            description="Budgets and approved expenses will appear here."
+            title={emptyTitle}
+            description={emptyDescription}
           />
         )}
       </CardContent>

@@ -1,5 +1,6 @@
 import { FileClockIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { createTranslator } from "@/i18n/translate";
 
 export function SourceWarning({
   contributionsMessage,
@@ -10,19 +11,21 @@ export function SourceWarning({
   moneyMessage?: string;
   projectsMessage?: string;
 }) {
+  const t = createTranslator("FamilyReports");
   const messages = [
-    moneyMessage ? `Money: ${moneyMessage}` : null,
-    contributionsMessage ? `Contributions: ${contributionsMessage}` : null,
-    projectsMessage ? `Projects: ${projectsMessage}` : null,
+    moneyMessage ? `${t("types.money")}: ${moneyMessage}` : null,
+    contributionsMessage
+      ? `${t("types.contributions")}: ${contributionsMessage}`
+      : null,
+    projectsMessage ? `${t("types.projects")}: ${projectsMessage}` : null,
   ].filter(Boolean);
 
   return (
     <Alert>
       <FileClockIcon aria-hidden="true" />
-      <AlertTitle>Some source modules are not ready</AlertTitle>
+      <AlertTitle>{t("someSourceModulesNotReady")}</AlertTitle>
       <AlertDescription>
-        Reports can only include modules returned by the backend.{" "}
-        {messages.join(" ")}
+        {t("reportsCanOnlyIncludeReturned")} {messages.join(" ")}
       </AlertDescription>
     </Alert>
   );

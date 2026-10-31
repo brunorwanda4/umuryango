@@ -4,6 +4,9 @@ import { SidebarIcon } from "@/components/app-shell/sidebar-icon";
 import { PageTitle } from "@/components/common/pages/page-title";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { createTranslator } from "@/i18n/translate";
+
+const t = createTranslator("FamilyContacts");
 
 export interface ContactPageHeaderProps {
   personal?: boolean;
@@ -36,8 +39,8 @@ export function ContactPageHeader({
 
   return (
     <PageTitle
-      title={personal ? "Personal Contacts" : "Family Contacts"}
-      badge={`${totalCount} saved`}
+      title={personal ? t("personalTitle") : t("familyTitle")}
+      badge={t("savedCount", { count: totalCount })}
       icon={
         <SidebarIcon
           className="size-6"
@@ -47,11 +50,13 @@ export function ContactPageHeader({
           }}
         />
       }
-      description="Save relatives, neighbors, doctors, lawyers, schools, churches, SACCOs, banks, business partners, and loan contacts."
+      description={personal ? t("personalDescription") : t("description")}
       actions={
         <>
           {emergencyCount > 0 ? (
-            <Badge variant="destructive">{emergencyCount} emergency</Badge>
+            <Badge variant="destructive">
+              {t("emergencyBadge", { count: emergencyCount })}
+            </Badge>
           ) : null}
           <input
             ref={fileInputRef}
@@ -67,11 +72,11 @@ export function ContactPageHeader({
             onClick={() => fileInputRef.current?.click()}
           >
             <FileUpIcon aria-hidden="true" data-icon="inline-start" />
-            {importing ? "Importing..." : "Import contacts"}
+            {importing ? t("importing") : t("importContacts")}
           </Button>
           <Button size="sm" onClick={onAddContact}>
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            Add Contact
+            {t("addContact")}
           </Button>
         </>
       }

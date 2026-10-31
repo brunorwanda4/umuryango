@@ -1,12 +1,18 @@
 import { InfoIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { createTranslator } from "@/i18n/translate";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
 import type { MoneyOverview } from "../money/types";
 import { FamilyActivityFeed } from "./family-activity-feed";
 import { FamilyDashboardSkeleton } from "./family-dashboard-skeleton";
-import { FamilyFinanceDashboard, FamilyQuickActions } from "./family-finance-dashboard";
+import {
+  FamilyFinanceDashboard,
+  FamilyQuickActions,
+} from "./family-finance-dashboard";
 import type { FamilyDetail } from "./types";
+
+const t = createTranslator("FamilyDashboard");
 
 export function FamilyDashboard({
   family,
@@ -17,7 +23,9 @@ export function FamilyDashboard({
   money: MoneyOverview | null;
   moneyMessage?: string;
 }) {
-  const currentMember = family.members.find((member) => member.authority === family.authority);
+  const currentMember = family.members.find(
+    (member) => member.authority === family.authority,
+  );
   const greetingName = currentMember?.fullName.split(" ")[0] ?? family.name;
 
   return (
@@ -25,19 +33,20 @@ export function FamilyDashboard({
       <header className="px-1 pb-1">
         <div className="mt-1 flex flex-wrap items-center gap-3">
           <h1 className="font-fraunces font-semibold text-[clamp(28px,6vw,40px)] leading-[1.1] tracking-[-0.01em]">
-            Welcome back, {greetingName}
+            {t("welcomeBack", { name: greetingName })}
           </h1>
-          <Badge variant="secondary">{AUTHORITY_LABELS[family.authority]}</Badge>
+          <Badge variant="secondary">
+            {AUTHORITY_LABELS[family.authority]}
+          </Badge>
         </div>
       </header>
 
       {moneyMessage ? (
         <Alert>
           <InfoIcon className="size-4" aria-hidden="true" />
-          <AlertTitle>Money records could not load</AlertTitle>
+          <AlertTitle>{t("moneyLoadErrorTitle")}</AlertTitle>
           <AlertDescription>
-            Family profile and member data loaded, but the financial dashboard could not read
-            persisted money records. Detail: {moneyMessage}
+            {t("moneyLoadErrorDescription", { detail: moneyMessage })}
           </AlertDescription>
         </Alert>
       ) : null}

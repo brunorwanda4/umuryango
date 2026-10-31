@@ -46,6 +46,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import { formatDate } from "../utils";
 import { LoanStatusBadge } from "./loan-status-badge";
@@ -77,14 +78,13 @@ export function LoanTable({
   onAction: (loan: LoanRecord, action: LoanAction) => void;
   onAddLoan: () => void;
 }) {
+  const t = createTranslator("FamilyLoans");
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Loan Table and History</CardTitle>
-        <CardDescription>
-          Borrowed money, lent money, repayment balances, due dates, approvals,
-          and loan actions.
-        </CardDescription>
+        <CardTitle>{t("tableTitle")}</CardTitle>
+        <CardDescription>{t("tableDesc")}</CardDescription>
       </CardHeader>
       <CardContent>
         {loans.length ? (
@@ -92,17 +92,19 @@ export function LoanTable({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Loan Title</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Borrower</TableHead>
-                  <TableHead>Lender</TableHead>
-                  <TableHead>Original Amount</TableHead>
-                  <TableHead>Paid Amount</TableHead>
-                  <TableHead>Remaining Balance</TableHead>
-                  <TableHead>Due Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t("colDate")}</TableHead>
+                  <TableHead>{t("colLoanTitle")}</TableHead>
+                  <TableHead>{t("colType")}</TableHead>
+                  <TableHead>{t("colBorrower")}</TableHead>
+                  <TableHead>{t("colLender")}</TableHead>
+                  <TableHead>{t("colOriginalAmount")}</TableHead>
+                  <TableHead>{t("colPaidAmount")}</TableHead>
+                  <TableHead>{t("colRemainingBalance")}</TableHead>
+                  <TableHead>{t("colDueDate")}</TableHead>
+                  <TableHead>{t("colStatus")}</TableHead>
+                  <TableHead className="text-right">
+                    {t("colActions")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -167,7 +169,9 @@ export function LoanTable({
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
-                              aria-label={`Open actions for ${loan.title}`}
+                              aria-label={t("openActionsAria", {
+                                title: loan.title,
+                              })}
                               variant="ghost"
                               size="icon"
                             >
@@ -179,7 +183,7 @@ export function LoanTable({
                               onClick={() => onAction(loan, "view")}
                             >
                               <EyeIcon className="mr-2 size-4" />
-                              View
+                              {t("viewAction")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={completed || !canManageLoans}
@@ -190,27 +194,27 @@ export function LoanTable({
                               ) : (
                                 <PencilIcon className="mr-2 size-4" />
                               )}
-                              Edit
+                              {t("editAction")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={completed || !canManageLoans}
                               onClick={() => onAction(loan, "repayment")}
                             >
                               <PlusIcon className="mr-2 size-4" />
-                              Add Repayment
+                              {t("addRepaymentAction")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => onAction(loan, "history")}
                             >
                               <HistoryIcon className="mr-2 size-4" />
-                              View Repayment History
+                              {t("historyAction")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={!canManageLoans}
                               onClick={() => onAction(loan, "document")}
                             >
                               <UploadIcon className="mr-2 size-4" />
-                              Attach Document
+                              {t("documentAction")}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -218,14 +222,14 @@ export function LoanTable({
                               onClick={() => onAction(loan, "approval")}
                             >
                               <SendIcon className="mr-2 size-4" />
-                              Send for Approval
+                              {t("approvalAction")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={completed || !canManageLoans}
                               onClick={() => onAction(loan, "complete")}
                             >
                               <CheckCircle2Icon className="mr-2 size-4" />
-                              Mark as Completed
+                              {t("completeAction")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={
@@ -239,7 +243,7 @@ export function LoanTable({
                               onClick={() => onAction(loan, "delete")}
                             >
                               <Trash2Icon className="mr-2 size-4" />
-                              Delete if allowed
+                              {t("deleteAction")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -256,22 +260,18 @@ export function LoanTable({
               <EmptyMedia variant="icon">
                 <FileClockIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>No loans recorded yet</EmptyTitle>
-              <EmptyDescription>
-                Track money borrowed, money lent, repayments, and due dates so
-                the family always knows what is owed and what has been paid.
-              </EmptyDescription>
+              <EmptyTitle>{t("noLoansTitle")}</EmptyTitle>
+              <EmptyDescription>{t("noLoansDesc")}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               {canManageLoans ? (
                 <Button size="sm" onClick={onAddLoan}>
                   <PlusIcon aria-hidden="true" data-icon="inline-start" />
-                  Add Loan
+                  {t("createTitle")}
                 </Button>
               ) : (
                 <span className="text-muted-foreground text-sm">
-                  You can view loan records for {family.name} when they are
-                  available.
+                  {t("viewLoansForFamily", { family: family.name })}
                 </span>
               )}
             </EmptyContent>

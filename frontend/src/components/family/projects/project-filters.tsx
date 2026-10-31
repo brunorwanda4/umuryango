@@ -7,7 +7,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 import type { ProjectStatusFilter } from "./types";
+
+const t = createTranslator("FamilyProjects");
 
 export function ProjectFilters({
   onStatusChange,
@@ -26,9 +29,9 @@ export function ProjectFilters({
           aria-hidden="true"
         />
         <div>
-          <p className="font-medium text-sm">Project status</p>
+          <p className="font-medium text-sm">{t("projectStatus")}</p>
           <p className="text-muted-foreground text-xs">
-            Current view: {statusLabel}
+            {t("currentView", { status: statusLabel })}
           </p>
         </div>
       </div>
@@ -36,15 +39,18 @@ export function ProjectFilters({
         value={status}
         onValueChange={(value) => onStatusChange(value as ProjectStatusFilter)}
       >
-        <SelectTrigger className="w-full sm:w-44" aria-label="Project status">
+        <SelectTrigger
+          className="w-full sm:w-44"
+          aria-label={t("projectStatus")}
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="planned">Planned</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="all">All projects</SelectItem>
+            <SelectItem value="active">{t("statusActive")}</SelectItem>
+            <SelectItem value="planned">{t("statusPlanned")}</SelectItem>
+            <SelectItem value="completed">{t("statusCompleted")}</SelectItem>
+            <SelectItem value="all">{t("statusAll")}</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>

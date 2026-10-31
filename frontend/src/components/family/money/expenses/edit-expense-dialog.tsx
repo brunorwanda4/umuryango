@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import { ExpenseFormFields } from "./expense-form-fields";
 import { withLinkedContext } from "./expense-utils";
@@ -37,6 +38,7 @@ export function EditExpenseDialog({
   transaction: ExpenseTransaction | null;
   onSuccess: () => void;
 }) {
+  const t = createTranslator("FamilyExpenses");
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     ExpenseFormValues,
     ExpenseTransaction
@@ -76,7 +78,7 @@ export function EditExpenseDialog({
         family.id,
       )}/money/transactions/${transaction?.id}`,
     },
-    onSuccessMessage: "Expense updated successfully",
+    onSuccessMessage: t("toasts.updatedSuccess"),
     toastOnSuccess: true,
     onSuccess: () => {
       onOpenChange(false);
@@ -113,11 +115,8 @@ export function EditExpenseDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Edit Expense Record</DialogTitle>
-          <DialogDescription>
-            Approved expenses are locked for normal users. Changes are captured
-            in the family audit trail.
-          </DialogDescription>
+          <DialogTitle>{t("dialogs.editTitle")}</DialogTitle>
+          <DialogDescription>{t("dialogs.editDesc")}</DialogDescription>
         </DialogHeader>
 
         <form
@@ -143,7 +142,7 @@ export function EditExpenseDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending ? "Saving changes..." : "Save changes"}
+            {isPending ? t("dialogs.saving") : t("dialogs.saveChanges")}
           </Button>
         </DialogFooter>
       </DialogContent>

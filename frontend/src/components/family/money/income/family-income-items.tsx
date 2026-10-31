@@ -9,6 +9,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { createTranslator } from "@/i18n/translate";
 import { FamilyIncomeItem } from "./family-income-item";
 import type { IncomeAction } from "./income-actions-dropdown";
 import type { IncomeTransaction } from "./types-and-schemas";
@@ -30,6 +31,8 @@ export function FamilyIncomeItems({
   handleActionClick,
   handleSendApproval,
 }: FamilyIncomeItemsProps) {
+  const t = createTranslator("FamilyIncome");
+
   if (data.length === 0) {
     return (
       <div className="px-5 pb-5 sm:px-6">
@@ -38,11 +41,8 @@ export function FamilyIncomeItems({
             <EmptyMedia variant="icon">
               <SearchIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>No income found</EmptyTitle>
-            <EmptyDescription>
-              Try another search term or filter to find matching family income
-              records.
-            </EmptyDescription>
+            <EmptyTitle>{t("panels.noIncomeFound")}</EmptyTitle>
+            <EmptyDescription>{t("panels.noIncomeFoundDesc")}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>

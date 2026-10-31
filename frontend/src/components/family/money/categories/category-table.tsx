@@ -34,6 +34,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createTranslator } from "@/i18n/translate";
 import { formatDate } from "../utils";
 import { CategoryIcon } from "./category-icon";
 import { CategorySearch } from "./category-search";
@@ -68,10 +69,12 @@ export function CategoryTable({
   search: string;
   onSearchChange: (value: string) => void;
 }) {
+  const t = createTranslator("FamilyCategories");
+
   return (
     <Card className="min-w-0">
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle>Category master data</CardTitle>
+        <CardTitle>{t("masterDataTitle")}</CardTitle>
         <CategorySearch
           value={search}
           onChange={onSearchChange}
@@ -86,7 +89,7 @@ export function CategoryTable({
           <CategoryCardSkeleton />
         ) : categories.length ? (
           <section
-            aria-label="Category list"
+            aria-label={t("categoryListAria")}
             className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3"
           >
             {categories.map((category) => (
@@ -106,11 +109,8 @@ export function CategoryTable({
               <EmptyMedia variant="icon">
                 <FolderCogIcon aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle>No categories found</EmptyTitle>
-              <EmptyDescription>
-                Adjust the filters or create a category for income, expenses,
-                budgets, receipts, and reports.
-              </EmptyDescription>
+              <EmptyTitle>{t("table.noCategoriesTitle")}</EmptyTitle>
+              <EmptyDescription>{t("table.noCategoriesDesc")}</EmptyDescription>
             </EmptyHeader>
           </Empty>
         )}
@@ -132,6 +132,8 @@ function CategoryCard({
   onDelete?: (category: MoneyCategory) => void;
   onEdit: (category: MoneyCategory) => void;
 }) {
+  const t = createTranslator("FamilyCategories");
+
   return (
     <Card className="min-w-0" size="sm">
       <CardHeader className="gap-3">
@@ -141,11 +143,11 @@ function CategoryCard({
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <CardTitle className="truncate">{category.name}</CardTitle>
               {category.isDefault ? (
-                <Badge variant="secondary">Default</Badge>
+                <Badge variant="secondary">{t("defaultBadge")}</Badge>
               ) : null}
             </div>
             <CardDescription className="mt-1 truncate">
-              Created by {category.createdBy}
+              {t("createdBy", { name: category.createdBy })}
             </CardDescription>
           </div>
         </div>
@@ -174,21 +176,21 @@ function CategoryCard({
         </p>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <CategoryMetric
-            label="Transactions"
+            label={t("metricTransactions")}
             value={categoryCountFormatter.format(category.transactionsCount)}
           />
           <CategoryMetric
-            label="Total amount"
+            label={t("metricTotalAmount")}
             value={
               <CompactMoney
                 currency={currency}
-                emptyLabel="No records"
+                emptyLabel={t("noRecords")}
                 value={category.totalMinorUnits}
               />
             }
           />
           <CategoryMetric
-            label="Last updated"
+            label={t("metricLastUpdated")}
             value={formatDate(category.updatedAt)}
           />
         </dl>
@@ -217,11 +219,13 @@ function CategoryActions({
   onDelete?: (category: MoneyCategory) => void;
   onEdit: (category: MoneyCategory) => void;
 }) {
+  const t = createTranslator("FamilyCategories");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          aria-label={`Open actions for ${category.name}`}
+          aria-label={t("actionsAria", { name: category.name })}
           size="icon-sm"
           variant="ghost"
         >
@@ -229,11 +233,11 @@ function CategoryActions({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className=" min-w-40">
-        <DropdownMenuLabel>Category actions</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("categoryActions")}</DropdownMenuLabel>
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={() => onEdit(category)}>
             <PencilIcon aria-hidden="true" data-icon="inline-start" />
-            Edit category
+            {t("table.edit")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() =>
@@ -244,7 +248,9 @@ function CategoryActions({
             }
           >
             <ArchiveIcon aria-hidden="true" data-icon="inline-start" />
-            {category.status === "ACTIVE" ? "Archive" : "Activate"}
+            {category.status === "ACTIVE"
+              ? t("archiveAction")
+              : t("activateAction")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
         {onDelete ? (
@@ -256,7 +262,7 @@ function CategoryActions({
                 onSelect={() => onDelete(category)}
               >
                 <Trash2Icon aria-hidden="true" data-icon="inline-start" />
-                Delete category
+                {t("table.delete")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </>

@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { type FamilyCapability, hasCapability } from "@/lib/family-access";
 import type { MoneyOverview } from "./types";
 
@@ -23,6 +24,7 @@ export function MoneyOperationsGrid({
   family: FamilyDetail;
   money: MoneyOverview | null;
 }) {
+  const t = createTranslator("FamilyMoney");
   const pendingApprovalCount = money?.totals?.pendingApprovalCount;
   const overdueCount = money?.totals?.overdueCount;
   const items: {
@@ -33,34 +35,34 @@ export function MoneyOperationsGrid({
     capability?: FamilyCapability;
   }[] = [
     {
-      title: "Pending approvals",
-      description: "Expenses, income, and corrections waiting for review.",
+      title: t("pendingApprovalsTitle"),
+      description: t("pendingApprovalsDesc"),
       value:
         typeof pendingApprovalCount === "number"
           ? pendingApprovalCount.toLocaleString()
-          : "No queue",
+          : t("noQueue"),
       icon: FileClockIcon,
       capability: "APPROVE_EXPENSE",
     },
     {
-      title: "Overdue money work",
-      description: "Debts, contributions, or budget reviews past due.",
+      title: t("overdueWorkTitle"),
+      description: t("overdueWorkDesc"),
       value:
         typeof overdueCount === "number"
           ? overdueCount.toLocaleString()
-          : "None",
+          : t("none"),
       icon: AlertCircleIcon,
     },
     {
-      title: "Audit readiness",
-      description: "Sensitive money changes require backend audit records.",
-      value: money?.generatedAt ? "Traceable" : "Pending API",
+      title: t("auditReadinessTitle"),
+      description: t("auditReadinessDesc"),
+      value: money?.generatedAt ? t("traceable") : t("pendingApi"),
       icon: ShieldCheckIcon,
     },
     {
-      title: "Report source",
-      description: "Reports must be generated from persisted records.",
-      value: `${money?.sourceRecordCount ?? 0} records`,
+      title: t("reportSourceTitle"),
+      description: t("reportSourceDesc"),
+      value: t("recordsCount", { count: money?.sourceRecordCount ?? 0 }),
       icon: CheckCircle2Icon,
       capability: "VIEW_REPORTS",
     },
@@ -68,7 +70,7 @@ export function MoneyOperationsGrid({
 
   return (
     <section
-      aria-label="Money operations"
+      aria-label={t("operationsAria")}
       className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       {items

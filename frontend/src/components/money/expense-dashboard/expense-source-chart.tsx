@@ -8,6 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { createTranslator } from "@/i18n/translate";
 import { formatFullMinorUnits } from "@/lib/format-compact-number";
 import type { ExpenseSourceDatum } from "./expense-dashboard-data";
 import { ExpenseSourceLegend } from "./expense-source-legend";
@@ -20,6 +21,8 @@ export function ExpenseSourceChart({
   data: ExpenseSourceDatum[];
   totalExpenseMinorUnits: string;
 }) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
+
   const sourceChartConfig = data.reduce<ChartConfig>((config, source) => {
     config[source.name] = {
       color: source.color,
@@ -31,7 +34,7 @@ export function ExpenseSourceChart({
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="px-5 pt-5 pb-0 sm:px-6 sm:pt-6">
         <CardTitle className="font-bold text-base">
-          Expenses by category
+          {t("charts.byCategoryTitle")}
         </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 px-5 pb-5 sm:px-6 lg:grid-cols-[minmax(13rem,1fr)_auto] lg:items-center">
@@ -71,7 +74,7 @@ export function ExpenseSourceChart({
               dominantBaseline="middle"
               className="fill-muted-foreground text-sm"
             >
-              Total
+              {t("charts.total")}
             </text>
             <ChartTooltip
               content={

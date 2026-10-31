@@ -1,19 +1,5 @@
-import {
-  ArchiveIcon,
-  BanknoteIcon,
-  CircleIcon,
-  FolderCogIcon,
-  UtensilsIcon,
-} from "lucide-react";
-import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
-import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import type { getCategoryStats } from "./types-and-constants";
 
 export function CategoryStatsCards({
@@ -21,34 +7,36 @@ export function CategoryStatsCards({
 }: {
   stats: ReturnType<typeof getCategoryStats>;
 }) {
+  const t = createTranslator("FamilyCategories");
+
   const cards = [
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: "Total Categories",
+      description: t("stats.totalCategories"),
       iconImage: "/images/icons/application.png",
       value: <span className="tabular-nums"> {stats.total}</span>,
     },
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: "Income Categories",
+      description: t("stats.incomeCategories"),
       iconImage: "/images/icons/income.png",
       value: <span className="tabular-nums"> {stats.income}</span>,
     },
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: "Expense Categories",
+      description: t("stats.expenseCategories"),
       iconImage: "/images/icons/expense.png",
       value: <span className="tabular-nums"> {stats.expense}</span>,
     },
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: "Active Categories",
+      description: t("statsActiveCategories"),
       iconImage: "/images/icons/checklist.png",
       value: <span className="tabular-nums"> {stats.active}</span>,
     },
     {
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
-      description: "Inactive Categories",
+      description: t("statsInactiveCategories"),
       iconImage: "/images/icons/sleep.png",
       value: <span className="tabular-nums"> {stats.inactive}</span>,
     },

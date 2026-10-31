@@ -1,5 +1,6 @@
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
+import { createTranslator } from "@/i18n/translate";
 import type { MoneyOverview } from "./types";
 
 export function MoneyMetricCards({
@@ -11,11 +12,12 @@ export function MoneyMetricCards({
   money: MoneyOverview | null;
   familySlug: string;
 }) {
+  const t = createTranslator("FamilyMoney");
   const totals = money?.totals;
   const moneyHref = `/family/${encodeURIComponent(familySlug)}/money`;
   const cards = [
     {
-      description: "Cash balance",
+      description: t("cashBalance"),
       value: (
         <CompactMoney
           currency={currency}
@@ -28,7 +30,7 @@ export function MoneyMetricCards({
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Income",
+      description: t("income"),
       value: (
         <CompactMoney
           currency={currency}
@@ -41,7 +43,7 @@ export function MoneyMetricCards({
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Expenses",
+      description: t("expenses"),
       value: (
         <CompactMoney
           currency={currency}
@@ -54,7 +56,7 @@ export function MoneyMetricCards({
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Savings",
+      description: t("savings"),
       value: (
         <CompactMoney
           currency={currency}
@@ -66,7 +68,7 @@ export function MoneyMetricCards({
       className: "rounded-2xl border-border/80 py-0 shadow-sm",
     },
     {
-      description: "Debts",
+      description: t("debts"),
       value: (
         <CompactMoney
           currency={currency}

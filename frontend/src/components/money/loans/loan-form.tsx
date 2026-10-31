@@ -28,6 +28,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import { PersonSelector } from "./person-selector";
 import {
   type LoanCategory,
@@ -64,6 +65,7 @@ export function LoanForm({
   onSuccess: () => void;
   open: boolean;
 }) {
+  const t = createTranslator("PersonalLoans");
   const [additionalOpen, setAdditionalOpen] = useState(false);
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     PersonalLoanFormValues,
@@ -104,7 +106,7 @@ export function LoanForm({
       method: "post",
       url: `/families/${encodeURIComponent(familyId)}/money/loans/personal`,
     },
-    onSuccessMessage: "Loan added",
+    onSuccessMessage: t("form.loanAddedToast"),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -134,10 +136,8 @@ export function LoanForm({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Add new loan</DialogTitle>
-          <DialogDescription>
-            Track money borrowed from or lent to one trusted person.
-          </DialogDescription>
+          <DialogTitle>{t("form.addLoanTitle")}</DialogTitle>
+          <DialogDescription>{t("form.addLoanDesc")}</DialogDescription>
         </DialogHeader>
         <form
           id="personal-loan-form"
@@ -151,8 +151,8 @@ export function LoanForm({
             <CommonFormField
               control={form.control}
               name="title"
-              label="Loan title"
-              placeholder="e.g. School fees support"
+              label={t("form.title")}
+              placeholder={t("form.titlePlaceholder")}
               required
             />
           </div>
@@ -162,7 +162,8 @@ export function LoanForm({
             render={({ field, fieldState }) => (
               <FieldSet data-invalid={Boolean(fieldState.error)}>
                 <FieldLegend variant="label">
-                  Loan type <span className="text-destructive">*</span>
+                  {t("form.loanType")}{" "}
+                  <span className="text-destructive">*</span>
                 </FieldLegend>
                 <RadioGroup
                   value={field.value}
@@ -174,8 +175,8 @@ export function LoanForm({
                   className="grid grid-cols-2 gap-3"
                 >
                   {[
-                    { label: "Borrowed", value: "BORROWED" },
-                    { label: "Lent", value: "LENT" },
+                    { label: t("form.borrowed"), value: "BORROWED" },
+                    { label: t("form.lent"), value: "LENT" },
                   ].map((option) => {
                     const id = `loan-type-${option.value.toLowerCase()}`;
 
@@ -198,7 +199,7 @@ export function LoanForm({
           <CommonFormField
             control={form.control}
             name="amountMinorUnits"
-            label="Amount"
+            label={t("form.amount")}
             fieldType="money"
             currency={currency}
             required
@@ -220,14 +221,14 @@ export function LoanForm({
           <CommonFormField
             control={form.control}
             name="startDate"
-            label="Start date"
+            label={t("form.startDate")}
             fieldType="date"
             required
           />
           <CommonFormField
             control={form.control}
             name="dueDate"
-            label="Due date"
+            label={t("form.dueDate")}
             fieldType="date"
             inputProps={{ min: form.watch("startDate") }}
             required
@@ -236,9 +237,9 @@ export function LoanForm({
             <CommonFormField
               control={form.control}
               name="notes"
-              label="Note"
+              label={t("form.note")}
               fieldType="textarea"
-              placeholder="Optional context or repayment agreement"
+              placeholder={t("form.notePlaceholder")}
             />
           </div>
 
@@ -253,7 +254,7 @@ export function LoanForm({
                 variant="outline"
                 className="w-full justify-between"
               >
-                Additional details
+                {t("form.additionalDetails")}
                 <ChevronDownIcon
                   aria-hidden="true"
                   data-icon="inline-end"
@@ -270,24 +271,30 @@ export function LoanForm({
                 <CommonFormField
                   control={form.control}
                   name="repaymentFrequency"
-                  label="Repayment frequency"
+                  label={t("form.repaymentFrequency")}
                   fieldType="select"
                   selectOptions={[
-                    { label: "One-time", value: "ONCE" },
-                    { label: "Weekly", value: "WEEKLY" },
-                    { label: "Every two weeks", value: "BIWEEKLY" },
-                    { label: "Monthly", value: "MONTHLY" },
-                    { label: "Quarterly", value: "QUARTERLY" },
-                    { label: "Yearly", value: "YEARLY" },
+                    { label: t("form.frequencies.once"), value: "ONCE" },
+                    { label: t("form.frequencies.weekly"), value: "WEEKLY" },
+                    {
+                      label: t("form.frequencies.biweekly"),
+                      value: "BIWEEKLY",
+                    },
+                    { label: t("form.frequencies.monthly"), value: "MONTHLY" },
+                    {
+                      label: t("form.frequencies.quarterly"),
+                      value: "QUARTERLY",
+                    },
+                    { label: t("form.frequencies.yearly"), value: "YEARLY" },
                   ]}
                 />
                 {categoryOptions.length ? (
                   <CommonFormField
                     control={form.control}
                     name="categoryId"
-                    label="Category"
+                    label={t("form.category")}
                     fieldType="select"
-                    placeholder="No category"
+                    placeholder={t("form.noCategory")}
                     selectOptions={categoryOptions}
                   />
                 ) : null}
@@ -295,7 +302,7 @@ export function LoanForm({
               <CommonFormField
                 control={form.control}
                 name="useInterest"
-                label="Use optional simple interest"
+                label={t("form.useInterest")}
                 fieldType="custom"
                 fieldClassName="rounded-2xl border p-4"
                 render={({ field, id }) => (
@@ -310,8 +317,8 @@ export function LoanForm({
                 <CommonFormField
                   control={form.control}
                   name="interestRate"
-                  label="Interest rate (%)"
-                  placeholder="e.g. 5"
+                  label={t("form.interestRate")}
+                  placeholder={t("form.interestPlaceholder")}
                   inputProps={{ inputMode: "decimal" }}
                   required
                 />
@@ -327,7 +334,7 @@ export function LoanForm({
             className="w-full sm:w-auto"
           >
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            {isPending ? "Adding..." : "Add loan"}
+            {isPending ? t("form.adding") : t("form.submitAdd")}
           </Button>
         </DialogFooter>
       </DialogContent>

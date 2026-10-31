@@ -1,6 +1,12 @@
-import { ArrowUpRightIcon, CalendarDaysIcon, TrophyIcon, WalletCardsIcon } from "lucide-react";
+import {
+  ArrowUpRightIcon,
+  CalendarDaysIcon,
+  TrophyIcon,
+  WalletCardsIcon,
+} from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
+import { createTranslator } from "@/i18n/translate";
 
 export function IncomeSummaryCards({
   summary,
@@ -16,6 +22,8 @@ export function IncomeSummaryCards({
     periodTotalMinorUnits: string;
   };
 }) {
+  const t = createTranslator("PersonalMoney.personalIncome");
+
   return (
     <CommonOverviewCardDisplay
       cardDescriptionClassName="flex items-center text-sm font-medium leading-5 text-muted-foreground max-sm:text-sm max-sm:font-medium "
@@ -26,16 +34,21 @@ export function IncomeSummaryCards({
       cards={[
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Total income",
+          description: t("summary.totalIncome"),
           iconSource: {
             image: { src: "/images/icons/wallet.png" },
             line: WalletCardsIcon,
           },
-          value: <CompactMoney currency="RWF" value={summary.allTimeTotalMinorUnits} />,
+          value: (
+            <CompactMoney
+              currency="RWF"
+              value={summary.allTimeTotalMinorUnits}
+            />
+          ),
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Income transactions",
+          description: t("summary.incomeTransactions"),
           iconSource: {
             image: { src: "/images/icons/transaction.png" },
             line: ArrowUpRightIcon,
@@ -44,16 +57,21 @@ export function IncomeSummaryCards({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "This month's",
+          description: t("summary.thisMonth"),
           iconSource: {
             image: { src: "/images/icons/calendar.png" },
             line: CalendarDaysIcon,
           },
-          value: <CompactMoney currency="RWF" value={summary.periodTotalMinorUnits} />,
+          value: (
+            <CompactMoney
+              currency="RWF"
+              value={summary.periodTotalMinorUnits}
+            />
+          ),
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Largest income",
+          description: t("summary.largestIncome"),
           iconSource: {
             image: { src: "/images/icons/quality.png" },
             line: TrophyIcon,
@@ -61,7 +79,7 @@ export function IncomeSummaryCards({
           value: (
             <CompactMoney
               currency="RWF"
-              emptyLabel="No records"
+              emptyLabel={t("summary.noRecords")}
               value={summary.largestIncome?.amountMinorUnits}
             />
           ),

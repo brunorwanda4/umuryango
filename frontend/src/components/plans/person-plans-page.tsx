@@ -24,6 +24,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { PersonPlanDetailsSheet } from "./person-plan-details-sheet";
 import { PersonPlanForm } from "./person-plan-form";
@@ -60,6 +61,7 @@ function PlansSkeleton() {
 }
 
 export function PersonPlansPage() {
+  const t = createTranslator("PersonalPlans");
   const [person, setPerson] = useState<PlanPerson | null>(null);
   const [plans, setPlans] = useState<PersonPlan[]>([]);
   const [filters, setFilters] = useState<PlanFilters>(EMPTY_PLAN_FILTERS);
@@ -138,14 +140,16 @@ export function PersonPlansPage() {
       { status },
     );
     if (!response.ok) {
-      toast.error("Plan could not be updated", {
+      toast.error(t("toasts.updateFailed"), {
         description: response.message,
       });
       void load(detailsPlan?.id);
       return;
     }
     toast.success(
-      status === "COMPLETED" ? "Plan completed" : "Plan marked incomplete",
+      status === "COMPLETED"
+        ? t("toasts.planCompleted")
+        : t("toasts.planIncomplete"),
     );
     void load(detailsPlan?.id);
   };
@@ -159,12 +163,12 @@ export function PersonPlansPage() {
     );
     setDeleting(false);
     if (!response.ok) {
-      toast.error("Plan could not be deleted", {
+      toast.error(t("toasts.deleteFailed"), {
         description: response.message,
       });
       return;
     }
-    toast.success("Plan deleted");
+    toast.success(t("toasts.planDeleted"));
     setDeletePlan(null);
     setDetailsPlan(null);
     void load();
@@ -176,10 +180,8 @@ export function PersonPlansPage() {
       <div className="flex flex-col gap-4">
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
-          <AlertTitle>Plans could not load</AlertTitle>
-          <AlertDescription>
-            {error ?? "Person profile not found."}
-          </AlertDescription>
+          <AlertTitle>{t("loadErrorTitle")}</AlertTitle>
+          <AlertDescription>{error ?? t("personNotFound")}</AlertDescription>
         </Alert>
         <Button
           variant="outline"
@@ -189,7 +191,7 @@ export function PersonPlansPage() {
             void load();
           }}
         >
-          Try again
+          {t("tryAgain")}
         </Button>
       </div>
     );
@@ -206,16 +208,15 @@ export function PersonPlansPage() {
             <EmptyMedia variant="icon">
               <ListChecksIcon aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>No plans for {firstName}</EmptyTitle>
+            <EmptyTitle>{t("noPlansTitle", { name: firstName })}</EmptyTitle>
             <EmptyDescription>
-              Add a task for today or create an important long-term goal for{" "}
-              {firstName}.
+              {t("noPlansDesc", { name: firstName })}
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button onClick={() => openCreate()}>
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              Add first plan
+              {t("addFirstPlan")}
             </Button>
           </EmptyContent>
         </Empty>
@@ -261,14 +262,15 @@ export function PersonPlansPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this plan?</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This removes the plan from the active personal plan list.
-              Financial history is not hard-deleted.
+              {t("deleteConfirmDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              {t("cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               disabled={deleting}
@@ -277,7 +279,7 @@ export function PersonPlansPage() {
                 void confirmDelete();
               }}
             >
-              {deleting ? "Deleting..." : "Delete plan"}
+              {deleting ? t("deleting") : t("deletePlan")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

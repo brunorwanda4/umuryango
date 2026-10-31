@@ -11,6 +11,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { createTranslator } from "@/i18n/translate";
 import { serverApiRequest } from "@/service/server-api";
 
 async function getDashboardPageData(familyName: string) {
@@ -56,6 +57,7 @@ export default async function FamilyDashboardPage({
 }) {
   const { familyName } = await params;
   const data = await getDashboardPageData(familyName);
+  const t = createTranslator("FamilyDashboard");
 
   if (!data.family) {
     return (
@@ -64,10 +66,10 @@ export default async function FamilyDashboardPage({
           <EmptyMedia variant="icon">
             <UsersIcon aria-hidden="true" />
           </EmptyMedia>
-          <EmptyTitle>Family not found</EmptyTitle>
+          <EmptyTitle>{t("familyNotFound")}</EmptyTitle>
           <EmptyDescription>
-            {data.error} You may not have access, or it no longer exists.{" "}
-            <Link href="/family">Back to your families</Link>
+            {t("familyNotFoundDesc", { error: data.error ?? "" })}{" "}
+            <Link href="/family">{t("backToFamilies")}</Link>
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

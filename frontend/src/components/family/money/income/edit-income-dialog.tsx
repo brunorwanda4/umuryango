@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyContact } from "../../contacts/types-and-schemas";
 import type { FamilyDetail } from "../../dashboard/types";
 import { IncomeFormFields } from "./income-form-fields";
@@ -40,6 +41,7 @@ export function EditIncomeDialog({
   onContactsChanged: (contact?: FamilyContact) => void | Promise<void>;
   onSuccess: () => void;
 }) {
+  const t = createTranslator("FamilyIncome");
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     TransactionFormValues,
     IncomeTransaction
@@ -112,7 +114,7 @@ export function EditIncomeDialog({
       method: "patch",
       url: `/families/${encodeURIComponent(family.id)}/money/transactions/${transaction?.id}`,
     },
-    onSuccessMessage: "Income transaction updated successfully",
+    onSuccessMessage: t("toasts.updatedSuccess"),
     toastOnSuccess: true,
     onSuccess: () => {
       onOpenChange(false);
@@ -162,11 +164,8 @@ export function EditIncomeDialog({
     >
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Edit Income Record</DialogTitle>
-          <DialogDescription>
-            Update the transaction details. Keep in mind edits generate audit
-            logs.
-          </DialogDescription>
+          <DialogTitle>{t("dialogs.editTitle")}</DialogTitle>
+          <DialogDescription>{t("dialogs.editDesc")}</DialogDescription>
         </DialogHeader>
 
         <form
@@ -196,7 +195,7 @@ export function EditIncomeDialog({
             disabled={isPending}
             className="w-full"
           >
-            {isPending ? "Saving changes..." : "Save changes"}
+            {isPending ? t("dialogs.saving") : t("dialogs.savingChanges")}
           </Button>
         </DialogFooter>
       </DialogContent>

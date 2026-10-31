@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import type { MoneySummary } from "./types";
 
 interface MoneySummaryCardsProps {
@@ -23,29 +24,31 @@ export function MoneySummaryCards({
   currency,
   summary,
 }: MoneySummaryCardsProps) {
+  const t = createTranslator("PersonalMoney.legacyTabs.summaryCards");
+
   const cards = [
     {
-      description: "Total income",
+      description: t("totalIncome"),
       icon: ArrowDownIcon,
       value: summary.totalIncomeMinorUnits,
     },
     {
-      description: "Total expenses",
+      description: t("totalExpenses"),
       icon: ArrowUpIcon,
       value: summary.totalExpensesMinorUnits,
     },
     {
-      description: "Balance",
+      description: t("balance"),
       icon: WalletCardsIcon,
       value: summary.balanceMinorUnits,
     },
     {
-      description: "Savings",
+      description: t("savings"),
       icon: PiggyBankIcon,
       value: summary.savingsMinorUnits,
     },
     {
-      description: "Debts",
+      description: t("debts"),
       icon: LandmarkIcon,
       value: summary.debtsMinorUnits,
     },

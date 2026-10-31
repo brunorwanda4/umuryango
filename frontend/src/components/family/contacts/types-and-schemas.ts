@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { createTranslator } from "@/i18n/translate";
+
+const t = createTranslator("FamilyContacts");
 
 export type FamilyContactType =
   | "RELATIVE"
@@ -119,6 +122,9 @@ export const contactFormSchema = z.object({
 export type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 export function contactTypeLabel(type: string) {
+  const key = `types.${type}`;
+  const translated = t(key);
+  if (translated !== `FamilyContacts.${key}`) return translated;
   return (
     contactTypeOptions.find((option) => option.value === type)?.label ??
     type.replace(/_/g, " ")

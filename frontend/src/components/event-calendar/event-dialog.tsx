@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { format, isBefore } from "date-fns";
 import { CalendarIcon, Trash2Icon } from "lucide-react";
@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 
 interface EventDialogProps {
@@ -55,6 +56,7 @@ export function EventDialog({
   onSave,
   onDelete,
 }: EventDialogProps) {
+  const t = createTranslator("EventCalendar");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState<Date>(new Date());
@@ -141,9 +143,7 @@ export function EventDialog({
         endHours < StartHour ||
         endHours > EndHour
       ) {
-        setError(
-          `Selected time must be between ${StartHour}:00 and ${EndHour}:00`,
-        );
+        setError(t("timeRangeError", { start: StartHour, end: EndHour }));
         return;
       }
 
@@ -156,12 +156,12 @@ export function EventDialog({
 
     // Validate that end date is not before start date
     if (isBefore(end, start)) {
-      setError("End date cannot be before start date");
+      setError(t("endDateBeforeStartError"));
       return;
     }
 
     // Use generic title if empty
-    const eventTitle = title.trim() ? title : "(no title)";
+    const eventTitle = title.trim() ? title : t("noTitle");
 
     onSave({
       allDay,
@@ -191,37 +191,37 @@ export function EventDialog({
     {
       bgClass: "bg-sky-400 data-[state=checked]:bg-sky-400",
       borderClass: "border-sky-400 data-[state=checked]:border-sky-400",
-      label: "Sky",
+      label: t("colors.sky"),
       value: "sky",
     },
     {
       bgClass: "bg-amber-400 data-[state=checked]:bg-amber-400",
       borderClass: "border-amber-400 data-[state=checked]:border-amber-400",
-      label: "Amber",
+      label: t("colors.amber"),
       value: "amber",
     },
     {
       bgClass: "bg-violet-400 data-[state=checked]:bg-violet-400",
       borderClass: "border-violet-400 data-[state=checked]:border-violet-400",
-      label: "Violet",
+      label: t("colors.violet"),
       value: "violet",
     },
     {
       bgClass: "bg-rose-400 data-[state=checked]:bg-rose-400",
       borderClass: "border-rose-400 data-[state=checked]:border-rose-400",
-      label: "Rose",
+      label: t("colors.rose"),
       value: "rose",
     },
     {
       bgClass: "bg-emerald-400 data-[state=checked]:bg-emerald-400",
       borderClass: "border-emerald-400 data-[state=checked]:border-emerald-400",
-      label: "Emerald",
+      label: t("colors.emerald"),
       value: "emerald",
     },
     {
       bgClass: "bg-orange-400 data-[state=checked]:bg-orange-400",
       borderClass: "border-orange-400 data-[state=checked]:border-orange-400",
-      label: "Orange",
+      label: t("colors.orange"),
       value: "orange",
     },
   ];
@@ -230,11 +230,11 @@ export function EventDialog({
     <Dialog onOpenChange={(open) => !open && onClose()} open={isOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{event?.id ? "Edit Event" : "Create Event"}</DialogTitle>
+          <DialogTitle>
+            {event?.id ? t("editEvent") : t("createEvent")}
+          </DialogTitle>
           <DialogDescription className="sr-only">
-            {event?.id
-              ? "Edit the details of this event"
-              : "Add a new event to your calendar"}
+            {event?.id ? t("editEventDesc") : t("createEventDesc")}
           </DialogDescription>
         </DialogHeader>
         {error && (
@@ -244,7 +244,7 @@ export function EventDialog({
         )}
         <div className="grid gap-4 py-4">
           <div className="*:not-first:mt-1.5">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">{t("title")}</Label>
             <Input
               id="title"
               onChange={(e) => setTitle(e.target.value)}
@@ -253,7 +253,7 @@ export function EventDialog({
           </div>
 
           <div className="*:not-first:mt-1.5">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t("description")}</Label>
             <Textarea
               id="description"
               onChange={(e) => setDescription(e.target.value)}
@@ -264,7 +264,7 @@ export function EventDialog({
 
           <div className="flex gap-4">
             <div className="flex-1 *:not-first:mt-1.5">
-              <Label htmlFor="start-date">Start Date</Label>
+              <Label htmlFor="start-date">{t("startDate")}</Label>
               <Popover onOpenChange={setStartDateOpen} open={startDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -281,7 +281,7 @@ export function EventDialog({
                         !startDate && "text-muted-foreground",
                       )}
                     >
-                      {startDate ? format(startDate, "PPP") : "Pick a date"}
+                      {startDate ? format(startDate, "PPP") : t("pickDate")}
                     </span>
                     <CalendarIcon
                       aria-hidden="true"
@@ -313,10 +313,10 @@ export function EventDialog({
 
             {!allDay && (
               <div className="min-w-28 *:not-first:mt-1.5">
-                <Label htmlFor="start-time">Start Time</Label>
+                <Label htmlFor="start-time">{t("startTime")}</Label>
                 <Select onValueChange={setStartTime} value={startTime}>
                   <SelectTrigger id="start-time">
-                    <SelectValue placeholder="Select time" />
+                    <SelectValue placeholder={t("selectTime")} />
                   </SelectTrigger>
                   <SelectContent>
                     {timeOptions.map((option) => (
@@ -332,7 +332,7 @@ export function EventDialog({
 
           <div className="flex gap-4">
             <div className="flex-1 *:not-first:mt-1.5">
-              <Label htmlFor="end-date">End Date</Label>
+              <Label htmlFor="end-date">{t("endDate")}</Label>
               <Popover onOpenChange={setEndDateOpen} open={endDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -349,7 +349,7 @@ export function EventDialog({
                         !endDate && "text-muted-foreground",
                       )}
                     >
-                      {endDate ? format(endDate, "PPP") : "Pick a date"}
+                      {endDate ? format(endDate, "PPP") : t("pickDate")}
                     </span>
                     <CalendarIcon
                       aria-hidden="true"
@@ -378,10 +378,10 @@ export function EventDialog({
 
             {!allDay && (
               <div className="min-w-28 *:not-first:mt-1.5">
-                <Label htmlFor="end-time">End Time</Label>
+                <Label htmlFor="end-time">{t("endTime")}</Label>
                 <Select onValueChange={setEndTime} value={endTime}>
                   <SelectTrigger id="end-time">
-                    <SelectValue placeholder="Select time" />
+                    <SelectValue placeholder={t("selectTime")} />
                   </SelectTrigger>
                   <SelectContent>
                     {timeOptions.map((option) => (
@@ -401,11 +401,11 @@ export function EventDialog({
               id="all-day"
               onCheckedChange={(checked) => setAllDay(checked === true)}
             />
-            <Label htmlFor="all-day">All day</Label>
+            <Label htmlFor="all-day">{t("allDay")}</Label>
           </div>
 
           <div className="*:not-first:mt-1.5">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="location">{t("location")}</Label>
             <Input
               id="location"
               onChange={(e) => setLocation(e.target.value)}
@@ -414,7 +414,7 @@ export function EventDialog({
           </div>
           <fieldset className="flex flex-col gap-4">
             <legend className="font-medium text-foreground text-sm leading-none">
-              Color
+              {t("color")}
             </legend>
             <RadioGroup
               className="flex gap-1.5"
@@ -441,7 +441,7 @@ export function EventDialog({
         <DialogFooter className="flex-row sm:justify-between">
           {event?.id && (
             <Button
-              aria-label="Delete event"
+              aria-label={t("deleteEvent")}
               onClick={handleDelete}
               size="icon"
               variant="outline"
@@ -451,9 +451,9 @@ export function EventDialog({
           )}
           <div className="flex flex-1 justify-end gap-2">
             <Button onClick={onClose} variant="outline">
-              Cancel
+              {t("cancel")}
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>{t("save")}</Button>
           </div>
         </DialogFooter>
       </DialogContent>

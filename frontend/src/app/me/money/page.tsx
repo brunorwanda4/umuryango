@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { PersonalMoneyPage } from "@/components/money/personal-money-page";
+import enMessages from "@/messages/en.json";
 
 export const metadata: Metadata = {
-  title: "My Money · Personal workspace",
-  description:
-    "Manage income, expenses, savings, debts, and recent money activity in one place.",
+  title: enMessages.PersonalMoney.metadataTitle,
+  description: enMessages.PersonalMoney.metadataDescription,
 };
 
 export default function MyMoneyPage() {

@@ -2,6 +2,7 @@
 
 import { DownloadIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createTranslator } from "@/i18n/translate";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -67,6 +68,8 @@ export function MobileInstallPrompt() {
     setDismissed(true);
   }
 
+  const t = createTranslator("AppShell.installPrompt");
+
   return (
     <div className="fixed inset-x-3 z-40 md:hidden bottom-[calc(4.75rem+env(safe-area-inset-bottom))]">
       <div className="mx-auto flex max-w-md items-center gap-2 rounded-md border bg-background/95 p-2 shadow-lg backdrop-blur">
@@ -76,15 +79,15 @@ export function MobileInstallPrompt() {
           onClick={handleInstall}
         >
           <DownloadIcon aria-hidden="true" className="size-4" />
-          Install app
+          {t("installApp")}
         </button>
         <button
           type="button"
-          aria-label="Dismiss install app prompt"
+          aria-label={t("dismiss")}
           className="flex size-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/30"
           onClick={handleDismiss}
         >
-          Later
+          {t("later")}
         </button>
       </div>
     </div>

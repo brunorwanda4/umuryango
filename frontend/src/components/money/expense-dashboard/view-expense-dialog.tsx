@@ -2,6 +2,7 @@
 
 import type * as React from "react";
 import { ViewTransactionDialog } from "@/components/common/money/view-transaction-dialog";
+import { createTranslator } from "@/i18n/translate";
 import { DeleteExpenseDialog } from "./delete-expense-dialog";
 import type {
   ExpenseCategory,
@@ -30,20 +31,21 @@ export function ViewExpenseDialog({
   searchParamValue,
   trigger,
 }: ViewExpenseDialogProps) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
   const ExpenseIcon = expense.icon;
 
   return (
     <ViewTransactionDialog
-      amountLabel="Amount spent"
+      amountLabel={t("viewDialog.amountSpent")}
       amountMinorUnits={expense.amountMinorUnits}
       category={expense.category}
       categoryClassName={expense.categoryClassName}
       currency={expense.currency}
       date={expense.date}
-      dateLabel="Date spent"
-      deleteLabel="Delete expense"
-      detailsDescription="Review the recorded expense and payment information."
-      detailsTitle="Expense details"
+      dateLabel={t("viewDialog.dateSpent")}
+      deleteLabel={t("viewDialog.deleteExpense")}
+      detailsDescription={t("viewDialog.detailsDesc")}
+      detailsTitle={t("viewDialog.detailsTitle")}
       description={expense.description}
       leading={
         <div className="bg-muted text-muted-foreground flex size-11 shrink-0 items-center justify-center rounded-lg">
@@ -78,7 +80,7 @@ export function ViewExpenseDialog({
       searchParamValue={searchParamValue ?? `view-expense-${expense.id}`}
       title={expense.source}
       trigger={trigger}
-      updateLabel="Update expense"
+      updateLabel={t("viewDialog.updateExpense")}
     />
   );
 }

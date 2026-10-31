@@ -6,8 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { createTranslator } from "@/i18n/translate";
 import type { ReportPeriod, ReportTypeFilter } from "./types";
-import { reportTypeLabels } from "./utils";
 
 export function ReportsFilters({
   onPeriodChange,
@@ -22,6 +22,8 @@ export function ReportsFilters({
   periodLabel: string;
   reportType: ReportTypeFilter;
 }) {
+  const t = createTranslator("FamilyReports");
+
   return (
     <section className="flex flex-col gap-3 rounded-2xl border bg-card p-4 lg:flex-row lg:items-center lg:justify-between">
       <div className="flex items-center gap-2">
@@ -30,9 +32,12 @@ export function ReportsFilters({
           aria-hidden="true"
         />
         <div>
-          <p className="font-medium text-sm">Report filters</p>
+          <p className="font-medium text-sm">{t("reportFilters")}</p>
           <p className="text-muted-foreground text-xs">
-            Current view: {periodLabel}, {reportTypeLabels[reportType]}
+            {t("currentView", {
+              period: periodLabel,
+              type: t(`types.${reportType}`),
+            })}
           </p>
         </div>
       </div>
@@ -41,13 +46,16 @@ export function ReportsFilters({
           value={period}
           onValueChange={(value) => onPeriodChange(value as ReportPeriod)}
         >
-          <SelectTrigger className="w-full sm:w-44" aria-label="Report period">
+          <SelectTrigger
+            className="w-full sm:w-44"
+            aria-label={t("reportPeriod")}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="month">This month</SelectItem>
-            <SelectItem value="quarter">This quarter</SelectItem>
-            <SelectItem value="year">This year</SelectItem>
+            <SelectItem value="month">{t("periods.month")}</SelectItem>
+            <SelectItem value="quarter">{t("periods.quarter")}</SelectItem>
+            <SelectItem value="year">{t("periods.year")}</SelectItem>
           </SelectContent>
         </Select>
         <Select
@@ -56,17 +64,22 @@ export function ReportsFilters({
             onReportTypeChange(value as ReportTypeFilter)
           }
         >
-          <SelectTrigger className="w-full sm:w-52" aria-label="Report type">
+          <SelectTrigger
+            className="w-full sm:w-52"
+            aria-label={t("reportType")}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All reports</SelectItem>
-            <SelectItem value="money">Money</SelectItem>
-            <SelectItem value="contributions">Contributions</SelectItem>
-            <SelectItem value="projects">Projects</SelectItem>
-            <SelectItem value="savings">Savings</SelectItem>
-            <SelectItem value="debts">Debts</SelectItem>
-            <SelectItem value="budgets">Budgets</SelectItem>
+            <SelectItem value="all">{t("types.all")}</SelectItem>
+            <SelectItem value="money">{t("types.money")}</SelectItem>
+            <SelectItem value="contributions">
+              {t("types.contributions")}
+            </SelectItem>
+            <SelectItem value="projects">{t("types.projects")}</SelectItem>
+            <SelectItem value="savings">{t("types.savings")}</SelectItem>
+            <SelectItem value="debts">{t("types.debts")}</SelectItem>
+            <SelectItem value="budgets">{t("types.budgets")}</SelectItem>
           </SelectContent>
         </Select>
       </div>

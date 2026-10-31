@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/empty";
 import { ItemGroup } from "@/components/ui/item";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createTranslator } from "@/i18n/translate";
 import {
   PersonGoalItem,
   PersonTaskItem,
@@ -54,8 +55,16 @@ function TabEmpty({
   person: PlanPerson;
   tab: PlansTab;
 }) {
+  const t = createTranslator("PersonalPlans");
   const firstName = person.fullName.split(" ")[0] || person.fullName;
   const isGoal = tab === "long-term";
+  const periodLabel =
+    tab === "week"
+      ? t("tabs.thisWeekPeriod")
+      : tab === "month"
+        ? t("tabs.thisMonthPeriod")
+        : t("tabs.completedPeriod");
+
   return (
     <Empty className="min-h-64 border bg-card">
       <EmptyHeader>
@@ -68,24 +77,26 @@ function TabEmpty({
         </EmptyMedia>
         <EmptyTitle>
           {tab === "today"
-            ? "Nothing planned for today"
+            ? t("tabs.nothingPlannedToday")
             : isGoal
-              ? "No long-term goals"
-              : `No plans in ${tab === "week" ? "this week" : tab === "month" ? "this month" : "completed"}`}
+              ? t("tabs.noLongTermGoals")
+              : t("tabs.noPlansIn", { period: periodLabel })}
         </EmptyTitle>
         <EmptyDescription>
           {tab === "today"
-            ? `${firstName} has no tasks scheduled for today.`
+            ? t("tabs.noTasksTodayFor", { name: firstName })
             : isGoal
-              ? `Create an important future goal for ${firstName}.`
-              : `There are no ${tab === "completed" ? "completed plans" : "tasks scheduled for this period"}.`}
+              ? t("tabs.createFutureGoalFor", { name: firstName })
+              : tab === "completed"
+                ? t("tabs.noCompletedPlans")
+                : t("tabs.noTasksScheduled")}
         </EmptyDescription>
       </EmptyHeader>
       {tab !== "completed" ? (
         <EmptyContent>
           <Button onClick={() => onAdd(isGoal ? "LONG_TERM_GOAL" : "TASK")}>
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            {isGoal ? "Create goal" : "Add plan"}
+            {isGoal ? t("tabs.createGoal") : t("tabs.addPlan")}
           </Button>
         </EmptyContent>
       ) : null}
@@ -104,12 +115,13 @@ export function PersonPlansTabs({
   person: PlanPerson;
   plans: PersonPlan[];
 }) {
+  const t = createTranslator("PersonalPlans");
   const tabs: Array<{ value: PlansTab; label: string }> = [
-    { value: "today", label: "Today" },
-    { value: "week", label: "This week" },
-    { value: "month", label: "This month" },
-    { value: "long-term", label: "Long-term" },
-    { value: "completed", label: "Completed" },
+    { value: "today", label: t("tabs.today") },
+    { value: "week", label: t("tabs.week") },
+    { value: "month", label: t("tabs.month") },
+    { value: "long-term", label: t("tabs.longTerm") },
+    { value: "completed", label: t("tabs.completed") },
   ];
 
   return (

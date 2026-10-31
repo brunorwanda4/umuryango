@@ -6,8 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { ContactActions } from "./contact-actions";
-import { contactTypeLabel, type FamilyContact } from "./types-and-schemas";
+import type { FamilyContact } from "./types-and-schemas";
+
+const t = createTranslator("FamilyContacts");
 
 export interface EmergencyContactsCardProps {
   emergencyContacts: FamilyContact[];
@@ -23,11 +26,9 @@ export function EmergencyContactsCard({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <ShieldAlertIcon className="size-4 text-destructive" />
-          Emergency contacts
+          {t("emergencyContacts")}
         </CardTitle>
-        <CardDescription>
-          Contacts marked for urgent family situations.
-        </CardDescription>
+        <CardDescription>{t("emergencyContactsDesc")}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {emergencyContacts.slice(0, 6).map((contact) => (
@@ -39,7 +40,7 @@ export function EmergencyContactsCard({
               <div className="font-medium">{contact.fullName}</div>
               <div className="text-muted-foreground text-sm">
                 {contact.relationshipToFamily ||
-                  contactTypeLabel(contact.contactType)}
+                  t(`types.${contact.contactType}`)}
               </div>
             </div>
             <ContactActions contact={contact} />

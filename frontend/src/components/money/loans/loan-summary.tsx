@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import CommonOverviewCardDisplay from "@/components/common/overview-card-display";
+import { createTranslator } from "@/i18n/translate";
 import type { PersonalLoan } from "./types-and-schemas";
 
 export function LoanSummary({
@@ -15,6 +16,7 @@ export function LoanSummary({
   currency: string;
   loans: PersonalLoan[];
 }) {
+  const t = createTranslator("PersonalLoans");
   const totals = loans.reduce(
     (sum, loan) => ({
       borrowed:
@@ -48,7 +50,7 @@ export function LoanSummary({
       cards={[
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Total borrowed",
+          description: t("summary.borrowed"),
           iconSource: {
             image: { src: "/images/icons/borrowing.png" },
             line: ArrowDownToLineIcon,
@@ -62,7 +64,7 @@ export function LoanSummary({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Total lent",
+          description: t("summary.lent"),
           iconSource: {
             image: { src: "/images/icons/lent.png" },
             line: ArrowUpFromLineIcon,
@@ -73,7 +75,7 @@ export function LoanSummary({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Total repaid",
+          description: t("summary.repaid"),
           iconSource: {
             image: { src: "/images/icons/repaid.png" },
             line: CircleDollarSignIcon,
@@ -87,7 +89,7 @@ export function LoanSummary({
         },
         {
           className: " border-border/80 py-0 shadow-sm",
-          description: "Total remaining",
+          description: t("summary.remaining"),
           iconSource: {
             image: { src: "/images/icons/clock.png" },
             line: ClockIcon,

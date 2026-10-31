@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import { IncomeTable } from "./income-table";
 import type { IncomeTransaction } from "./types-and-schemas";
@@ -36,6 +37,7 @@ export function OneTimeIncomePanel({
   handleSendApproval,
   setOpenCreate,
 }: OneTimeIncomePanelProps) {
+  const t = createTranslator("FamilyIncome");
   const summary = useMemo(() => {
     let totalMinorUnits = BigInt(0);
     let approvedMinorUnits = BigInt(0);
@@ -68,14 +70,13 @@ export function OneTimeIncomePanel({
           <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
             <CoinsIcon className="size-6 text-muted-foreground" />
           </span>
-          <h3 className="font-semibold text-lg">No one-time income yet</h3>
+          <h3 className="font-semibold text-lg">{t("panels.noOneTime")}</h3>
           <p className="mt-1 mb-6 max-w-sm text-muted-foreground text-sm">
-            Add gifts, donations, one-off business payments, or any money that
-            does not repeat.
+            {t("panels.noOneTimeDesc")}
           </p>
           <Button size="sm" onClick={() => setOpenCreate(true)}>
             <PlusIcon aria-hidden="true" data-icon="inline-start" />
-            Add One-Time Income
+            {t("panels.addOneTime")}
           </Button>
         </CardContent>
       </Card>
@@ -88,7 +89,7 @@ export function OneTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              Total One-Time
+              {t("panels.totalOneTime")}
             </CardTitle>
             <WalletIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -105,7 +106,7 @@ export function OneTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              Approved
+              {t("panels.approved")}
             </CardTitle>
             <CoinsIcon className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -122,7 +123,7 @@ export function OneTimeIncomePanel({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider">
-              Pending
+              {t("panels.pending")}
             </CardTitle>
             <ReceiptTextIcon className="size-4 text-muted-foreground" />
           </CardHeader>

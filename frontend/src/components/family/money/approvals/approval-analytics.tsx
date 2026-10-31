@@ -23,6 +23,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { createTranslator } from "@/i18n/translate";
 import { TableEmptyState } from "../money-ui-helpers";
 import { formatCompactMinorUnits, formatFullMinorUnits } from "../utils";
 import type { ApprovalAnalyticsModel } from "./types";
@@ -37,21 +38,20 @@ export function ApprovalAnalytics({
   currency: string;
   hasRecords: boolean;
 }) {
+  const t = createTranslator("FamilyApprovals");
+
   if (!hasRecords) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Approval analytics</CardTitle>
-          <CardDescription>
-            Charts are generated from persisted approval and transaction
-            records.
-          </CardDescription>
+          <CardTitle>{t("analyticsTitle")}</CardTitle>
+          <CardDescription>{t("analyticsDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <TableEmptyState
             icon={BarChart3Icon}
-            title="No approval analytics yet"
-            description="Approval rate, category, monthly, rejection, and timing charts will appear once financial records are submitted and reviewed."
+            title={t("noAnalyticsYet")}
+            description={t("noAnalyticsYetDesc")}
           />
         </CardContent>
       </Card>
@@ -62,10 +62,8 @@ export function ApprovalAnalytics({
     <section className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>Pending vs Approved</CardTitle>
-          <CardDescription>
-            Current pending queue compared with approved and rejected records.
-          </CardDescription>
+          <CardTitle>{t("pendingVsApproved")}</CardTitle>
+          <CardDescription>{t("pendingVsApprovedDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">
@@ -86,10 +84,8 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>Approval rate</CardTitle>
-          <CardDescription>
-            Approved versus rejected transaction decisions.
-          </CardDescription>
+          <CardTitle>{t("approvalRateTitle")}</CardTitle>
+          <CardDescription>{t("approvalRateDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-[14rem_1fr]">
           <ChartContainer config={approvalChartConfig} className="h-56 w-full">
@@ -113,8 +109,7 @@ export function ApprovalAnalytics({
               {analytics.approvalPercent.toFixed(0)}%
             </p>
             <p className="text-muted-foreground text-sm leading-6">
-              Approval rate is calculated only from persisted approved and
-              rejected transactions.
+              {t("approvalRateNote")}
             </p>
           </div>
         </CardContent>
@@ -122,10 +117,8 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>Average approval time</CardTitle>
-          <CardDescription>
-            Monthly review speed from creation to approval.
-          </CardDescription>
+          <CardTitle>{t("averageApprovalTimeTitle")}</CardTitle>
+          <CardDescription>{t("averageApprovalTimeDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">
@@ -149,10 +142,8 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>Approvals by month</CardTitle>
-          <CardDescription>
-            Approved transaction volume by approval month.
-          </CardDescription>
+          <CardTitle>{t("approvalsByMonth")}</CardTitle>
+          <CardDescription>{t("approvalsByMonthDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">
@@ -173,10 +164,8 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>Approvals by category</CardTitle>
-          <CardDescription>
-            Approved transaction value grouped by category.
-          </CardDescription>
+          <CardTitle>{t("approvalsByCategory")}</CardTitle>
+          <CardDescription>{t("approvalsByCategoryDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">
@@ -206,7 +195,9 @@ export function ApprovalAnalytics({
                   <ChartTooltipContent
                     formatter={(value) => (
                       <>
-                        <span className="text-muted-foreground">Amount</span>
+                        <span className="text-muted-foreground">
+                          {t("amountLabel")}
+                        </span>
                         <span className="font-mono font-medium">
                           {formatFullMinorUnits(value, currency)}
                         </span>
@@ -227,10 +218,8 @@ export function ApprovalAnalytics({
 
       <Card>
         <CardHeader>
-          <CardTitle>Rejections by category</CardTitle>
-          <CardDescription>
-            Rejected transaction count grouped by category.
-          </CardDescription>
+          <CardTitle>{t("rejectionsByCategory")}</CardTitle>
+          <CardDescription>{t("rejectionsByCategoryDesc")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={approvalChartConfig} className="h-72 w-full">

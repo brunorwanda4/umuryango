@@ -11,9 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { CurrentUser } from "@/hooks/use-current-user";
+import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import type {
@@ -51,6 +51,8 @@ export function MoneyIncomePage({
   familyName: string;
   initialData?: MoneyIncomePageInitialData;
 }) {
+  const t = createTranslator("FamilyIncome");
+  const tCommon = createTranslator("Common");
   const [family, setFamily] = useState<FamilyDetail | null>(
     initialData?.family ?? null,
   );
@@ -445,11 +447,9 @@ export function MoneyIncomePage({
           <CardHeader>
             <CardTitle className="text-destructive flex items-center gap-2">
               <AlertCircleIcon className="size-5" />
-              Failed to load income page
+              {t("failedToLoad")}
             </CardTitle>
-            <CardDescription>
-              {error || "Family workspace not found."}
-            </CardDescription>
+            <CardDescription>{error || t("workspaceNotFound")}</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -464,12 +464,12 @@ export function MoneyIncomePage({
       aria-busy={isRefreshing}
     >
       <PageTitle
-        title="Income"
+        title={t("pageTitle")}
         actions={
           hasCapability(family, "RECORD_INCOME") && (
             <Button size="sm" onClick={() => openGenericCreate(true)}>
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              Add Income
+              {t("addIncome")}
             </Button>
           )
         }
@@ -502,9 +502,9 @@ export function MoneyIncomePage({
       {/* Main Income Table */}
       <Tabs defaultValue="all">
         <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="every-time">Every Time</TabsTrigger>
-          <TabsTrigger value="one-time">One Time</TabsTrigger>
+          <TabsTrigger value="all">{tCommon("all")}</TabsTrigger>
+          <TabsTrigger value="every-time">{t("tabs.everyTime")}</TabsTrigger>
+          <TabsTrigger value="one-time">{t("tabs.oneTime")}</TabsTrigger>
         </TabsList>
         <TabsContent value="all">
           <IncomeTable

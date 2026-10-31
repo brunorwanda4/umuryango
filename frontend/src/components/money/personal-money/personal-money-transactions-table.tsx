@@ -1,3 +1,4 @@
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import { formatCompactRwf } from "./formatters";
 import type { RealTransaction } from "./types";
@@ -11,12 +12,15 @@ export interface PersonalMoneyTransactionsTableProps {
 export function PersonalMoneyTransactionsTable({
   items,
   currency = "RWF",
-  emptyMessage = "No records in this view yet.",
+  emptyMessage,
 }: PersonalMoneyTransactionsTableProps) {
+  const t = createTranslator("PersonalMoney.transactionsTable");
+  const displayEmptyMessage = emptyMessage ?? t("emptyMessage");
+
   if (items.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-border py-8 text-center text-sm text-muted-foreground">
-        {emptyMessage}
+        {displayEmptyMessage}
       </div>
     );
   }
@@ -25,12 +29,12 @@ export function PersonalMoneyTransactionsTable({
     <div className="flex flex-col">
       {/* Desktop Header row */}
       <div className="hidden grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr] items-center gap-3 border-b border-border pb-2.5 text-[13px] font-medium text-muted-foreground md:grid">
-        <span>Record</span>
-        <span>Type</span>
-        <span>Category</span>
-        <span>Date</span>
-        <span>Status</span>
-        <span className="text-right">Amount</span>
+        <span>{t("record")}</span>
+        <span>{t("type")}</span>
+        <span>{t("category")}</span>
+        <span>{t("date")}</span>
+        <span>{t("status")}</span>
+        <span className="text-right">{t("amount")}</span>
       </div>
 
       {/* Row items */}
@@ -86,7 +90,11 @@ export function PersonalMoneyTransactionsTable({
                     )}
                   >
                     <span className="size-1.5 rounded-full bg-current" />
-                    {isIncome ? "Income" : isExpense ? "Expense" : "Saving"}
+                    {isIncome
+                      ? t("income")
+                      : isExpense
+                        ? t("expense")
+                        : t("saving")}
                   </span>
                 </div>
 
@@ -111,7 +119,11 @@ export function PersonalMoneyTransactionsTable({
                     )}
                   >
                     <span className="size-1.5 rounded-full bg-current" />
-                    {x.status}
+                    {x.status === "Received"
+                      ? t("statusReceived")
+                      : x.status === "Paid"
+                        ? t("statusPaid")
+                        : x.status}
                   </span>
                 </div>
               </div>

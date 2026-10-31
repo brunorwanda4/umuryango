@@ -20,7 +20,11 @@ import {
 import { FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import type { ProjectCategory } from "./types";
+
+const t = createTranslator("FamilyProjects");
+const tCommon = createTranslator("Common");
 
 // ─── Local types ──────────────────────────────────────────────────────────────
 
@@ -63,23 +67,20 @@ export type ProjectForEdit = {
 
 // ─── Static options ───────────────────────────────────────────────────────────
 
-const projectCategoryOptions: { value: ProjectCategory; label: string }[] = [
-  { value: "house", label: "Build a house" },
-  { value: "vehicle", label: "Buy a vehicle" },
-  { value: "education", label: "Education support" },
-  { value: "business", label: "Family business" },
-  { value: "event", label: "Ceremony or event" },
-  { value: "other", label: "Other family plan" },
+const projectCategoryValues: ProjectCategory[] = [
+  "house",
+  "vehicle",
+  "education",
+  "business",
+  "event",
+  "other",
 ];
 
-const contributionStrategyOptions: {
-  value: ContributionStrategy;
-  label: string;
-}[] = [
-  { value: "equal_shares", label: "Equal shares" },
-  { value: "pledges", label: "Member pledges" },
-  { value: "monthly", label: "Monthly contribution" },
-  { value: "as_available", label: "As available" },
+const contributionStrategyValues: ContributionStrategy[] = [
+  "equal_shares",
+  "pledges",
+  "monthly",
+  "as_available",
 ];
 
 // ─── Public wrappers ──────────────────────────────────────────────────────────
@@ -104,7 +105,7 @@ export function CreateProjectDialog({
       <DialogTrigger asChild>
         <Button size="sm">
           <PlusIcon aria-hidden="true" data-icon="inline-start" />
-          New project
+          {t("newProject")}
         </Button>
       </DialogTrigger>
       <ProjectFormDialogContent
@@ -174,12 +175,10 @@ function ProjectFormDialogContent({
     <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl md:max-w-2xl">
       <DialogHeader>
         <DialogTitle>
-          {isEdit ? "Edit project" : "Create a family project"}
+          {isEdit ? t("editProject") : t("createProjectTitle")}
         </DialogTitle>
         <DialogDescription>
-          {isEdit
-            ? "Update the project details. Changes are saved to the family record."
-            : "Add a plan with a target amount, dates, responsible member, and contribution approach."}
+          {isEdit ? t("editProjectDesc") : t("createProjectDesc")}
         </DialogDescription>
       </DialogHeader>
       <ProjectForm
@@ -217,13 +216,31 @@ function ProjectForm({
 
   const memberOptions = useMemo(
     () => [
-      { value: "unassigned", label: "Assign later" },
+      { value: "unassigned", label: t("assignLater") },
       ...family.members.map((member) => ({
         value: member.id,
         label: member.fullName,
       })),
     ],
     [family.members],
+  );
+
+  const categoryOptions = useMemo(
+    () =>
+      projectCategoryValues.map((value) => ({
+        value,
+        label: t(`categories.${value}`),
+      })),
+    [],
+  );
+
+  const strategyOptions = useMemo(
+    () =>
+      contributionStrategyValues.map((value) => ({
+        value,
+        label: t(`strategies.${value}`),
+      })),
+    [],
   );
 
   const defaultProjectDates = useMemo(() => getDefaultProjectDates(), []);
@@ -248,7 +265,7 @@ function ProjectForm({
       request: isEdit
         ? {
             method: "patch",
-            url: `/families/${encodeURIComponent(family.id)}/projects/${project!.id}`,
+            url: `/families/${encodeURIComponent(family.id)}/projects/${project?.id}`,
           }
         : {
             method: "post",
@@ -275,7 +292,7 @@ function ProjectForm({
         participantNotes: values.participantNotes.trim() || null,
         description: values.description.trim() || null,
       }),
-      onSuccessMessage: isEdit ? "Project updated." : "Project plan saved.",
+      onSuccessMessage: isEdit ? t("projectUpdated") : t("projectSaved"),
       onSuccess: () => {
         if (!isEdit) form.reset();
         onSuccess();
@@ -318,7 +335,7 @@ function ProjectForm({
     >
       {error ? (
         <Alert variant="destructive">
-          <AlertTitle>Could not save project</AlertTitle>
+          <AlertTitle>{t("saveProjectError")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
@@ -334,22 +351,22 @@ function ProjectForm({
         <CommonFormField
           control={form.control}
           name="name"
-          label="Project name"
-          placeholder="Build family house"
+          label={t("projectName")}
+          placeholder={t("projectNamePlaceholder")}
           required
         />
         <CommonFormField
           control={form.control}
           name="category"
-          label="Project type"
+          label={t("projectType")}
           fieldType="select"
-          selectOptions={projectCategoryOptions}
+          selectOptions={categoryOptions}
           required
         />
         <CommonFormField
           control={form.control}
           name="targetAmount"
-          label={`Target amount (${currency})`}
+          label={t("targetAmountLabel", { currency })}
           placeholder={
             getCurrencyFractionDigits(currency) === 0 ? "5000000" : "50000.00"
           }
@@ -359,11 +376,11 @@ function ProjectForm({
         <CommonFormField
           control={form.control}
           name="expectedContributionAmount"
-          label={`Expected contribution per member (${currency})`}
+          label={t("expectedContributionLabel", { currency })}
           placeholder={
             getCurrencyFractionDigits(currency) === 0 ? "10000" : "100.00"
           }
-          description="Optional. Use this for equal shares, monthly plans, or expected pledges."
+          description={t("expectedContributionDesc")}
           inputProps={{
             inputMode: "decimal",
             autoComplete: "off",
@@ -373,13 +390,13 @@ function ProjectForm({
           <CommonFormField
             control={form.control}
             name="startDate"
-            label="Start date"
+            label={t("startDate")}
             fieldType="date"
           />
           <CommonFormField
             control={form.control}
             name="targetDate"
-            label="Target date"
+            label={t("targetDate")}
             fieldType="date"
             required
           />
@@ -387,33 +404,33 @@ function ProjectForm({
         <CommonFormField
           control={form.control}
           name="ownerMemberId"
-          label="Responsible member"
+          label={t("responsibleMember")}
           fieldType="select"
           selectOptions={memberOptions}
         />
         <CommonFormField
           control={form.control}
           name="contributionStrategy"
-          label="Contribution approach"
+          label={t("contributionApproach")}
           fieldType="select"
-          selectOptions={contributionStrategyOptions}
+          selectOptions={strategyOptions}
           required
         />
         <CommonFormField
           control={form.control}
           name="participantNotes"
-          label="People and roles"
+          label={t("participantNotesLabel")}
           fieldType="textarea"
-          placeholder="Example: Jean leads construction follow-up, Alice tracks supplier receipts."
+          placeholder={t("participantNotesPlaceholder")}
           textareaProps={{ rows: 3 }}
           fieldClassName="col-span-2"
         />
         <CommonFormField
           control={form.control}
           name="description"
-          label="Project notes"
+          label={t("descriptionLabel")}
           fieldType="textarea"
-          placeholder="Add purpose, location, payment rules, documents needed, or approval notes."
+          placeholder={t("descriptionPlaceholder")}
           textareaProps={{ rows: 4 }}
           fieldClassName="col-span-2"
         />
@@ -422,19 +439,19 @@ function ProjectForm({
       <DialogFooter>
         <DialogClose asChild>
           <Button type="button" variant="outline">
-            Cancel
+            {tCommon("cancel")}
           </Button>
         </DialogClose>
         <Button type="submit" disabled={isPending}>
           {isPending ? (
             <>
               <Spinner data-icon="inline-start" />
-              Saving
+              {tCommon("saving")}
             </>
           ) : isEdit ? (
-            "Save changes"
+            tCommon("save")
           ) : (
-            "Save project"
+            t("saveProject")
           )}
         </Button>
       </DialogFooter>

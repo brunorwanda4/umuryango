@@ -7,6 +7,7 @@ import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { DataViewToggle } from "@/components/common/table/data-view-toggle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 import type {
   ExpenseCategory,
@@ -29,10 +30,12 @@ function getRecentExpenseColumns({
   familyId: string;
   onSuccess: () => void | Promise<void>;
 }): ColumnDef<RecentExpenseRecord>[] {
+  const t = createTranslator("PersonalMoney.personalExpenses");
+
   return [
     {
       accessorKey: "source",
-      header: "Source",
+      header: t("table.source"),
       cell: ({ row }) => {
         const SourceIcon = row.original.icon;
 
@@ -55,7 +58,7 @@ function getRecentExpenseColumns({
     },
     {
       accessorKey: "description",
-      header: "Description",
+      header: t("table.description"),
       cell: ({ row }) => (
         <span className="block min-w-60 text-muted-foreground">
           {row.original.description}
@@ -64,7 +67,7 @@ function getRecentExpenseColumns({
     },
     {
       accessorKey: "category",
-      header: "Category",
+      header: t("table.category"),
       cell: ({ row }) => (
         <span
           className={cn(
@@ -78,7 +81,7 @@ function getRecentExpenseColumns({
     },
     {
       accessorKey: "amountMinorUnits",
-      header: "Amount",
+      header: t("table.amount"),
       cell: ({ row }) => (
         <span className="font-bold text-chart-1">
           <CompactMoney currency="RWF" value={row.original.amountMinorUnits} />
@@ -87,14 +90,14 @@ function getRecentExpenseColumns({
     },
     {
       accessorKey: "date",
-      header: "Date",
+      header: t("table.date"),
       cell: ({ row }) => (
         <span className="text-muted-foreground">{row.original.date}</span>
       ),
     },
     {
       accessorKey: "paymentMethod",
-      header: "Payment method",
+      header: t("table.paymentMethod"),
       cell: ({ row }) => {
         const PaymentIcon = row.original.paymentIcon;
 
@@ -115,7 +118,7 @@ function getRecentExpenseColumns({
     },
     {
       id: "actions",
-      header: () => <div className="text-right">Actions</div>,
+      header: () => <div className="text-right">{t("table.actions")}</div>,
       cell: ({ row }) => (
         <div className="flex justify-end">
           <RecentExpenseActionsPopover
@@ -141,6 +144,7 @@ export function RecentExpenseTable({
   familyId: string;
   onSuccess: () => void | Promise<void>;
 }) {
+  const t = createTranslator("PersonalMoney.personalExpenses");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [paymentMethod, setPaymentMethod] = useState("all");
@@ -181,7 +185,9 @@ export function RecentExpenseTable({
   return (
     <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
       <CardHeader className="flex items-center justify-between px-5 pt-5 pb-2 sm:px-6">
-        <CardTitle className="font-bold text-base">Recent expenses</CardTitle>
+        <CardTitle className="font-bold text-base">
+          {t("table.recentExpenses")}
+        </CardTitle>
         <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
       <CardContent className="px-0 pb-0">
@@ -201,7 +207,7 @@ export function RecentExpenseTable({
             columns={recentExpenseColumns}
             data={filteredExpenseData}
             getRowAriaLabel={(row) =>
-              `View expense details for ${row.original.source}`
+              t("table.viewExpenseAria", { source: row.original.source })
             }
             onRowClick={(row) => setViewExpenseId(row.original.id)}
             rowClassName={() => "hover:bg-muted/50"}

@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createTranslator } from "@/i18n/translate";
 import { CATEGORY_ICONS } from "../money/mock-finance-data";
 import type {
   AmountValue,
@@ -17,6 +18,9 @@ import type {
   IncomeSourceRow,
   TransactionRow,
 } from "./family-finance-helpers";
+
+const t = createTranslator("FamilyDashboard");
+const tCommon = createTranslator("Common");
 
 export function ExpenseCategoriesTable({
   data,
@@ -31,7 +35,7 @@ export function ExpenseCategoriesTable({
     () => [
       {
         accessorKey: "name",
-        header: "Category",
+        header: tCommon("category"),
         cell: ({ row }) => {
           const Icon =
             CATEGORY_ICONS[row.original.name] || CATEGORY_ICONS.Miscellaneous;
@@ -48,7 +52,7 @@ export function ExpenseCategoriesTable({
       },
       {
         accessorKey: "amount",
-        header: () => <div className="text-right">This Month</div>,
+        header: () => <div className="text-right">{t("thisMonth")}</div>,
         cell: ({ row }) => (
           <div className="text-right font-mono">
             {formatAmount(row.original.amount)}
@@ -57,12 +61,12 @@ export function ExpenseCategoriesTable({
       },
       {
         accessorKey: "lastMonth",
-        header: () => <div className="text-right">Last Month</div>,
+        header: () => <div className="text-right">{t("lastMonth")}</div>,
         cell: ({ row }) => {
           if (!isDemo) {
             return (
               <div className="text-right text-muted-foreground text-sm">
-                No baseline
+                {t("noBaseline")}
               </div>
             );
           }
@@ -95,8 +99,8 @@ export function ExpenseCategoriesTable({
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Expense categories</CardTitle>
-        <CardDescription>Monthly spending across categories.</CardDescription>
+        <CardTitle>{t("expenseCategoriesTitle")}</CardTitle>
+        <CardDescription>{t("expenseCategoriesDesc")}</CardDescription>
       </CardHeader>
       <CardContent>
         <CommonDataTable columns={columns} data={data} />
@@ -116,7 +120,7 @@ export function IncomeSourcesTable({
     () => [
       {
         accessorKey: "name",
-        header: "Source",
+        header: t("source"),
         cell: ({ row }) => {
           const Icon =
             CATEGORY_ICONS[row.original.name] || CATEGORY_ICONS["Other Income"];
@@ -133,7 +137,7 @@ export function IncomeSourcesTable({
       },
       {
         accessorKey: "frequency",
-        header: "Frequency",
+        header: t("frequency"),
         cell: ({ row }) => (
           <span className="text-muted-foreground">
             {row.original.frequency}
@@ -142,7 +146,7 @@ export function IncomeSourcesTable({
       },
       {
         accessorKey: "amount",
-        header: () => <div className="text-right">Amount</div>,
+        header: () => <div className="text-right">{tCommon("amount")}</div>,
         cell: ({ row }) => (
           <div className="text-right font-mono">
             {formatAmount(row.original.amount)}
@@ -156,8 +160,8 @@ export function IncomeSourcesTable({
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Income sources</CardTitle>
-        <CardDescription>Where family money comes from.</CardDescription>
+        <CardTitle>{t("incomeSourcesTitle")}</CardTitle>
+        <CardDescription>{t("incomeSourcesDesc")}</CardDescription>
       </CardHeader>
       <CardContent>
         <CommonDataTable columns={columns} data={data} />
@@ -177,14 +181,14 @@ export function RecentTransactionsTable({
     () => [
       {
         accessorKey: "date",
-        header: "Date",
+        header: tCommon("date"),
         cell: ({ row }) => (
           <span className="text-muted-foreground">{row.original.date}</span>
         ),
       },
       {
         accessorKey: "category",
-        header: "Category",
+        header: tCommon("category"),
         cell: ({ row }) => {
           const Icon =
             CATEGORY_ICONS[row.original.category] ||
@@ -200,11 +204,11 @@ export function RecentTransactionsTable({
       },
       {
         accessorKey: "member",
-        header: "Member",
+        header: t("member"),
       },
       {
         accessorKey: "method",
-        header: "Status",
+        header: tCommon("status"),
         cell: ({ row }) => (
           <Badge variant="outline" className="font-normal text-xs">
             {row.original.method}
@@ -213,7 +217,7 @@ export function RecentTransactionsTable({
       },
       {
         accessorKey: "amount",
-        header: () => <div className="text-right">Amount</div>,
+        header: () => <div className="text-right">{tCommon("amount")}</div>,
         cell: ({ row }) => (
           <div className="text-right font-mono">
             {row.original.type === "income" ? "+" : "-"}
@@ -228,8 +232,8 @@ export function RecentTransactionsTable({
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle>Recent transactions</CardTitle>
-        <CardDescription>Latest family financial activity.</CardDescription>
+        <CardTitle>{t("recentTransactionsTitle")}</CardTitle>
+        <CardDescription>{t("recentTransactionsDesc")}</CardDescription>
       </CardHeader>
       <CardContent>
         <CommonDataTable columns={columns} data={data} />

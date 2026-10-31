@@ -23,6 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
@@ -58,6 +59,7 @@ export function CommonDataTable<TData, TValue>({
   loading = false,
   className,
 }: DataTableProps<TData, TValue>) {
+  const t = createTranslator("Common");
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const internalTable = useReactTable({
     data,
@@ -173,7 +175,7 @@ export function CommonDataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center text-muted-foreground text-sm"
                   >
-                    Loading...
+                    {t("loading")}
                   </TableCell>
                 </TableRow>
               ) : table.getRowModel().rows?.length ? (
@@ -233,7 +235,7 @@ export function CommonDataTable<TData, TValue>({
                     colSpan={columns.length}
                     className="h-24 text-center text-muted-foreground text-sm"
                   >
-                    No items found.
+                    {t("noItemsFound")}
                   </TableCell>
                 </TableRow>
               )}
@@ -242,7 +244,7 @@ export function CommonDataTable<TData, TValue>({
         </div>
         <div className="flex justify-end gap-1 border-t bg-muted/20 p-1">
           <Button
-            aria-label="Scroll table left"
+            aria-label={t("scrollTableLeft")}
             size="icon"
             type="button"
             variant="ghost"
@@ -251,7 +253,7 @@ export function CommonDataTable<TData, TValue>({
             <ChevronLeftIcon aria-hidden="true" />
           </Button>
           <Button
-            aria-label="Scroll table right"
+            aria-label={t("scrollTableRight")}
             size="icon"
             type="button"
             variant="ghost"
@@ -280,15 +282,15 @@ export function CommonDataTable<TData, TValue>({
             }
           >
             <ChevronLeftIcon aria-hidden="true" data-icon="inline-start" />
-            Previous
+            {t("previous")}
           </Button>
 
           <span className="text-sm">
-            {/* Page {table.getState().pagination.pageIndex + 1} */}
-            Page{" "}
-            {serverMode
-              ? (pageIndex ?? 0) + 1
-              : table.getState().pagination.pageIndex + 1}{" "}
+            {t("pageIndicator", {
+              page: serverMode
+                ? (pageIndex ?? 0) + 1
+                : table.getState().pagination.pageIndex + 1,
+            })}
           </span>
 
           <Button
@@ -310,7 +312,7 @@ export function CommonDataTable<TData, TValue>({
                 : !table.getCanNextPage()
             }
           >
-            Next
+            {t("next")}
             <ChevronRightIcon aria-hidden="true" data-icon="inline-end" />
           </Button>
         </div>

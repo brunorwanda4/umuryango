@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useZodFormSubmit } from "@/hooks/use-zod-form-submit";
+import { createTranslator } from "@/i18n/translate";
 import {
   type LoanPayment,
   type PersonalLoan,
@@ -35,6 +36,7 @@ export function RecordPaymentForm({
   onSuccess: () => void;
   open: boolean;
 }) {
+  const t = createTranslator("PersonalLoans");
   const remaining = Number(loan?.remainingBalanceMinorUnits ?? 0);
   const schema = useMemo(
     () =>
@@ -74,7 +76,7 @@ export function RecordPaymentForm({
       method: "post",
       url: `/families/${encodeURIComponent(familyId)}/money/loans/${encodeURIComponent(loan?.id ?? "")}/repayments`,
     },
-    onSuccessMessage: "Payment recorded",
+    onSuccessMessage: t("paymentForm.paymentRecordedToast"),
     toastOnSuccess: true,
     toastOnError: true,
     onSuccess: () => {
@@ -107,9 +109,9 @@ export function RecordPaymentForm({
     >
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Record payment</DialogTitle>
+          <DialogTitle>{t("paymentForm.title")}</DialogTitle>
           <DialogDescription>
-            Remaining balance for {loan?.title ?? "this loan"}:{" "}
+            {t("paymentForm.description", { title: loan?.title ?? "" })}{" "}
             {loan ? (
               <CompactMoney
                 currency={loan.currency}
@@ -127,13 +129,13 @@ export function RecordPaymentForm({
           <CommonFormField
             control={form.control}
             name="payFull"
-            label="Pay full remaining balance"
+            label={t("paymentForm.payFull")}
             fieldType="checkbox"
           />
           <CommonFormField
             control={form.control}
             name="amountMinorUnits"
-            label="Payment amount"
+            label={t("paymentForm.amount")}
             fieldType="money"
             currency={loan?.currency ?? "RWF"}
             disabled={payFull}
@@ -143,21 +145,27 @@ export function RecordPaymentForm({
             <CommonFormField
               control={form.control}
               name="paymentDate"
-              label="Payment date"
+              label={t("paymentForm.date")}
               fieldType="date"
               required
             />
             <CommonFormField
               control={form.control}
               name="paymentMethod"
-              label="Payment method"
+              label={t("paymentForm.method")}
               fieldType="select"
               selectOptions={[
-                { label: "Cash", value: "CASH" },
-                { label: "Mobile money", value: "MOBILE_MONEY" },
-                { label: "Bank transfer", value: "BANK_TRANSFER" },
-                { label: "Card", value: "CARD" },
-                { label: "Other", value: "OTHER" },
+                { label: t("paymentForm.methods.cash"), value: "CASH" },
+                {
+                  label: t("paymentForm.methods.mobileMoney"),
+                  value: "MOBILE_MONEY",
+                },
+                {
+                  label: t("paymentForm.methods.bankTransfer"),
+                  value: "BANK_TRANSFER",
+                },
+                { label: t("paymentForm.methods.card"), value: "CARD" },
+                { label: t("paymentForm.methods.other"), value: "OTHER" },
               ]}
               required
             />
@@ -165,9 +173,9 @@ export function RecordPaymentForm({
           <CommonFormField
             control={form.control}
             name="notes"
-            label="Note"
+            label={t("paymentForm.note")}
             fieldType="textarea"
-            placeholder="Optional payment note"
+            placeholder={t("paymentForm.notePlaceholder")}
           />
         </form>
         <DialogFooter>
@@ -183,10 +191,10 @@ export function RecordPaymentForm({
               <HandCoinsIcon aria-hidden="true" data-icon="inline-start" />
             )}
             {isPending
-              ? "Recording..."
+              ? t("paymentForm.recording")
               : payFull
-                ? "Pay full balance"
-                : "Record payment"}
+                ? t("paymentForm.payFullBalance")
+                : t("paymentForm.recordPayment")}
           </Button>
         </DialogFooter>
       </DialogContent>

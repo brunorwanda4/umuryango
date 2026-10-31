@@ -6,6 +6,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { createTranslator } from "@/i18n/translate";
 import type { SidebarView } from "./sidebar-utils";
 
 export function SidebarViewSwitcher({
@@ -15,10 +16,11 @@ export function SidebarViewSwitcher({
   value: SidebarView;
   onChange: (value: SidebarView) => void;
 }) {
+  const t = createTranslator("AppShell.sidebar");
   const showingSettings = value === "settings";
   const label = showingSettings
-    ? "Back to main sidebar"
-    : "Open settings sidebar";
+    ? t("backToMainSidebar")
+    : t("openSettingsSidebar");
   const Icon = showingSettings ? ChevronLeftIcon : SettingsIcon;
 
   return (
@@ -31,7 +33,7 @@ export function SidebarViewSwitcher({
           onClick={() => onChange(showingSettings ? "main" : "settings")}
         >
           <Icon aria-hidden="true" />
-          <span>Settings</span>
+          <span>{t("settings")}</span>
         </SidebarMenuButton>
       </SidebarMenuItem>
     </SidebarMenu>

@@ -6,10 +6,12 @@ import { SidebarIcon } from "@/components/app-shell/sidebar-icon";
 import { PageTitle } from "@/components/common/pages/page-title";
 import { IncomeDashboard } from "@/components/money/income-dashboard";
 import { useIncomePageData } from "@/hooks/use-income-page-data";
+import { createTranslator } from "@/i18n/translate";
 import { IncomePageActions } from "./income-page-actions";
 import { getMonthPeriod } from "./utils";
 
 export function PersonalIncomePage() {
+  const t = createTranslator("PersonalMoney.personalIncome");
   const [period, setPeriod] = useState(() =>
     getMonthPeriod(new Date().toISOString().slice(0, 7)),
   );
@@ -24,7 +26,7 @@ export function PersonalIncomePage() {
   return (
     <div className="flex flex-col gap-5">
       <PageTitle
-        title="Income"
+        title={t("title")}
         icon={
           <SidebarIcon
             className="size-6"
@@ -34,7 +36,7 @@ export function PersonalIncomePage() {
             }}
           />
         }
-        description="Track your personal income from work, business, gifts, and other sources."
+        description={t("description")}
         actions={
           <IncomePageActions
             canRecordIncome={Boolean(family)}
