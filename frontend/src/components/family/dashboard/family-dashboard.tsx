@@ -1,64 +1,151 @@
-import { InfoIcon } from "lucide-react";
+import { AlertCircleIcon } from "lucide-react";
+import { DashboardHeader } from "@/components/common/dashboard/dashboard-header";
+import {
+  DashboardGrid,
+  DashboardShell,
+} from "@/components/common/dashboard/dashboard-shell";
+import type { LoanRecord } from "@/components/family/money/loans/types-and-schemas";
+import type { MoneyOverview } from "@/components/family/money/types";
+import type { ProjectsOverview } from "@/components/family/projects/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { createTranslator } from "@/i18n/translate";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
-import type { MoneyOverview } from "../money/types";
+import { resolveCurrentFamilyMember } from "./dashboard-data";
 import { FamilyActivityFeed } from "./family-activity-feed";
 import { FamilyDashboardSkeleton } from "./family-dashboard-skeleton";
 import {
-  FamilyFinanceDashboard,
-  FamilyQuickActions,
+  FamilyActiveProjectsCard,
+  FamilyAttentionCard,
+  FamilyContributionsOverviewCard,
+  FamilyFinancialSummary,
+  FamilyLoansOverviewCard,
+  FamilyMoneyOverviewCard,
+  FamilyQuickActionsCard,
 } from "./family-finance-dashboard";
-import type { FamilyDetail } from "./types";
+import { FamilyMembersOverview } from "./family-members-overview";
+import type {
+  ContributionsOverview,
+  FamilyAuditEvent,
+  FamilyDetail,
+  RejectedTransactionRow,
+} from "./types";
 
 const t = createTranslator("FamilyDashboard");
 
 export function FamilyDashboard({
   family,
+  currentUserId = null,
+  currentUserFullName = null,
   money,
+  rejectedTransactions = null,
+  contributions = null,
+  projects = null,
+  loans = null,
+  auditEvents = null,
+  warnings = [],
   moneyMessage,
 }: {
   family: FamilyDetail;
+  currentUserId?: string | null;
+  currentUserFullName?: string | null;
   money: MoneyOverview | null;
+  rejectedTransactions?: RejectedTransactionRow[] | null;
+  contributions?: ContributionsOverview | null;
+  projects?: ProjectsOverview | null;
+  loans?: LoanRecord[] | null;
+  auditEvents?: FamilyAuditEvent[] | null;
+  warnings?: string[];
   moneyMessage?: string;
 }) {
-  const currentMember = family.members.find(
-    (member) => member.authority === family.authority,
+  const { currentMember, firstName } = resolveCurrentFamilyMember(
+    family,
+    currentUserId,
+    currentUserFullName,
   );
-  const greetingName = currentMember?.fullName.split(" ")[0] ?? family.name;
+  const memberCount = family.memberCount || family.members.length;
+  const combinedWarnings =
+    warnings.length > 0
+      ? [...new Set(warnings)]
+      : moneyMessage
+        ? [
+            t((m) => m.FamilyDashboard.moneyLoadErrorDescription, {
+              detail: moneyMessage,
+            }),
+          ]
+        : [];
 
   return (
-    <div className="mx-auto flex w-full max-w-[1040px] flex-col gap-4 pb-6">
-      <header className="px-1 pb-1">
-        <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="font-fraunces font-semibold text-[clamp(28px,6vw,40px)] leading-[1.1] tracking-[-0.01em]">
-            {t((m) => m.FamilyDashboard.welcomeBack, { name: greetingName })}
-          </h1>
-          <Badge variant="secondary">
-            {AUTHORITY_LABELS[family.authority]}
-          </Badge>
-        </div>
-      </header>
+    <DashboardShell>
+      <DashboardHeader
+        title={
+          firstName
+            ? t((m) => m.FamilyDashboard.welcomeBack, { name: firstName })
+            : t((m) => m.FamilyDashboard.welcomeBackDefault)
+        }
+        meta={
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">{family.name}</Badge>
+            <Badge variant="outline">
+              {AUTHORITY_LABELS[family.authority]}
+            </Badge>
+            <Badge variant="outline">
+              {t((m) => m.FamilyDashboard.membersCount, {
+                count: memberCount,
+              })}
+            </Badge>
+            <Badge variant="outline">
+              {t((m) => m.FamilyDashboard.reportingPeriod)}
+            </Badge>
+          </div>
+        }
+        subtitle={family.description ?? undefined}
+      />
 
-      {moneyMessage ? (
+      {combinedWarnings.length > 0 ? (
         <Alert>
-          <InfoIcon className="size-4" aria-hidden="true" />
-          <AlertTitle>
-            {t((m) => m.FamilyDashboard.moneyLoadErrorTitle)}
-          </AlertTitle>
-          <AlertDescription>
-            {t((m) => m.FamilyDashboard.moneyLoadErrorDescription, {
-              detail: moneyMessage,
-            })}
-          </AlertDescription>
+          <AlertCircleIcon aria-hidden="true" />
+          <AlertTitle>{t((m) => m.FamilyDashboard.warningsTitle)}</AlertTitle>
+          <AlertDescription>{combinedWarnings.join(" ")}</AlertDescription>
         </Alert>
       ) : null}
 
-      <FamilyFinanceDashboard family={family} money={money} />
-      <FamilyActivityFeed family={family} money={money} />
-      <FamilyQuickActions family={family} />
-    </div>
+      <FamilyFinancialSummary family={family} money={money} />
+
+      <FamilyQuickActionsCard family={family} />
+
+      <DashboardGrid>
+        <FamilyMoneyOverviewCard family={family} money={money} />
+
+        <FamilyAttentionCard
+          family={family}
+          currentMember={currentMember}
+          money={money}
+          contributions={contributions}
+          rejectedTransactions={rejectedTransactions}
+        />
+
+        <FamilyContributionsOverviewCard
+          family={family}
+          contributions={contributions}
+        />
+
+        <FamilyActiveProjectsCard family={family} projects={projects} />
+
+        <FamilyMembersOverview family={family} />
+
+        <FamilyLoansOverviewCard family={family} loans={loans} />
+
+        <FamilyActivityFeed
+          family={family}
+          money={money}
+          contributions={contributions}
+          projects={projects}
+          auditEvents={auditEvents}
+          className="lg:col-span-2"
+        />
+      </DashboardGrid>
+    </DashboardShell>
   );
 }
 

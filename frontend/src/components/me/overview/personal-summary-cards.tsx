@@ -1,6 +1,10 @@
 import { ArrowDownLeftIcon, ArrowUpRightIcon } from "lucide-react";
-import Link from "next/link";
-import { CompactMoney } from "@/components/common/money/compact-money";
+import { DashboardQuickAddTile } from "@/components/common/dashboard/dashboard-action-grid";
+import {
+  DashboardBalanceCard,
+  DashboardBalanceStat,
+} from "@/components/common/dashboard/dashboard-balance-card";
+import { DashboardSummaryMetric } from "@/components/common/dashboard/dashboard-metric-card";
 import {
   Card,
   CardContent,
@@ -27,45 +31,34 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
   ).length;
   const moneyAvailable = Boolean(data.income && data.expenses);
   const cardClassName = "card card-border gap-0 rounded-[20px] py-5 shadow-sm";
+
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr]">
-      <Card className="family-balance-card gap-0 rounded-[22px] border py-[22px] text-white shadow-xl">
-        <CardHeader className="px-[22px]">
-          <CardDescription className="font-mono text-[17px] font-semibold uppercase tracking-[0.14em] text-white/90">
-            {t((m) => m.PersonalOverview.summaryCards.totalBalance, {
-              currency: data.currency,
-            })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="mt-7 flex flex-1 flex-col px-[22px]">
-          <Link href="/me/money" className="block">
-            <CompactMoney
-              className="mt-2 font-mono text-4xl font-semibold tracking-[0.06em] text-white sm:text-5xl"
-              currency={data.currency}
-              value={moneyAvailable ? balance.toString() : 0}
-            />
-            {!moneyAvailable ? (
-              <p className="mt-2 text-sm text-white/70">
-                {t((m) => m.PersonalOverview.summaryCards.moneyUnavailable)}
-              </p>
-            ) : null}
-          </Link>
-          <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
-            <BalanceStat
-              href="/me/money/income"
-              currency={data.currency}
-              label={t((m) => m.PersonalOverview.summaryCards.incomeThisMonth)}
-              value={income}
-            />
-            <BalanceStat
-              href="/me/money/expenses"
-              currency={data.currency}
-              label={t((m) => m.PersonalOverview.summaryCards.spentThisMonth)}
-              value={expenses}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <DashboardBalanceCard
+        label={t((m) => m.PersonalOverview.summaryCards.totalBalance, {
+          currency: data.currency,
+        })}
+        currency={data.currency}
+        value={moneyAvailable ? balance.toString() : 0}
+        href="/me/money"
+        unavailable={!moneyAvailable}
+        unavailableLabel={t(
+          (m) => m.PersonalOverview.summaryCards.moneyUnavailable,
+        )}
+      >
+        <DashboardBalanceStat
+          href="/me/money/income"
+          currency={data.currency}
+          label={t((m) => m.PersonalOverview.summaryCards.incomeThisMonth)}
+          value={income}
+        />
+        <DashboardBalanceStat
+          href="/me/money/expenses"
+          currency={data.currency}
+          label={t((m) => m.PersonalOverview.summaryCards.spentThisMonth)}
+          value={expenses}
+        />
+      </DashboardBalanceCard>
 
       <Card className={cardClassName}>
         <CardHeader className="px-5 pb-3.5">
@@ -78,108 +71,46 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
         </CardHeader>
         <CardContent className="grid gap-4 px-5">
           <div className="grid grid-cols-3 gap-2">
-            <SummaryMetric
+            <DashboardSummaryMetric
               href="/me/plans"
               label={t((m) => m.PersonalOverview.summaryCards.activePlans)}
               value={activePlans}
             />
-            <SummaryMetric
+            <DashboardSummaryMetric
               href="/me/money/loans"
               label={t((m) => m.PersonalOverview.summaryCards.activeLoans)}
               value={activeLoans}
             />
-            <SummaryMetric
+            <DashboardSummaryMetric
               href="/family"
               label={t((m) => m.PersonalOverview.summaryCards.workspaces)}
               value={data.families.length}
             />
           </div>
           <div className="grid gap-2.5 sm:grid-cols-2">
-            <QuickAddLink
+            <DashboardQuickAddTile
               href="/me/money/income"
               label={t((m) => m.PersonalOverview.summaryCards.addIncome)}
-              icon={ArrowDownLeftIcon}
-              iconClassName="text-emerald-500"
+              icon={
+                <ArrowDownLeftIcon
+                  className="text-emerald-500"
+                  aria-hidden="true"
+                />
+              }
             />
-            <QuickAddLink
+            <DashboardQuickAddTile
               href="/me/money/expenses"
               label={t((m) => m.PersonalOverview.summaryCards.addExpense)}
-              icon={ArrowUpRightIcon}
-              iconClassName="text-destructive"
+              icon={
+                <ArrowUpRightIcon
+                  className="text-destructive"
+                  aria-hidden="true"
+                />
+              }
             />
           </div>
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-function BalanceStat({
-  href,
-  currency,
-  label,
-  value,
-}: {
-  href: string;
-  currency: string;
-  label: string;
-  value: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="rounded-xl border border-white/10 bg-white/6 p-3 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-    >
-      <small className="block text-[13px] text-white/70">{label}</small>
-      <CompactMoney
-        className="mt-1 block font-mono text-lg font-semibold text-white"
-        currency={currency}
-        value={value}
-      />
-    </Link>
-  );
-}
-
-function SummaryMetric({
-  href,
-  label,
-  value,
-}: {
-  href: string;
-  label: string;
-  value: number;
-}) {
-  return (
-    <Link
-      href={href}
-      className="rounded-xl border bg-muted/40 p-2.5 transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-    >
-      <p className="text-muted-foreground text-[11px] leading-tight">{label}</p>
-      <p className="mt-1 font-mono text-lg font-semibold">{value}</p>
-    </Link>
-  );
-}
-
-function QuickAddLink({
-  href,
-  label,
-  icon: Icon,
-  iconClassName,
-}: {
-  href: string;
-  label: string;
-  icon: typeof ArrowDownLeftIcon;
-  iconClassName: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex min-h-[74px] flex-col items-start gap-2.5 rounded-[14px] border p-3.5 transition-colors hover:bg-muted"
-    >
-      <span className="flex size-9 items-center justify-center rounded-[10px] bg-muted">
-        <Icon className={iconClassName} aria-hidden="true" />
-      </span>
-      <span className="font-medium text-sm">{label}</span>
-    </Link>
   );
 }

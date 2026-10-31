@@ -1,6 +1,10 @@
 "use client";
 
 import { AlertCircleIcon, RefreshCwIcon } from "lucide-react";
+import {
+  DashboardGrid,
+  DashboardShell,
+} from "@/components/common/dashboard/dashboard-shell";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,7 +45,7 @@ export function PersonalOverviewPage() {
 
   const firstName = data.user?.fullName.split(" ")[0] || undefined;
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:gap-5">
+    <DashboardShell>
       <PersonalDashboardHeader firstName={firstName} />
       {data.warnings.length > 0 ? (
         <Alert>
@@ -53,14 +57,14 @@ export function PersonalOverviewPage() {
         </Alert>
       ) : null}
       <PersonalSummaryCards data={data} />
-      <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+      <DashboardGrid>
         <MoneyOverviewCard data={data} onSuccess={reload} />
         <PlansOverviewCard plans={data.plans} />
         <FamilyWorkspacesCard families={data.families} />
         <LoansOverviewCard currency={data.currency} loans={data.loans} />
         <RecentActivityCard data={data} />
-      </div>
-    </div>
+      </DashboardGrid>
+    </DashboardShell>
   );
 }
 

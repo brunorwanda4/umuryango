@@ -8,16 +8,12 @@ import {
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+  DashboardActionGrid,
+  DashboardActionTile,
+} from "@/components/common/dashboard/dashboard-action-grid";
+import { DashboardSectionCard } from "@/components/common/dashboard/dashboard-section-card";
+import { Button } from "@/components/ui/button";
 import { createTranslator } from "@/i18n/translate";
 
 const actions: Array<{
@@ -43,49 +39,43 @@ export function QuickActionsCard() {
   const t = createTranslator("PersonalOverview.quickActionsCard");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {t((m) => m.PersonalOverview.quickActionsCard.title)}
-        </CardTitle>
-        <CardDescription>
-          {t((m) => m.PersonalOverview.quickActionsCard.description)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid grid-cols-2 gap-2">
-        {actions.map((action) => (
-          <Button
-            key={action.key}
-            asChild
-            variant="outline"
-            className="h-auto justify-start py-3"
-          >
-            <Link href={action.href}>
-              <action.icon data-icon="inline-start" aria-hidden="true" />
-              {t(action.key)}
+    <DashboardSectionCard
+      title={t((m) => m.PersonalOverview.quickActionsCard.title)}
+      description={t((m) => m.PersonalOverview.quickActionsCard.description)}
+      footerClassName="flex items-start gap-3"
+      footer={
+        <>
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <FileTextIcon className="size-4" aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-medium text-sm">
+              {t((m) => m.PersonalOverview.quickActionsCard.documentsTitle)}
+            </p>
+            <p className="text-muted-foreground text-xs">
+              {t(
+                (m) => m.PersonalOverview.quickActionsCard.documentsUnavailable,
+              )}
+            </p>
+          </div>
+          <Button asChild size="sm" variant="ghost">
+            <Link href="/me/documents">
+              {t((m) => m.PersonalOverview.quickActionsCard.open)}
             </Link>
           </Button>
+        </>
+      }
+    >
+      <DashboardActionGrid>
+        {actions.map((action) => (
+          <DashboardActionTile
+            key={action.key}
+            href={action.href}
+            icon={<action.icon data-icon="inline-start" aria-hidden="true" />}
+            label={t(action.key)}
+          />
         ))}
-      </CardContent>
-      <Separator />
-      <CardFooter className="flex items-start gap-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <FileTextIcon className="size-4" aria-hidden="true" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="font-medium text-sm">
-            {t((m) => m.PersonalOverview.quickActionsCard.documentsTitle)}
-          </p>
-          <p className="text-muted-foreground text-xs">
-            {t((m) => m.PersonalOverview.quickActionsCard.documentsUnavailable)}
-          </p>
-        </div>
-        <Button asChild size="sm" variant="ghost">
-          <Link href="/me/documents">
-            {t((m) => m.PersonalOverview.quickActionsCard.open)}
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+      </DashboardActionGrid>
+    </DashboardSectionCard>
   );
 }

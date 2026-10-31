@@ -1,188 +1,126 @@
 import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  LandmarkIcon,
-  SparklesIcon,
-  TargetIcon,
+  ActivityIcon,
+  ArrowDownLeftIcon,
+  ArrowUpRightIcon,
+  CheckCircle2Icon,
+  FolderKanbanIcon,
+  PiggyBankIcon,
+  SettingsIcon,
+  UserCheckIcon,
   UserPlusIcon,
+  XCircleIcon,
 } from "lucide-react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  DashboardActivityItem,
+  DashboardActivityList,
+} from "@/components/common/dashboard/dashboard-activity-list";
+import { DashboardEmptyState } from "@/components/common/dashboard/dashboard-empty-state";
+import { DashboardSectionCard } from "@/components/common/dashboard/dashboard-section-card";
+import type { MoneyOverview } from "@/components/family/money/types";
+import type { ProjectsOverview } from "@/components/family/projects/types";
 import { createTranslator } from "@/i18n/translate";
-import { AUTHORITY_LABELS } from "@/lib/family-access";
-import type { MoneyOverview } from "../money/types";
-import { formatMinorUnits, formatTitle } from "../money/utils";
-import { formatRelativeTime, getKinshipLabel } from "./dashboard-data";
-import type { FamilyDetail } from "./types";
+import { hasCapability } from "@/lib/family-access";
+import {
+  buildFamilyActivityEntries,
+  formatRelativeTime,
+} from "./dashboard-data";
+import type {
+  ContributionsOverview,
+  FamilyActivityEntry,
+  FamilyAuditEvent,
+  FamilyDetail,
+} from "./types";
 
 const t = createTranslator("FamilyDashboard");
 
-const MAX_ENTRIES = 6;
-
-type ActivityEntry = {
-  id: string;
-  type:
-    | "member_joined"
-    | "family_created"
-    | "expense_recorded"
-    | "income_recorded"
-    | "goal_updated"
-    | "contribution_paid";
-  name: string;
-  avatarUrl: string | null;
-  description: string;
-  timestamp: Date;
-};
-
-function buildActivityEntries(
-  family: FamilyDetail,
-  money: MoneyOverview | null,
-): ActivityEntry[] {
-  const entries: ActivityEntry[] = [];
-
-  for (const member of family.members) {
-    const joinedAt = new Date(member.joinedAt);
-
-    if (Number.isNaN(joinedAt.getTime())) {
-      continue;
-    }
-
-    const roleLabel = AUTHORITY_LABELS[member.authority];
-    const kinship = getKinshipLabel(member);
-
-    entries.push({
-      id: `member-${member.id}`,
-      type: "member_joined",
-      name: member.fullName,
-      avatarUrl: member.avatarUrl,
-      description: t((m) => m.FamilyDashboard.memberJoined, {
-        role: roleLabel,
-        kinship,
-      }),
-      timestamp: joinedAt,
-    });
+function getActivityIcon(kind: FamilyActivityEntry["kind"]) {
+  switch (kind) {
+    case "transaction-income":
+      return <ArrowDownLeftIcon className="size-4" aria-hidden="true" />;
+    case "transaction-expense":
+      return <ArrowUpRightIcon className="size-4" aria-hidden="true" />;
+    case "transaction-approved":
+      return <CheckCircle2Icon className="size-4" aria-hidden="true" />;
+    case "transaction-rejected":
+      return <XCircleIcon className="size-4" aria-hidden="true" />;
+    case "contribution":
+      return <PiggyBankIcon className="size-4" aria-hidden="true" />;
+    case "project":
+      return <FolderKanbanIcon className="size-4" aria-hidden="true" />;
+    case "member-invited":
+      return <UserPlusIcon className="size-4" aria-hidden="true" />;
+    case "member-joined":
+    case "member-updated":
+      return <UserCheckIcon className="size-4" aria-hidden="true" />;
+    case "settings":
+      return <SettingsIcon className="size-4" aria-hidden="true" />;
   }
-
-  const createdAt = new Date(family.createdAt);
-
-  if (!Number.isNaN(createdAt.getTime())) {
-    entries.push({
-      id: `family-${family.id}`,
-      type: "family_created",
-      name: family.name,
-      avatarUrl: null,
-      description: t((m) => m.FamilyDashboard.familyCreated),
-      timestamp: createdAt,
-    });
-  }
-
-  const currency = money?.currency ?? family.defaultCurrency;
-
-  for (const record of money?.records ?? []) {
-    const timestamp = new Date(record.date ?? "");
-
-    if (Number.isNaN(timestamp.getTime())) {
-      continue;
-    }
-
-    const recordType = record.type.toLowerCase();
-    const isIncome = recordType.includes("income");
-    const isExpense = recordType.includes("expense");
-    const amount = formatMinorUnits(record.amountMinorUnits, currency);
-    const category = record.category ?? formatTitle(record.title);
-
-    entries.push({
-      id: `money-${record.id}`,
-      type: isIncome
-        ? "income_recorded"
-        : isExpense
-          ? "expense_recorded"
-          : "contribution_paid",
-      name: record.createdBy ?? family.name,
-      avatarUrl: null,
-      description: isIncome
-        ? t((m) => m.FamilyDashboard.recordedIncome, { amount, category })
-        : isExpense
-          ? t((m) => m.FamilyDashboard.recordedExpense, { amount, category })
-          : t((m) => m.FamilyDashboard.recordedTransaction, {
-              amount,
-              category,
-            }),
-      timestamp,
-    });
-  }
-
-  entries.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-
-  return entries;
 }
 
 export function FamilyActivityFeed({
   family,
   money,
+  contributions = null,
+  projects = null,
+  auditEvents = null,
+  className,
 }: {
   family: FamilyDetail;
   money: MoneyOverview | null;
+  contributions?: ContributionsOverview | null;
+  projects?: ProjectsOverview | null;
+  auditEvents?: FamilyAuditEvent[] | null;
+  className?: string;
 }) {
-  const allEntries = buildActivityEntries(family, money);
-  const visibleEntries = allEntries.slice(0, MAX_ENTRIES);
+  const canViewAuditLog = hasCapability(family, "MANAGE_MEMBERS");
+  const encodedSlug = encodeURIComponent(family.slug);
+  const entries = buildFamilyActivityEntries({
+    family,
+    money,
+    contributions,
+    projects,
+    auditEvents,
+  });
 
   return (
-    <Card className="card card-border gap-0 rounded-[20px] py-5 shadow-sm">
-      <CardHeader className="px-5 pb-3.5">
-        <CardTitle className="font-fraunces text-xl">
-          {t((m) => m.FamilyDashboard.recentActivityTitle)}
-        </CardTitle>
-        <CardDescription>
-          {t((m) => m.FamilyDashboard.recentActivityDesc)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="px-5">
-        <div className="flex flex-col">
-          {visibleEntries.map((entry) => {
-            let Icon = UserPlusIcon;
-
-            if (entry.type === "family_created") {
-              Icon = SparklesIcon;
-            } else if (entry.type === "expense_recorded") {
-              Icon = ArrowUpIcon;
-            } else if (entry.type === "income_recorded") {
-              Icon = ArrowDownIcon;
-            } else if (entry.type === "goal_updated") {
-              Icon = TargetIcon;
-            } else if (entry.type === "contribution_paid") {
-              Icon = LandmarkIcon;
-            }
+    <DashboardSectionCard
+      title={t((m) => m.FamilyDashboard.recentActivityTitle)}
+      description={t((m) => m.FamilyDashboard.recentActivityDesc)}
+      actionHref={
+        canViewAuditLog ? `/family/${encodedSlug}/settings/audit` : undefined
+      }
+      actionLabel={
+        canViewAuditLog ? t((m) => m.FamilyDashboard.viewAuditLog) : undefined
+      }
+      className={className}
+    >
+      {entries.length === 0 ? (
+        <DashboardEmptyState
+          icon={<ActivityIcon aria-hidden="true" />}
+          title={t((m) => m.FamilyDashboard.noActivityTitle)}
+          description={t((m) => m.FamilyDashboard.noActivityDesc)}
+        />
+      ) : (
+        <DashboardActivityList>
+          {entries.map((entry) => {
+            const parsedDate = new Date(entry.occurredAt);
+            const timestamp = Number.isNaN(parsedDate.getTime())
+              ? entry.occurredAt
+              : formatRelativeTime(parsedDate);
 
             return (
-              <div
+              <DashboardActivityItem
                 key={entry.id}
-                className="flex items-center gap-3 border-t py-3 first:border-t-0 first:pt-0 last:pb-0"
-              >
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
-                  <Icon aria-hidden="true" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm">
-                    <span className="font-semibold">{entry.name}</span>{" "}
-                    <span className="text-muted-foreground">
-                      {entry.description}
-                    </span>
-                  </p>
-                </div>
-                <span className="shrink-0 text-muted-foreground text-xs">
-                  {formatRelativeTime(entry.timestamp)}
-                </span>
-              </div>
+                href={entry.href}
+                icon={getActivityIcon(entry.kind)}
+                title={entry.title}
+                description={entry.detail}
+                timestamp={timestamp}
+              />
             );
           })}
-        </div>
-      </CardContent>
-    </Card>
+        </DashboardActivityList>
+      )}
+    </DashboardSectionCard>
   );
 }

@@ -1,24 +1,10 @@
-import { ArrowRightIcon, HandCoinsIcon } from "lucide-react";
-import Link from "next/link";
+import { HandCoinsIcon } from "lucide-react";
+import { DashboardEmptyState } from "@/components/common/dashboard/dashboard-empty-state";
+import { DashboardStatTile } from "@/components/common/dashboard/dashboard-metric-card";
+import { DashboardSectionCard } from "@/components/common/dashboard/dashboard-section-card";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import type { PersonalLoan } from "@/components/money/loans/types-and-schemas";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { Progress } from "@/components/ui/progress";
 import { createTranslator } from "@/i18n/translate";
 import { addMinorUnits } from "./personal-overview-data";
@@ -45,141 +31,106 @@ export function LoansOverviewCard({
     .slice(0, 3);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t((m) => m.PersonalOverview.loansCard.title)}</CardTitle>
-        <CardDescription>
-          {t((m) => m.PersonalOverview.loansCard.description)}
-        </CardDescription>
-        <CardAction>
-          <Button asChild size="sm" variant="ghost">
-            <Link href="/me/money/loans">
-              {t((m) => m.PersonalOverview.loansCard.openLoans)}
-              <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
-            </Link>
-          </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-5">
-        <div className="grid grid-cols-2 gap-3">
-          <LoanStat
-            label={t((m) => m.PersonalOverview.loansCard.totalBorrowed)}
-            currency={currency}
-            value={addMinorUnits(
-              ...borrowed.map((loan) => loan.originalAmountMinorUnits),
-            ).toString()}
-          />
-          <LoanStat
-            label={t((m) => m.PersonalOverview.loansCard.totalLent)}
-            currency={currency}
-            value={addMinorUnits(
-              ...lent.map((loan) => loan.originalAmountMinorUnits),
-            ).toString()}
-          />
-          <LoanStat
-            label={t((m) => m.PersonalOverview.loansCard.remainingStat)}
-            currency={currency}
-            value={addMinorUnits(
-              ...active.map((loan) => loan.remainingBalanceMinorUnits),
-            ).toString()}
-          />
-          <div className="rounded-xl bg-muted p-3">
-            <p className="font-semibold text-lg">{dueSoon.length}</p>
-            <p className="text-muted-foreground text-xs">
-              {t((m) => m.PersonalOverview.loansCard.dueInSevenDays)}
-            </p>
-          </div>
-        </div>
-        {loans.length === 0 ? (
-          <Empty className="border border-dashed">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <HandCoinsIcon aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle>
-                {t((m) => m.PersonalOverview.loansCard.noLoansYet)}
-              </EmptyTitle>
-              <EmptyDescription>
-                {t((m) => m.PersonalOverview.loansCard.noLoansDesc)}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <div className="flex flex-col gap-4">
-            {urgent.map((loan) => {
-              const expected = BigInt(
-                loan.totalExpectedAmountMinorUnits || "0",
-              );
-              const paid = BigInt(loan.paidAmountMinorUnits || "0");
-              const progress =
-                expected > BigInt(0)
-                  ? Number((paid * BigInt(100)) / expected)
-                  : 0;
-              return (
-                <div key={loan.id} className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-sm">
-                        {loan.title}
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        {t((m) => m.PersonalOverview.loansCard.duePersonDate, {
-                          name: loan.person.name,
-                          date: new Date(loan.dueDate).toLocaleDateString(
-                            "en",
-                            {
-                              month: "short",
-                              day: "numeric",
-                            },
-                          ),
-                        })}
-                      </p>
-                    </div>
-                    <Badge
-                      variant={
-                        loan.status === "OVERDUE" ? "destructive" : "outline"
-                      }
-                    >
-                      {loan.type === "BORROWED"
-                        ? t((m) => m.PersonalOverview.loansCard.borrowed)
-                        : t((m) => m.PersonalOverview.loansCard.lent)}
-                    </Badge>
+    <DashboardSectionCard
+      title={t((m) => m.PersonalOverview.loansCard.title)}
+      description={t((m) => m.PersonalOverview.loansCard.description)}
+      actionHref="/me/money/loans"
+      actionLabel={t((m) => m.PersonalOverview.loansCard.openLoans)}
+    >
+      <div className="grid grid-cols-2 gap-3">
+        <DashboardStatTile
+          label={t((m) => m.PersonalOverview.loansCard.totalBorrowed)}
+          value={
+            <CompactMoney
+              currency={currency}
+              value={addMinorUnits(
+                ...borrowed.map((loan) => loan.originalAmountMinorUnits),
+              ).toString()}
+            />
+          }
+        />
+        <DashboardStatTile
+          label={t((m) => m.PersonalOverview.loansCard.totalLent)}
+          value={
+            <CompactMoney
+              currency={currency}
+              value={addMinorUnits(
+                ...lent.map((loan) => loan.originalAmountMinorUnits),
+              ).toString()}
+            />
+          }
+        />
+        <DashboardStatTile
+          label={t((m) => m.PersonalOverview.loansCard.remainingStat)}
+          value={
+            <CompactMoney
+              currency={currency}
+              value={addMinorUnits(
+                ...active.map((loan) => loan.remainingBalanceMinorUnits),
+              ).toString()}
+            />
+          }
+        />
+        <DashboardStatTile
+          label={t((m) => m.PersonalOverview.loansCard.dueInSevenDays)}
+          value={dueSoon.length}
+        />
+      </div>
+      {loans.length === 0 ? (
+        <DashboardEmptyState
+          icon={<HandCoinsIcon aria-hidden="true" />}
+          title={t((m) => m.PersonalOverview.loansCard.noLoansYet)}
+          description={t((m) => m.PersonalOverview.loansCard.noLoansDesc)}
+        />
+      ) : (
+        <div className="flex flex-col gap-4">
+          {urgent.map((loan) => {
+            const expected = BigInt(loan.totalExpectedAmountMinorUnits || "0");
+            const paid = BigInt(loan.paidAmountMinorUnits || "0");
+            const progress =
+              expected > BigInt(0)
+                ? Number((paid * BigInt(100)) / expected)
+                : 0;
+            return (
+              <div key={loan.id} className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-sm">{loan.title}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {t((m) => m.PersonalOverview.loansCard.duePersonDate, {
+                        name: loan.person.name,
+                        date: new Date(loan.dueDate).toLocaleDateString("en", {
+                          month: "short",
+                          day: "numeric",
+                        }),
+                      })}
+                    </p>
                   </div>
-                  <Progress
-                    value={progress}
-                    aria-label={t(
-                      (m) => m.PersonalOverview.loansCard.repaidAria,
-                      {
-                        title: loan.title,
-                        progress,
-                      },
-                    )}
-                  />
+                  <Badge
+                    variant={
+                      loan.status === "OVERDUE" ? "destructive" : "outline"
+                    }
+                  >
+                    {loan.type === "BORROWED"
+                      ? t((m) => m.PersonalOverview.loansCard.borrowed)
+                      : t((m) => m.PersonalOverview.loansCard.lent)}
+                  </Badge>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function LoanStat({
-  currency,
-  label,
-  value,
-}: {
-  currency: string;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="min-w-0 rounded-xl bg-muted p-3">
-      <p className="truncate font-semibold text-lg">
-        <CompactMoney currency={currency} value={value} />
-      </p>
-      <p className="text-muted-foreground text-xs">{label}</p>
-    </div>
+                <Progress
+                  value={progress}
+                  aria-label={t(
+                    (m) => m.PersonalOverview.loansCard.repaidAria,
+                    {
+                      title: loan.title,
+                      progress,
+                    },
+                  )}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </DashboardSectionCard>
   );
 }

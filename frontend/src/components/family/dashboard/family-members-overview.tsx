@@ -1,19 +1,15 @@
-import { ArrowRightIcon, UsersIcon } from "lucide-react";
+import { UsersIcon } from "lucide-react";
 import Link from "next/link";
+import { DashboardEmptyState } from "@/components/common/dashboard/dashboard-empty-state";
+import { DashboardStatTile } from "@/components/common/dashboard/dashboard-metric-card";
+import { DashboardSectionCard } from "@/components/common/dashboard/dashboard-section-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { createTranslator } from "@/i18n/translate";
 import { AUTHORITY_LABELS } from "@/lib/family-access";
-import { cn } from "@/lib/utils";
 import {
+  getAuthorityBreakdown,
+  getInitials,
   getKinshipLabel,
   getVisibleMembers,
   joinedDateFormatter,
@@ -22,100 +18,89 @@ import type { FamilyDetail } from "./types";
 
 const t = createTranslator("FamilyDashboard");
 
-const roleDotClass = {
-  HEAD: "bg-primary",
-  ADMIN: "bg-secondary-foreground",
-  MEMBER: "bg-muted-foreground",
-} as const;
-
 export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
-  const visibleMembers = getVisibleMembers(family);
-  const hiddenCount = family.memberCount - visibleMembers.length;
+  const membersHref = `/family/${encodeURIComponent(family.slug)}/members`;
+  const visibleMembers = getVisibleMembers(family).slice(0, 4);
+  const breakdown = getAuthorityBreakdown(family);
+  const totalMembers = family.memberCount || family.members.length;
+  const hiddenCount = Math.max(0, totalMembers - visibleMembers.length);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <CardTitle className="flex items-center gap-2">
-            <UsersIcon className="size-4" aria-hidden="true" />
-            {t((m) => m.FamilyDashboard.peopleInFamily)}
-          </CardTitle>
-          <CardDescription>
-            {t((m) => m.FamilyDashboard.peopleInFamilyDesc)}
-          </CardDescription>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/family/${family.slug}/members`}>
-            {t((m) => m.FamilyDashboard.viewMembers)}
-            <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
-          </Link>
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <DashboardSectionCard
+      title={t((m) => m.FamilyDashboard.membersCardTitle)}
+      description={t((m) => m.FamilyDashboard.membersCardDesc)}
+      actionHref={membersHref}
+      actionLabel={t((m) => m.FamilyDashboard.viewMembers)}
+    >
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <DashboardStatTile
+          label={t((m) => m.FamilyDashboard.totalMembersStat)}
+          value={totalMembers}
+        />
+        {breakdown.map((item) => (
+          <DashboardStatTile
+            key={item.authority}
+            label={item.label}
+            value={item.members}
+          />
+        ))}
+      </div>
+
+      {visibleMembers.length === 0 ? (
+        <DashboardEmptyState
+          icon={<UsersIcon aria-hidden="true" />}
+          title={t((m) => m.FamilyDashboard.noMembersTitle)}
+          description={t((m) => m.FamilyDashboard.noMembersDesc)}
+        />
+      ) : (
+        <div className="flex flex-col gap-3">
           {visibleMembers.map((member) => {
-            const isHead = member.authority === "HEAD";
+            const joinedDate = new Date(member.joinedAt);
+            const formattedJoined = Number.isNaN(joinedDate.getTime())
+              ? member.joinedAt
+              : joinedDateFormatter.format(joinedDate);
 
             return (
-              <div
+              <Link
                 key={member.id}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg border p-3 transition-all duration-200 hover:border-primary/20 hover:shadow-sm",
-                  isHead && "ring-2 ring-primary/10",
-                )}
+                href={membersHref}
+                className="flex items-center gap-3 rounded-xl border p-3 transition-colors hover:bg-muted/40"
               >
-                <div
-                  className={cn(
-                    "relative rounded-full",
-                    isHead && "ring-2 ring-primary/20",
-                  )}
-                >
-                  <Avatar size={isHead ? "lg" : "sm"}>
-                    {member.avatarUrl ? (
-                      <AvatarImage
-                        src={member.avatarUrl}
-                        alt={member.fullName}
-                      />
-                    ) : null}
-                    <AvatarFallback name={member.fullName} />
-                  </Avatar>
-                  <span
-                    className={cn(
-                      "-right-0.5 -bottom-0.5 absolute size-2.5 rounded-full border-2 border-background",
-                      roleDotClass[member.authority],
-                    )}
-                    aria-hidden="true"
-                  />
-                </div>
+                <Avatar size="sm">
+                  {member.avatarUrl ? (
+                    <AvatarImage src={member.avatarUrl} alt={member.fullName} />
+                  ) : null}
+                  <AvatarFallback name={member.fullName}>
+                    {getInitials(member.fullName)}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-sm">
                     {member.fullName}
                   </p>
-                  <p className="text-muted-foreground text-xs">
-                    {getKinshipLabel(member)} -{" "}
+                  <p className="truncate text-muted-foreground text-xs">
+                    {getKinshipLabel(member)} ·{" "}
                     {t((m) => m.FamilyDashboard.joinedDate, {
-                      date: joinedDateFormatter.format(
-                        new Date(member.joinedAt),
-                      ),
+                      date: formattedJoined,
                     })}
                   </p>
                 </div>
                 <Badge
-                  variant={isHead ? "default" : "outline"}
+                  variant={member.authority === "HEAD" ? "default" : "outline"}
                   className="shrink-0"
                 >
                   {AUTHORITY_LABELS[member.authority]}
                 </Badge>
-              </div>
+              </Link>
             );
           })}
+          {hiddenCount > 0 ? (
+            <p className="text-muted-foreground text-xs">
+              {t((m) => m.FamilyDashboard.moreMembers, { count: hiddenCount })}
+            </p>
+          ) : null}
         </div>
-        {hiddenCount > 0 ? (
-          <div className="mt-3 rounded-lg border border-dashed bg-muted/30 p-3 text-center text-muted-foreground text-sm">
-            {t((m) => m.FamilyDashboard.moreMembers, { count: hiddenCount })}
-          </div>
-        ) : null}
-      </CardContent>
-    </Card>
+      )}
+    </DashboardSectionCard>
   );
 }

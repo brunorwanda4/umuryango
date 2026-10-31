@@ -543,4 +543,47 @@ describe('FamiliesService', () => {
       ).rejects.toBeInstanceOf(ForbiddenException);
     });
   });
+
+  describe('getBySlugForUser', () => {
+    it('identifies currentMember by the authenticated userId even when multiple members share the same authority', async () => {
+      prisma.family.findUnique.mockResolvedValue({
+        ...familyRecord,
+        members: [
+          {
+            ...makeMember({
+              id: 'mem-admin-1',
+              userId: 'u-admin-1',
+              authority: FamilyAuthority.ADMIN,
+            }),
+            user: {
+              fullName: 'First Admin',
+              email: 'admin1@example.com',
+              avatarUrl: null,
+            },
+          },
+          {
+            ...makeMember({
+              id: 'mem-admin-2',
+              userId: 'u-admin-2',
+              authority: FamilyAuthority.ADMIN,
+            }),
+            user: {
+              fullName: 'Second Admin',
+              email: 'admin2@example.com',
+              avatarUrl: null,
+            },
+          },
+        ],
+      });
+
+      const detail = await service.getBySlugForUser(
+        'u-admin-2',
+        'mutesi-family',
+      );
+
+      expect(detail.currentMember.id).toBe('mem-admin-2');
+      expect(detail.currentMember.userId).toBe('u-admin-2');
+      expect(detail.currentMember.fullName).toBe('Second Admin');
+    });
+  });
 });

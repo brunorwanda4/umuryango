@@ -6,19 +6,11 @@ import {
   UsersIcon,
 } from "lucide-react";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
+  DashboardActivityItem,
+  DashboardActivityList,
+} from "@/components/common/dashboard/dashboard-activity-list";
+import { DashboardEmptyState } from "@/components/common/dashboard/dashboard-empty-state";
+import { DashboardSectionCard } from "@/components/common/dashboard/dashboard-section-card";
 import { createTranslator, type Translator } from "@/i18n/translate";
 import type { PersonalOverviewData } from "./personal-overview-data";
 
@@ -74,62 +66,38 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
     .slice(0, 5);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {t((m) => m.PersonalOverview.recentActivityCard.title)}
-        </CardTitle>
-        <CardDescription>
-          {t((m) => m.PersonalOverview.recentActivityCard.recentActionsDesc)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {activities.length === 0 ? (
-          <Empty className="border border-dashed">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <ActivityIcon aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle>
-                {t((m) => m.PersonalOverview.recentActivityCard.emptyTitle)}
-              </EmptyTitle>
-              <EmptyDescription>
-                {t(
-                  (m) => m.PersonalOverview.recentActivityCard.noRecentActions,
-                )}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <div className="flex flex-col">
-            {activities.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-start gap-3 border-b py-3 first:pt-0 last:border-b-0 last:pb-0"
-              >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                  <activity.icon className="size-4" aria-hidden="true" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-sm">{activity.title}</p>
-                  <p className="truncate text-muted-foreground text-xs">
-                    {activity.description}
-                  </p>
-                </div>
-                <p className="shrink-0 text-muted-foreground text-xs">
-                  {activity.time
-                    ? formatRelativeTime(activity.time, t)
-                    : t(
-                        (m) =>
-                          m.PersonalOverview.recentActivityCard.availableNow,
-                      )}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <DashboardSectionCard
+      title={t((m) => m.PersonalOverview.recentActivityCard.title)}
+      description={t(
+        (m) => m.PersonalOverview.recentActivityCard.recentActionsDesc,
+      )}
+    >
+      {activities.length === 0 ? (
+        <DashboardEmptyState
+          icon={<ActivityIcon aria-hidden="true" />}
+          title={t((m) => m.PersonalOverview.recentActivityCard.emptyTitle)}
+          description={t(
+            (m) => m.PersonalOverview.recentActivityCard.noRecentActions,
+          )}
+        />
+      ) : (
+        <DashboardActivityList>
+          {activities.map((activity) => (
+            <DashboardActivityItem
+              key={activity.id}
+              icon={<activity.icon className="size-4" aria-hidden="true" />}
+              title={activity.title}
+              description={activity.description}
+              timestamp={
+                activity.time
+                  ? formatRelativeTime(activity.time, t)
+                  : t((m) => m.PersonalOverview.recentActivityCard.availableNow)
+              }
+            />
+          ))}
+        </DashboardActivityList>
+      )}
+    </DashboardSectionCard>
   );
 }
 

@@ -1,9 +1,7 @@
 import { UsersIcon } from "lucide-react";
 import Link from "next/link";
+import { loadFamilyDashboardData } from "@/components/family/dashboard/dashboard-data";
 import { FamilyDashboard } from "@/components/family/dashboard/family-dashboard";
-import type { FamilyDetail } from "@/components/family/dashboard/types";
-import type { MoneyOverview } from "@/components/family/money/types";
-import { normalizeMoneyOverview } from "@/components/family/money/utils";
 import {
   Empty,
   EmptyDescription,
@@ -14,40 +12,23 @@ import {
 import { createTranslator } from "@/i18n/translate";
 import { serverApiRequest } from "@/service/server-api";
 
-async function getDashboardPageData(familyName: string) {
-  const familyResponse = await serverApiRequest<undefined, FamilyDetail>(
+async function fetchServerPath<T>(path: string): Promise<T> {
+  const response = await serverApiRequest<undefined, T>(
     "get",
-    `/families/${encodeURIComponent(familyName)}`,
+    path,
     undefined,
     { cache: "no-store" },
   );
 
-  if (!familyResponse.ok || !familyResponse.data) {
-    return {
-      family: null,
-      money: null,
-      moneyMessage: undefined,
-      error: familyResponse.message ?? "Unable to load this family.",
-    };
+  if (!response.ok || response.data === undefined) {
+    throw new Error(response.message ?? "Unable to load family data.");
   }
 
-  const family = familyResponse.data;
-  const moneyResponse = await serverApiRequest<undefined, MoneyOverview>(
-    "get",
-    `/families/${encodeURIComponent(family.id)}/money/overview?period=month`,
-    undefined,
-    { cache: "no-store" },
-  );
+  return response.data;
+}
 
-  return {
-    family,
-    money: moneyResponse.ok ? normalizeMoneyOverview(moneyResponse.data) : null,
-    moneyMessage: moneyResponse.ok
-      ? undefined
-      : (moneyResponse.message ??
-        "Money records are not available from the API yet."),
-    error: null,
-  };
+async function getDashboardPageData(familyName: string) {
+  return loadFamilyDashboardData(familyName, fetchServerPath);
 }
 
 export default async function FamilyDashboardPage({
@@ -56,10 +37,10 @@ export default async function FamilyDashboardPage({
   params: Promise<{ familyName: string }>;
 }) {
   const { familyName } = await params;
-  const data = await getDashboardPageData(familyName);
+  const result = await getDashboardPageData(familyName);
   const t = createTranslator("FamilyDashboard");
 
-  if (!data.family) {
+  if (!result.ok) {
     return (
       <Empty>
         <EmptyHeader>
@@ -69,7 +50,7 @@ export default async function FamilyDashboardPage({
           <EmptyTitle>{t((m) => m.FamilyDashboard.familyNotFound)}</EmptyTitle>
           <EmptyDescription>
             {t((m) => m.FamilyDashboard.familyNotFoundDesc, {
-              error: data.error ?? "",
+              error: result.errorMessage,
             })}{" "}
             <Link href="/family">
               {t((m) => m.FamilyDashboard.backToFamilies)}
@@ -80,11 +61,20 @@ export default async function FamilyDashboardPage({
     );
   }
 
+  const { data } = result;
+
   return (
     <FamilyDashboard
       family={data.family}
+      currentUserId={data.currentUserId}
+      currentUserFullName={data.currentUserFullName}
       money={data.money}
-      moneyMessage={data.moneyMessage}
+      rejectedTransactions={data.rejectedTransactions}
+      contributions={data.contributions}
+      projects={data.projects}
+      loans={data.loans}
+      auditEvents={data.auditEvents}
+      warnings={data.warnings}
     />
   );
 }

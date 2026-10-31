@@ -1,23 +1,9 @@
-import { ArrowRightIcon, CalendarDaysIcon } from "lucide-react";
-import Link from "next/link";
+import { CalendarDaysIcon } from "lucide-react";
+import { DashboardEmptyState } from "@/components/common/dashboard/dashboard-empty-state";
+import { DashboardStatTile } from "@/components/common/dashboard/dashboard-metric-card";
+import { DashboardSectionCard } from "@/components/common/dashboard/dashboard-section-card";
 import type { PersonPlan } from "@/components/plans/types-and-schemas";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { createTranslator, type Translator } from "@/i18n/translate";
 
 export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
@@ -65,71 +51,53 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
   ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t((m) => m.PersonalOverview.plansCard.title)}</CardTitle>
-        <CardDescription>
-          {t((m) => m.PersonalOverview.plansCard.description)}
-        </CardDescription>
-        <CardAction>
-          <Button asChild size="sm" variant="ghost">
-            <Link href="/me/plans">
-              {t((m) => m.PersonalOverview.plansCard.viewAll)}
-              <ArrowRightIcon data-icon="inline-end" aria-hidden="true" />
-            </Link>
-          </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-5">
-        <div className="grid grid-cols-2 gap-3">
-          {stats.map((stat) => (
-            <div key={stat.label} className="rounded-xl bg-muted p-3">
-              <p className="font-semibold text-xl">{stat.value}</p>
-              <p className="text-muted-foreground text-xs">{stat.label}</p>
+    <DashboardSectionCard
+      title={t((m) => m.PersonalOverview.plansCard.title)}
+      description={t((m) => m.PersonalOverview.plansCard.description)}
+      actionHref="/me/plans"
+      actionLabel={t((m) => m.PersonalOverview.plansCard.viewAll)}
+    >
+      <div className="grid grid-cols-2 gap-3">
+        {stats.map((stat) => (
+          <DashboardStatTile
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+          />
+        ))}
+      </div>
+      {plans.length === 0 ? (
+        <DashboardEmptyState
+          icon={<CalendarDaysIcon aria-hidden="true" />}
+          title={t((m) => m.PersonalOverview.plansCard.noPlansYet)}
+          description={t((m) => m.PersonalOverview.plansCard.noPlansYetDesc)}
+        />
+      ) : (
+        <div className="flex flex-col gap-3">
+          <p className="font-medium text-sm">
+            {t((m) => m.PersonalOverview.plansCard.upcoming)}
+          </p>
+          {upcoming.map((plan) => (
+            <div
+              key={plan.id}
+              className="flex items-center justify-between gap-3"
+            >
+              <div className="min-w-0">
+                <p className="truncate font-medium text-sm">{plan.title}</p>
+                <p className="text-muted-foreground text-xs">
+                  {formatPlanDate(plan, t)}
+                </p>
+              </div>
+              <Badge variant="outline">
+                {plan.type === "TASK"
+                  ? t((m) => m.PersonalOverview.plansCard.task)
+                  : `${plan.progress}%`}
+              </Badge>
             </div>
           ))}
         </div>
-        {plans.length === 0 ? (
-          <Empty className="border border-dashed">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <CalendarDaysIcon aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle>
-                {t((m) => m.PersonalOverview.plansCard.noPlansYet)}
-              </EmptyTitle>
-              <EmptyDescription>
-                {t((m) => m.PersonalOverview.plansCard.noPlansYetDesc)}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        ) : (
-          <div className="flex flex-col gap-3">
-            <p className="font-medium text-sm">
-              {t((m) => m.PersonalOverview.plansCard.upcoming)}
-            </p>
-            {upcoming.map((plan) => (
-              <div
-                key={plan.id}
-                className="flex items-center justify-between gap-3"
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium text-sm">{plan.title}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {formatPlanDate(plan, t)}
-                  </p>
-                </div>
-                <Badge variant="outline">
-                  {plan.type === "TASK"
-                    ? t((m) => m.PersonalOverview.plansCard.task)
-                    : `${plan.progress}%`}
-                </Badge>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      )}
+    </DashboardSectionCard>
   );
 }
 
