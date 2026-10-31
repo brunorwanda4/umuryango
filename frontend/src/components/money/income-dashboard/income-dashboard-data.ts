@@ -121,7 +121,9 @@ export function mapIncomeDashboard(data: IncomeDashboardResponse) {
   };
 }
 
-function mapIncomeRecord(transaction: IncomeTransaction): RecentIncomeRecord {
+export function mapIncomeRecord(
+  transaction: IncomeTransaction,
+): RecentIncomeRecord {
   const category = transaction.category.name;
   const account = transaction.paymentMethod ?? "OTHER";
   const categoryStyle = getCategoryStyle(category);

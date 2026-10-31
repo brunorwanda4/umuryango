@@ -54,7 +54,7 @@ export function PersonalOverviewPage() {
       ) : null}
       <PersonalSummaryCards data={data} />
       <div className="grid min-w-0 gap-4 lg:grid-cols-2">
-        <MoneyOverviewCard data={data} />
+        <MoneyOverviewCard data={data} onSuccess={reload} />
         <PlansOverviewCard plans={data.plans} />
         <FamilyWorkspacesCard families={data.families} />
         <LoansOverviewCard currency={data.currency} loans={data.loans} />

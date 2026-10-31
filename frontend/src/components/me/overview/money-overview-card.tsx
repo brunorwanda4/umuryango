@@ -5,13 +5,16 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { CompactMoney } from "@/components/common/money/compact-money";
+import { mapExpenseRecord } from "@/components/money/expense-dashboard/expense-dashboard-data";
+import { ViewExpenseDialog } from "@/components/money/expense-dashboard/view-expense-dialog";
+import { mapIncomeRecord } from "@/components/money/income-dashboard/income-dashboard-data";
+import { ViewIncomeDialog } from "@/components/money/income-dashboard/view-income-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardAction,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -35,13 +38,17 @@ import {
   toChartNumber,
 } from "@/lib/format-compact-number";
 import type { PersonalOverviewData } from "./personal-overview-data";
-import { addMinorUnits } from "./personal-overview-data";
 
-export function MoneyOverviewCard({ data }: { data: PersonalOverviewData }) {
+export function MoneyOverviewCard({
+  data,
+  onSuccess,
+}: {
+  data: PersonalOverviewData;
+  onSuccess: () => void | Promise<void>;
+}) {
   const t = createTranslator("PersonalOverview.moneyCard");
   const income = data.income?.summary.periodTotalMinorUnits ?? "0";
   const expenses = data.expenses?.summary.periodTotalMinorUnits ?? "0";
-  const remaining = addMinorUnits(income) - addMinorUnits(expenses);
   const chartConfig = useMemo(
     () =>
       ({
@@ -96,23 +103,6 @@ export function MoneyOverviewCard({ data }: { data: PersonalOverviewData }) {
           </Empty>
         ) : (
           <>
-            <div className="grid grid-cols-3 gap-3">
-              <MiniStat
-                label={t("income")}
-                currency={data.currency}
-                value={income}
-              />
-              <MiniStat
-                label={t("expenses")}
-                currency={data.currency}
-                value={expenses}
-              />
-              <MiniStat
-                label={t("remaining")}
-                currency={data.currency}
-                value={remaining.toString()}
-              />
-            </div>
             <ChartContainer
               config={chartConfig}
               className="h-44 w-full aspect-auto"
@@ -155,62 +145,58 @@ export function MoneyOverviewCard({ data }: { data: PersonalOverviewData }) {
                   {t("noRecentTransactions")}
                 </p>
               ) : (
-                records.map((record) => (
-                  <div
-                    key={record.id}
-                    className="flex items-center justify-between gap-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-sm">
-                        {record.description ?? record.category.name}
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        {record.category.name} ·{" "}
-                        {new Date(record.date).toLocaleDateString("en", {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
-                    <CompactMoney
-                      className="font-medium"
-                      currency={record.currency}
-                      value={record.amountMinorUnits}
+                records.map((record) => {
+                  const trigger = (
+                    <Button
+                      key={record.id}
+                      type="button"
+                      variant="ghost"
+                      className="h-auto w-full justify-between gap-3 whitespace-normal text-left"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-sm">
+                          {record.description ?? record.category.name}
+                        </p>
+                        <p className="text-muted-foreground text-xs">
+                          {record.category.name} ·{" "}
+                          {new Date(record.date).toLocaleDateString("en", {
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </p>
+                      </div>
+                      <CompactMoney
+                        className="font-medium"
+                        currency={record.currency}
+                        value={record.amountMinorUnits}
+                      />
+                    </Button>
+                  );
+                  return record.type === "INCOME" ? (
+                    <ViewIncomeDialog
+                      key={record.id}
+                      income={mapIncomeRecord(record)}
+                      categories={data.categories}
+                      familyId={record.familyId}
+                      onSuccess={onSuccess}
+                      trigger={trigger}
                     />
-                  </div>
-                ))
+                  ) : (
+                    <ViewExpenseDialog
+                      key={record.id}
+                      expense={mapExpenseRecord(record)}
+                      categories={data.categories}
+                      familyId={record.familyId}
+                      onSuccess={onSuccess}
+                      trigger={trigger}
+                    />
+                  );
+                })
               )}
             </div>
           </>
         )}
       </CardContent>
-      <CardFooter className="flex flex-wrap gap-2 border-t">
-        <Button asChild size="sm">
-          <Link href="/me/money/income">{t("addIncome")}</Link>
-        </Button>
-        <Button asChild size="sm" variant="outline">
-          <Link href="/me/money/expenses">{t("addExpense")}</Link>
-        </Button>
-      </CardFooter>
     </Card>
-  );
-}
-
-function MiniStat({
-  currency,
-  label,
-  value,
-}: {
-  currency: string;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="min-w-0 rounded-xl bg-muted p-3">
-      <p className="text-muted-foreground text-xs">{label}</p>
-      <p className="mt-1 truncate font-semibold text-sm">
-        <CompactMoney currency={currency} value={value} />
-      </p>
-    </div>
   );
 }

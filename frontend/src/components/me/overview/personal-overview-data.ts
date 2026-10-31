@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import type { ExpenseDashboardResponse } from "@/components/money/expense-dashboard/expense-dashboard-data";
-import type { IncomeDashboardResponse } from "@/components/money/income-dashboard/income-dashboard-data";
+import type {
+  IncomeCategory,
+  IncomeDashboardResponse,
+} from "@/components/money/income-dashboard/income-dashboard-data";
 import {
   normalizePersonalLoans,
   type PersonalLoan,
@@ -30,6 +33,7 @@ export type PersonalOverviewData = {
   income: IncomeDashboardResponse | null;
   expenses: ExpenseDashboardResponse | null;
   currency: string;
+  categories: IncomeCategory[];
   warnings: string[];
 };
 
@@ -41,6 +45,7 @@ const EMPTY_DATA: PersonalOverviewData = {
   income: null,
   expenses: null,
   currency: "RWF",
+  categories: [],
   warnings: [],
 };
 
@@ -107,26 +112,39 @@ export function usePersonalOverviewData() {
     let income: IncomeDashboardResponse | null = null;
     let expenses: ExpenseDashboardResponse | null = null;
     let loans: PersonalLoan[] = [];
+    let categories: IncomeCategory[] = [];
     const warnings: string[] = [];
 
     if (workspaceResponse.ok && moneyWorkspace) {
       const range = currentMonthRange();
-      const [incomeResponse, expenseResponse, loansResponse] =
-        await Promise.all([
-          apiRequest<undefined, IncomeDashboardResponse>(
-            "get",
-            `/families/${encodeURIComponent(moneyWorkspace.id)}/money/transactions/mine/dashboard?type=INCOME&from=${range.from}&to=${range.to}`,
-          ),
-          apiRequest<undefined, ExpenseDashboardResponse>(
-            "get",
-            `/families/${encodeURIComponent(moneyWorkspace.id)}/money/transactions/mine/dashboard?type=EXPENSE&from=${range.from}&to=${range.to}`,
-          ),
-          apiRequest<undefined, unknown>(
-            "get",
-            `/families/${encodeURIComponent(moneyWorkspace.id)}/money/loans/personal?limit=100`,
-          ),
-        ]);
+      const [
+        incomeResponse,
+        expenseResponse,
+        loansResponse,
+        categoriesResponse,
+      ] = await Promise.all([
+        apiRequest<undefined, IncomeDashboardResponse>(
+          "get",
+          `/families/${encodeURIComponent(moneyWorkspace.id)}/money/transactions/mine/dashboard?type=INCOME&from=${range.from}&to=${range.to}`,
+        ),
+        apiRequest<undefined, ExpenseDashboardResponse>(
+          "get",
+          `/families/${encodeURIComponent(moneyWorkspace.id)}/money/transactions/mine/dashboard?type=EXPENSE&from=${range.from}&to=${range.to}`,
+        ),
+        apiRequest<undefined, unknown>(
+          "get",
+          `/families/${encodeURIComponent(moneyWorkspace.id)}/money/loans/personal?limit=100`,
+        ),
+        apiRequest<undefined, IncomeCategory[]>(
+          "get",
+          `/families/${encodeURIComponent(moneyWorkspace.id)}/money/categories/mine`,
+        ),
+      ]);
       income = incomeResponse.data ?? null;
+      categories = categoriesResponse.ok ? (categoriesResponse.data ?? []) : [];
+      if (!categoriesResponse.ok && categoriesResponse.statusCode !== 404) {
+        warnings.push("Money categories could not be loaded.");
+      }
       expenses = expenseResponse.data ?? null;
       loans = loansResponse.ok
         ? normalizePersonalLoans(loansResponse.data)
@@ -153,6 +171,7 @@ export function usePersonalOverviewData() {
       families,
       plans: plansResponse.data?.plans ?? [],
       loans,
+      categories,
       income,
       expenses,
       currency: moneyWorkspace?.defaultCurrency ?? "RWF",

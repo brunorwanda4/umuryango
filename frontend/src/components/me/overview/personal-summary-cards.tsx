@@ -50,11 +50,13 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
           </Link>
           <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
             <BalanceStat
+              href="/me/money/income"
               currency={data.currency}
               label={t("incomeThisMonth")}
               value={income}
             />
             <BalanceStat
+              href="/me/money/expenses"
               currency={data.currency}
               label={t("spentThisMonth")}
               value={expenses}
@@ -72,9 +74,18 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
         </CardHeader>
         <CardContent className="grid gap-4 px-5">
           <div className="grid grid-cols-3 gap-2">
-            <SummaryMetric label={t("activePlans")} value={activePlans} />
-            <SummaryMetric label={t("activeLoans")} value={activeLoans} />
             <SummaryMetric
+              href="/me/plans"
+              label={t("activePlans")}
+              value={activePlans}
+            />
+            <SummaryMetric
+              href="/me/money/loans"
+              label={t("activeLoans")}
+              value={activeLoans}
+            />
+            <SummaryMetric
+              href="/family"
               label={t("workspaces")}
               value={data.families.length}
             />
@@ -100,32 +111,48 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
 }
 
 function BalanceStat({
+  href,
   currency,
   label,
   value,
 }: {
+  href: string;
   currency: string;
   label: string;
   value: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/6 p-3">
+    <Link
+      href={href}
+      className="rounded-xl border border-white/10 bg-white/6 p-3 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    >
       <small className="block text-[13px] text-white/70">{label}</small>
       <CompactMoney
         className="mt-1 block font-mono text-lg font-semibold text-white"
         currency={currency}
         value={value}
       />
-    </div>
+    </Link>
   );
 }
 
-function SummaryMetric({ label, value }: { label: string; value: number }) {
+function SummaryMetric({
+  href,
+  label,
+  value,
+}: {
+  href: string;
+  label: string;
+  value: number;
+}) {
   return (
-    <div className="rounded-xl border bg-muted/40 p-2.5">
+    <Link
+      href={href}
+      className="rounded-xl border bg-muted/40 p-2.5 transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    >
       <p className="text-muted-foreground text-[11px] leading-tight">{label}</p>
       <p className="mt-1 font-mono text-lg font-semibold">{value}</p>
-    </div>
+    </Link>
   );
 }
 

@@ -1,9 +1,8 @@
 "use client";
 
-import { ArrowLeftIcon, CheckIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeftIcon, CheckIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { CommonFormField } from "@/components/common/form/common-form-field";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -78,7 +77,6 @@ type CreateFamilyFormValues = {
   contributionCadence: string;
   type: string;
   description: string;
-  inviteMembers: { email: string; kinshipLabel: string }[];
 };
 
 const createSlug = (value: string) =>
@@ -87,8 +85,6 @@ const createSlug = (value: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const getCreateFamilySchema = (copy: CreateFamilyFormCopy) =>
   z.object({
@@ -103,25 +99,9 @@ const getCreateFamilySchema = (copy: CreateFamilyFormCopy) =>
     contributionCadence: z.string().min(1, copy.validation.cadenceRequired),
     type: z.string().min(1, copy.validation.familyTypeRequired),
     description: z.string().max(500),
-    inviteMembers: z
-      .array(
-        z.object({
-          email: z
-            .string()
-            .trim()
-            .refine((value) => value === "" || emailPattern.test(value), {
-              message: copy.validation.inviteEmailInvalid,
-            }),
-          kinshipLabel: z.string(),
-        }),
-      )
-      .max(50, copy.validation.inviteEmailInvalid),
   });
 
-export function CreateFamilyForm({
-  copy,
-  familyIndexHref,
-}: CreateFamilyFormProps) {
+export function CreateFamilyForm({ copy, familyIndexHref }: CreateFamilyFormProps) {
   const router = useRouter();
 
   const schema = useMemo(() => getCreateFamilySchema(copy), [copy]);
@@ -138,7 +118,6 @@ export function CreateFamilyForm({
         contributionCadence: "monthly",
         type: "NUCLEAR",
         description: "",
-        inviteMembers: [{ email: "", kinshipLabel: "" }],
       },
     },
     request: {
@@ -156,15 +135,6 @@ export function CreateFamilyForm({
       contributionCadence: values.contributionCadence,
       type: values.type,
       description: values.description.trim() || undefined,
-      invites: (() => {
-        const invites = values.inviteMembers
-          .filter((member) => member.email.trim() !== "")
-          .map((member) => ({
-            email: member.email.trim().toLowerCase(),
-            kinshipLabel: member.kinshipLabel || undefined,
-          }));
-        return invites.length ? invites : undefined;
-      })(),
     }),
     onSuccessMessage: copy.successDescription,
     onSuccess: (data, values) => {
@@ -174,20 +144,11 @@ export function CreateFamilyForm({
     toastOnError: true,
   });
 
-  const {
-    fields: inviteFields,
-    append: appendInvite,
-    remove: removeInvite,
-  } = useFieldArray({ control: form.control, name: "inviteMembers" });
-
   const name = form.watch("name");
   const slugPreview = useMemo(() => createSlug(name), [name]);
 
   return (
-    <form
-      className="flex flex-col gap-6"
-      onSubmit={form.handleSubmit(onSubmit)}
-    >
+    <form className="flex flex-col gap-6" onSubmit={form.handleSubmit(onSubmit)}>
       {error ? (
         <Alert variant="destructive">
           <AlertTitle>{copy.genericError}</AlertTitle>
@@ -239,25 +200,26 @@ export function CreateFamilyForm({
           />
         </div>
 
-        <CommonFormField
-          control={form.control}
-          name="contributionCadence"
-          label={copy.cadenceLabel}
-          placeholder={copy.cadencePlaceholder}
-          fieldType="select"
-          selectOptions={copy.cadences}
-          required
-        />
-
-        <CommonFormField
-          control={form.control}
-          name="type"
-          label={copy.familyTypeLabel}
-          placeholder={copy.familyTypePlaceholder}
-          fieldType="select"
-          selectOptions={copy.familyTypes}
-          required
-        />
+        <div className="grid gap-6 md:grid-cols-2">
+          <CommonFormField
+            control={form.control}
+            name="contributionCadence"
+            label={copy.cadenceLabel}
+            placeholder={copy.cadencePlaceholder}
+            fieldType="select"
+            selectOptions={copy.cadences}
+            required
+          />
+          <CommonFormField
+            control={form.control}
+            name="type"
+            label={copy.familyTypeLabel}
+            placeholder={copy.familyTypePlaceholder}
+            fieldType="select"
+            selectOptions={copy.familyTypes}
+            required
+          />
+        </div>
 
         <CommonFormField
           control={form.control}
@@ -270,60 +232,6 @@ export function CreateFamilyForm({
             maxLength: 500,
           }}
         />
-
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <span className="font-medium text-sm">{copy.inviteEmailLabel}</span>
-            <span className="text-muted-foreground text-sm">
-              {copy.inviteEmailHint}
-            </span>
-          </div>
-
-          {inviteFields.map((memberField, index) => (
-            <div
-              key={memberField.id}
-              className="grid gap-3 sm:grid-cols-[1fr_minmax(0,12rem)_auto] sm:items-end"
-            >
-              <CommonFormField
-                control={form.control}
-                name={`inviteMembers.${index}.email`}
-                label={copy.inviteEmailLabel}
-                placeholder={copy.inviteEmailPlaceholder}
-                type="email"
-                inputProps={{ autoComplete: "email" }}
-              />
-              <CommonFormField
-                control={form.control}
-                name={`inviteMembers.${index}.kinshipLabel`}
-                label={copy.kinshipLabel}
-                placeholder={copy.kinshipPlaceholder}
-                fieldType="select"
-                selectOptions={copy.kinships}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => removeInvite(index)}
-                disabled={inviteFields.length === 1}
-                aria-label={copy.removeMemberLabel}
-              >
-                <Trash2Icon aria-hidden="true" />
-              </Button>
-            </div>
-          ))}
-
-          <Button
-            type="button"
-            variant="outline"
-            className="w-fit"
-            onClick={() => appendInvite({ email: "", kinshipLabel: "" })}
-            disabled={inviteFields.length >= 50}
-          >
-            <PlusIcon data-icon="inline-start" aria-hidden="true" />
-            {copy.addMemberLabel}
-          </Button>
-        </div>
       </FieldGroup>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

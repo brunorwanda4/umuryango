@@ -123,7 +123,7 @@ export function mapExpenseDashboard(data: ExpenseDashboardResponse) {
   };
 }
 
-function mapExpenseRecord(
+export function mapExpenseRecord(
   transaction: ExpenseTransaction,
 ): RecentExpenseRecord {
   const category = transaction.category.name;
