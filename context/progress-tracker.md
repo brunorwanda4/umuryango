@@ -4,7 +4,7 @@ Keep this file short. Update it only for meaningful product or engineering progr
 
 ## Snapshot
 
-- Project: Rwanda Family.
+- Project: Umuryango.
 - Goal: production-ready family management for money, contributions, reports, announcements, events, documents, projects, and communication.
 - Architecture target: `frontend/` and `backend/` with Bun; Next.js 15 frontend and NestJS + Prisma + PostgreSQL backend; Redis/BullMQ; Bunny Storage; Docker/VPS/CI-CD.
 - Documentation baseline exists: `AGENTS.md` and all `context/*.md` files.

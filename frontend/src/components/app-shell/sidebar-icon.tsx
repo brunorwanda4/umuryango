@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 
 export type SidebarIconStyle = "line" | "image";
 
-const SIDEBAR_ICON_STYLE_STORAGE_KEY = "rwanda-family-sidebar-icon-style";
-const SIDEBAR_ICON_STYLE_EVENT = "rwanda-family-sidebar-icon-style-change";
+const SIDEBAR_ICON_STYLE_STORAGE_KEY = "umuryango-sidebar-icon-style";
+const SIDEBAR_ICON_STYLE_EVENT = "umuryango-sidebar-icon-style-change";
 const DEFAULT_SIDEBAR_ICON_STYLE: SidebarIconStyle = "line";
 
 export type SidebarIconSource =

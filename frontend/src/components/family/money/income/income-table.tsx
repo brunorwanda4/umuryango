@@ -20,7 +20,7 @@ import {
 import type { IncomeTransaction } from "./types-and-schemas";
 
 const FAMILY_INCOME_VIEW_MODE_STORAGE_KEY =
-  "rwanda-family-family-income-view-mode";
+  "umuryango-family-income-view-mode";
 
 function getRemainingMinorUnits(tx: IncomeTransaction) {
   if (!tx.expectedAmountMinorUnits) return null;

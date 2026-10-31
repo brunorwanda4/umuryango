@@ -15,7 +15,7 @@ export type CurrentUser = {
   createdAt: string;
 };
 
-export const CURRENT_USER_UPDATED_EVENT = "rwanda-family:current-user-updated";
+export const CURRENT_USER_UPDATED_EVENT = "umuryango:current-user-updated";
 
 export function publishCurrentUserUpdate(user: CurrentUser) {
   window.dispatchEvent(

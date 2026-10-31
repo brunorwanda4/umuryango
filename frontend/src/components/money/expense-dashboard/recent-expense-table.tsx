@@ -19,7 +19,7 @@ import { RecentExpenseItems } from "./recent-expense-items";
 import { ViewExpenseDialog } from "./view-expense-dialog";
 
 const RECENT_EXPENSE_VIEW_MODE_STORAGE_KEY =
-  "rwanda-family-recent-expense-view-mode";
+  "umuryango-recent-expense-view-mode";
 
 function getRecentExpenseColumns({
   categories,

@@ -19,7 +19,7 @@ import { RecentIncomeItems } from "./recent-income-items";
 import { ViewIncomeDialog } from "./view-income-dialog";
 
 const RECENT_INCOME_VIEW_MODE_STORAGE_KEY =
-  "rwanda-family-recent-income-view-mode";
+  "umuryango-recent-income-view-mode";
 
 function getRecentIncomeColumns({
   categories,

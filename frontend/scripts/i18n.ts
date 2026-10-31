@@ -112,7 +112,7 @@ if (command === "find") {
     process.exit(1);
   }
 } else {
-  console.log("Rwanda Family i18n CLI");
+  console.log("Umuryango i18n CLI");
   console.log("Usage:");
   console.log(
     "  bun run i18n find <word_or_key>    Find where a word or key is in en.json with line numbers",

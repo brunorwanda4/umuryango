@@ -1,4 +1,4 @@
-# Rwanda Family Frontend Agent Guide
+# Umuryango Frontend Agent Guide
 
 This frontend guide extends the repository-wide instructions in
 [../AGENTS.md](../AGENTS.md). Before changing frontend code or documentation,

@@ -3,7 +3,7 @@ import { AppearanceSettingsPage } from "@/components/settings/appearance-setting
 import enMessages from "@/messages/en.json";
 
 export const metadata: Metadata = {
-  title: `${enMessages.AppShell.appearance.title} | Rwanda Family`,
+  title: `${enMessages.AppShell.appearance.title} | Umuryango`,
   description: enMessages.AppShell.appearance.description,
 };
 

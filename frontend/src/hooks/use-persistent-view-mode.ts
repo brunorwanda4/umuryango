@@ -14,7 +14,7 @@ export function usePersistentViewMode(
 ) {
   const [viewMode, setViewModeState] = useState<DataViewMode>(defaultViewMode);
   const eventName = useMemo(
-    () => `rwanda-family-view-mode-change:${storageKey}`,
+    () => `umuryango-view-mode-change:${storageKey}`,
     [storageKey],
   );
 

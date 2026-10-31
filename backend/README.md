@@ -1,3 +1,7 @@
+# Umuryango Backend
+
+The NestJS API for [Umuryango](https://github.com/brunorwanda4/umuryango).
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
@@ -23,12 +27,14 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Umuryango's NestJS backend for authentication and family management workflows.
 
 ## Project setup
 
 ```bash
-$ bun install
+git clone https://github.com/brunorwanda4/umuryango.git
+cd umuryango/backend
+bun install
 ```
 
 ## Compile and run the project

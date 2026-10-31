@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     telephone: false,
   },
   keywords: [
-    "Rwanda Family",
+    "Umuryango",
     "family management",
     "family finance",
     "contribution tracking",

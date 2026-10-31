@@ -1,10 +1,15 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Umuryango Frontend
+
+The Next.js frontend for [Umuryango](https://github.com/brunorwanda4/umuryango).
 
 ## Getting Started
 
-First, run the development server:
+Clone the repository, install dependencies, and run the development server:
 
 ```bash
+git clone https://github.com/brunorwanda4/umuryango.git
+cd umuryango/frontend
+bun install
 bun run dev
 ```
 

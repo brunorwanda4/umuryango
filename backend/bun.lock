@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "backend",
+      "name": "umuryango-backend",
       "dependencies": {
         "@nestjs/common": "^11.0.1",
         "@nestjs/config": "^4.0.4",

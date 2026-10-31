@@ -1,6 +1,6 @@
 # Project Overview
 
-Rwanda Family is a secure, mobile-first family management platform for finances, contributions, projects, events, documents, reports, announcements, and communication.
+Umuryango is a secure, mobile-first family management platform for finances, contributions, projects, events, documents, reports, announcements, and communication.
 
 ## Product Goal
 

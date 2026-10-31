@@ -1,17 +1,17 @@
 {
   "Metadata": {
     "title": {
-      "default": "Rwanda Family",
-      "template": "%s | Rwanda Family"
+      "default": "Umuryango",
+      "template": "%s | Umuryango"
     },
-    "description": "Rwanda Family helps families securely manage money, contributions, expenses, savings, debts, projects, documents, announcements, events, and reports in one trusted place.",
-    "applicationName": "Rwanda Family",
+    "description": "Umuryango helps families securely manage money, contributions, expenses, savings, debts, projects, documents, announcements, events, and reports in one trusted place.",
+    "applicationName": "Umuryango",
     "openGraphDescription": "A secure family management platform for finances, contributions, projects, documents, announcements, events, and reports.",
     "twitterDescription": "Securely manage family money, contributions, projects, documents, announcements, events, and reports."
   },
   "Shared": {
-    "brand": "Rwanda Family",
-    "homeAriaLabel": "Rwanda Family home",
+    "brand": "Umuryango",
+    "homeAriaLabel": "Umuryango home",
     "navigationAriaLabel": "Public pages",
     "authFooterAriaLabel": "Authentication footer pages",
     "nav": {
@@ -22,8 +22,8 @@
       "login": "Log in"
     },
     "footer": {
-      "free": "Rwanda Family is currently free to use.",
-      "privacy": "Rwanda Family is currently free to use. Private family data is used to provide the application, protect accounts, and support family workflows. It is not sold or used for unrelated purposes."
+      "free": "Umuryango is currently free to use.",
+      "privacy": "Umuryango is currently free to use. Private family data is used to provide the application, protect accounts, and support family workflows. It is not sold or used for unrelated purposes."
     },
     "theme": {
       "label": "Theme",
@@ -34,11 +34,11 @@
   },
   "Home": {
     "badge": "Free to use now",
-    "title": "Rwanda Family",
+    "title": "Umuryango",
     "description": "Securely manage family money, contributions, projects, documents, announcements, events, and reports from one private workspace.",
     "login": "Log in",
     "viewItems": "View items",
-    "privacyNote": "Rwanda Family does not sell private family data or use it for unrelated advertising, profiling, or external datasets.",
+    "privacyNote": "Umuryango does not sell private family data or use it for unrelated advertising, profiling, or external datasets.",
     "privacyLink": "Read the privacy policy.",
     "trustTitle": "Built for trust",
     "trustDescription": "Family records should stay accurate, permission-aware, and easy to explain.",
@@ -81,12 +81,12 @@
     ]
   },
   "AuthLayout": {
-    "free": "Rwanda Family is currently free to use."
+    "free": "Umuryango is currently free to use."
   },
   "LoginPage": {
     "metadataTitle": "Log in",
-    "metadataDescription": "Log in to Rwanda Family to manage family money, contributions, projects, documents, announcements, and reports.",
-    "title": "Log into Rwanda Family",
+    "metadataDescription": "Log in to Umuryango to manage family money, contributions, projects, documents, announcements, and reports.",
+    "title": "Log into Umuryango",
     "heading": "Organize the family moments you protect.",
     "highlightedHeading": "together.",
     "createAccount": "Create new account",
@@ -97,7 +97,7 @@
       "first": "Family enjoying time together",
       "second": "Family capturing a shared moment",
       "third": "Family planning together at home",
-      "fourth": "Family using Rwanda Family together"
+      "fourth": "Family using Umuryango together"
     }
   },
   "LoginForm": {
@@ -116,8 +116,8 @@
   },
   "RegisterPage": {
     "metadataTitle": "Create account",
-    "metadataDescription": "Create a Rwanda Family account to manage family money, contributions, projects, documents, announcements, and reports.",
-    "heading": "Get started on Rwanda Family",
+    "metadataDescription": "Create an Umuryango account to manage family money, contributions, projects, documents, announcements, and reports.",
+    "heading": "Get started on Umuryango",
     "subheading": "Create an account to organize your family money, projects, documents, and announcements together.",
     "backAriaLabel": "Go back"
   },
@@ -166,7 +166,7 @@
   },
   "ForgotPasswordPage": {
     "metadataTitle": "Forgot password",
-    "metadataDescription": "Reset your Rwanda Family account password.",
+    "metadataDescription": "Reset your Umuryango account password.",
     "heading": "Forgot your password?",
     "subheading": "Enter your email and we'll send you a 6-digit reset code.",
     "backAriaLabel": "Go back to login"
@@ -192,7 +192,7 @@
   },
   "CreateFamilyPage": {
     "metadataTitle": "Create family",
-    "metadataDescription": "Create a Rwanda Family workspace for money, contributions, projects, documents, announcements, events, and reports.",
+    "metadataDescription": "Create an Umuryango workspace for money, contributions, projects, documents, announcements, events, and reports.",
     "badge": "Family setup",
     "heading": "Create a family workspace",
     "description": "Set the basic family profile before inviting members, tracking contributions, and organizing shared records.",
@@ -402,11 +402,11 @@
   },
   "ItemsPage": {
     "metadataTitle": "Items",
-    "metadataDescription": "Explore the family management items Rwanda Family helps organize, including money, contributions, projects, documents, reports, events, and members.",
+    "metadataDescription": "Explore the family management items Umuryango helps organize, including money, contributions, projects, documents, reports, events, and members.",
     "badge": "What you can organize",
     "title": "Items for everyday family administration.",
-    "description": "Rwanda Family keeps the important parts of family management structured, private, and easy to review. Each item is designed for family roles, approvals, audit history, and mobile use.",
-    "freeNote": "The application is currently free to use. Rwanda Family does not sell private family data or use it for unrelated advertising, profiling, or external datasets.",
+    "description": "Umuryango keeps the important parts of family management structured, private, and easy to review. Each item is designed for family roles, approvals, audit history, and mobile use.",
+    "freeNote": "The application is currently free to use. Umuryango does not sell private family data or use it for unrelated advertising, profiling, or external datasets.",
     "items": [
       {
         "id": "money",
@@ -462,14 +462,14 @@
   },
   "PrivacyPage": {
     "metadataTitle": "Privacy Policy",
-    "metadataDescription": "Read how Rwanda Family protects family data, limits data use, and avoids selling or reusing private records for unrelated purposes.",
+    "metadataDescription": "Read how Umuryango protects family data, limits data use, and avoids selling or reusing private records for unrelated purposes.",
     "badge": "Last updated June 15, 2026",
     "title": "Privacy Policy",
-    "description": "Rwanda Family is built for private family administration. Family data should be protected, used only for the application, and kept inside the permissions of each family workspace.",
+    "description": "Umuryango is built for private family administration. Family data should be protected, used only for the application, and kept inside the permissions of each family workspace.",
     "sections": [
       {
         "title": "What we collect",
-        "body": "Rwanda Family may collect account details, family membership details, family workspace records, financial records entered by permitted users, documents uploaded by users, device information, security logs, and support messages."
+        "body": "Umuryango may collect account details, family membership details, family workspace records, financial records entered by permitted users, documents uploaded by users, device information, security logs, and support messages."
       },
       {
         "title": "How we use data",
@@ -489,21 +489,21 @@
       },
       {
         "title": "Retention and deletion",
-        "body": "Financial and permission-sensitive records may be retained for audit history. Where deletion is allowed, Rwanda Family should use safe deletion, soft deletion, or reversal records when auditability matters."
+        "body": "Financial and permission-sensitive records may be retained for audit history. Where deletion is allowed, Umuryango should use safe deletion, soft deletion, or reversal records when auditability matters."
       }
     ]
   },
   "SafetyPage": {
     "metadataTitle": "Safety and Data Policy",
-    "metadataDescription": "Learn how Rwanda Family keeps the application free, protects private family data, and limits access to sensitive records.",
+    "metadataDescription": "Learn how Umuryango keeps the application free, protects private family data, and limits access to sensitive records.",
     "badge": "Free and private by design",
     "title": "Safety and Data Policy",
-    "description": "Rwanda Family should be safe for every family. The application is currently free to use, and private family data must not be sold, reused for unrelated purposes, or accessed casually.",
+    "description": "Umuryango should be safe for every family. The application is currently free to use, and private family data must not be sold, reused for unrelated purposes, or accessed casually.",
     "protections": [
       {
         "id": "unrelated-use",
         "title": "No unrelated use",
-        "description": "Private family records are for running Rwanda Family workflows, not for unrelated advertising, profiling, or resale."
+        "description": "Private family records are for running Umuryango workflows, not for unrelated advertising, profiling, or resale."
       },
       {
         "id": "permissions",
@@ -534,14 +534,14 @@
   },
   "TermsPage": {
     "metadataTitle": "Terms of Use",
-    "metadataDescription": "Read the Rwanda Family terms covering free use, user responsibilities, family owner responsibilities, and acceptable use.",
+    "metadataDescription": "Read the Umuryango terms covering free use, user responsibilities, family owner responsibilities, and acceptable use.",
     "badge": "Last updated June 15, 2026",
     "title": "Terms of Use",
-    "description": "These terms explain how Rwanda Family should be used while it is offered as a free family management application.",
+    "description": "These terms explain how Umuryango should be used while it is offered as a free family management application.",
     "sections": [
       {
         "title": "Free use",
-        "body": "Rwanda Family is currently free to use. If paid features are introduced later, users should receive clear notice before being asked to pay."
+        "body": "Umuryango is currently free to use. If paid features are introduced later, users should receive clear notice before being asked to pay."
       },
       {
         "title": "User responsibility",
@@ -553,11 +553,11 @@
       },
       {
         "title": "Financial records",
-        "body": "Rwanda Family helps organize family records but does not create, invent, or approve financial activity on behalf of a family. Reports must be based on persisted records."
+        "body": "Umuryango helps organize family records but does not create, invent, or approve financial activity on behalf of a family. Reports must be based on persisted records."
       },
       {
         "title": "Acceptable use",
-        "body": "Users may not use Rwanda Family to upload harmful files, violate privacy, impersonate others, attack the service, bypass permissions, or store unlawful content."
+        "body": "Users may not use Umuryango to upload harmful files, violate privacy, impersonate others, attack the service, bypass permissions, or store unlawful content."
       },
       {
         "title": "Service changes",
@@ -573,7 +573,7 @@
     "backHome": "Back to home"
   },
   "GlobalErrorPage": {
-    "title": "Something went wrong | Rwanda Family",
+    "title": "Something went wrong | Umuryango",
     "heading": "Something went wrong",
     "description": "A critical error stopped the application from loading. Please try again in a moment.",
     "reference": "Error reference: {digest}",
@@ -826,7 +826,7 @@
     }
   },
   "FamilyPage": {
-    "metadataTitle": "Family workspaces | Rwanda Family",
+    "metadataTitle": "Family workspaces | Umuryango",
     "metadataDescription": "View the family workspaces and members you have access to.",
     "badge": "Family access",
     "heading": "Your families",
@@ -1336,7 +1336,7 @@
     "icon": "Icon",
     "color": "Color",
     "budget": "Budget limit",
-    "demoNotice": "No saved categories were returned yet, so recommended Rwanda Family demo categories are shown.",
+    "demoNotice": "No saved categories were returned yet, so recommended Umuryango demo categories are shown.",
     "unavailableNotice": "Saved categories are not available, so demo categories are shown.",
     "activeAgain": "{name} is active again",
     "archived": "{name} has been archived",
@@ -2393,7 +2393,7 @@
     "appearanceSectionDesc": "Customize theme preferences and how navigation icons appear."
   },
   "PersonalOverview": {
-    "metadataTitle": "Overview | Rwanda Family",
+    "metadataTitle": "Overview | Umuryango",
     "metadataDescription": "Review your personal money, plans, debts, family workspaces, and recent activity.",
     "title": "Personal Overview",
     "description": "Your finances, plans, and workspace activity in one place.",
@@ -2543,7 +2543,7 @@
     }
   },
   "PersonalMoney": {
-    "metadataTitle": "My Money | Rwanda Family",
+    "metadataTitle": "My Money | Umuryango",
     "metadataDescription": "Manage income, expenses, savings, debts, and recent money activity in one place.",
     "pageTitle": "My Money",
     "pageDescription": "Manage income, expenses, savings, debts, and recent money activity in one place.",
@@ -2947,7 +2947,7 @@
     "due": "Due {date}"
   },
   "PersonalPlans": {
-    "metadataTitle": "Plans | Rwanda Family",
+    "metadataTitle": "Plans | Umuryango",
     "metadataDescription": "Organize personal goals, shopping lists, and future milestones.",
     "title": "Personal Plans",
     "description": "Set and monitor personal targets, projects, and actionable steps.",
@@ -3130,7 +3130,7 @@
     }
   },
   "PersonalSettings": {
-    "metadataTitle": "Settings | Rwanda Family",
+    "metadataTitle": "Settings | Umuryango",
     "metadataDescription": "Manage your profile, account details, security, and workspace preferences.",
     "title": "Personal settings",
     "description": "Manage your profile, account details, security, and workspace preferences.",

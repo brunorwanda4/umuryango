@@ -1,10 +1,10 @@
-# Rwanda Family Agent Guide
+# Umuryango Agent Guide
 
 Read this first, then open only the relevant files in `context/` for the task.
 
 ## Mission
 
-Rwanda Family is a family management platform for money, contributions, expenses, income, savings, debts, projects, events, documents, reports, announcements, and communication. Build for Rwandan and broader African family patterns first, but keep the product globally scalable, mobile-first, secure, auditable, and localization-ready.
+Umuryango is a family management platform for money, contributions, expenses, income, savings, debts, projects, events, documents, reports, announcements, and communication. Build for Rwandan and broader African family patterns first, but keep the product globally scalable, mobile-first, secure, auditable, and localization-ready.
 
 ## Non-Negotiables
 

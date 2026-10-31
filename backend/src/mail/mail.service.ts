@@ -75,11 +75,11 @@ export class MailService {
       return;
     }
 
-    const subject = 'Your Rwanda Family verification code';
+    const subject = 'Your Umuryango verification code';
     const text = [
       `Hi ${fullName},`,
       '',
-      `Your Rwanda Family verification code is: ${code}`,
+      `Your Umuryango verification code is: ${code}`,
       '',
       `This code expires in ${expiresInMinutes} minutes.`,
       'If you did not create this account, you can ignore this email.',
@@ -88,7 +88,7 @@ export class MailService {
     const html = `
       <div style="font-family: Arial, Helvetica, sans-serif; color: #111; max-width: 480px; margin: 0 auto;">
         <h2 style="margin-bottom: 8px;">Verify your email</h2>
-        <p style="margin: 0 0 16px;">Hi ${fullName}, use the code below to finish creating your Rwanda Family account.</p>
+        <p style="margin: 0 0 16px;">Hi ${fullName}, use the code below to finish creating your Umuryango account.</p>
         <div style="font-size: 32px; font-weight: 700; letter-spacing: 8px; padding: 16px 0; text-align: center; background: #f4f4f5; border-radius: 12px;">${code}</div>
         <p style="margin: 16px 0 0; color: #555;">This code expires in ${expiresInMinutes} minutes. If you did not request it, ignore this email.</p>
       </div>`;
@@ -123,11 +123,11 @@ export class MailService {
       return;
     }
 
-    const subject = 'Reset your Rwanda Family password';
+    const subject = 'Reset your Umuryango password';
     const text = [
       `Hi ${fullName},`,
       '',
-      `Your Rwanda Family password reset code is: ${code}`,
+      `Your Umuryango password reset code is: ${code}`,
       '',
       `This code expires in ${expiresInMinutes} minutes.`,
       'If you did not request a password reset, you can safely ignore this email.',
@@ -136,7 +136,7 @@ export class MailService {
     const html = `
       <div style="font-family: Arial, Helvetica, sans-serif; color: #111; max-width: 480px; margin: 0 auto;">
         <h2 style="margin-bottom: 8px;">Reset your password</h2>
-        <p style="margin: 0 0 16px;">Hi ${fullName}, use the code below to reset your Rwanda Family account password.</p>
+        <p style="margin: 0 0 16px;">Hi ${fullName}, use the code below to reset your Umuryango account password.</p>
         <div style="font-size: 32px; font-weight: 700; letter-spacing: 8px; padding: 16px 0; text-align: center; background: #f4f4f5; border-radius: 12px;">${code}</div>
         <p style="margin: 16px 0 0; color: #555;">This code expires in ${expiresInMinutes} minutes. If you did not request a password reset, you can safely ignore this email — your password will not change.</p>
       </div>`;
@@ -176,7 +176,7 @@ export class MailService {
     const text = [
       'Hi,',
       '',
-      `${inviterName} invited you to join the "${familyName}" family workspace on Rwanda Family.`,
+      `${inviterName} invited you to join the "${familyName}" family workspace on Umuryango.`,
       '',
       `Accept the invite: ${inviteUrl}`,
       '',
@@ -187,7 +187,7 @@ export class MailService {
     const html = `
       <div style="font-family: Arial, Helvetica, sans-serif; color: #111; max-width: 480px; margin: 0 auto;">
         <h2 style="margin-bottom: 8px;">You're invited</h2>
-        <p style="margin: 0 0 16px;">${inviterName} invited you to join the <strong>${familyName}</strong> family workspace on Rwanda Family.</p>
+        <p style="margin: 0 0 16px;">${inviterName} invited you to join the <strong>${familyName}</strong> family workspace on Umuryango.</p>
         <p style="margin: 0 0 16px; text-align: center;">
           <a href="${inviteUrl}" style="display: inline-block; padding: 12px 24px; background: #111; color: #fff; border-radius: 12px; text-decoration: none;">Accept invitation</a>
         </p>

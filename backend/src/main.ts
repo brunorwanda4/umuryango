@@ -48,9 +48,9 @@ async function bootstrap() {
   );
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Rwanda Family API')
+    .setTitle('Umuryango API')
     .setDescription(
-      'Versioned REST API for Rwanda Family authentication and family management workflows.',
+      'Versioned REST API for Umuryango authentication and family management workflows.',
     )
     .setVersion('1.0')
     .addTag('auth', 'Authentication and account verification')
@@ -65,7 +65,7 @@ async function bootstrap() {
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('/', app, swaggerDocument, {
-    customSiteTitle: 'Rwanda Family API Docs',
+    customSiteTitle: 'Umuryango API Docs',
     customCssUrl:
       'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.32.6/swagger-ui.css',
     customJs: [

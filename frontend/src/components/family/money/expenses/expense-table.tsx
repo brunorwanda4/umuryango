@@ -28,7 +28,7 @@ import { FamilyExpenseItems } from "./family-expense-items";
 import type { Category, ExpenseTransaction } from "./types-and-schemas";
 
 const FAMILY_EXPENSES_VIEW_MODE_STORAGE_KEY =
-  "rwanda-family-family-expenses-view-mode";
+  "umuryango-family-expenses-view-mode";
 
 export function ExpenseTable({
   filteredTransactions,
