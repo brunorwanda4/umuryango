@@ -46,11 +46,19 @@ import {
   useInvitations,
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
-  useNotifications,
   useNotificationSummary,
+  useNotifications,
 } from "@/hooks/use-notifications";
 import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
+
+export type NotificationsScope =
+  | { type: "global" }
+  | { type: "family"; familySlug: string; familyName?: string };
+
+export type NotificationsPageViewProps = {
+  scope?: NotificationsScope;
+};
 
 function formatRelativeTime(dateString: string): string {
   try {
@@ -105,16 +113,22 @@ function getNotificationIcon(type: NotificationItem["type"]) {
   }
 }
 
-export function NotificationsPageView() {
+export function NotificationsPageView({ scope }: NotificationsPageViewProps) {
   const router = useRouter();
   const t = createTranslator("NotificationsPage");
+
+  const isFamily = scope?.type === "family";
+  const familySlug = isFamily ? scope.familySlug : undefined;
+  const familyDisplayName = isFamily
+    ? scope.familyName || scope.familySlug
+    : "";
 
   const [page, setPage] = useState(1);
   const [accumulatedItems, setAccumulatedItems] = useState<NotificationItem[]>(
     [],
   );
 
-  const { data: summary } = useNotificationSummary();
+  const { data: summary } = useNotificationSummary(familySlug);
   const {
     data: notifData,
     isLoading: isNotifLoading,
@@ -122,7 +136,7 @@ export function NotificationsPageView() {
     error: notifError,
     refetch: refetchNotifs,
     isFetching: isNotifFetching,
-  } = useNotifications({ page, limit: 20 });
+  } = useNotifications({ page, limit: 20, familySlug });
 
   const {
     data: invitations,
@@ -130,16 +144,17 @@ export function NotificationsPageView() {
     isError: isInvitesError,
     error: invitesError,
     refetch: refetchInvites,
-  } = useInvitations("PENDING");
+  } = useInvitations("PENDING", { enabled: !isFamily });
 
-  const markReadMutation = useMarkNotificationRead();
-  const markAllReadMutation = useMarkAllNotificationsRead();
+  const markReadMutation = useMarkNotificationRead(familySlug);
+  const markAllReadMutation = useMarkAllNotificationsRead(familySlug);
   const acceptMutation = useAcceptInvitation();
   const declineMutation = useDeclineInvitation();
 
   const unreadCount = summary?.unreadCount ?? notifData?.unreadCount ?? 0;
-  const pendingInviteCount =
-    summary?.pendingInvitationCount ?? invitations?.length ?? 0;
+  const pendingInviteCount = isFamily
+    ? 0
+    : (summary?.pendingInvitationCount ?? invitations?.length ?? 0);
 
   useEffect(() => {
     if (notifData?.items) {
@@ -226,11 +241,180 @@ export function NotificationsPageView() {
 
   const hasMore = notifData?.hasMore ?? false;
 
+  const pageTitle = isFamily
+    ? t((m) => m.NotificationsPage.familyTitle)
+    : t((m) => m.NotificationsPage.title);
+
+  const pageDescription = isFamily
+    ? t((m) => m.NotificationsPage.familyDescription, {
+        familyName: familyDisplayName,
+      })
+    : t((m) => m.NotificationsPage.description);
+
+  const emptyTitle = isFamily
+    ? t((m) => m.NotificationsPage.familyEmptyTitle)
+    : t((m) => m.NotificationsPage.allTab.emptyTitle);
+
+  const emptyDescription = isFamily
+    ? t((m) => m.NotificationsPage.familyEmptyDescription, {
+        familyName: familyDisplayName,
+      })
+    : t((m) => m.NotificationsPage.allTab.emptyDescription);
+
+  const renderNotificationsList = () => {
+    if (isNotifLoading && page === 1) {
+      return (
+        <div className="space-y-3">
+          <Skeleton className="h-20 w-full rounded-2xl" />
+          <Skeleton className="h-20 w-full rounded-2xl" />
+          <Skeleton className="h-20 w-full rounded-2xl" />
+        </div>
+      );
+    }
+
+    if (isNotifError) {
+      return (
+        <Alert variant="destructive">
+          <AlertCircleIcon className="size-4" />
+          <AlertTitle>
+            {t((m) => m.NotificationsPage.allTab.loadErrorTitle)}
+          </AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              {notifError?.message ||
+                t((m) => m.NotificationsPage.allTab.loadErrorDescription)}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetchNotifs()}
+              className="ml-4"
+            >
+              {t((m) => m.NotificationsPage.allTab.retry)}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      );
+    }
+
+    if (accumulatedItems.length === 0) {
+      return (
+        <Empty className="py-16 border rounded-3xl">
+          <EmptyMedia variant="icon">
+            <InboxIcon className="size-6 text-muted-foreground" />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>{emptyTitle}</EmptyTitle>
+            <EmptyDescription>{emptyDescription}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      );
+    }
+
+    return (
+      <div className="flex flex-col gap-2.5">
+        {accumulatedItems.map((item) => {
+          const isUnread = !item.readAt;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleNotificationClick(item)}
+              className={cn(
+                "w-full flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-left",
+                isUnread
+                  ? "bg-card border-border/80 shadow-xs"
+                  : "bg-muted/20 border-border/40 opacity-85 hover:opacity-100",
+              )}
+            >
+              <div
+                className={cn(
+                  "flex size-10 shrink-0 items-center justify-center rounded-xl border",
+                  isUnread
+                    ? "bg-background border-border shadow-xs"
+                    : "bg-muted/40 border-border/40 text-muted-foreground",
+                )}
+              >
+                {getNotificationIcon(item.type)}
+              </div>
+
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <p
+                      className={cn(
+                        "text-sm truncate",
+                        isUnread
+                          ? "font-semibold text-foreground"
+                          : "font-normal text-muted-foreground",
+                      )}
+                    >
+                      {item.title}
+                    </p>
+                    {item.family && !isFamily && (
+                      <Badge
+                        variant="outline"
+                        className="text-[10px] px-1.5 py-0 h-4 font-normal text-muted-foreground"
+                      >
+                        {item.family.name}
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground/80 shrink-0">
+                    {formatRelativeTime(item.createdAt)}
+                  </span>
+                </div>
+
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                  {item.description}
+                </p>
+              </div>
+
+              <div className="flex items-center shrink-0 self-center pl-2">
+                <span className="sr-only">
+                  {isUnread
+                    ? t((m) => m.NotificationsPage.allTab.unread)
+                    : t((m) => m.NotificationsPage.allTab.read)}
+                </span>
+                {isUnread && (
+                  <div
+                    aria-hidden="true"
+                    className="size-2 rounded-full bg-primary"
+                  />
+                )}
+              </div>
+            </button>
+          );
+        })}
+
+        {hasMore && (
+          <div className="flex justify-center pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={isNotifFetching}
+              className="rounded-xl px-6"
+            >
+              {isNotifFetching ? (
+                <>
+                  <Loader2Icon className="size-4 animate-spin mr-2" />
+                  {t((m) => m.NotificationsPage.allTab.loadingMore)}
+                </>
+              ) : (
+                t((m) => m.NotificationsPage.allTab.loadMore)
+              )}
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="flex w-full max-w-5xl flex-col gap-6">
       <PageTitle
-        title={t((m) => m.NotificationsPage.title)}
-        description={t((m) => m.NotificationsPage.description)}
+        title={pageTitle}
+        description={pageDescription}
         icon={<BellIcon className="size-6 text-foreground" />}
         actions={
           unreadCount > 0 ? (
@@ -252,384 +436,265 @@ export function NotificationsPageView() {
         }
       />
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 max-w-sm mb-6">
-          <TabsTrigger
-            value="all"
-            className="flex items-center justify-center gap-2"
-          >
-            <span>{t((m) => m.NotificationsPage.tabs.all)}</span>
-            {unreadCount > 0 && (
-              <Badge
-                variant="secondary"
-                className="px-1.5 py-0 h-4 text-[10px] font-semibold"
-              >
-                {unreadCount}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger
-            value="invitations"
-            className="flex items-center justify-center gap-2"
-          >
-            <span>{t((m) => m.NotificationsPage.tabs.invitations)}</span>
-            {pendingInviteCount > 0 && (
-              <Badge
-                variant="secondary"
-                className="px-1.5 py-0 h-4 text-[10px] font-semibold"
-              >
-                {pendingInviteCount}
-              </Badge>
-            )}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-4 outline-none">
-          {isNotifLoading && page === 1 ? (
-            <div className="space-y-3">
-              <Skeleton className="h-20 w-full rounded-2xl" />
-              <Skeleton className="h-20 w-full rounded-2xl" />
-              <Skeleton className="h-20 w-full rounded-2xl" />
-            </div>
-          ) : isNotifError ? (
-            <Alert variant="destructive">
-              <AlertCircleIcon className="size-4" />
-              <AlertTitle>
-                {t((m) => m.NotificationsPage.allTab.loadErrorTitle)}
-              </AlertTitle>
-              <AlertDescription className="flex items-center justify-between">
-                <span>
-                  {notifError?.message ||
-                    t((m) => m.NotificationsPage.allTab.loadErrorDescription)}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => refetchNotifs()}
-                  className="ml-4"
+      {isFamily ? (
+        // Family-scoped notifications page: direct list, no tabs or invitations
+        <div className="space-y-4">{renderNotificationsList()}</div>
+      ) : (
+        // Global notifications page: two tabs (All notifications and Invitations)
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-sm mb-6">
+            <TabsTrigger
+              value="all"
+              className="flex items-center justify-center gap-2"
+            >
+              <span>{t((m) => m.NotificationsPage.tabs.all)}</span>
+              {unreadCount > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="px-1.5 py-0 h-4 text-[10px] font-semibold"
                 >
-                  {t((m) => m.NotificationsPage.allTab.retry)}
-                </Button>
-              </AlertDescription>
-            </Alert>
-          ) : accumulatedItems.length === 0 ? (
-            <Empty className="py-16 border rounded-3xl">
-              <EmptyMedia variant="icon">
-                <InboxIcon className="size-6 text-muted-foreground" />
-              </EmptyMedia>
-              <EmptyHeader>
-                <EmptyTitle>
-                  {t((m) => m.NotificationsPage.allTab.emptyTitle)}
-                </EmptyTitle>
-                <EmptyDescription>
-                  {t((m) => m.NotificationsPage.allTab.emptyDescription)}
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <div className="flex flex-col gap-2.5">
-              {accumulatedItems.map((item) => {
-                const isUnread = !item.readAt;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleNotificationClick(item)}
-                    className={cn(
-                      "w-full flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring text-left",
-                      isUnread
-                        ? "bg-card border-border/80 shadow-xs"
-                        : "bg-muted/20 border-border/40 opacity-85 hover:opacity-100",
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "flex size-10 shrink-0 items-center justify-center rounded-xl border",
-                        isUnread
-                          ? "bg-background border-border shadow-xs"
-                          : "bg-muted/40 border-border/40 text-muted-foreground",
-                      )}
-                    >
-                      {getNotificationIcon(item.type)}
-                    </div>
+                  {unreadCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="invitations"
+              className="flex items-center justify-center gap-2"
+            >
+              <span>{t((m) => m.NotificationsPage.tabs.invitations)}</span>
+              {pendingInviteCount > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="px-1.5 py-0 h-4 text-[10px] font-semibold"
+                >
+                  {pendingInviteCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
-                    <div className="flex-1 min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <p
-                            className={cn(
-                              "text-sm truncate",
-                              isUnread
-                                ? "font-semibold text-foreground"
-                                : "font-normal text-muted-foreground",
-                            )}
-                          >
-                            {item.title}
-                          </p>
-                          {item.family && (
+          <TabsContent value="all" className="space-y-4 outline-none">
+            {renderNotificationsList()}
+          </TabsContent>
+
+          <TabsContent value="invitations" className="space-y-4 outline-none">
+            {isInvitesLoading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-32 w-full rounded-2xl" />
+                <Skeleton className="h-32 w-full rounded-2xl" />
+              </div>
+            ) : isInvitesError ? (
+              <Alert variant="destructive">
+                <AlertCircleIcon className="size-4" />
+                <AlertTitle>
+                  {t((m) => m.NotificationsPage.invitationsTab.loadErrorTitle)}
+                </AlertTitle>
+                <AlertDescription className="flex items-center justify-between">
+                  <span>
+                    {invitesError?.message ||
+                      t(
+                        (m) =>
+                          m.NotificationsPage.invitationsTab
+                            .loadErrorDescription,
+                      )}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refetchInvites()}
+                    className="ml-4"
+                  >
+                    {t((m) => m.NotificationsPage.invitationsTab.retry)}
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            ) : !invitations || invitations.length === 0 ? (
+              <Empty className="py-16 border rounded-3xl">
+                <EmptyMedia variant="icon">
+                  <UsersIcon className="size-6 text-muted-foreground" />
+                </EmptyMedia>
+                <EmptyHeader>
+                  <EmptyTitle>
+                    {t((m) => m.NotificationsPage.invitationsTab.emptyTitle)}
+                  </EmptyTitle>
+                  <EmptyDescription>
+                    {t(
+                      (m) =>
+                        m.NotificationsPage.invitationsTab.emptyDescription,
+                    )}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {invitations.map((invite) => {
+                  const isPendingMutation =
+                    (acceptMutation.isPending &&
+                      acceptMutation.variables === invite.id) ||
+                    (declineMutation.isPending &&
+                      declineMutation.variables === invite.id);
+
+                  const isExpired =
+                    invite.status === "EXPIRED" ||
+                    new Date(invite.expiresAt) < new Date();
+
+                  return (
+                    <Card
+                      key={invite.id}
+                      className="flex flex-col justify-between rounded-2xl border bg-card"
+                    >
+                      <CardHeader className="space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <CardTitle className="text-base font-semibold">
+                              {invite.family.name}
+                            </CardTitle>
+                            <CardDescription className="text-xs">
+                              {invite.invitedBy?.fullName
+                                ? t(
+                                    (m) =>
+                                      m.NotificationsPage.invitationsTab
+                                        .invitedBy,
+                                    { name: invite.invitedBy.fullName },
+                                  )
+                                : t(
+                                    (m) =>
+                                      m.NotificationsPage.invitationsTab
+                                        .invitedByUnknown,
+                                  )}
+                            </CardDescription>
+                          </div>
+                          {isExpired ? (
                             <Badge
-                              variant="outline"
-                              className="text-[10px] px-1.5 py-0 h-4 font-normal text-muted-foreground"
+                              variant="destructive"
+                              className="text-[10px]"
                             >
-                              {item.family.name}
+                              {t(
+                                (m) =>
+                                  m.NotificationsPage.invitationsTab.expired,
+                              )}
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px]">
+                              {invite.family.type.toLowerCase()}
                             </Badge>
                           )}
                         </div>
-                        <span className="text-xs text-muted-foreground/80 shrink-0">
-                          {formatRelativeTime(item.createdAt)}
-                        </span>
-                      </div>
 
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                        {item.description}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center shrink-0 self-center pl-2">
-                      <span className="sr-only">
-                        {isUnread
-                          ? t((m) => m.NotificationsPage.allTab.unread)
-                          : t((m) => m.NotificationsPage.allTab.read)}
-                      </span>
-                      {isUnread && (
-                        <div
-                          aria-hidden="true"
-                          className="size-2 rounded-full bg-primary"
-                        />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-
-              {hasMore && (
-                <div className="flex justify-center pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((p) => p + 1)}
-                    disabled={isNotifFetching}
-                    className="rounded-xl px-6"
-                  >
-                    {isNotifFetching ? (
-                      <>
-                        <Loader2Icon className="size-4 animate-spin mr-2" />
-                        {t((m) => m.NotificationsPage.allTab.loadingMore)}
-                      </>
-                    ) : (
-                      t((m) => m.NotificationsPage.allTab.loadMore)
-                    )}
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="invitations" className="space-y-4 outline-none">
-          {isInvitesLoading ? (
-            <div className="space-y-3">
-              <Skeleton className="h-32 w-full rounded-2xl" />
-              <Skeleton className="h-32 w-full rounded-2xl" />
-            </div>
-          ) : isInvitesError ? (
-            <Alert variant="destructive">
-              <AlertCircleIcon className="size-4" />
-              <AlertTitle>
-                {t((m) => m.NotificationsPage.invitationsTab.loadErrorTitle)}
-              </AlertTitle>
-              <AlertDescription className="flex items-center justify-between">
-                <span>
-                  {invitesError?.message ||
-                    t(
-                      (m) =>
-                        m.NotificationsPage.invitationsTab.loadErrorDescription,
-                    )}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => refetchInvites()}
-                  className="ml-4"
-                >
-                  {t((m) => m.NotificationsPage.invitationsTab.retry)}
-                </Button>
-              </AlertDescription>
-            </Alert>
-          ) : !invitations || invitations.length === 0 ? (
-            <Empty className="py-16 border rounded-3xl">
-              <EmptyMedia variant="icon">
-                <UsersIcon className="size-6 text-muted-foreground" />
-              </EmptyMedia>
-              <EmptyHeader>
-                <EmptyTitle>
-                  {t((m) => m.NotificationsPage.invitationsTab.emptyTitle)}
-                </EmptyTitle>
-                <EmptyDescription>
-                  {t(
-                    (m) => m.NotificationsPage.invitationsTab.emptyDescription,
-                  )}
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {invitations.map((invite) => {
-                const isPendingMutation =
-                  (acceptMutation.isPending &&
-                    acceptMutation.variables === invite.id) ||
-                  (declineMutation.isPending &&
-                    declineMutation.variables === invite.id);
-
-                const isExpired =
-                  invite.status === "EXPIRED" ||
-                  new Date(invite.expiresAt) < new Date();
-
-                return (
-                  <Card
-                    key={invite.id}
-                    className="flex flex-col justify-between rounded-2xl border bg-card"
-                  >
-                    <CardHeader className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <CardTitle className="text-base font-semibold">
-                            {invite.family.name}
-                          </CardTitle>
-                          <CardDescription className="text-xs">
-                            {invite.invitedBy?.fullName
-                              ? t(
-                                  (m) =>
-                                    m.NotificationsPage.invitationsTab
-                                      .invitedBy,
-                                  { name: invite.invitedBy.fullName },
-                                )
-                              : t(
-                                  (m) =>
-                                    m.NotificationsPage.invitationsTab
-                                      .invitedByUnknown,
-                                )}
-                          </CardDescription>
-                        </div>
-                        {isExpired ? (
-                          <Badge variant="destructive" className="text-[10px]">
-                            {t(
-                              (m) => m.NotificationsPage.invitationsTab.expired,
-                            )}
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-[10px]">
-                            {invite.family.type.toLowerCase()}
-                          </Badge>
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 text-xs text-muted-foreground pt-1">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 font-medium">
-                          <UserCheckIcon className="size-3" />
-                          {t((m) => m.NotificationsPage.invitationsTab.role, {
-                            role: invite.authority,
-                          })}
-                        </span>
-                        {(invite.kinshipCustom || invite.kinshipLabel) && (
+                        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground pt-1">
                           <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 font-medium">
+                            <UserCheckIcon className="size-3" />
+                            {t((m) => m.NotificationsPage.invitationsTab.role, {
+                              role: invite.authority,
+                            })}
+                          </span>
+                          {(invite.kinshipCustom || invite.kinshipLabel) && (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 font-medium">
+                              {t(
+                                (m) =>
+                                  m.NotificationsPage.invitationsTab.kinship,
+                                {
+                                  kinship:
+                                    invite.kinshipCustom ||
+                                    invite.kinshipLabel ||
+                                    "",
+                                },
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="space-y-1.5 text-xs text-muted-foreground/90">
+                        <div className="flex items-center gap-1 text-[11px]">
+                          <ClockIcon className="size-3 shrink-0" />
+                          <span>
                             {t(
-                              (m) => m.NotificationsPage.invitationsTab.kinship,
+                              (m) => m.NotificationsPage.invitationsTab.sentOn,
                               {
-                                kinship:
-                                  invite.kinshipCustom ||
-                                  invite.kinshipLabel ||
-                                  "",
+                                date: formatDate(invite.createdAt),
                               },
                             )}
                           </span>
-                        )}
-                      </div>
-                    </CardHeader>
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px]">
+                          <ClockIcon className="size-3 shrink-0" />
+                          <span>
+                            {t(
+                              (m) =>
+                                m.NotificationsPage.invitationsTab.expiresOn,
+                              { date: formatDate(invite.expiresAt) },
+                            )}
+                          </span>
+                        </div>
+                      </CardContent>
 
-                    <CardContent className="space-y-1.5 text-xs text-muted-foreground/90">
-                      <div className="flex items-center gap-1 text-[11px]">
-                        <ClockIcon className="size-3 shrink-0" />
-                        <span>
-                          {t((m) => m.NotificationsPage.invitationsTab.sentOn, {
-                            date: formatDate(invite.createdAt),
-                          })}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 text-[11px]">
-                        <ClockIcon className="size-3 shrink-0" />
-                        <span>
-                          {t(
-                            (m) => m.NotificationsPage.invitationsTab.expiresOn,
-                            { date: formatDate(invite.expiresAt) },
+                      <CardFooter className="flex items-center gap-2 pt-2 border-t border-border/40">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          disabled={
+                            isPendingMutation ||
+                            isExpired ||
+                            acceptMutation.isPending ||
+                            declineMutation.isPending
+                          }
+                          onClick={() => handleAcceptInvite(invite)}
+                          className="flex-1 rounded-xl cursor-pointer"
+                        >
+                          {acceptMutation.isPending &&
+                          acceptMutation.variables === invite.id ? (
+                            <>
+                              <Loader2Icon className="size-3.5 animate-spin mr-1.5" />
+                              {t(
+                                (m) =>
+                                  m.NotificationsPage.invitationsTab.accepting,
+                              )}
+                            </>
+                          ) : (
+                            t((m) => m.NotificationsPage.invitationsTab.accept)
                           )}
-                        </span>
-                      </div>
-                    </CardContent>
-
-                    <CardFooter className="flex items-center gap-2 pt-2 border-t border-border/40">
-                      <Button
-                        variant="default"
-                        size="sm"
-                        disabled={
-                          isPendingMutation ||
-                          isExpired ||
-                          acceptMutation.isPending ||
-                          declineMutation.isPending
-                        }
-                        onClick={() => handleAcceptInvite(invite)}
-                        className="flex-1 rounded-xl cursor-pointer"
-                      >
-                        {acceptMutation.isPending &&
-                        acceptMutation.variables === invite.id ? (
-                          <>
-                            <Loader2Icon className="size-3.5 animate-spin mr-1.5" />
-                            {t(
-                              (m) =>
-                                m.NotificationsPage.invitationsTab.accepting,
-                            )}
-                          </>
-                        ) : (
-                          t((m) => m.NotificationsPage.invitationsTab.accept)
-                        )}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={
-                          isPendingMutation ||
-                          isExpired ||
-                          acceptMutation.isPending ||
-                          declineMutation.isPending
-                        }
-                        onClick={() => handleDeclineInvite(invite)}
-                        className="flex-1 rounded-xl cursor-pointer"
-                      >
-                        {declineMutation.isPending &&
-                        declineMutation.variables === invite.id ? (
-                          <>
-                            <Loader2Icon className="size-3.5 animate-spin mr-1.5" />
-                            {t(
-                              (m) =>
-                                m.NotificationsPage.invitationsTab.declining,
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <XIcon className="size-3.5 mr-1" />
-                            {t(
-                              (m) => m.NotificationsPage.invitationsTab.decline,
-                            )}
-                          </>
-                        )}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={
+                            isPendingMutation ||
+                            isExpired ||
+                            acceptMutation.isPending ||
+                            declineMutation.isPending
+                          }
+                          onClick={() => handleDeclineInvite(invite)}
+                          className="flex-1 rounded-xl cursor-pointer"
+                        >
+                          {declineMutation.isPending &&
+                          declineMutation.variables === invite.id ? (
+                            <>
+                              <Loader2Icon className="size-3.5 animate-spin mr-1.5" />
+                              {t(
+                                (m) =>
+                                  m.NotificationsPage.invitationsTab.declining,
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <XIcon className="size-3.5 mr-1" />
+                              {t(
+                                (m) =>
+                                  m.NotificationsPage.invitationsTab.decline,
+                              )}
+                            </>
+                          )}
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }

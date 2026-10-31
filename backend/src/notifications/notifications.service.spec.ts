@@ -17,6 +17,9 @@ describe('NotificationsService', () => {
     familyInvite: {
       count: jest.Mock;
     };
+    family: {
+      findFirst: jest.Mock;
+    };
     user: {
       findUnique: jest.Mock;
     };
@@ -35,6 +38,9 @@ describe('NotificationsService', () => {
       },
       familyInvite: {
         count: jest.fn(),
+      },
+      family: {
+        findFirst: jest.fn(),
       },
       user: {
         findUnique: jest.fn(),
@@ -215,6 +221,194 @@ describe('NotificationsService', () => {
         }),
         update: {},
       });
+    });
+  });
+
+  describe('Family-scoped notifications', () => {
+    const familyA = {
+      id: 'family-a-id',
+      slug: 'family-a',
+      members: [{ id: 'member-1' }],
+    };
+
+    beforeEach(() => {
+      prisma.family.findFirst.mockResolvedValue(familyA);
+    });
+
+    it('allows a member to list notifications from their family', async () => {
+      const mockNotifs = [
+        {
+          id: 'notif-a',
+          userId: 'user-1',
+          familyId: 'family-a-id',
+          title: 'Family A Notif',
+          readAt: null,
+          createdAt: new Date(),
+        },
+      ];
+      prisma.notification.findMany.mockResolvedValue(mockNotifs);
+      prisma.notification.count
+        .mockResolvedValueOnce(1)
+        .mockResolvedValueOnce(1);
+
+      const result = await service.listForFamily('user-1', 'family-a', {
+        page: 1,
+        limit: 10,
+      });
+
+      expect(prisma.family.findFirst).toHaveBeenCalledWith({
+        where: {
+          OR: [{ slug: 'family-a' }, { id: 'family-a' }],
+        },
+        select: {
+          id: true,
+          slug: true,
+          members: {
+            where: { userId: 'user-1', removedAt: null },
+            select: { id: true },
+          },
+        },
+      });
+      expect(prisma.notification.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: 'user-1', familyId: 'family-a-id' },
+          skip: 0,
+          take: 10,
+        }),
+      );
+      expect(result.items).toEqual(mockNotifs);
+    });
+
+    it('rejects with NotFoundException when a user queries a family they do not belong to', async () => {
+      prisma.family.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.listForFamily('user-stranger', 'family-a', {}),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(prisma.notification.findMany).not.toHaveBeenCalled();
+    });
+
+    it('ensures Family A results never contain Family B notifications', async () => {
+      prisma.notification.findMany.mockResolvedValue([]);
+      prisma.notification.count.mockResolvedValue(0);
+
+      await service.listForFamily('user-1', 'family-a', {});
+
+      expect(prisma.notification.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            userId: 'user-1',
+            familyId: 'family-a-id',
+          }),
+        }),
+      );
+      // Explicitly verifies familyId is Family A and not Family B
+      const callWhere = prisma.notification.findMany.mock.calls[0][0].where;
+      expect(callWhere.familyId).toBe('family-a-id');
+      expect(callWhere.familyId).not.toBe('family-b-id');
+    });
+
+    it('only marks notifications in Family A as read when family mark-all-read is called', async () => {
+      prisma.notification.updateMany.mockResolvedValue({ count: 3 });
+
+      const result = await service.markAllAsReadForFamily('user-1', 'family-a');
+
+      expect(result.count).toBe(3);
+      expect(prisma.notification.updateMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user-1',
+          familyId: 'family-a-id',
+          readAt: null,
+        },
+        data: { readAt: expect.any(Date) },
+      });
+    });
+
+    it('prevents family mark-read from modifying a notification belonging to another family', async () => {
+      // findFirst returns null because notification does not match both userId and familyId
+      prisma.notification.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.markAsReadForFamily(
+          'user-1',
+          'family-a',
+          'notif-from-family-b',
+        ),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(prisma.notification.findFirst).toHaveBeenCalledWith({
+        where: {
+          id: 'notif-from-family-b',
+          userId: 'user-1',
+          familyId: 'family-a-id',
+        },
+        include: expect.any(Object),
+      });
+      expect(prisma.notification.update).not.toHaveBeenCalled();
+    });
+
+    it('allows marking a notification read when it matches both user and family', async () => {
+      const existing = {
+        id: 'notif-a',
+        userId: 'user-1',
+        familyId: 'family-a-id',
+        readAt: null,
+      };
+      prisma.notification.findFirst.mockResolvedValue(existing);
+      prisma.notification.update.mockResolvedValue({
+        ...existing,
+        readAt: new Date(),
+      });
+
+      const result = await service.markAsReadForFamily(
+        'user-1',
+        'family-a',
+        'notif-a',
+      );
+
+      expect(result.readAt).toBeDefined();
+      expect(prisma.notification.update).toHaveBeenCalledWith({
+        where: { id: 'notif-a' },
+        data: { readAt: expect.any(Date) },
+        include: expect.any(Object),
+      });
+    });
+
+    it('returns family-scoped summary with unreadCount and recent items', async () => {
+      prisma.notification.count.mockResolvedValue(2);
+      prisma.notification.findMany.mockResolvedValue([
+        { id: 'notif-1', title: 'A' },
+      ]);
+
+      const summary = await service.getFamilySummary('user-1', 'family-a');
+
+      expect(summary.unreadCount).toBe(2);
+      expect(summary.pendingInvitationCount).toBe(0);
+      expect(summary.recent).toHaveLength(1);
+      expect(prisma.notification.count).toHaveBeenCalledWith({
+        where: { userId: 'user-1', familyId: 'family-a-id', readAt: null },
+      });
+      expect(prisma.notification.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: 'user-1', familyId: 'family-a-id' },
+          take: 5,
+        }),
+      );
+    });
+
+    it('ensures global account endpoints continue returning all notifications for the user across families', async () => {
+      prisma.notification.findMany.mockResolvedValue([]);
+      prisma.notification.count.mockResolvedValue(0);
+
+      await service.listForUser('user-1', { page: 1, limit: 10 });
+
+      // Global where only has userId, not restricted to familyId
+      expect(prisma.notification.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: 'user-1' },
+        }),
+      );
     });
   });
 });

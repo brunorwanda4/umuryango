@@ -106,6 +106,14 @@ export default function AppNavbarSearch() {
                 <span>{tSearch((m) => m.AppShell.search.familyDashboard)}</span>
               </CommandItem>
               <CommandItem
+                onSelect={() => handleNavigate(`${familyHref}/notifications`)}
+              >
+                <BellIcon className="mr-2 size-4" />
+                <span>
+                  {tSearch((m) => m.AppShell.search.familyNotifications)}
+                </span>
+              </CommandItem>
+              <CommandItem
                 onSelect={() => handleNavigate(`${familyHref}/money`)}
               >
                 <CreditCardIcon className="mr-2 size-4" />

@@ -2,6 +2,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   BadgeDollarSignIcon,
+  BellIcon,
   BookOpenCheckIcon,
   CalendarDaysIcon,
   ClipboardListIcon,
@@ -24,10 +25,7 @@ import {
 import { createTranslator } from "@/i18n/translate";
 import type { SidebarIconSource } from "./sidebar-icon";
 
-const sidebarIcon = (
-  imageName: string,
-  lineIcon: LucideIcon,
-): SidebarIconSource => ({
+const sidebarIcon = (imageName: string, lineIcon: LucideIcon): SidebarIconSource => ({
   image: {
     src: `/images/icons/${imageName}.png`,
   },
@@ -254,6 +252,7 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
           href: familyHref,
           icon: sidebarIcon("dashboard", HomeIcon),
         },
+
         {
           title: tItems((m) => m.AppShell.navigation.items.money),
           href: `${familyHref}/money`,
@@ -269,6 +268,11 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
           title: tItems((m) => m.AppShell.navigation.items.reports),
           href: `${familyHref}/reports`,
           icon: sidebarIcon("reports", ReceiptTextIcon),
+        },
+        {
+          title: tItems((m) => m.AppShell.navigation.items.notifications),
+          href: `${familyHref}/notifications`,
+          icon: sidebarIcon("announcement", BellIcon),
         },
       ],
     },
@@ -301,9 +305,7 @@ export const getFamilyNavigation = (familySlug: string): NavigationGroup[] => {
   ];
 };
 
-export const getFamilySettingsNavigation = (
-  familySlug: string,
-): NavigationGroup[] => {
+export const getFamilySettingsNavigation = (familySlug: string): NavigationGroup[] => {
   const familyHref = `/family/${familySlug}`;
 
   return [
@@ -337,11 +339,7 @@ export const workspaceLinks = [
   },
 ];
 
-export function isSettingsPath(
-  pathname: string,
-  mode: AppSidebarMode,
-  encodedFamilySlug: string,
-) {
+export function isSettingsPath(pathname: string, mode: AppSidebarMode, encodedFamilySlug: string) {
   if (mode === "family" && encodedFamilySlug) {
     const settingsHref = `/family/${encodedFamilySlug}/settings`;
 
@@ -356,12 +354,7 @@ export function isSettingsPath(
   );
 }
 
-export function isActivePath(
-  pathname: string,
-  href: string,
-  currentHash = "",
-  exact = false,
-) {
+export function isActivePath(pathname: string, href: string, currentHash = "", exact = false) {
   const [hrefPath, hrefHash] = href.split("#");
   const targetPath = hrefPath || href;
 
@@ -398,10 +391,7 @@ export function formatFamilyName(familySlug?: string) {
     .trim()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
-  return (
-    formatted ||
-    createTranslator("AppShell.workspaceSwitcher")("familyWorkspace")
-  );
+  return formatted || createTranslator("AppShell.workspaceSwitcher")("familyWorkspace");
 }
 
 export function getInitials(value: string) {

@@ -725,6 +725,7 @@
       "noResults": "No results found.",
       "familyScope": "Family Scope",
       "familyDashboard": "Family Dashboard",
+      "familyNotifications": "Family Notifications",
       "familyMoneyOverview": "Family Money Overview",
       "familyExpenses": "Family Expenses",
       "familyProjects": "Family Projects",
@@ -821,7 +822,8 @@
         "familyWorkspaces": "Family workspaces",
         "general": "General",
         "audit": "Audit log",
-        "appearance": "Appearance"
+        "appearance": "Appearance",
+        "notifications": "Notifications"
       }
     }
   },
@@ -3546,6 +3548,12 @@
     "metadataDescription": "View your notifications and pending family invitations.",
     "title": "Notifications",
     "description": "Stay updated on family invitations, transaction approvals, and financial activities.",
+    "familyTitle": "Notifications",
+    "familyDescription": "Stay updated on financial activities, approvals, and events in {familyName}.",
+    "familyMetadataTitle": "Notifications | {familyName} | Umuryango",
+    "familyMetadataDescription": "View notifications for {familyName}.",
+    "familyEmptyTitle": "No notifications",
+    "familyEmptyDescription": "There are no notifications for {familyName} right now.",
     "markAllRead": "Mark all as read",
     "markingAllRead": "Marking all as read...",
     "allMarkedRead": "All notifications marked as read.",

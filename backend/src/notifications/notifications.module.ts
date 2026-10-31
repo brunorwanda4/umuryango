@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { PrismaModule } from '../prisma/prisma.module';
+import { FamilyNotificationsController } from './family-notifications.controller';
 import { InvitationsController } from './invitations.controller';
 import { InvitationsService } from './invitations.service';
 import { NotificationsController } from './notifications.controller';
@@ -8,7 +9,11 @@ import { NotificationsService } from './notifications.service';
 
 @Module({
   imports: [PrismaModule, AuthModule],
-  controllers: [NotificationsController, InvitationsController],
+  controllers: [
+    NotificationsController,
+    FamilyNotificationsController,
+    InvitationsController,
+  ],
   providers: [NotificationsService, InvitationsService],
   exports: [NotificationsService, InvitationsService],
 })

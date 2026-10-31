@@ -542,6 +542,11 @@ export class ContributionsService {
         });
 
         if (member && member.userId !== userId) {
+          const family = await tx.family.findUnique({
+            where: { id: familyId },
+            select: { slug: true },
+          });
+          const familySlug = encodeURIComponent(family?.slug ?? familyId);
           await this.notificationsService.createNotification(
             {
               userId: member.userId,
@@ -549,7 +554,7 @@ export class ContributionsService {
               type: NotificationType.CONTRIBUTION_VERIFIED,
               title: 'Contribution Verified',
               description: 'Your contribution payment has been verified.',
-              href: `/families/${familyId}/contributions`,
+              href: `/family/${familySlug}/money`,
               dedupeKey: `contrib-verify:${row.id}`,
             },
             tx,

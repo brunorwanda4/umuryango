@@ -566,6 +566,11 @@ export class TransactionsService {
         transaction.createdById &&
         transaction.createdById !== userId
       ) {
+        const family = await tx.family.findUnique({
+          where: { id: familyId },
+          select: { slug: true },
+        });
+        const familySlug = encodeURIComponent(family?.slug ?? familyId);
         await this.notificationsService.createNotification(
           {
             userId: transaction.createdById,
@@ -573,7 +578,7 @@ export class TransactionsService {
             type: NotificationType.TRANSACTION_APPROVED,
             title: 'Transaction Approved',
             description: `Your ${transaction.type.toLowerCase()} of ${transaction.currency} ${(Number(transaction.amountMinorUnits) / 100).toFixed(0)} was approved.`,
-            href: `/families/${familyId}/money`,
+            href: `/family/${familySlug}/money`,
             dedupeKey: `tx-approve:${transaction.id}`,
           },
           tx,
@@ -627,6 +632,11 @@ export class TransactionsService {
         transaction.createdById &&
         transaction.createdById !== userId
       ) {
+        const family = await tx.family.findUnique({
+          where: { id: familyId },
+          select: { slug: true },
+        });
+        const familySlug = encodeURIComponent(family?.slug ?? familyId);
         await this.notificationsService.createNotification(
           {
             userId: transaction.createdById,
@@ -634,7 +644,7 @@ export class TransactionsService {
             type: NotificationType.TRANSACTION_REJECTED,
             title: 'Transaction Rejected',
             description: `Your ${transaction.type.toLowerCase()} of ${transaction.currency} ${(Number(transaction.amountMinorUnits) / 100).toFixed(0)} was rejected.`,
-            href: `/families/${familyId}/money`,
+            href: `/family/${familySlug}/money`,
             dedupeKey: `tx-reject:${transaction.id}`,
           },
           tx,

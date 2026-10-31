@@ -219,4 +219,185 @@ export class NotificationsService {
 
     return { count: result.count };
   }
+
+  async resolveFamilyMember(
+    userId: string,
+    familySlug: string,
+  ): Promise<{ familyId: string; familySlug: string }> {
+    const family = await this.prisma.family.findFirst({
+      where: {
+        OR: [{ slug: familySlug }, { id: familySlug }],
+      },
+      select: {
+        id: true,
+        slug: true,
+        members: {
+          where: { userId, removedAt: null },
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!family || family.members.length === 0) {
+      throw new NotFoundException('Family not found.');
+    }
+
+    return { familyId: family.id, familySlug: family.slug };
+  }
+
+  async listForFamily(
+    userId: string,
+    familySlug: string,
+    query: ListNotificationsDto,
+  ): Promise<{
+    items: NotificationWithFamily[];
+    total: number;
+    page: number;
+    limit: number;
+    hasMore: boolean;
+    unreadCount: number;
+  }> {
+    const { familyId } = await this.resolveFamilyMember(userId, familySlug);
+
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.NotificationWhereInput = {
+      userId,
+      familyId,
+      ...(query.unread === true
+        ? { readAt: null }
+        : query.unread === false
+          ? { readAt: { not: null } }
+          : {}),
+    };
+
+    const [items, total, unreadCount] = await Promise.all([
+      this.prisma.notification.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+        include: {
+          family: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      }),
+      this.prisma.notification.count({ where }),
+      this.prisma.notification.count({
+        where: { userId, familyId, readAt: null },
+      }),
+    ]);
+
+    const hasMore = skip + items.length < total;
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      hasMore,
+      unreadCount,
+    };
+  }
+
+  async getFamilySummary(
+    userId: string,
+    familySlug: string,
+  ): Promise<{
+    unreadCount: number;
+    pendingInvitationCount: number;
+    recent: NotificationWithFamily[];
+  }> {
+    const { familyId } = await this.resolveFamilyMember(userId, familySlug);
+
+    const [unreadCount, recent] = await Promise.all([
+      this.prisma.notification.count({
+        where: { userId, familyId, readAt: null },
+      }),
+      this.prisma.notification.findMany({
+        where: { userId, familyId },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        include: {
+          family: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      unreadCount,
+      pendingInvitationCount: 0,
+      recent,
+    };
+  }
+
+  async markAsReadForFamily(
+    userId: string,
+    familySlug: string,
+    notificationId: string,
+  ): Promise<NotificationWithFamily> {
+    const { familyId } = await this.resolveFamilyMember(userId, familySlug);
+
+    const notification = await this.prisma.notification.findFirst({
+      where: { id: notificationId, userId, familyId },
+      include: {
+        family: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    if (!notification) {
+      throw new NotFoundException('Notification not found.');
+    }
+
+    if (notification.readAt) {
+      return notification;
+    }
+
+    return this.prisma.notification.update({
+      where: { id: notificationId },
+      data: { readAt: new Date() },
+      include: {
+        family: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+    });
+  }
+
+  async markAllAsReadForFamily(
+    userId: string,
+    familySlug: string,
+  ): Promise<{ count: number }> {
+    const { familyId } = await this.resolveFamilyMember(userId, familySlug);
+
+    const result = await this.prisma.notification.updateMany({
+      where: { userId, familyId, readAt: null },
+      data: { readAt: new Date() },
+    });
+
+    return { count: result.count };
+  }
 }

@@ -2,24 +2,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  SidebarIcon,
-  type SidebarIconSource,
-} from "@/components/app-shell/sidebar-icon";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { SidebarIcon, type SidebarIconSource } from "@/components/app-shell/sidebar-icon";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemHeader,
-} from "../ui/item";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemHeader } from "../ui/item";
 
 interface OverviewCard {
   description?: ReactNode;
@@ -59,34 +45,22 @@ const OverviewCardDisplay = ({
       )}
     >
       {cards.map((data, index) => {
-        const key =
-          typeof data.description === "string" ? data.description : index;
+        const key = typeof data.description === "string" ? data.description : index;
         const cardIcon = data.iconSource ? (
           <SidebarIcon icon={data.iconSource} className="size-7" />
         ) : data.iconImage ? (
-          <Image
-            alt=""
-            aria-hidden="true"
-            height={28}
-            src={data.iconImage}
-            width={28}
-          />
+          <Image alt="" aria-hidden="true" height={28} src={data.iconImage} width={28} />
         ) : (
           (data.icon ?? null)
         );
         const mobileItem = (
-          <Item
-            variant="muted"
-            className="min-h-28 border border-border sm:hidden"
-          >
+          <Item variant="muted" className="md:min-h-28 min-h-16 border border-border sm:hidden">
             <ItemContent>
               <ItemHeader>
                 <div className="flex min-w-0 flex-row items-center gap-4">
                   {cardIcon}
                   <div className="min-w-0">
-                    <ItemDescription
-                      className={cn("truncate", cardDescriptionClassName)}
-                    >
+                    <ItemDescription className={cn("truncate", cardDescriptionClassName)}>
                       {data.description}
                     </ItemDescription>
                     {data.footer && (
@@ -104,12 +78,7 @@ const OverviewCardDisplay = ({
               </ItemHeader>
             </ItemContent>
             <ItemActions className="min-w-0">
-              <span
-                className={cn(
-                  "truncate text-lg font-semibold",
-                  cardTitleClassName,
-                )}
-              >
+              <span className={cn("truncate text-lg font-semibold", cardTitleClassName)}>
                 {data.value}
               </span>
             </ItemActions>
@@ -131,16 +100,12 @@ const OverviewCardDisplay = ({
                     cardDescriptionClassName,
                   )}
                 >
-                  <span>{data.description}</span>{" "}
-                  <span className=" block sm:hidden">:</span>
+                  <span>{data.description}</span> <span className=" block sm:hidden">:</span>
                 </CardDescription>
               </div>
               <div className="min-w-0 max-sm:flex-row-reverse max-sm:flex max-sm:items-center max-sm:gap-4">
                 <CardTitle
-                  className={cn(
-                    "truncate text-xl sm:text-2xl font-bold",
-                    cardTitleClassName,
-                  )}
+                  className={cn("truncate text-xl sm:text-2xl font-bold", cardTitleClassName)}
                 >
                   {data.value}
                 </CardTitle>

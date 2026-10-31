@@ -77,6 +77,16 @@ export const notificationKeys = {
   list: (filters: { page?: number; limit?: number; unread?: boolean }) =>
     [...notificationKeys.lists(), filters] as const,
   summary: () => [...notificationKeys.all, "summary"] as const,
+  family: (familySlug: string) =>
+    [...notificationKeys.all, "family", familySlug] as const,
+  familyLists: (familySlug: string) =>
+    [...notificationKeys.family(familySlug), "list"] as const,
+  familyList: (
+    familySlug: string,
+    filters: { page?: number; limit?: number; unread?: boolean },
+  ) => [...notificationKeys.familyLists(familySlug), filters] as const,
+  familySummary: (familySlug: string) =>
+    [...notificationKeys.family(familySlug), "summary"] as const,
 };
 
 export const invitationKeys = {
@@ -89,10 +99,12 @@ export function useNotifications(params?: {
   page?: number;
   limit?: number;
   unread?: boolean;
+  familySlug?: string;
 }) {
   const page = params?.page ?? 1;
   const limit = params?.limit ?? 20;
   const unread = params?.unread;
+  const familySlug = params?.familySlug;
 
   const searchParams = new URLSearchParams();
   searchParams.set("page", String(page));
@@ -101,12 +113,20 @@ export function useNotifications(params?: {
     searchParams.set("unread", String(unread));
   }
 
+  const endpoint = familySlug
+    ? `/families/${encodeURIComponent(familySlug)}/notifications?${searchParams.toString()}`
+    : `/notifications?${searchParams.toString()}`;
+
+  const queryKey = familySlug
+    ? notificationKeys.familyList(familySlug, { page, limit, unread })
+    : notificationKeys.list({ page, limit, unread });
+
   return useQuery({
-    queryKey: notificationKeys.list({ page, limit, unread }),
+    queryKey,
     queryFn: async () => {
       const res = await apiRequest<undefined, NotificationListResponse>(
         "get",
-        `/notifications?${searchParams.toString()}`,
+        endpoint,
       );
       if (!res.ok || !res.data) {
         throw new Error(res.message ?? "Failed to load notifications");
@@ -116,13 +136,32 @@ export function useNotifications(params?: {
   });
 }
 
-export function useNotificationSummary() {
+export function useFamilyNotifications(
+  familySlug: string,
+  params?: {
+    page?: number;
+    limit?: number;
+    unread?: boolean;
+  },
+) {
+  return useNotifications({ ...params, familySlug });
+}
+
+export function useNotificationSummary(familySlug?: string) {
+  const queryKey = familySlug
+    ? notificationKeys.familySummary(familySlug)
+    : notificationKeys.summary();
+
+  const endpoint = familySlug
+    ? `/families/${encodeURIComponent(familySlug)}/notifications/summary`
+    : "/notifications/summary";
+
   return useQuery({
-    queryKey: notificationKeys.summary(),
+    queryKey,
     queryFn: async () => {
       const res = await apiRequest<undefined, NotificationSummaryResponse>(
         "get",
-        "/notifications/summary",
+        endpoint,
       );
       if (!res.ok || !res.data) {
         throw new Error(res.message ?? "Failed to load notification summary");
@@ -130,17 +169,26 @@ export function useNotificationSummary() {
       return res.data;
     },
     refetchInterval: 30000,
+    enabled: familySlug !== undefined ? !!familySlug : true,
   });
 }
 
-export function useMarkNotificationRead() {
+export function useFamilyNotificationSummary(familySlug: string) {
+  return useNotificationSummary(familySlug);
+}
+
+export function useMarkNotificationRead(familySlug?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
+      const endpoint = familySlug
+        ? `/families/${encodeURIComponent(familySlug)}/notifications/${id}/read`
+        : `/notifications/${id}/read`;
+
       const res = await apiRequest<undefined, NotificationItem>(
         "patch",
-        `/notifications/${id}/read`,
+        endpoint,
       );
       if (!res.ok || !res.data) {
         throw new Error(res.message ?? "Failed to mark notification as read");
@@ -148,19 +196,39 @@ export function useMarkNotificationRead() {
       return res.data;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      if (familySlug) {
+        void queryClient.invalidateQueries({
+          queryKey: notificationKeys.family(familySlug),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: notificationKeys.summary(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: notificationKeys.lists(),
+        });
+      } else {
+        void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      }
     },
   });
 }
 
-export function useMarkAllNotificationsRead() {
+export function useFamilyMarkNotificationRead(familySlug: string) {
+  return useMarkNotificationRead(familySlug);
+}
+
+export function useMarkAllNotificationsRead(familySlug?: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
+      const endpoint = familySlug
+        ? `/families/${encodeURIComponent(familySlug)}/notifications/read-all`
+        : "/notifications/read-all";
+
       const res = await apiRequest<undefined, { count: number }>(
         "patch",
-        "/notifications/read-all",
+        endpoint,
       );
       if (!res.ok) {
         throw new Error(res.message ?? "Failed to mark all as read");
@@ -168,12 +236,31 @@ export function useMarkAllNotificationsRead() {
       return res.data;
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      if (familySlug) {
+        void queryClient.invalidateQueries({
+          queryKey: notificationKeys.family(familySlug),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: notificationKeys.summary(),
+        });
+        void queryClient.invalidateQueries({
+          queryKey: notificationKeys.lists(),
+        });
+      } else {
+        void queryClient.invalidateQueries({ queryKey: notificationKeys.all });
+      }
     },
   });
 }
 
-export function useInvitations(status = "PENDING") {
+export function useFamilyMarkAllNotificationsRead(familySlug: string) {
+  return useMarkAllNotificationsRead(familySlug);
+}
+
+export function useInvitations(
+  status = "PENDING",
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: invitationKeys.list(status),
     queryFn: async () => {
@@ -186,6 +273,7 @@ export function useInvitations(status = "PENDING") {
       }
       return res.data;
     },
+    enabled: options?.enabled ?? true,
   });
 }
 
