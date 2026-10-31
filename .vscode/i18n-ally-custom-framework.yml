@@ -1,0 +1,23 @@
+# Configuration for i18n Ally in VS Code / Antigravity IDE
+# Enables Ctrl+Click ("Go to Definition") on translation keys directly to en.json
+languageIds:
+  - javascript
+  - typescript
+  - javascriptreact
+  - typescriptreact
+
+usageMatchRegex:
+  # Matches t("key") or t('key') or t(`key`)
+  - "[^\\w\\d]t\\([\\s*['\"`]({key})['\"`]"
+  # Matches tNav("key"), tItems("key"), tGroups("key"), tShared("key"), etc.
+  - "[^\\w\\d]t[A-Za-z0-9_]*\\([\\s*['\"`]({key})['\"`]"
+  # Matches translate(messages, "key")
+  - "[^\\w\\d]translate\\([^,]+,\\s*['\"`]({key})['\"`]"
+  # Matches translate("key")
+  - "[^\\w\\d]translate\\([\\s*['\"`]({key})['\"`]"
+
+# Matches createTranslator("Namespace") or createTranslator("Namespace.sub")
+scopeRangeRegex: "createTranslator\\(\\s*['\"`](.*?)['\"`]"
+
+monopoly: false
+keyStyle: nested

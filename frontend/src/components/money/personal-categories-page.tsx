@@ -21,11 +21,19 @@ import { PersonalCategoryDialog } from "@/components/money/personal-category-dia
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createTranslator } from "@/i18n/translate";
+import { hasCapability } from "@/lib/family-access";
 import { cn } from "@/lib/utils";
 import apiRequest from "@/service/api";
 
-export function PersonalCategoriesPage() {
+export function PersonalCategoriesPage({
+  familyName,
+}: {
+  familyName?: string;
+} = {}) {
+  const personal = familyName === undefined;
+  const familyCopy = createTranslator("FamilyCategories");
   const t = createTranslator("PersonalMoney.categoriesSection");
+  const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [familyId, setFamilyId] = useState<string | null>(null);
   const [categories, setCategories] = useState<MoneyCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,11 +49,15 @@ export function PersonalCategoriesPage() {
 
     const workspaceResponse = await apiRequest<undefined, FamilyDetail>(
       "get",
-      "/families/personal-workspace",
+      personal
+        ? "/families/personal-workspace"
+        : `/families/${encodeURIComponent(familyName)}`,
     );
     const family = workspaceResponse.data;
 
     if (!workspaceResponse.ok || !family) {
+      setFamily(null);
+      toast.error(workspaceResponse.message ?? t("loadError"));
       setFamilyId(null);
       setCategories([]);
       setLoading(false);
@@ -53,9 +65,10 @@ export function PersonalCategoriesPage() {
     }
 
     setFamilyId(family.id);
+    setFamily(family);
     const response = await apiRequest<undefined, ApiCategory[]>(
       "get",
-      `/families/${encodeURIComponent(family.id)}/money/categories/mine`,
+      `/families/${encodeURIComponent(family.id)}/money/categories${personal ? "/mine" : ""}`,
     );
 
     if (response.ok) {
@@ -65,7 +78,20 @@ export function PersonalCategoriesPage() {
       toast.error(response.message ?? t("loadError"));
     }
     setLoading(false);
-  }, [t]);
+  }, [familyName, personal, t]);
+
+  const canManage =
+    personal || family?.authority === "HEAD" || family?.authority === "ADMIN";
+  const allowedTypes = (["INCOME", "EXPENSE"] as const).filter(
+    (type) =>
+      personal ||
+      (family &&
+        hasCapability(
+          family,
+          type === "INCOME" ? "RECORD_INCOME" : "RECORD_EXPENSE",
+        )),
+  );
+  const canCreate = Boolean(familyId && allowedTypes.length);
 
   useEffect(() => {
     void loadCategories();
@@ -86,14 +112,14 @@ export function PersonalCategoriesPage() {
   }, [categories, filter, search]);
 
   const handleToggleStatus = async (cat: MoneyCategory) => {
-    if (!familyId) return;
+    if (!familyId || !canManage) return;
 
     const nextStatus: CategoryStatus =
       cat.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
 
     const response = await apiRequest(
       "patch",
-      `/families/${encodeURIComponent(familyId)}/money/categories/mine/${encodeURIComponent(cat.id)}`,
+      `/families/${encodeURIComponent(familyId)}/money/categories${personal ? "/mine" : ""}/${encodeURIComponent(cat.id)}`,
       { status: nextStatus },
     );
 
@@ -111,11 +137,11 @@ export function PersonalCategoriesPage() {
   };
 
   const handleDelete = async (cat: MoneyCategory) => {
-    if (!familyId) return;
+    if (!familyId || !canManage) return;
 
     const response = await apiRequest(
       "delete",
-      `/families/${encodeURIComponent(familyId)}/money/categories/mine/${encodeURIComponent(cat.id)}`,
+      `/families/${encodeURIComponent(familyId)}/money/categories${personal ? "/mine" : ""}/${encodeURIComponent(cat.id)}`,
     );
 
     if (!response.ok) {
@@ -128,11 +154,13 @@ export function PersonalCategoriesPage() {
   };
 
   const openCreateDialog = () => {
+    if (!canCreate) return;
     setSelectedCategory(null);
     setDialogOpen(true);
   };
 
   const openEditDialog = (cat: MoneyCategory) => {
+    if (!canManage) return;
     setSelectedCategory(cat);
     setDialogOpen(true);
   };
@@ -154,10 +182,10 @@ export function PersonalCategoriesPage() {
       <div className="flex flex-col gap-1">
         <h1 className="flex items-center gap-3 font-fraunces text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           <ListIcon className="size-8 sm:size-9" aria-hidden="true" />
-          {t("title")}
+          {personal ? t("title") : familyCopy("pageTitle")}
         </h1>
         <p className="mt-2 mb-2 text-[15px] text-muted-foreground">
-          {t("description")}
+          {personal ? t("description") : familyCopy("pageDescription")}
         </p>
       </div>
 
@@ -288,20 +316,22 @@ export function PersonalCategoriesPage() {
               </button>
             </div>
 
-            <Button
-              type="button"
-              onClick={() => {
-                if (!familyId) {
-                  toast.error(t("createWorkspaceFirst"));
-                  return;
-                }
-                openCreateDialog();
-              }}
-              className="h-9 gap-1.5 rounded-full bg-foreground px-4 text-sm font-semibold text-background shadow-sm hover:bg-foreground/90"
-            >
-              <PlusIcon className="size-4" />
-              {t("addCategory")}
-            </Button>
+            {canCreate && (
+              <Button
+                type="button"
+                onClick={() => {
+                  if (!familyId) {
+                    toast.error(t("createWorkspaceFirst"));
+                    return;
+                  }
+                  openCreateDialog();
+                }}
+                className="h-9 gap-1.5 rounded-full bg-foreground px-4 text-sm font-semibold text-background shadow-sm hover:bg-foreground/90"
+              >
+                <PlusIcon className="size-4" />
+                {t("addCategory")}
+              </Button>
+            )}
           </div>
 
           {/* Master Data List */}
@@ -322,20 +352,22 @@ export function PersonalCategoriesPage() {
               <p className="mx-auto mt-1.5 mb-4 max-w-sm text-sm text-muted-foreground">
                 {t("noCategoriesDesc")}
               </p>
-              <Button
-                type="button"
-                onClick={() => {
-                  if (!familyId) {
-                    toast.error(t("createWorkspaceFirst"));
-                    return;
-                  }
-                  openCreateDialog();
-                }}
-                className="h-10 gap-2 rounded-full bg-foreground px-5 text-sm font-semibold text-background shadow-sm hover:bg-foreground/90"
-              >
-                <PlusIcon className="size-4" />
-                {t("addCategory")}
-              </Button>
+              {canCreate && (
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (!familyId) {
+                      toast.error(t("createWorkspaceFirst"));
+                      return;
+                    }
+                    openCreateDialog();
+                  }}
+                  className="h-10 gap-2 rounded-full bg-foreground px-5 text-sm font-semibold text-background shadow-sm hover:bg-foreground/90"
+                >
+                  <PlusIcon className="size-4" />
+                  {t("addCategory")}
+                </Button>
+              )}
             </div>
           ) : filteredCategories.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">
@@ -400,34 +432,38 @@ export function PersonalCategoriesPage() {
                       </span>
 
                       {/* Activate / Deactivate Toggle */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleToggleStatus(cat)}
-                        className="h-[34px] rounded-[10px] px-3 text-[13px] font-semibold"
-                      >
-                        {isActive ? t("deactivate") : t("activate")}
-                      </Button>
+                      {canManage && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleToggleStatus(cat)}
+                            className="h-[34px] rounded-[10px] px-3 text-[13px] font-semibold"
+                          >
+                            {isActive ? t("deactivate") : t("activate")}
+                          </Button>
 
-                      {/* Edit */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEditDialog(cat)}
-                        className="h-[34px] rounded-[10px] px-3 text-[13px] font-semibold"
-                      >
-                        {t("edit")}
-                      </Button>
+                          {/* Edit */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEditDialog(cat)}
+                            className="h-[34px] rounded-[10px] px-3 text-[13px] font-semibold"
+                          >
+                            {t("edit")}
+                          </Button>
 
-                      {/* Delete */}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(cat)}
-                        className="h-[34px] rounded-[10px] px-3 text-[13px] font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        {t("delete")}
-                      </Button>
+                          {/* Delete */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(cat)}
+                            className="h-[34px] rounded-[10px] px-3 text-[13px] font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            {t("delete")}
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
@@ -593,6 +629,8 @@ export function PersonalCategoriesPage() {
 
       {/* Add / Edit Category Dialog */}
       <PersonalCategoryDialog
+        personal={personal}
+        allowedTypes={selectedCategory ? ["INCOME", "EXPENSE"] : allowedTypes}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         familyId={familyId}

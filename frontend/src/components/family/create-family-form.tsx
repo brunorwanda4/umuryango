@@ -101,7 +101,10 @@ const getCreateFamilySchema = (copy: CreateFamilyFormCopy) =>
     description: z.string().max(500),
   });
 
-export function CreateFamilyForm({ copy, familyIndexHref }: CreateFamilyFormProps) {
+export function CreateFamilyForm({
+  copy,
+  familyIndexHref,
+}: CreateFamilyFormProps) {
   const router = useRouter();
 
   const schema = useMemo(() => getCreateFamilySchema(copy), [copy]);
@@ -148,7 +151,10 @@ export function CreateFamilyForm({ copy, familyIndexHref }: CreateFamilyFormProp
   const slugPreview = useMemo(() => createSlug(name), [name]);
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={form.handleSubmit(onSubmit)}>
+    <form
+      className="flex flex-col gap-6"
+      onSubmit={form.handleSubmit(onSubmit)}
+    >
       {error ? (
         <Alert variant="destructive">
           <AlertTitle>{copy.genericError}</AlertTitle>

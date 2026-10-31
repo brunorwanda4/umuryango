@@ -26,6 +26,8 @@ export const CATEGORY_COLORS = [
 ];
 
 export function PersonalCategoryDialog({
+  personal = true,
+  allowedTypes = ["INCOME", "EXPENSE"],
   open,
   onOpenChange,
   familyId,
@@ -33,6 +35,8 @@ export function PersonalCategoryDialog({
   existingCategories,
   onSuccess,
 }: {
+  personal?: boolean;
+  allowedTypes?: ("INCOME" | "EXPENSE")[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   familyId: string | null;
@@ -46,6 +50,7 @@ export function PersonalCategoryDialog({
   const [color, setColor] = useState(CATEGORY_COLORS[0]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const defaultType = allowedTypes.includes("EXPENSE") ? "EXPENSE" : "INCOME";
 
   useEffect(() => {
     if (open) {
@@ -55,17 +60,18 @@ export function PersonalCategoryDialog({
         setColor(category.color || CATEGORY_COLORS[0]);
       } else {
         setName("");
-        setType("EXPENSE");
+        setType(defaultType);
         setColor(CATEGORY_COLORS[0]);
       }
       setError(null);
       setIsPending(false);
     }
-  }, [open, category]);
+  }, [open, category, defaultType]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const trimmedName = name.trim();
+    if (isPending || !allowedTypes.includes(type)) return;
 
     if (!trimmedName) {
       setError(t("uniqueName"));
@@ -95,8 +101,8 @@ export function PersonalCategoryDialog({
     const isEdit = Boolean(category);
     const method = isEdit ? "patch" : "post";
     const url = isEdit
-      ? `/families/${encodeURIComponent(familyId)}/money/categories/mine/${encodeURIComponent(category?.id ?? "")}`
-      : `/families/${encodeURIComponent(familyId)}/money/categories/mine`;
+      ? `/families/${encodeURIComponent(familyId)}/money/categories${personal ? "/mine" : ""}/${encodeURIComponent(category?.id ?? "")}`
+      : `/families/${encodeURIComponent(familyId)}/money/categories${personal ? "/mine" : ""}`;
 
     const response = await apiRequest(method, url, {
       name: trimmedName,
@@ -169,8 +175,12 @@ export function PersonalCategoryDialog({
               }}
               className="h-12 w-full rounded-xl border border-border bg-muted/60 px-3 text-base text-foreground outline-none focus:ring-2 focus:ring-ring"
             >
-              <option value="INCOME">{t("income")}</option>
-              <option value="EXPENSE">{t("expense")}</option>
+              {allowedTypes.includes("INCOME") && (
+                <option value="INCOME">{t("income")}</option>
+              )}
+              {allowedTypes.includes("EXPENSE") && (
+                <option value="EXPENSE">{t("expense")}</option>
+              )}
             </select>
           </div>
 

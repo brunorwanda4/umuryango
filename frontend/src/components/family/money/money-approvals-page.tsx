@@ -44,8 +44,9 @@ import { FamilyMoneySkeleton } from "./family-money-skeleton";
 import type { MoneyOverview } from "./types";
 import { normalizeMoneyOverview } from "./utils";
 
+const t = createTranslator("FamilyApprovals");
+
 export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
-  const t = createTranslator("FamilyApprovals");
   const { user } = useCurrentUser();
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [money, setMoney] = useState<MoneyOverview | null>(null);
@@ -107,7 +108,7 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
     } finally {
       setLoading(false);
     }
-  }, [familyName, t]);
+  }, [familyName]);
 
   useEffect(() => {
     fetchData();
