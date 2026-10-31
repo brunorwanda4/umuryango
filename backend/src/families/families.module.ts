@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { MailModule } from '../mail/mail.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { FamiliesController } from './families.controller';
 import { FamiliesService } from './families.service';
 
 @Module({
-  imports: [PrismaModule, MailModule, AuthModule],
+  imports: [PrismaModule, MailModule, AuthModule, NotificationsModule],
   controllers: [FamiliesController],
   providers: [FamiliesService],
 })

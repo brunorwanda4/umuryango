@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import {
   CategoryStatus,
@@ -12,12 +13,14 @@ import {
   FamilyContactStatus,
   IncomePaymentStatus,
   IncomeRecurrence,
+  NotificationType,
   Prisma,
   TransactionScope,
   TransactionStatus,
   TransactionType,
 } from '@prisma/client';
 import { can } from '../families/family-access';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { RecordIncomePaymentDto } from './dto/record-income-payment.dto';
@@ -26,7 +29,10 @@ import { UpdateTransactionDto } from './dto/update-transaction.dto';
 
 @Injectable()
 export class TransactionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly notificationsService?: NotificationsService,
+  ) {}
 
   async create(userId: string, familyId: string, dto: CreateTransactionDto) {
     const membership = await this.requireMembership(userId, familyId);
@@ -555,6 +561,25 @@ export class TransactionsService {
         },
       });
 
+      if (
+        this.notificationsService &&
+        transaction.createdById &&
+        transaction.createdById !== userId
+      ) {
+        await this.notificationsService.createNotification(
+          {
+            userId: transaction.createdById,
+            familyId,
+            type: NotificationType.TRANSACTION_APPROVED,
+            title: 'Transaction Approved',
+            description: `Your ${transaction.type.toLowerCase()} of ${transaction.currency} ${(Number(transaction.amountMinorUnits) / 100).toFixed(0)} was approved.`,
+            href: `/families/${familyId}/money`,
+            dedupeKey: `tx-approve:${transaction.id}`,
+          },
+          tx,
+        );
+      }
+
       return this.serializeTransaction(updated);
     });
   }
@@ -596,6 +621,25 @@ export class TransactionsService {
           },
         },
       });
+
+      if (
+        this.notificationsService &&
+        transaction.createdById &&
+        transaction.createdById !== userId
+      ) {
+        await this.notificationsService.createNotification(
+          {
+            userId: transaction.createdById,
+            familyId,
+            type: NotificationType.TRANSACTION_REJECTED,
+            title: 'Transaction Rejected',
+            description: `Your ${transaction.type.toLowerCase()} of ${transaction.currency} ${(Number(transaction.amountMinorUnits) / 100).toFixed(0)} was rejected.`,
+            href: `/families/${familyId}/money`,
+            dedupeKey: `tx-reject:${transaction.id}`,
+          },
+          tx,
+        );
+      }
 
       return this.serializeTransaction(updated);
     });

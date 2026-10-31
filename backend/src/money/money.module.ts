@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { MoneyController } from './money.controller';
 import { MoneyService } from './money.service';
@@ -15,7 +16,7 @@ import { LoansController } from './loans.controller';
 import { LoansService } from './loans.service';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule, AuthModule, NotificationsModule],
   controllers: [
     MoneyController,
     CategoriesController,

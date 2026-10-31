@@ -6,6 +6,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -16,10 +17,12 @@ import {
   FamilyInviteStatus,
   FamilyKinship,
   FamilyType,
+  NotificationType,
 } from '@prisma/client';
 import { hash } from 'bcryptjs';
 import { MailService } from '../mail/mail.service';
 import { DEFAULT_MONEY_CATEGORIES } from '../money/default-categories';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
   CreateFamilyDto,
@@ -79,6 +82,7 @@ export type FamilyDetail = {
   createdAt: Date;
   authority: FamilyAuthority;
   capabilities: FamilyCapability[];
+  currentMember: FamilyMemberSummary;
   memberCount: number;
   members: FamilyMemberSummary[];
 };
@@ -131,6 +135,7 @@ export class FamiliesService {
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {}
 
   async create(userId: string, dto: CreateFamilyDto): Promise<CreatedFamily> {
@@ -190,6 +195,7 @@ export class FamiliesService {
         },
         invites: {
           create: invites.map((invite) => ({
+            invitedById: creator.id,
             email: invite.email,
             authority: FamilyAuthority.MEMBER,
             kinshipLabel: invite.kinshipLabel,
@@ -204,6 +210,27 @@ export class FamiliesService {
         },
       },
     });
+
+    if (this.notificationsService && uniqueInviteEmails.length > 0) {
+      const existingUsers = await this.prisma.user.findMany({
+        where: { email: { in: uniqueInviteEmails } },
+        select: { id: true, email: true },
+      });
+
+      await Promise.all(
+        existingUsers.map((u) =>
+          this.notificationsService?.createNotification({
+            userId: u.id,
+            familyId: family.id,
+            type: NotificationType.FAMILY_INVITE,
+            title: `Invitation to join ${family.name}`,
+            description: `${creator.fullName} invited you to join the ${family.name} family workspace.`,
+            href: '/me/notifications',
+            dedupeKey: `invite:${family.id}:${u.email.toLowerCase()}`,
+          }),
+        ),
+      );
+    }
 
     await Promise.all(
       invites.map((invite) =>
@@ -338,6 +365,7 @@ export class FamiliesService {
         },
         create: {
           familyId: family.id,
+          invitedById: userId,
           email: dto.email,
           authority: dto.authority,
           kinshipLabel: dto.kinshipLabel,
@@ -348,6 +376,7 @@ export class FamiliesService {
           expiresAt,
         },
         update: {
+          invitedById: userId,
           authority: dto.authority,
           kinshipLabel: dto.kinshipLabel,
           kinshipCustom: dto.kinshipCustom || null,
@@ -369,6 +398,28 @@ export class FamiliesService {
           },
         },
       });
+
+      if (this.notificationsService) {
+        const invitedUser = await tx.user.findUnique({
+          where: { email: dto.email.toLowerCase() },
+          select: { id: true },
+        });
+
+        if (invitedUser && invitedUser.id !== userId) {
+          await this.notificationsService.createNotification(
+            {
+              userId: invitedUser.id,
+              familyId: family.id,
+              type: NotificationType.FAMILY_INVITE,
+              title: `Invitation to join ${family.name}`,
+              description: `${membership.user.fullName} invited you to join the ${family.name} family workspace.`,
+              href: '/me/notifications',
+              dedupeKey: `invite:${family.id}:${dto.email.toLowerCase()}`,
+            },
+            tx,
+          );
+        }
+      }
     });
 
     await this.sendInviteEmail({
@@ -690,6 +741,7 @@ export class FamiliesService {
       createdAt: family.createdAt,
       authority: membership.authority,
       capabilities: membership.capabilities,
+      currentMember: this.toMemberSummary(membership),
       memberCount: family.members.length,
       members: family.members.map((member) => this.toMemberSummary(member)),
     };

@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import {
   ContributionCycleStatus,
@@ -11,8 +12,10 @@ import {
   FamilyAuditAction,
   FamilyAuthority,
   FamilyCapability,
+  NotificationType,
 } from '@prisma/client';
 import { can } from '../families/family-access';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateCycleDto } from './dto/create-cycle.dto';
 import type { CreatePlanDto } from './dto/create-plan.dto';
@@ -39,7 +42,10 @@ const PERIOD_LABELS: Record<ContributionPeriod, string> = {
 
 @Injectable()
 export class ContributionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly notificationsService?: NotificationsService,
+  ) {}
 
   async getOverview(
     userId: string,
@@ -528,6 +534,28 @@ export class ContributionsService {
           },
         },
       });
+
+      if (this.notificationsService) {
+        const member = await tx.familyMember.findUnique({
+          where: { id: row.memberId },
+          select: { userId: true },
+        });
+
+        if (member && member.userId !== userId) {
+          await this.notificationsService.createNotification(
+            {
+              userId: member.userId,
+              familyId,
+              type: NotificationType.CONTRIBUTION_VERIFIED,
+              title: 'Contribution Verified',
+              description: 'Your contribution payment has been verified.',
+              href: `/families/${familyId}/contributions`,
+              dedupeKey: `contrib-verify:${row.id}`,
+            },
+            tx,
+          );
+        }
+      }
 
       return row;
     });

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BellIcon,
   CreditCardIcon,
   FileTextIcon,
   FolderKanbanIcon,
@@ -137,10 +138,14 @@ export default function AppNavbarSearch() {
                 <span>{tSearch((m) => m.AppShell.search.familySettings)}</span>
               </CommandItem>
               <CommandItem
-                onSelect={() => handleNavigate(`${familyHref}/settings/appearance`)}
+                onSelect={() =>
+                  handleNavigate(`${familyHref}/settings/appearance`)
+                }
               >
                 <PaletteIcon className="mr-2 size-4" />
-                <span>{tSearch((m) => m.AppShell.search.appearanceSettings)}</span>
+                <span>
+                  {tSearch((m) => m.AppShell.search.appearanceSettings)}
+                </span>
               </CommandItem>
             </CommandGroup>
           )}
@@ -151,6 +156,10 @@ export default function AppNavbarSearch() {
             <CommandItem onSelect={() => handleNavigate("/me")}>
               <HomeIcon className="mr-2 size-4" />
               <span>{tSearch((m) => m.AppShell.search.personalDashboard)}</span>
+            </CommandItem>
+            <CommandItem onSelect={() => handleNavigate("/me/notifications")}>
+              <BellIcon className="mr-2 size-4" />
+              <span>{tNav((m) => m.AppShell.navbar.notifications)}</span>
             </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/me/money")}>
               <CreditCardIcon className="mr-2 size-4" />
@@ -164,9 +173,13 @@ export default function AppNavbarSearch() {
               <SettingsIcon className="mr-2 size-4" />
               <span>{tSearch((m) => m.AppShell.search.accountSettings)}</span>
             </CommandItem>
-            <CommandItem onSelect={() => handleNavigate("/me/settings/appearance")}>
+            <CommandItem
+              onSelect={() => handleNavigate("/me/settings/appearance")}
+            >
               <PaletteIcon className="mr-2 size-4" />
-              <span>{tSearch((m) => m.AppShell.search.appearanceSettings)}</span>
+              <span>
+                {tSearch((m) => m.AppShell.search.appearanceSettings)}
+              </span>
             </CommandItem>
             <CommandItem onSelect={() => handleNavigate("/me/security")}>
               <ShieldCheckIcon className="mr-2 size-4" />

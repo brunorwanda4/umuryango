@@ -56,6 +56,8 @@ async function bootstrap() {
     .addTag('auth', 'Authentication and account verification')
     .addTag('families', 'Family workspace creation and membership')
     .addTag('contributions', 'Family contribution plans, cycles, and payments')
+    .addTag('notifications', 'User notifications and summary counts')
+    .addTag('invitations', 'Family invitations inbox and acceptance')
     .addTag(
       'projects',
       'Family project plans, budgets, contributions, and updates',

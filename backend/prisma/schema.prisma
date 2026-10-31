@@ -109,6 +109,8 @@ enum FamilyAuditAction {
   CATEGORY_CREATED
   CATEGORY_UPDATED
   CATEGORY_ARCHIVED
+  INVITATION_ACCEPTED
+  INVITATION_DECLINED
 }
 
 enum ContributionCadence {
@@ -321,6 +323,7 @@ enum FamilyProjectContributionStatus {
 enum FamilyInviteStatus {
   PENDING
   ACCEPTED
+  DECLINED
   EXPIRED
   REVOKED
 }
@@ -366,6 +369,8 @@ model User {
   performedLoanAuditLogs       FamilyLoanAuditLog[]        @relation("LoanAuditPerformed")
   personPlans                  PersonPlan[]                @relation("PersonPlans")
   createdPersonPlans           PersonPlan[]                @relation("PersonPlansCreated")
+  notifications                Notification[]
+  createdFamilyInvites         FamilyInvite[]              @relation("FamilyInvitesCreated")
 
   @@index([status])
 }
@@ -499,6 +504,7 @@ model Family {
   contacts              FamilyContact[]
   loans                 FamilyLoan[]
   loanRepayments        FamilyLoanRepayment[]
+  notifications         Notification[]
 
   @@index([createdById])
 }
@@ -533,6 +539,7 @@ model FamilyMember {
 model FamilyInvite {
   id            String             @id @default(cuid())
   familyId      String
+  invitedById   String?
   email         String
   authority     FamilyAuthority    @default(MEMBER)
   kinshipLabel  FamilyKinship?
@@ -544,9 +551,11 @@ model FamilyInvite {
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
   family        Family             @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  invitedBy     User?              @relation("FamilyInvitesCreated", fields: [invitedById], references: [id], onDelete: SetNull)
 
   @@unique([familyId, email])
   @@index([email])
+  @@index([invitedById])
 }
 
 model FamilyAuditEvent {
@@ -561,6 +570,35 @@ model FamilyAuditEvent {
   family         Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
   @@index([familyId, createdAt])
+}
+
+enum NotificationType {
+  FAMILY_INVITE
+  TRANSACTION_APPROVED
+  TRANSACTION_REJECTED
+  CONTRIBUTION_VERIFIED
+  CONTRIBUTION_REVERSED
+  SYSTEM
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  familyId    String?
+  type        NotificationType
+  title       String
+  description String
+  href        String?
+  readAt      DateTime?
+  dedupeKey   String?          @unique
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family      Family?          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+  @@index([familyId])
 }
 
 model AuthAuditEvent {
