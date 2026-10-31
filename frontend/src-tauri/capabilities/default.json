@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Least-privilege capabilities for the Umuryango offline-first native client. All networking, authentication, and SQLite access are restricted to typed Rust commands.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "notification:default",
+    "opener:default",
+    "dialog:default"
+  ]
+}

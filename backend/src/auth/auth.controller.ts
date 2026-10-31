@@ -23,10 +23,16 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
-import { ACCESS_COOKIE_NAME, REFRESH_COOKIE_NAME } from './auth.constants';
+import {
+  ACCESS_COOKIE_NAME,
+  extractAccessTokenFromRequest,
+  isNativeClientRequest,
+  REFRESH_COOKIE_NAME,
+} from './auth.constants';
 import { AuthService, type LoginResult } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
+import { NativeLogoutDto, NativeRefreshDto } from './dto/native-session.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ResendVerificationDto } from './dto/resend-verification.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -213,9 +219,7 @@ export class AuthController {
     description: 'No valid session was found.',
   })
   async me(@Req() request: Request) {
-    const accessToken = request.cookies?.[ACCESS_COOKIE_NAME] as
-      | string
-      | undefined;
+    const accessToken = extractAccessTokenFromRequest(request);
     const user = await this.authService.getCurrentUser(accessToken);
 
     return {
@@ -235,9 +239,7 @@ export class AuthController {
     @Body() updateProfileDto: UpdateProfileDto,
     @Req() request: Request,
   ) {
-    const accessToken = request.cookies?.[ACCESS_COOKIE_NAME] as
-      | string
-      | undefined;
+    const accessToken = extractAccessTokenFromRequest(request);
     const result = await this.authService.updateCurrentUser(
       accessToken,
       updateProfileDto,
@@ -260,9 +262,7 @@ export class AuthController {
   @ApiOkResponse({ description: 'Avatar updated successfully.' })
   @ApiUnauthorizedResponse({ description: 'No valid session was found.' })
   async updateMyAvatar(@Req() request: Request) {
-    const accessToken = request.cookies?.[ACCESS_COOKIE_NAME] as
-      | string
-      | undefined;
+    const accessToken = extractAccessTokenFromRequest(request);
     const user = await this.authService.updateCurrentUserAvatar(accessToken, {
       ipAddress: request.ip,
       userAgent: request.get('user-agent'),
@@ -292,9 +292,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const accessToken = request.cookies?.[ACCESS_COOKIE_NAME] as
-      | string
-      | undefined;
+    const accessToken = extractAccessTokenFromRequest(request);
     const refreshToken = request.cookies?.[REFRESH_COOKIE_NAME] as
       | string
       | undefined;
@@ -442,6 +440,114 @@ export class AuthController {
       data: {},
       message: 'Password updated successfully. Please log in again.',
     };
+  }
+
+  @Post('native/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Authenticate a native Tauri client and return tokens for Rust secure storage',
+  })
+  async nativeLogin(@Body() loginDto: LoginDto, @Req() request: Request) {
+    this.assertNativeClient(request);
+
+    const loginResult = await this.authService.login(loginDto, {
+      ipAddress: request.ip,
+      userAgent: request.get('user-agent') ?? 'Umuryango-Tauri/2.0',
+    });
+
+    return {
+      data: {
+        user: loginResult.user,
+        accessToken: loginResult.accessToken,
+        refreshToken: loginResult.refreshToken,
+        accessTokenExpiresInSeconds: loginResult.accessTokenExpiresInSeconds,
+        refreshTokenExpiresAt: loginResult.refreshTokenExpiresAt.toISOString(),
+      },
+      message: 'Native session established.',
+    };
+  }
+
+  @Post('native/refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Rotate refresh token and issue a new access token for Rust client',
+  })
+  async nativeRefresh(
+    @Body() nativeRefreshDto: NativeRefreshDto,
+    @Req() request: Request,
+  ) {
+    this.assertNativeClient(request);
+
+    const loginResult = await this.authService.refreshSession(
+      nativeRefreshDto.refreshToken,
+      {
+        ipAddress: request.ip,
+        userAgent: request.get('user-agent') ?? 'Umuryango-Tauri/2.0',
+      },
+    );
+
+    return {
+      data: {
+        user: loginResult.user,
+        accessToken: loginResult.accessToken,
+        refreshToken: loginResult.refreshToken,
+        accessTokenExpiresInSeconds: loginResult.accessTokenExpiresInSeconds,
+        refreshTokenExpiresAt: loginResult.refreshTokenExpiresAt.toISOString(),
+      },
+      message: 'Native session refreshed.',
+    };
+  }
+
+  @Post('native/logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Revoke native session tokens on the backend' })
+  async nativeLogout(
+    @Body() nativeLogoutDto: NativeLogoutDto,
+    @Req() request: Request,
+  ) {
+    this.assertNativeClient(request);
+
+    const accessToken = extractAccessTokenFromRequest(request);
+    await this.authService.logout(accessToken, nativeLogoutDto.refreshToken);
+
+    return {
+      data: { revoked: true },
+      message: 'Native session revoked.',
+    };
+  }
+
+  @Get('native/health')
+  @ApiOperation({
+    summary:
+      'Lightweight authenticated session and connectivity probe for native clients',
+  })
+  async nativeHealth(@Req() request: Request) {
+    this.assertNativeClient(request);
+
+    const accessToken = extractAccessTokenFromRequest(request);
+    const user = await this.authService.getCurrentUser(accessToken);
+
+    return {
+      data: {
+        status: 'ok',
+        serverTimestamp: new Date().toISOString(),
+        user: {
+          id: user.id,
+          email: user.email,
+          fullName: user.fullName,
+        },
+      },
+      message: 'Native session healthy.',
+    };
+  }
+
+  private assertNativeClient(request: Request) {
+    if (!isNativeClientRequest(request)) {
+      throw new UnauthorizedException(
+        'Native client identifier header x-umuryango-client: tauri-native is required.',
+      );
+    }
   }
 
   private setAuthCookies(response: Response, loginResult: LoginResult) {

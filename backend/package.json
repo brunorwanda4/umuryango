@@ -14,7 +14,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "bun dist/src/main.js",
     "lint": "biome lint",
-    "test": "jest",
+    "test": "bun test src",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",

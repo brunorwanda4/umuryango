@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserStatus } from '@prisma/client';
 import type { Request } from 'express';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ACCESS_COOKIE_NAME } from '../auth.constants';
+import { extractAccessTokenFromRequest } from '../auth.constants';
 
 export type AuthenticatedRequest = Request & { userId: string };
 
@@ -21,7 +21,7 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const token = request.cookies?.[ACCESS_COOKIE_NAME] as string | undefined;
+    const token = extractAccessTokenFromRequest(request);
 
     if (!token) {
       throw new UnauthorizedException('Not authenticated.');

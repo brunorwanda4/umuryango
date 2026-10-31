@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Umuryango",
+  "version": "0.1.0",
+  "identifier": "rw.umuryango.app",
+  "build": {
+    "beforeDevCommand": "bun run native:dev",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "bun run native:build",
+    "frontendDist": "../native/dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Umuryango",
+        "width": 1280,
+        "height": 840,
+        "minWidth": 375,
+        "minHeight": 640,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost data:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost",
+      "capabilities": ["default"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      }
+    },
+    "android": {
+      "minSdkVersion": 26
+    }
+  }
+}

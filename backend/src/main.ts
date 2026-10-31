@@ -30,6 +30,9 @@ function parseCorsOrigins() {
     'http://127.0.0.1:4914',
     'http://localhost:4974',
     'http://127.0.0.1:4974',
+    'tauri://localhost',
+    'http://tauri.localhost',
+    'https://tauri.localhost',
   ];
 }
 

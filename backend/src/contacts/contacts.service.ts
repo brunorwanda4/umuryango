@@ -348,7 +348,7 @@ export class ContactsService {
   }
 
   private serialize(contact: ContactWithCreator, userId: string) {
-    const displayName = contact.displayNames.find(
+    const displayName = (contact.displayNames ?? []).find(
       (entry) => entry.userId === userId,
     )?.fullName;
     return {

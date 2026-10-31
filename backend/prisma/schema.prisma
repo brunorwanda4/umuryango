@@ -111,6 +111,9 @@ enum FamilyAuditAction {
   CATEGORY_ARCHIVED
   INVITATION_ACCEPTED
   INVITATION_DECLINED
+  RECEIPT_UPLOADED
+  SYNC_MUTATION_APPLIED
+  SYNC_MUTATION_REJECTED
 }
 
 enum ContributionCadence {
@@ -505,8 +508,10 @@ model Family {
   loans                 FamilyLoan[]
   loanRepayments        FamilyLoanRepayment[]
   notifications         Notification[]
+  syncMutations         FamilySyncMutation[]
 
   @@index([createdById])
+  @@index([updatedAt, id])
 }
 
 model FamilyMember {
@@ -534,6 +539,7 @@ model FamilyMember {
 
   @@unique([familyId, userId])
   @@index([userId])
+  @@index([familyId, updatedAt, id])
 }
 
 model FamilyInvite {
@@ -599,6 +605,7 @@ model Notification {
   @@index([userId, createdAt])
   @@index([userId, readAt])
   @@index([familyId])
+  @@index([familyId, updatedAt, id])
 }
 
 model AuthAuditEvent {
@@ -635,6 +642,7 @@ model FamilyContributionPlan {
   payments         FamilyContributionPayment[]
 
   @@index([familyId, status])
+  @@index([familyId, updatedAt, id])
 }
 
 model FamilyContributionAssignment {
@@ -670,6 +678,7 @@ model FamilyContributionCycle {
 
   @@index([familyId, dueDate])
   @@index([planId, periodStart])
+  @@index([familyId, updatedAt, id])
 }
 
 model FamilyContributionPayment {
@@ -700,6 +709,7 @@ model FamilyContributionPayment {
   @@index([familyId, status, paidAt])
   @@index([planId, cycleId])
   @@index([memberId])
+  @@index([familyId, updatedAt, id])
 }
 
 model FamilyProject {
@@ -735,6 +745,7 @@ model FamilyProject {
   @@index([familyId, targetDate])
   @@index([ownerMemberId])
   @@index([createdById])
+  @@index([familyId, updatedAt, id])
 }
 
 model FamilyProjectParticipant {
@@ -829,6 +840,7 @@ model FamilyContact {
   @@index([familyId, isEmergencyContact])
   @@index([familyId, isLoanContact])
   @@index([createdById])
+  @@index([familyId, updatedAt, id])
 }
 
 model FamilyContactDisplayName {
@@ -871,6 +883,7 @@ model FamilyTransactionCategory {
   @@index([familyId, type])
   @@index([familyId, status])
   @@index([familyId, scope, ownerId, type, status])
+  @@index([familyId, updatedAt, id])
 }
 
 model FamilyTransaction {
@@ -918,6 +931,7 @@ model FamilyTransaction {
   @@index([familyId, status])
   @@index([familyId, receivedFromContactId])
   @@index([categoryId])
+  @@index([familyId, updatedAt, id])
 }
 
 model FamilyReceipt {
@@ -928,6 +942,8 @@ model FamilyReceipt {
   fileType       String
   fileSizeBytes  Int
   storageKey     String
+  checksumSha256 String?
+  idempotencyKey String?
   uploadedById   String
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
@@ -936,7 +952,9 @@ model FamilyReceipt {
   uploadedBy     User                  @relation("ReceiptsUploaded", fields: [uploadedById], references: [id], onDelete: Cascade)
   loanRepayments FamilyLoanRepayment[]
 
+  @@unique([familyId, idempotencyKey])
   @@index([familyId, transactionId])
+  @@index([familyId, updatedAt, id])
 }
 
 model FamilyBudget {
@@ -1080,4 +1098,26 @@ model FamilyLoanAuditLog {
 
   @@index([loanId, createdAt])
   @@index([performedById])
+}
+
+model FamilySyncMutation {
+  id             String   @id @default(cuid())
+  familyId       String
+  actorId        String
+  deviceId       String
+  idempotencyKey String
+  localRecordId  String
+  commandType    String
+  payloadHash    String
+  outcome        String
+  conflictCode   String?
+  serverRecordId String?
+  responseJson   Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  family         Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, idempotencyKey])
+  @@index([familyId, actorId, createdAt])
+  @@index([familyId, updatedAt, id])
 }

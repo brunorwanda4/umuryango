@@ -10,7 +10,11 @@
     "start": "bun next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "i18n": "bun ./scripts/i18n.ts"
+    "i18n": "bun ./scripts/i18n.ts",
+    "test": "bun test src native/src/test",
+    "native:test": "bun test native/src/test/native-ui.test.tsx",
+    "native:build": "bun build ./native/index.html --outdir ./native/dist --minify",
+    "native:dev": "bun ./native/index.html --port 5173"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

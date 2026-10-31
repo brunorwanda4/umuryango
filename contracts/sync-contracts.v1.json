@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UmuryangoOfflineSyncContracts",
+  "version": "1.0.0",
+  "clientHeader": {
+    "name": "x-umuryango-client",
+    "nativeValue": "tauri-native"
+  },
+  "syncStatuses": [
+    "SYNCED",
+    "LOCAL_PENDING",
+    "SYNCING",
+    "CONFLICT",
+    "REJECTED",
+    "FAILED_RETRYABLE"
+  ],
+  "recordTypes": [
+    "FAMILY",
+    "MEMBER",
+    "CATEGORY",
+    "TRANSACTION",
+    "RECEIPT",
+    "CONTRIBUTION_PLAN",
+    "CONTRIBUTION_CYCLE",
+    "CONTRIBUTION_PAYMENT",
+    "PROJECT",
+    "CONTACT",
+    "NOTIFICATION"
+  ],
+  "commandTypes": [
+    "CREATE_EXPENSE",
+    "CREATE_INCOME",
+    "CREATE_PERSONAL_TRANSACTION",
+    "UPDATE_TRANSACTION_NOTES",
+    "RECORD_CONTRIBUTION_PAYMENT",
+    "CREATE_PROJECT",
+    "CREATE_CONTACT",
+    "UPDATE_CONTACT",
+    "ATTACH_RECEIPT"
+  ],
+  "commandOutcomes": [
+    "APPLIED",
+    "DUPLICATE_IGNORED",
+    "CONFLICT",
+    "REJECTED",
+    "FAILED_RETRYABLE"
+  ],
+  "conflictCodes": [
+    "VERSION_CONFLICT",
+    "APPROVAL_STATE_CONFLICT",
+    "PERMISSION_DENIED",
+    "MEMBERSHIP_REVOKED",
+    "CATEGORY_INACTIVE",
+    "IDEMPOTENCY_KEY_REUSED",
+    "TARGET_NOT_FOUND",
+    "PARENT_COMMAND_FAILED",
+    "ATTACHMENT_CHECKSUM_MISMATCH",
+    "VALIDATION_FAILED"
+  ],
+  "conflictResolutions": [
+    "ACCEPT_SERVER",
+    "DISCARD_LOCAL",
+    "RETRY_AS_NEW_NOTES"
+  ],
+  "connectivityStates": [
+    "ONLINE",
+    "OFFLINE",
+    "DEGRADED"
+  ]
+}
