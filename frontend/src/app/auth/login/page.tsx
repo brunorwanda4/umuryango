@@ -70,7 +70,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
           aria-label={shared((m) => m.Shared.homeAriaLabel)}
         >
           <Image
-            src="/logo.svg"
+            src="/brand/umuryango-inverted-icon.png"
             alt=""
             width={56}
             height={56}
@@ -207,7 +207,12 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
 
           <div className="flex flex-col items-center gap-5">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Image src="/logo.svg" alt="" width={24} height={24} />
+              <Image
+                src="/brand/umuryango-inverted-icon.png"
+                alt=""
+                width={24}
+                height={24}
+              />
               <span>{shared((m) => m.Shared.brand)}</span>
             </div>
           </div>

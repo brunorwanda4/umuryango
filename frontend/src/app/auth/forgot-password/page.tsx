@@ -42,7 +42,7 @@ const ForgotPasswordPage = async ({
 
         <div className="flex items-center gap-2">
           <Image
-            src="/logo.svg"
+            src="/brand/umuryango-inverted-icon.png"
             alt={shared((m) => m.Shared.brand)}
             width={32}
             height={32}

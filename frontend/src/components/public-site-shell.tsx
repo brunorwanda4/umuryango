@@ -41,17 +41,10 @@ export function PublicSiteShell({
             className="flex w-fit items-center gap-3"
             aria-label={t((m) => m.Shared.homeAriaLabel)}
           >
-            <Image
-              src="/logo.svg"
-              alt=""
-              width={36}
-              height={36}
-              className="rounded-xl"
-              priority
+            <span
+              aria-hidden="true"
+              className="block h-9 w-40 bg-foreground [mask-image:url('/brand/umuryango-horizontal-wordmark.png')] [mask-position:left_center] [mask-repeat:no-repeat] [mask-size:contain] [-webkit-mask-image:url('/brand/umuryango-horizontal-wordmark.png')] [-webkit-mask-position:left_center] [-webkit-mask-repeat:no-repeat] [-webkit-mask-size:contain]"
             />
-            <span className="text-base font-semibold">
-              {t((m) => m.Shared.brand)}
-            </span>
           </Link>
 
           <nav
@@ -87,7 +80,12 @@ export function PublicSiteShell({
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-5 py-8 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-3 text-sm font-medium">
-              <Image src="/logo.svg" alt="" width={28} height={28} />
+              <Image
+                src="/brand/umuryango-inverted-icon.png"
+                alt=""
+                width={28}
+                height={28}
+              />
               <span>{t((m) => m.Shared.brand)}</span>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
