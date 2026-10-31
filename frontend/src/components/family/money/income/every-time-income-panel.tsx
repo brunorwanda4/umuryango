@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import { formatDate } from "../utils";
+import type { IncomeFiltersProps } from "./income-filters";
 import { IncomeTable } from "./income-table";
 import type { IncomeTransaction } from "./types-and-schemas";
 
@@ -32,7 +33,7 @@ type EveryTimeIncomePanelProps = {
   onAddPayment: (tx: IncomeTransaction, amountDueMinorUnits: string) => void;
   handleSendApproval: (tx: IncomeTransaction) => void;
   setOpenCreate: (open: boolean) => void;
-};
+} & IncomeFiltersProps;
 
 type SourceSummary = {
   key: string;
@@ -139,6 +140,22 @@ export function EveryTimeIncomePanel({
   onAddPayment,
   handleSendApproval,
   setOpenCreate,
+  search,
+  setSearch,
+  filterCategory,
+  setFilterCategory,
+  filterPaymentMethod,
+  setFilterPaymentMethod,
+  filterStatus,
+  setFilterStatus,
+  filterMember,
+  setFilterMember,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  resetFilters,
+  categories,
 }: EveryTimeIncomePanelProps) {
   const t = createTranslator("FamilyIncome");
   const summary = useMemo(() => {
@@ -246,7 +263,16 @@ export function EveryTimeIncomePanel({
     };
   }, [transactions]);
 
-  if (transactions.length === 0) {
+  const hasActiveFilters =
+    Boolean(search) ||
+    filterCategory !== "all" ||
+    filterPaymentMethod !== "all" ||
+    filterStatus !== "all" ||
+    filterMember !== "all" ||
+    Boolean(startDate) ||
+    Boolean(endDate);
+
+  if (transactions.length === 0 && !hasActiveFilters) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
@@ -481,6 +507,22 @@ export function EveryTimeIncomePanel({
         handleActionClick={handleActionClick}
         handleSendApproval={handleSendApproval}
         setOpenCreate={setOpenCreate}
+        search={search}
+        setSearch={setSearch}
+        filterCategory={filterCategory}
+        setFilterCategory={setFilterCategory}
+        filterPaymentMethod={filterPaymentMethod}
+        setFilterPaymentMethod={setFilterPaymentMethod}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+        filterMember={filterMember}
+        setFilterMember={setFilterMember}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        resetFilters={resetFilters}
+        categories={categories}
       />
     </div>
   );

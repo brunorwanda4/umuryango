@@ -5,7 +5,13 @@ import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { DataViewToggle } from "@/components/common/table/data-view-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
 import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
@@ -17,10 +23,10 @@ import {
   type IncomeAction,
   IncomeActionsDropdown,
 } from "./income-actions-dropdown";
+import { IncomeFilters, type IncomeFiltersProps } from "./income-filters";
 import type { IncomeTransaction } from "./types-and-schemas";
 
-const FAMILY_INCOME_VIEW_MODE_STORAGE_KEY =
-  "umuryango-family-income-view-mode";
+const FAMILY_INCOME_VIEW_MODE_STORAGE_KEY = "umuryango-family-income-view-mode";
 
 function getRemainingMinorUnits(tx: IncomeTransaction) {
   if (!tx.expectedAmountMinorUnits) return null;
@@ -44,6 +50,22 @@ export function IncomeTable({
   handleActionClick,
   handleSendApproval,
   setOpenCreate,
+  search,
+  setSearch,
+  filterCategory,
+  setFilterCategory,
+  filterPaymentMethod,
+  setFilterPaymentMethod,
+  filterStatus,
+  setFilterStatus,
+  filterMember,
+  setFilterMember,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  resetFilters,
+  categories,
 }: {
   filteredTransactions: IncomeTransaction[];
   currency: string;
@@ -52,7 +74,7 @@ export function IncomeTable({
   handleActionClick: (tx: IncomeTransaction, action: IncomeAction) => void;
   handleSendApproval: (tx: IncomeTransaction) => void;
   setOpenCreate: (open: boolean) => void;
-}) {
+} & IncomeFiltersProps) {
   const t = createTranslator("FamilyIncome");
   const _tCommon = createTranslator("Common");
   const [viewMode, setViewMode] = usePersistentViewMode(
@@ -221,11 +243,35 @@ export function IncomeTable({
   ];
 
   return (
-    <Card className="min-w-0">
-      <CardHeader className="flex flex-row items-center justify-between gap-3 pb-3">
-        <CardTitle>{t((m) => m.FamilyIncome.table.historyTitle)}</CardTitle>
+    <Card className="min-w-0 gap-2">
+      <CardHeader className="flex flex-row items-center justify-between gap-3">
+        <div className="space-y-1">
+          <CardTitle>{t((m) => m.FamilyIncome.table.historyTitle)}</CardTitle>
+          <CardDescription>
+            {t((m) => m.FamilyIncome.table.historyDesc)}
+          </CardDescription>
+        </div>
         <DataViewToggle value={viewMode} onValueChange={setViewMode} />
       </CardHeader>
+      <IncomeFilters
+        search={search}
+        setSearch={setSearch}
+        filterCategory={filterCategory}
+        setFilterCategory={setFilterCategory}
+        filterPaymentMethod={filterPaymentMethod}
+        setFilterPaymentMethod={setFilterPaymentMethod}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+        filterMember={filterMember}
+        setFilterMember={setFilterMember}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
+        resetFilters={resetFilters}
+        categories={categories}
+        family={family}
+      />
       <CardContent
         className={cn("min-w-0", viewMode === "items" && "px-0 pb-0")}
       >

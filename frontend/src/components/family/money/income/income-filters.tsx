@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Collapsible,
   CollapsibleContent,
@@ -23,6 +22,26 @@ import {
 import { createTranslator } from "@/i18n/translate";
 import type { FamilyDetail } from "../../dashboard/types";
 import type { Category } from "./types-and-schemas";
+
+export type IncomeFiltersProps = {
+  search: string;
+  setSearch: (val: string) => void;
+  filterCategory: string;
+  setFilterCategory: (val: string) => void;
+  filterPaymentMethod: string;
+  setFilterPaymentMethod: (val: string) => void;
+  filterStatus: string;
+  setFilterStatus: (val: string) => void;
+  filterMember: string;
+  setFilterMember: (val: string) => void;
+  startDate: string;
+  setStartDate: (val: string) => void;
+  endDate: string;
+  setEndDate: (val: string) => void;
+  resetFilters: () => void;
+  categories: Category[];
+  family: FamilyDetail;
+};
 
 export function IncomeFilters({
   search,
@@ -42,25 +61,7 @@ export function IncomeFilters({
   resetFilters,
   categories,
   family,
-}: {
-  search: string;
-  setSearch: (val: string) => void;
-  filterCategory: string;
-  setFilterCategory: (val: string) => void;
-  filterPaymentMethod: string;
-  setFilterPaymentMethod: (val: string) => void;
-  filterStatus: string;
-  setFilterStatus: (val: string) => void;
-  filterMember: string;
-  setFilterMember: (val: string) => void;
-  startDate: string;
-  setStartDate: (val: string) => void;
-  endDate: string;
-  setEndDate: (val: string) => void;
-  resetFilters: () => void;
-  categories: Category[];
-  family: FamilyDetail;
-}) {
+}: IncomeFiltersProps) {
   const t = createTranslator("FamilyIncome");
   const tCommon = createTranslator("Common");
   const [showMoreFilters, setShowMoreFilters] = useState(false);
@@ -74,8 +75,8 @@ export function IncomeFilters({
   ].filter(Boolean).length;
 
   return (
-    <Card className="min-w-0 bg-card/50">
-      <CardContent className="flex min-w-0 flex-col gap-4 p-4">
+    <div className="border-b bg-card/50 px-6 py-4">
+      <div className="flex min-w-0 flex-col gap-4">
         <Collapsible
           open={showMoreFilters}
           onOpenChange={setShowMoreFilters}
@@ -239,7 +240,7 @@ export function IncomeFilters({
             </div>
           </CollapsibleContent>
         </Collapsible>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

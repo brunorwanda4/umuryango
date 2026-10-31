@@ -27,7 +27,6 @@ import { CreateIncomeDialog } from "./income/create-income-dialog";
 import { DeleteTransactionDialog } from "./income/delete-transaction-dialog";
 import { EditIncomeDialog } from "./income/edit-income-dialog";
 import { EveryTimeIncomePanel } from "./income/every-time-income-panel";
-import { IncomeFilters } from "./income/income-filters";
 import { IncomeMetricCards } from "./income/income-metric-cards";
 import { IncomePaymentDialog } from "./income/income-payment-dialog";
 import { IncomeTable } from "./income/income-table";
@@ -480,27 +479,6 @@ export function MoneyIncomePage({
       {/* Summary Cards */}
       <IncomeMetricCards transactions={transactions} currency={currency} />
 
-      {/* Filters Bar */}
-      <IncomeFilters
-        search={search}
-        setSearch={setSearch}
-        filterCategory={filterCategory}
-        setFilterCategory={setFilterCategory}
-        filterPaymentMethod={filterPaymentMethod}
-        setFilterPaymentMethod={setFilterPaymentMethod}
-        filterStatus={filterStatus}
-        setFilterStatus={setFilterStatus}
-        filterMember={filterMember}
-        setFilterMember={setFilterMember}
-        startDate={startDate}
-        setStartDate={setStartDate}
-        endDate={endDate}
-        setEndDate={setEndDate}
-        resetFilters={resetFilters}
-        categories={categories}
-        family={family}
-      />
-
       {/* Main Income Table */}
       <Tabs defaultValue="all">
         <TabsList>
@@ -521,6 +499,22 @@ export function MoneyIncomePage({
             handleActionClick={handleActionClick}
             handleSendApproval={handleSendApproval}
             setOpenCreate={openGenericCreate}
+            search={search}
+            setSearch={setSearch}
+            filterCategory={filterCategory}
+            setFilterCategory={setFilterCategory}
+            filterPaymentMethod={filterPaymentMethod}
+            setFilterPaymentMethod={setFilterPaymentMethod}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            filterMember={filterMember}
+            setFilterMember={setFilterMember}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            resetFilters={resetFilters}
+            categories={categories}
           />
         </TabsContent>
         <TabsContent value="every-time">
@@ -533,6 +527,22 @@ export function MoneyIncomePage({
             onAddPayment={handleAddPayment}
             handleSendApproval={handleSendApproval}
             setOpenCreate={openGenericCreate}
+            search={search}
+            setSearch={setSearch}
+            filterCategory={filterCategory}
+            setFilterCategory={setFilterCategory}
+            filterPaymentMethod={filterPaymentMethod}
+            setFilterPaymentMethod={setFilterPaymentMethod}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            filterMember={filterMember}
+            setFilterMember={setFilterMember}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            resetFilters={resetFilters}
+            categories={categories}
           />
         </TabsContent>
         <TabsContent value="one-time">
@@ -544,6 +554,22 @@ export function MoneyIncomePage({
             handleActionClick={handleActionClick}
             handleSendApproval={handleSendApproval}
             setOpenCreate={openGenericCreate}
+            search={search}
+            setSearch={setSearch}
+            filterCategory={filterCategory}
+            setFilterCategory={setFilterCategory}
+            filterPaymentMethod={filterPaymentMethod}
+            setFilterPaymentMethod={setFilterPaymentMethod}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            filterMember={filterMember}
+            setFilterMember={setFilterMember}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            resetFilters={resetFilters}
+            categories={categories}
           />
         </TabsContent>
       </Tabs>
