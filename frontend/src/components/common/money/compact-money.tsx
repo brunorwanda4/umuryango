@@ -18,6 +18,7 @@ interface CompactMoneyProps extends ComponentProps<"span"> {
   currency: string;
   emptyLabel?: string;
   value: MinorUnitValue;
+  showCurrency?: boolean;
 }
 
 export function CompactMoney({
@@ -25,12 +26,15 @@ export function CompactMoney({
   currency,
   emptyLabel,
   value,
+  showCurrency = true,
   ...props
 }: CompactMoneyProps) {
   const compact =
     emptyLabel === undefined
-      ? formatCompactMinorUnits(value, currency)
-      : formatOptionalCompactMinorUnits(value, currency, emptyLabel);
+      ? formatCompactMinorUnits(value, currency, { showCurrency })
+      : formatOptionalCompactMinorUnits(value, currency, emptyLabel, {
+          showCurrency,
+        });
   const full = formatFullMinorUnits(value, currency);
   const shouldShowTooltip =
     value !== null && value !== undefined && compact !== full;

@@ -5,7 +5,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/common/pages/page-title";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Empty,
   EmptyDescription,
@@ -22,7 +27,11 @@ import { ApprovalDetailsSheet } from "./approvals/approval-details-sheet";
 import { ApprovalFiltersPanel } from "./approvals/approval-filters-panel";
 import { ApprovalQueue } from "./approvals/approval-queue";
 import { ApprovalSummaryCards } from "./approvals/approval-summary-cards";
-import type { ApprovalFilters, ApprovalQueueItem, MoneyTransaction } from "./approvals/types";
+import type {
+  ApprovalFilters,
+  ApprovalQueueItem,
+  MoneyTransaction,
+} from "./approvals/types";
 import {
   buildApprovalAnalytics,
   buildApprovalQueue,
@@ -44,7 +53,8 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<ApprovalFilters>(EMPTY_FILTERS);
-  const [selectedApproval, setSelectedApproval] = useState<ApprovalQueueItem | null>(null);
+  const [selectedApproval, setSelectedApproval] =
+    useState<ApprovalQueueItem | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -59,7 +69,10 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
       );
 
       if (!familyResponse.ok || !familyResponse.data) {
-        throw new Error(familyResponse.message ?? t((m) => m.FamilyApprovals.workspaceNotFound));
+        throw new Error(
+          familyResponse.message ??
+            t((m) => m.FamilyApprovals.workspaceNotFound),
+        );
       }
 
       const familyData = familyResponse.data;
@@ -76,17 +89,28 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
         ),
       ]);
 
-      setMoney(overviewResponse.ok ? normalizeMoneyOverview(overviewResponse.data) : null);
+      setMoney(
+        overviewResponse.ok
+          ? normalizeMoneyOverview(overviewResponse.data)
+          : null,
+      );
       setMoneyMessage(
         overviewResponse.ok
           ? null
-          : (overviewResponse.message ?? t((m) => m.FamilyApprovals.approvalSourceUnavailable)),
+          : (overviewResponse.message ??
+              t((m) => m.FamilyApprovals.approvalSourceUnavailable)),
       );
       setTransactions(
-        transactionResponse.ok && transactionResponse.data ? transactionResponse.data : [],
+        transactionResponse.ok && transactionResponse.data
+          ? transactionResponse.data
+          : [],
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : t((m) => m.FamilyApprovals.toastError));
+      setError(
+        err instanceof Error
+          ? err.message
+          : t((m) => m.FamilyApprovals.toastError),
+      );
     } finally {
       setLoading(false);
     }
@@ -98,7 +122,8 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
 
   const currency = money?.currency ?? family?.defaultCurrency ?? "RWF";
   const canApprove = family ? hasCapability(family, "APPROVE_EXPENSE") : false;
-  const canAssign = family?.authority === "HEAD" || family?.authority === "ADMIN";
+  const canAssign =
+    family?.authority === "HEAD" || family?.authority === "ADMIN";
 
   const queue = useMemo(
     () => buildApprovalQueue(transactions, money?.approvals ?? []),
@@ -110,7 +135,8 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
     if (!user) return [];
 
     return queue.filter(
-      (item) => item.requestedById === user.id || item.requestedBy === user.fullName,
+      (item) =>
+        item.requestedById === user.id || item.requestedBy === user.fullName,
     );
   }, [canApprove, queue, user]);
 
@@ -118,7 +144,9 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
     if (canApprove) return transactions;
     if (!user) return [];
 
-    return transactions.filter((transaction) => transaction.createdById === user.id);
+    return transactions.filter(
+      (transaction) => transaction.createdById === user.id,
+    );
   }, [canApprove, transactions, user]);
 
   const analytics = useMemo(
@@ -147,7 +175,9 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
     if (!selectedApproval) return null;
     return (
       visibleQueue.find(
-        (item) => item.id === selectedApproval.id && item.source === selectedApproval.source,
+        (item) =>
+          item.id === selectedApproval.id &&
+          item.source === selectedApproval.source,
       ) ?? selectedApproval
     );
   }, [visibleQueue, selectedApproval]);
@@ -185,7 +215,9 @@ export function MoneyApprovalsPage({ familyName }: { familyName: string }) {
         await fetchData();
         setSelectedApproval(null);
       } else {
-        toast.error(response.message ?? t((m) => m.FamilyApprovals.toastFailed));
+        toast.error(
+          response.message ?? t((m) => m.FamilyApprovals.toastFailed),
+        );
       }
     } catch {
       toast.error(t((m) => m.FamilyApprovals.toastError));

@@ -1,9 +1,8 @@
 "use client";
 
-import { ArrowUpIcon } from "lucide-react";
 import { useState } from "react";
-import { SidebarIcon } from "@/components/app-shell/sidebar-icon";
-import { PageTitle } from "@/components/common/pages/page-title";
+import { MoneyDirectionHeader } from "@/components/common/money-section/money-direction-header";
+import { MoneyDirectionShell } from "@/components/common/money-section/money-direction-shell";
 import { ExpenseDashboard } from "@/components/money/expense-dashboard";
 import { useExpensePageData } from "@/hooks/use-expense-page-data";
 import { createTranslator } from "@/i18n/translate";
@@ -23,19 +22,18 @@ export function PersonalExpensePage() {
     (c) => c.type === "EXPENSE" && c.status === "ACTIVE",
   );
 
+  const periodMonthName = new Intl.DateTimeFormat("en", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${period.from}T00:00:00`));
+
   return (
-    <div className="flex flex-col gap-5">
-      <PageTitle
+    <MoneyDirectionShell>
+      <MoneyDirectionHeader
+        direction="expense"
+        eyebrow="Outflows & Spending"
+        periodLabel={periodMonthName}
         title={t((m) => m.PersonalMoney.personalExpenses.title)}
-        icon={
-          <SidebarIcon
-            className="size-6"
-            icon={{
-              image: { src: "/images/icons/expense.png" },
-              line: ArrowUpIcon,
-            }}
-          />
-        }
         description={t((m) => m.PersonalMoney.personalExpenses.description)}
         actions={
           <ExpensePageActions
@@ -50,12 +48,14 @@ export function PersonalExpensePage() {
       />
       <ExpenseDashboard
         categories={expenseCategories}
+        allCategories={categories}
         data={dashboard}
         error={error}
         familyId={family?.id ?? null}
         isLoading={isLoading}
         onRetry={reload}
+        periodLabel={periodMonthName}
       />
-    </div>
+    </MoneyDirectionShell>
   );
 }

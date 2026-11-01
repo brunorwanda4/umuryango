@@ -81,6 +81,16 @@ test("formats persisted minor-unit money values", () => {
   assert.equal(formatFullMinorUnits(120_000, "USD"), "USD 1,200.00");
   assert.equal(formatCompactMinorUnits(null, "RWF"), "\u2014");
   assert.equal(formatOptionalCompactMinorUnits(null, "RWF"), "No records");
+  assert.equal(
+    formatCompactMinorUnits(1_200, "RWF", { showCurrency: false }),
+    "1.2K",
+  );
+  assert.equal(
+    formatOptionalCompactMinorUnits(1_200, "RWF", "No records", {
+      showCurrency: false,
+    }),
+    "1.2K",
+  );
 });
 
 test("fallback formatter promotes rounded thresholds to the next suffix", () => {

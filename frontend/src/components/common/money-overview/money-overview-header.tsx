@@ -24,7 +24,7 @@ export function MoneyOverviewHeader({
           {title}
         </h1>
         {description ? (
-          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 hidden md:block">
             {description}
           </p>
         ) : null}

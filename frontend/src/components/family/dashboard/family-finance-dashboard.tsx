@@ -204,7 +204,7 @@ export function FamilyFinancialSummary({
   return (
     <section
       aria-label={t((m) => m.FamilyDashboard.overviewAriaLabel)}
-      className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr]"
+      className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr] md:items-start"
     >
       <DashboardBalanceCard
         label={t((m) => m.FamilyDashboard.totalBalance, { currency })}

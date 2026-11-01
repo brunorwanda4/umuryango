@@ -187,7 +187,7 @@ export function RecentExpenseTable({
   );
 
   return (
-    <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
+    <Card className="rounded-2xl border border-zinc-800/80 bg-[#0f0f12] py-0 shadow-xs">
       <CardHeader className="flex items-center justify-between px-5 pt-5 pb-2 sm:px-6">
         <CardTitle className="font-bold text-base">
           {t((m) => m.PersonalMoney.personalExpenses.table.recentExpenses)}

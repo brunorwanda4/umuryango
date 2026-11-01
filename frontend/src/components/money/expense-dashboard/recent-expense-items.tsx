@@ -2,8 +2,7 @@
 
 import { SearchIcon } from "lucide-react";
 import { useState } from "react";
-import { CompactMoney } from "@/components/common/money/compact-money";
-import { Badge } from "@/components/ui/badge";
+import { MoneyMobileTransactionRow } from "@/components/common/money-section/money-mobile-transaction-row";
 import {
   Empty,
   EmptyDescription,
@@ -11,16 +10,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item";
 import { createTranslator } from "@/i18n/translate";
-import { cn } from "@/lib/utils";
 import type {
   ExpenseCategory,
   RecentExpenseRecord,
@@ -46,15 +36,15 @@ export function RecentExpenseItems({
   if (data.length === 0) {
     return (
       <div className="px-5 pb-5 sm:px-6">
-        <Empty className="border">
+        <Empty className="border border-zinc-800 bg-zinc-900/40">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <SearchIcon aria-hidden="true" />
+              <SearchIcon aria-hidden="true" className="text-zinc-500" />
             </EmptyMedia>
-            <EmptyTitle>
+            <EmptyTitle className="text-zinc-300">
               {t((m) => m.PersonalMoney.personalExpenses.items.noExpensesTitle)}
             </EmptyTitle>
-            <EmptyDescription>
+            <EmptyDescription className="text-zinc-500 text-xs">
               {t((m) => m.PersonalMoney.personalExpenses.items.noExpensesDesc)}
             </EmptyDescription>
           </EmptyHeader>
@@ -64,7 +54,7 @@ export function RecentExpenseItems({
   }
 
   return (
-    <ul className="flex w-full flex-col gap-4 px-5 pb-5 sm:px-6">
+    <ul className="flex w-full flex-col gap-2.5 px-4 pb-4 sm:px-6">
       {data.map((expense) => (
         <RecentExpenseItem
           categories={categories}
@@ -89,63 +79,39 @@ function RecentExpenseItem({
   expense: RecentExpenseRecord;
   onSuccess: () => void | Promise<void>;
 }) {
-  const t = createTranslator("PersonalMoney.personalExpenses");
   const [isViewOpen, setIsViewOpen] = useState(false);
-  const SourceIcon = expense.icon;
-  const PaymentIcon = expense.paymentIcon;
 
   return (
     <>
-      <li>
-        <Item
-          className="relative cursor-pointer hover:bg-muted/50"
-          onClick={() => setIsViewOpen(true)}
-          variant="outline"
-        >
-          <button
-            aria-label={t(
-              (m) => m.PersonalMoney.personalExpenses.table.viewExpenseAria,
-              { source: expense.source },
-            )}
-            className="absolute inset-0 rounded-2xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            onClick={() => setIsViewOpen(true)}
-            type="button"
-          />
-          <ItemMedia
-            variant="icon"
-            className={cn("size-9 rounded-full", expense.sourceClassName)}
-          >
-            <SourceIcon aria-hidden="true" />
-          </ItemMedia>
-          <ItemContent className="min-w-0">
-            <ItemTitle className="max-w-full">
-              <span className="truncate">{expense.source}</span>
-              <Badge className={expense.categoryClassName}>
-                {expense.category}
-              </Badge>
-            </ItemTitle>
-            <ItemDescription>{expense.description}</ItemDescription>
-            <div className="flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
-              <span>{expense.date}</span>
-              <span aria-hidden="true">/</span>
-              <span className="inline-flex items-center gap-1">
-                <PaymentIcon aria-hidden="true" />
-                {expense.paymentMethod}
-              </span>
-            </div>
-          </ItemContent>
-          <ItemActions className="relative z-10 ml-auto">
-            <span className="font-bold text-chart-1 text-sm">
-              <CompactMoney currency="RWF" value={expense.amountMinorUnits} />
-            </span>
+      <li className="list-none">
+        <MoneyMobileTransactionRow
+          direction="expense"
+          title={expense.source}
+          subtitle={
+            expense.description !== "No additional notes"
+              ? expense.description
+              : null
+          }
+          category={expense.category}
+          categoryClassName={expense.categoryClassName}
+          paymentMethod={expense.paymentMethod}
+          paymentIcon={expense.paymentIcon}
+          date={expense.date}
+          amountMinorUnits={expense.amountMinorUnits}
+          currency={expense.currency}
+          status={expense.status}
+          icon={expense.icon}
+          iconClassName={expense.sourceClassName}
+          onView={() => setIsViewOpen(true)}
+          actions={
             <RecentExpenseActionsPopover
               categories={categories}
               familyId={familyId}
               expense={expense}
               onSuccess={onSuccess}
             />
-          </ItemActions>
-        </Item>
+          }
+        />
       </li>
       <ViewExpenseDialog
         categories={categories}

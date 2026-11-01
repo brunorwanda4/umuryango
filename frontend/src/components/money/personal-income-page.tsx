@@ -1,9 +1,8 @@
 "use client";
 
-import { ArrowDownIcon } from "lucide-react";
 import { useState } from "react";
-import { SidebarIcon } from "@/components/app-shell/sidebar-icon";
-import { PageTitle } from "@/components/common/pages/page-title";
+import { MoneyDirectionHeader } from "@/components/common/money-section/money-direction-header";
+import { MoneyDirectionShell } from "@/components/common/money-section/money-direction-shell";
 import { IncomeDashboard } from "@/components/money/income-dashboard";
 import { useIncomePageData } from "@/hooks/use-income-page-data";
 import { createTranslator } from "@/i18n/translate";
@@ -23,19 +22,18 @@ export function PersonalIncomePage() {
     (c) => c.type === "INCOME" && c.status === "ACTIVE",
   );
 
+  const periodMonthName = new Intl.DateTimeFormat("en", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${period.from}T00:00:00`));
+
   return (
-    <div className="flex flex-col gap-5">
-      <PageTitle
+    <MoneyDirectionShell>
+      <MoneyDirectionHeader
+        direction="income"
+        eyebrow="Inflows & Earnings"
+        periodLabel={periodMonthName}
         title={t((m) => m.PersonalMoney.personalIncome.title)}
-        icon={
-          <SidebarIcon
-            className="size-6"
-            icon={{
-              image: { src: "/images/icons/income.png" },
-              line: ArrowDownIcon,
-            }}
-          />
-        }
         description={t((m) => m.PersonalMoney.personalIncome.description)}
         actions={
           <IncomePageActions
@@ -50,12 +48,14 @@ export function PersonalIncomePage() {
       />
       <IncomeDashboard
         categories={incomeCategories}
+        allCategories={categories}
         data={dashboard}
         error={error}
         familyId={family?.id ?? null}
         isLoading={isLoading}
         onRetry={reload}
+        periodLabel={periodMonthName}
       />
-    </div>
+    </MoneyDirectionShell>
   );
 }

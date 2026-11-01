@@ -18,8 +18,7 @@ import { RecentIncomeFilter } from "./recent-income-filter";
 import { RecentIncomeItems } from "./recent-income-items";
 import { ViewIncomeDialog } from "./view-income-dialog";
 
-const RECENT_INCOME_VIEW_MODE_STORAGE_KEY =
-  "umuryango-recent-income-view-mode";
+const RECENT_INCOME_VIEW_MODE_STORAGE_KEY = "umuryango-recent-income-view-mode";
 
 function getRecentIncomeColumns({
   categories,
@@ -177,7 +176,7 @@ export function RecentIncomeTable({
   );
 
   return (
-    <Card className="rounded-2xl border-border/80 py-0 shadow-sm">
+    <Card className="rounded-2xl border border-zinc-800/80 bg-[#0f0f12] py-0 shadow-xs">
       <CardHeader className="flex items-center justify-between px-5 pt-5 pb-2 sm:px-6">
         <CardTitle className="font-bold text-base">
           {t((m) => m.PersonalMoney.personalIncome.table.recentIncome)}

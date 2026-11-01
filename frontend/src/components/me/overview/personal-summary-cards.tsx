@@ -26,7 +26,7 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
   const moneyAvailable = Boolean(data.income && data.expenses);
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr]">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr] md:items-start">
       <DashboardBalanceCard
         label={t((m) => m.PersonalOverview.summaryCards.totalBalance, {
           currency: data.currency,

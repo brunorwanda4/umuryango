@@ -1,9 +1,30 @@
 "use client";
 
-import { AlertCircleIcon, PlusIcon } from "lucide-react";
+import {
+  AlertCircleIcon,
+  LayersIcon,
+  PlusCircleIcon,
+  PlusIcon,
+  RefreshCwIcon,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { PageTitle } from "@/components/common/pages/page-title";
+import { MoneyActionGrid } from "@/components/common/money-section/money-action-grid";
+import { MoneyCategoryBreakdownCard } from "@/components/common/money-section/money-category-breakdown-card";
+import { MoneyDirectionHeader } from "@/components/common/money-section/money-direction-header";
+import { MoneyDirectionShell } from "@/components/common/money-section/money-direction-shell";
+import { MoneyDirectionalHero } from "@/components/common/money-section/money-directional-hero";
+import { MoneyPendingAttentionCard } from "@/components/common/money-section/money-pending-attention-card";
+import {
+  normalizeMinorUnits,
+  safeCalculatePercentage,
+} from "@/components/common/money-section/money-section-utils";
+import type {
+  MoneyActionItem,
+  MoneyCategoryItem,
+  MoneyHeroSubmetric,
+  MoneyPendingAttentionItem,
+} from "@/components/common/money-section/types";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,7 +48,6 @@ import { CreateIncomeDialog } from "./income/create-income-dialog";
 import { DeleteTransactionDialog } from "./income/delete-transaction-dialog";
 import { EditIncomeDialog } from "./income/edit-income-dialog";
 import { EveryTimeIncomePanel } from "./income/every-time-income-panel";
-import { IncomeMetricCards } from "./income/income-metric-cards";
 import { IncomePaymentDialog } from "./income/income-payment-dialog";
 import { IncomeTable } from "./income/income-table";
 import { OneTimeIncomePanel } from "./income/one-time-income-panel";
@@ -42,6 +62,23 @@ export type MoneyIncomePageInitialData = {
   currentUser: CurrentUser | null;
   error: string | null;
 };
+
+function formatDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function getRecordDateKey(value: string | null | undefined) {
+  if (!value) return null;
+  const dateMatch = value.match(/^\d{4}-\d{2}-\d{2}/);
+  if (dateMatch) return dateMatch[0];
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return formatDateKey(date);
+}
 
 export function MoneyIncomePage({
   familyName,
@@ -277,39 +314,119 @@ export function MoneyIncomePage({
     return family.authority === "HEAD" || family.authority === "ADMIN";
   }, [family]);
 
+  // Aggregated persisted metrics
+  const summary = useMemo(() => {
+    const todayKey = formatDateKey(new Date());
+    const currentMonthKey = todayKey.slice(0, 7);
+
+    let totalRecorded = 0n;
+    let monthRecorded = 0n;
+    let pendingAmount = 0n;
+    let activeRecordCount = 0;
+
+    for (const tx of transactions) {
+      if (tx.status === "REJECTED" || tx.status === "REVERSED") {
+        continue;
+      }
+
+      activeRecordCount += 1;
+      const amount = BigInt(normalizeMinorUnits(tx.amountMinorUnits));
+      const txDateKey = getRecordDateKey(tx.date);
+      totalRecorded += amount;
+
+      if (txDateKey?.startsWith(currentMonthKey)) {
+        monthRecorded += amount;
+      }
+
+      if (tx.status === "PENDING") {
+        pendingAmount += amount;
+      }
+    }
+
+    const clearedAmount =
+      totalRecorded >= pendingAmount ? totalRecorded - pendingAmount : 0n;
+
+    return {
+      totalRecorded: totalRecorded.toString(),
+      monthRecorded: monthRecorded.toString(),
+      pendingAmount: pendingAmount.toString(),
+      clearedAmount: clearedAmount.toString(),
+      recordCount: activeRecordCount,
+    };
+  }, [transactions]);
+
+  // Pending Attention Items
+  const pendingTransactions = useMemo(
+    () => transactions.filter((t) => t.status === "PENDING"),
+    [transactions],
+  );
+
+  // Stream Categories with BigInt safety
+  const streamCategoryItems = useMemo<MoneyCategoryItem[]>(() => {
+    const map = new Map<
+      string,
+      { id: string; name: string; total: bigint; color?: string | null }
+    >();
+
+    for (const tx of transactions) {
+      if (tx.status === "REJECTED" || tx.status === "REVERSED") continue;
+      const name = tx.category.name || "Uncategorized";
+      const id = tx.categoryId || name;
+      const amount = BigInt(normalizeMinorUnits(tx.amountMinorUnits));
+      if (amount <= 0n) continue;
+
+      const existing = map.get(id);
+      if (existing) {
+        existing.total += amount;
+      } else {
+        map.set(id, {
+          id,
+          name,
+          total: amount,
+          color: tx.category.color ?? null,
+        });
+      }
+    }
+
+    return Array.from(map.values())
+      .sort((a, b) => (b.total > a.total ? 1 : b.total < a.total ? -1 : 0))
+      .map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+        amountMinorUnits: entry.total.toString(),
+        color: entry.color,
+        percentage: safeCalculatePercentage(
+          entry.total.toString(),
+          summary.totalRecorded,
+        ),
+      }));
+  }, [transactions, summary.totalRecorded]);
+
   // Filtering Logic
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
-      // Search
       const searchMatch =
         !search ||
         tx.description?.toLowerCase().includes(search.toLowerCase()) ||
         tx.receivedFrom?.toLowerCase().includes(search.toLowerCase()) ||
         tx.propertyName?.toLowerCase().includes(search.toLowerCase());
 
-      // Category
       const categoryMatch =
         filterCategory === "all" || tx.categoryId === filterCategory;
 
-      // Payment Method
       const paymentMatch =
         filterPaymentMethod === "all" ||
         tx.paymentMethod === filterPaymentMethod;
 
-      // Status
       const statusMatch = filterStatus === "all" || tx.status === filterStatus;
-
-      // Member
       const memberMatch =
         filterMember === "all" || tx.receivedBy === filterMember;
 
-      // Date Range
       let dateMatch = true;
       if (startDate) {
         dateMatch = dateMatch && new Date(tx.date) >= new Date(startDate);
       }
       if (endDate) {
-        // Add 1 day to make range inclusive
         const endLimit = new Date(endDate);
         endLimit.setDate(endLimit.getDate() + 1);
         dateMatch = dateMatch && new Date(tx.date) < endLimit;
@@ -334,6 +451,7 @@ export function MoneyIncomePage({
     startDate,
     endDate,
   ]);
+
   const everyTimeTransactions = useMemo(
     () =>
       filteredTransactions.filter(
@@ -341,6 +459,7 @@ export function MoneyIncomePage({
       ),
     [filteredTransactions],
   );
+
   const oneTimeTransactions = useMemo(
     () =>
       filteredTransactions.filter(
@@ -349,16 +468,58 @@ export function MoneyIncomePage({
     [filteredTransactions],
   );
 
-  const handleActionClick = (
-    tx: IncomeTransaction,
-    action: "view" | "edit" | "delete" | "receipt",
-  ) => {
-    setSelectedTx(tx);
-    if (action === "view") setOpenView(true);
-    else if (action === "edit") setOpenEdit(true);
-    else if (action === "delete") setOpenDelete(true);
-    else if (action === "receipt") setOpenReceipt(true);
-  };
+  const handleActionClick = useCallback(
+    (tx: IncomeTransaction, action: "view" | "edit" | "delete" | "receipt") => {
+      setSelectedTx(tx);
+      if (action === "view") setOpenView(true);
+      else if (action === "edit") setOpenEdit(true);
+      else if (action === "delete") setOpenDelete(true);
+      else if (action === "receipt") setOpenReceipt(true);
+    },
+    [],
+  );
+
+  const handleSendApproval = useCallback(
+    async (tx: IncomeTransaction) => {
+      if (!family) return;
+      try {
+        const res = await apiRequest(
+          "post",
+          `/families/${family.id}/money/transactions/${tx.id}/approve`,
+        );
+        if (res.ok) {
+          toast.success("Income approved successfully.");
+          await refreshTransactions();
+        } else {
+          toast.error(res.message ?? "Approval failed.");
+        }
+      } catch {
+        toast.error("An error occurred during approval.");
+      }
+    },
+    [family, refreshTransactions],
+  );
+
+  const pendingAttentionItems = useMemo<MoneyPendingAttentionItem[]>(() => {
+    return pendingTransactions.map((tx) => ({
+      id: tx.id,
+      title: tx.description || tx.category.name || "Income Record",
+      subtitle: tx.receivedFrom ? `From: ${tx.receivedFrom}` : null,
+      date: tx.date ? tx.date.slice(0, 10) : null,
+      amountMinorUnits: tx.amountMinorUnits,
+      currency: family?.defaultCurrency ?? "RWF",
+      status: tx.status,
+      actionLabel: isAdmin ? "Approve" : undefined,
+      onAction: isAdmin ? () => handleSendApproval(tx) : undefined,
+      onView: () => handleActionClick(tx, "view"),
+    }));
+  }, [
+    pendingTransactions,
+    family?.defaultCurrency,
+    isAdmin,
+    handleActionClick,
+    handleSendApproval,
+  ]);
 
   const openGenericCreate = useCallback((open: boolean) => {
     setOpenCreate(open);
@@ -410,24 +571,6 @@ export function MoneyIncomePage({
     [],
   );
 
-  const handleSendApproval = async (tx: IncomeTransaction) => {
-    if (!family) return;
-    try {
-      const res = await apiRequest(
-        "post",
-        `/families/${family.id}/money/transactions/${tx.id}/approve`,
-      );
-      if (res.ok) {
-        toast.success("Income approved successfully.");
-        await refreshTransactions();
-      } else {
-        toast.error(res.message ?? "Approval failed.");
-      }
-    } catch {
-      toast.error("An error occurred during approval.");
-    }
-  };
-
   const resetFilters = () => {
     setSearch("");
     setFilterCategory("all");
@@ -437,6 +580,89 @@ export function MoneyIncomePage({
     setStartDate("");
     setEndDate("");
   };
+
+  const submetrics = useMemo<MoneyHeroSubmetric[]>(() => {
+    return [
+      {
+        id: "cleared-income",
+        label: "Cleared / Completed",
+        value: summary.clearedAmount,
+        variant: "income",
+        indicatorColor: "emerald",
+        countText: `${transactions.filter((t) => t.status === "APPROVED").length} approved payouts`,
+      },
+      {
+        id: "pending-income",
+        label: "Pending Inflows",
+        value: summary.pendingAmount,
+        variant: "pending",
+        indicatorColor: "amber",
+        countText: `${pendingTransactions.length} awaiting settlement`,
+      },
+      {
+        id: "month-recorded",
+        label: "This Month",
+        value: summary.monthRecorded,
+        variant: "income",
+        indicatorColor: "blue",
+        countText: "Current month collections",
+      },
+      {
+        id: "total-count",
+        label: "Active Records",
+        value: summary.recordCount,
+        variant: "neutral",
+        indicatorColor: "muted",
+        countText: `${summary.recordCount} entries recorded`,
+      },
+    ];
+  }, [
+    summary.clearedAmount,
+    summary.pendingAmount,
+    summary.monthRecorded,
+    summary.recordCount,
+    transactions,
+    pendingTransactions.length,
+  ]);
+
+  const quickActions = useMemo<MoneyActionItem[]>(() => {
+    const canRecord = family ? hasCapability(family, "RECORD_INCOME") : false;
+    return [
+      {
+        id: "add-income",
+        label: t((m) => m.FamilyIncome.addIncome),
+        description: "Log contribution or deposit",
+        icon: PlusCircleIcon,
+        iconColor: "emerald",
+        disabled: !canRecord,
+        onClick: () => openGenericCreate(true),
+        tooltip: !canRecord
+          ? "You do not have permission to record family income."
+          : undefined,
+      },
+      {
+        id: "manage-categories",
+        label: "Categories",
+        description: "View inflow channels",
+        icon: LayersIcon,
+        iconColor: "blue",
+        onClick: () => {
+          const el = document.getElementById("family-income-streams-section");
+          el?.scrollIntoView({ behavior: "smooth" });
+        },
+      },
+      {
+        id: "refresh-records",
+        label: "Refresh",
+        description: "Fetch latest family records",
+        icon: RefreshCwIcon,
+        iconColor: "zinc",
+        onClick: () => {
+          void refreshTransactions();
+        },
+      },
+    ];
+  }, [family, t, openGenericCreate, refreshTransactions]);
 
   if (loading) return <FamilyMoneySkeleton />;
   if (error || !family) {
@@ -460,28 +686,81 @@ export function MoneyIncomePage({
   const currency = family.defaultCurrency;
 
   return (
-    <div
-      className="flex min-w-0 max-w-full flex-col gap-6"
-      aria-busy={isRefreshing}
-    >
-      <PageTitle
+    <MoneyDirectionShell aria-busy={isRefreshing}>
+      {/* 1. Page Header */}
+      <MoneyDirectionHeader
+        direction="income"
+        eyebrow="Inflows & Earnings"
+        periodLabel={family.name}
         title={t((m) => m.FamilyIncome.pageTitle)}
+        description={t((m) => m.FamilyIncome.pageDescription)}
         actions={
-          hasCapability(family, "RECORD_INCOME") && (
+          hasCapability(family, "RECORD_INCOME") ? (
             <Button size="sm" onClick={() => openGenericCreate(true)}>
               <PlusIcon aria-hidden="true" data-icon="inline-start" />
               {t((m) => m.FamilyIncome.addIncome)}
             </Button>
-          )
+          ) : null
         }
       />
 
-      {/* Summary Cards */}
-      <IncomeMetricCards transactions={transactions} currency={currency} />
+      {/* 2. Top Grid: Directional Hero (7 cols) + Inflow Actions & Pending Attention (5 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+        <div className="lg:col-span-7 xl:col-span-7">
+          <MoneyDirectionalHero
+            direction="income"
+            currency={currency}
+            totalAmountMinorUnits={summary.totalRecorded}
+            eyebrowLabel="TOTAL INCOME RECORDED (RWF)"
+            periodBadge={
+              <span className="font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                {currency}
+              </span>
+            }
+            subtitle="Track member contributions, rent collections, business returns, and grants."
+            submetrics={submetrics}
+          />
+        </div>
 
-      {/* Main Income Table */}
-      <Tabs defaultValue="all">
-        <TabsList>
+        <div className="lg:col-span-5 xl:col-span-5 flex flex-col gap-4">
+          <MoneyActionGrid
+            title="Inflow actions"
+            description="Record family payments, manage income categories, and track approvals."
+            actions={quickActions}
+          />
+
+          {pendingTransactions.length > 0 ? (
+            <MoneyPendingAttentionCard
+              direction="income"
+              title="Pending & Expected Inflows"
+              subtitle="Pledges and transactions awaiting settlement or approval."
+              badgeCount={pendingTransactions.length}
+              items={pendingAttentionItems}
+            />
+          ) : null}
+        </div>
+      </div>
+
+      {/* 3. Middle Section: Streams & Sources Breakdown Card */}
+      <div
+        id="family-income-streams-section"
+        className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5"
+      >
+        <div className="lg:col-span-12">
+          <MoneyCategoryBreakdownCard
+            direction="income"
+            title="Income Streams & Sources"
+            subtitle="Breakdown of member contributions, rental collections, projects, and communal pots."
+            currency={currency}
+            items={streamCategoryItems}
+            activeCountLabel={`${streamCategoryItems.length} active streams`}
+          />
+        </div>
+      </div>
+
+      {/* 4. Ledger Section with Tabs */}
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="bg-zinc-900 border border-zinc-800">
           <TabsTrigger value="all">{tCommon((m) => m.Common.all)}</TabsTrigger>
           <TabsTrigger value="every-time">
             {t((m) => m.FamilyIncome.tabs.everyTime)}
@@ -490,7 +769,7 @@ export function MoneyIncomePage({
             {t((m) => m.FamilyIncome.tabs.oneTime)}
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="all">
+        <TabsContent value="all" className="mt-4">
           <IncomeTable
             filteredTransactions={filteredTransactions}
             currency={currency}
@@ -517,7 +796,7 @@ export function MoneyIncomePage({
             categories={categories}
           />
         </TabsContent>
-        <TabsContent value="every-time">
+        <TabsContent value="every-time" className="mt-4">
           <EveryTimeIncomePanel
             transactions={everyTimeTransactions}
             currency={currency}
@@ -545,7 +824,7 @@ export function MoneyIncomePage({
             categories={categories}
           />
         </TabsContent>
-        <TabsContent value="one-time">
+        <TabsContent value="one-time" className="mt-4">
           <OneTimeIncomePanel
             transactions={oneTimeTransactions}
             currency={currency}
@@ -638,6 +917,6 @@ export function MoneyIncomePage({
         transaction={selectedTx}
         onSuccess={refreshTransactions}
       />
-    </div>
+    </MoneyDirectionShell>
   );
 }

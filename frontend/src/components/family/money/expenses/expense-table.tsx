@@ -217,7 +217,7 @@ export function ExpenseTable({
   ];
 
   return (
-    <Card className=" gap-2">
+    <Card className="rounded-2xl border border-zinc-800/80 bg-[#0f0f12] py-0 shadow-xs min-w-0 gap-2">
       <CardHeader className="flex flex-row items-center justify-between gap-3">
         <div className="space-y-1">
           <CardTitle>{t((m) => m.FamilyExpenses.table.historyTitle)}</CardTitle>

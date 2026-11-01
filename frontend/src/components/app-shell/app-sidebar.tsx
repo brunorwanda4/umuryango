@@ -171,7 +171,7 @@ function AppSidebarContent({
         <SidebarRail />
         <SidebarResizeHandle open={open} />
       </Sidebar>
-      <SidebarInset className="flex flex-col pt-14">
+      <SidebarInset className="flex flex-col md:pt-14">
         <AppNavbar sidebarTitle={sidebarTitle} />
         <main className="flex-1 min-w-0 max-w-full p-4 pb-32 sm:p-6 sm:pb-36 md:pb-6 md:px-16">
           <div className="min-h-screen">{children}</div>

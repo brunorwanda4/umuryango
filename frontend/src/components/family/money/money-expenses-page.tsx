@@ -1,9 +1,31 @@
 "use client";
 
-import { AlertCircleIcon, PlusIcon } from "lucide-react";
+import {
+  AlertCircleIcon,
+  PieChartIcon,
+  PlusCircleIcon,
+  PlusIcon,
+  RefreshCwIcon,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { PageTitle } from "@/components/common/pages/page-title";
+import { MoneyActionGrid } from "@/components/common/money-section/money-action-grid";
+import { MoneyCategoryBreakdownCard } from "@/components/common/money-section/money-category-breakdown-card";
+import { MoneyDirectionHeader } from "@/components/common/money-section/money-direction-header";
+import { MoneyDirectionShell } from "@/components/common/money-section/money-direction-shell";
+import { MoneyDirectionalHero } from "@/components/common/money-section/money-directional-hero";
+import { MoneyPendingAttentionCard } from "@/components/common/money-section/money-pending-attention-card";
+import {
+  normalizeMinorUnits,
+  safeCalculatePercentage,
+} from "@/components/common/money-section/money-section-utils";
+import type {
+  MoneyActionItem,
+  MoneyCategoryItem,
+  MoneyHeroProgress,
+  MoneyHeroSubmetric,
+  MoneyPendingAttentionItem,
+} from "@/components/common/money-section/types";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,7 +44,6 @@ import { DeleteExpenseDialog } from "./expenses/delete-expense-dialog";
 import { EditExpenseDialog } from "./expenses/edit-expense-dialog";
 import { ExpenseAnalytics } from "./expenses/expense-analytics";
 import { ExpenseDetailsDialog } from "./expenses/expense-details-dialog";
-import { ExpenseMetricCards } from "./expenses/expense-metric-cards";
 import { ExpenseTable } from "./expenses/expense-table";
 import type {
   Category,
@@ -44,6 +65,11 @@ export type MoneyExpensesPageInitialData = {
   projects: ProjectOption[];
   error: string | null;
 };
+
+const countedExpenseStatuses = new Set<ExpenseTransaction["status"]>([
+  "APPROVED",
+  "PENDING",
+]);
 
 export function MoneyExpensesPage({
   familyName,
@@ -70,6 +96,7 @@ export function MoneyExpensesPage({
   );
   const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(initialData?.error ?? null);
+  const [activeTab, setActiveTab] = useState("data");
 
   const [openCreate, setOpenCreate] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
@@ -223,6 +250,189 @@ export function MoneyExpensesPage({
     [money, projects],
   );
 
+  // BigInt-safe summary calculations
+  const summary = useMemo(() => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    let totalExpenses = 0n;
+    let monthExpenses = 0n;
+    let todayExpenses = 0n;
+    let pendingApproval = 0n;
+
+    for (const transaction of transactions) {
+      const amount = BigInt(normalizeMinorUnits(transaction.amountMinorUnits));
+      const txDate = new Date(transaction.date);
+      const isCountedExpense = countedExpenseStatuses.has(transaction.status);
+      const isThisMonth =
+        txDate.getMonth() === currentMonth &&
+        txDate.getFullYear() === currentYear;
+      const isToday =
+        txDate.getDate() === today.getDate() &&
+        txDate.getMonth() === currentMonth &&
+        txDate.getFullYear() === currentYear;
+
+      if (isCountedExpense) {
+        totalExpenses += amount;
+
+        if (isThisMonth) {
+          monthExpenses += amount;
+        }
+
+        if (isToday) {
+          todayExpenses += amount;
+        }
+      }
+
+      if (transaction.status === "PENDING") {
+        pendingApproval += amount;
+      }
+    }
+
+    return {
+      totalExpenses: totalExpenses.toString(),
+      monthExpenses: monthExpenses.toString(),
+      todayExpenses: todayExpenses.toString(),
+      pendingApproval: pendingApproval.toString(),
+    };
+  }, [transactions]);
+
+  // Optional real budget progress
+  const budgetProgress = useMemo<MoneyHeroProgress | undefined>(() => {
+    if (!money?.budgets || money.budgets.length === 0) return undefined;
+
+    let totalBudget = 0n;
+    for (const b of money.budgets) {
+      totalBudget += BigInt(normalizeMinorUnits(b.amountMinorUnits));
+    }
+
+    if (totalBudget <= 0n) return undefined;
+
+    const percent = safeCalculatePercentage(
+      summary.monthExpenses,
+      totalBudget.toString(),
+    );
+
+    return {
+      label: "Monthly Family Budget Used",
+      percent,
+      percentText: `${percent}% of budget spent`,
+    };
+  }, [money?.budgets, summary.monthExpenses]);
+
+  // Pending Attention Items
+  const pendingTransactions = useMemo(
+    () => transactions.filter((t) => t.status === "PENDING"),
+    [transactions],
+  );
+
+  const handleActionClick = useCallback(
+    (
+      transaction: ExpenseTransaction,
+      action: "view" | "edit" | "delete" | "receipt",
+    ) => {
+      setSelectedTx(transaction);
+      if (action === "view") setOpenView(true);
+      if (action === "edit") setOpenEdit(true);
+      if (action === "delete") setOpenDelete(true);
+      if (action === "receipt") setOpenReceipt(true);
+    },
+    [],
+  );
+
+  const handleSendApproval = useCallback(
+    async (transaction: ExpenseTransaction) => {
+      if (!family) return;
+      if (transaction.status !== "PENDING") {
+        toast.success(t((m) => m.FamilyExpenses.toasts.readyForApproval));
+        return;
+      }
+
+      try {
+        const response = await apiRequest(
+          "post",
+          `/families/${family.id}/money/transactions/${transaction.id}/approve`,
+        );
+        if (response.ok) {
+          toast.success(t((m) => m.FamilyExpenses.toasts.approvedSuccess));
+          fetchData();
+        } else {
+          toast.error(
+            response.message ??
+              t((m) => m.FamilyExpenses.toasts.approvalFailed),
+          );
+        }
+      } catch {
+        toast.error(t((m) => m.FamilyExpenses.toasts.approvalError));
+      }
+    },
+    [family, t, fetchData],
+  );
+
+  const pendingAttentionItems = useMemo<MoneyPendingAttentionItem[]>(() => {
+    return pendingTransactions.map((tx) => ({
+      id: tx.id,
+      title: tx.description || tx.category.name || "Expense Record",
+      subtitle: tx.receivedBy ? `By: ${tx.receivedBy}` : null,
+      date: tx.date ? tx.date.slice(0, 10) : null,
+      amountMinorUnits: tx.amountMinorUnits,
+      currency: family?.defaultCurrency ?? "RWF",
+      status: tx.status,
+      actionLabel: isAdmin ? "Approve" : undefined,
+      onAction: isAdmin ? () => handleSendApproval(tx) : undefined,
+      onView: () => handleActionClick(tx, "view"),
+    }));
+  }, [
+    pendingTransactions,
+    family?.defaultCurrency,
+    isAdmin,
+    handleActionClick,
+    handleSendApproval,
+  ]);
+
+  // Category items with BigInt arithmetic
+  const categoryItems = useMemo<MoneyCategoryItem[]>(() => {
+    const map = new Map<
+      string,
+      { id: string; name: string; total: bigint; color?: string | null }
+    >();
+
+    for (const tx of transactions) {
+      if (tx.status === "REJECTED" || tx.status === "REVERSED") continue;
+      const name = tx.category.name || "Uncategorized";
+      const id = tx.categoryId || name;
+      const amount = BigInt(normalizeMinorUnits(tx.amountMinorUnits));
+      if (amount <= 0n) continue;
+
+      const existing = map.get(id);
+      if (existing) {
+        existing.total += amount;
+      } else {
+        map.set(id, {
+          id,
+          name,
+          total: amount,
+          color: tx.category.color ?? null,
+        });
+      }
+    }
+
+    return Array.from(map.values())
+      .sort((a, b) => (b.total > a.total ? 1 : b.total < a.total ? -1 : 0))
+      .map((entry) => ({
+        id: entry.id,
+        name: entry.name,
+        amountMinorUnits: entry.total.toString(),
+        color: entry.color,
+        percentage: safeCalculatePercentage(
+          entry.total.toString(),
+          summary.totalExpenses,
+        ),
+      }));
+  }, [transactions, summary.totalExpenses]);
+
+  // Filtering Logic
   const filteredTransactions = useMemo(() => {
     const min = minAmount ? Number(minAmount.replace(/,/g, "")) : null;
     const max = maxAmount ? Number(maxAmount.replace(/,/g, "")) : null;
@@ -288,42 +498,6 @@ export function MoneyExpensesPage({
     maxAmount,
   ]);
 
-  const handleActionClick = (
-    transaction: ExpenseTransaction,
-    action: "view" | "edit" | "delete" | "receipt",
-  ) => {
-    setSelectedTx(transaction);
-    if (action === "view") setOpenView(true);
-    if (action === "edit") setOpenEdit(true);
-    if (action === "delete") setOpenDelete(true);
-    if (action === "receipt") setOpenReceipt(true);
-  };
-
-  const handleSendApproval = async (transaction: ExpenseTransaction) => {
-    if (!family) return;
-    if (transaction.status !== "PENDING") {
-      toast.success(t((m) => m.FamilyExpenses.toasts.readyForApproval));
-      return;
-    }
-
-    try {
-      const response = await apiRequest(
-        "post",
-        `/families/${family.id}/money/transactions/${transaction.id}/approve`,
-      );
-      if (response.ok) {
-        toast.success(t((m) => m.FamilyExpenses.toasts.approvedSuccess));
-        fetchData();
-      } else {
-        toast.error(
-          response.message ?? t((m) => m.FamilyExpenses.toasts.approvalFailed),
-        );
-      }
-    } catch {
-      toast.error(t((m) => m.FamilyExpenses.toasts.approvalError));
-    }
-  };
-
   const handleDuplicate = (transaction: ExpenseTransaction) => {
     setDuplicateValues({
       title: `${transaction.description || "Expense Transaction"} copy`,
@@ -373,6 +547,83 @@ export function MoneyExpensesPage({
     setMaxAmount("");
   };
 
+  const submetrics = useMemo<MoneyHeroSubmetric[]>(() => {
+    return [
+      {
+        id: "this-month-expenses",
+        label: t((m) => m.FamilyExpenses.metrics.expensesThisMonth),
+        value: summary.monthExpenses,
+        variant: "expense",
+        indicatorColor: "rose",
+        countText: "Outflows recorded this month",
+      },
+      {
+        id: "today-expenses",
+        label: t((m) => m.FamilyExpenses.metrics.expensesToday),
+        value: summary.todayExpenses,
+        variant: "expense",
+        indicatorColor: "amber",
+        countText: "Outflows recorded today",
+      },
+      {
+        id: "pending-approval-expenses",
+        label: t((m) => m.FamilyExpenses.metrics.pendingApproval),
+        value: summary.pendingApproval,
+        variant: "pending",
+        indicatorColor: "amber",
+        countText: `${pendingTransactions.length} awaiting approval`,
+      },
+      {
+        id: "total-expenses-count",
+        label: "Total Outflows",
+        value: summary.totalExpenses,
+        variant: "neutral",
+        indicatorColor: "muted",
+        countText: `${transactions.length} total records`,
+      },
+    ];
+  }, [t, summary, pendingTransactions.length, transactions.length]);
+
+  const quickActions = useMemo<MoneyActionItem[]>(() => {
+    const canRecord = family ? hasCapability(family, "RECORD_EXPENSE") : false;
+    return [
+      {
+        id: "add-expense",
+        label: t((m) => m.FamilyExpenses.addExpense),
+        description: "Log household payment or cost",
+        icon: PlusCircleIcon,
+        iconColor: "rose",
+        disabled: !canRecord,
+        onClick: () => {
+          setDuplicateValues(null);
+          setOpenCreate(true);
+        },
+        tooltip: !canRecord
+          ? "You do not have permission to record family expenses."
+          : undefined,
+      },
+      {
+        id: "view-analytics",
+        label: activeTab === "overview" ? "View ledger" : "Budget analytics",
+        description: "Analyze budget & project links",
+        icon: PieChartIcon,
+        iconColor: "purple",
+        onClick: () =>
+          setActiveTab((prev) => (prev === "overview" ? "data" : "overview")),
+      },
+      {
+        id: "refresh-expenses",
+        label: "Refresh",
+        description: "Fetch latest expense records",
+        icon: RefreshCwIcon,
+        iconColor: "zinc",
+        onClick: () => {
+          void fetchData();
+        },
+      },
+    ];
+  }, [family, t, activeTab, fetchData]);
+
   if (loading) return <FamilyMoneySkeleton />;
   if (error || !family) {
     return (
@@ -395,8 +646,12 @@ export function MoneyExpensesPage({
   const currency = family.defaultCurrency;
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageTitle
+    <MoneyDirectionShell>
+      {/* 1. Page Header */}
+      <MoneyDirectionHeader
+        direction="expense"
+        eyebrow="Outflows & Spending"
+        periodLabel={family.name}
         title={t((m) => m.FamilyExpenses.pageTitle)}
         description={t((m) => m.FamilyExpenses.pageDescription)}
         actions={
@@ -414,9 +669,62 @@ export function MoneyExpensesPage({
           ) : null
         }
       />
-      <ExpenseMetricCards transactions={transactions} currency={currency} />
-      <Tabs>
-        <TabsList>
+
+      {/* 2. Top Grid: Directional Hero (7 cols) + Outflow Actions & Pending Attention (5 cols) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+        <div className="lg:col-span-7 xl:col-span-7">
+          <MoneyDirectionalHero
+            direction="expense"
+            currency={currency}
+            totalAmountMinorUnits={summary.totalExpenses}
+            eyebrowLabel="TOTAL EXPENSES RECORDED (RWF)"
+            periodBadge={
+              <span className="font-mono text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                {currency}
+              </span>
+            }
+            subtitle="Track household bills, groceries, rent, transport, projects, and family operations."
+            progress={budgetProgress}
+            submetrics={submetrics}
+          />
+        </div>
+
+        <div className="lg:col-span-5 xl:col-span-5 flex flex-col gap-4">
+          <MoneyActionGrid
+            title="Expense actions"
+            description="Log family expenses, review budget usage, and track approvals."
+            actions={quickActions}
+          />
+
+          {pendingTransactions.length > 0 ? (
+            <MoneyPendingAttentionCard
+              direction="expense"
+              title="Pending Approvals"
+              subtitle="Expense requests awaiting leadership review."
+              badgeCount={pendingTransactions.length}
+              items={pendingAttentionItems}
+            />
+          ) : null}
+        </div>
+      </div>
+
+      {/* 3. Middle Section: Expense Categories Breakdown Card */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+        <div className="lg:col-span-12">
+          <MoneyCategoryBreakdownCard
+            direction="expense"
+            title="Expense Categories & Breakdown"
+            subtitle="Breakdown of food, housing, utilities, transport, and household costs."
+            currency={currency}
+            items={categoryItems}
+            activeCountLabel={`${categoryItems.length} active categories`}
+          />
+        </div>
+      </div>
+
+      {/* 4. Ledger Section with Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="bg-zinc-900 border border-zinc-800">
           <TabsTrigger value="data">
             {t((m) => m.FamilyExpenses.tabData)}
           </TabsTrigger>
@@ -424,7 +732,7 @@ export function MoneyExpensesPage({
             {t((m) => m.FamilyExpenses.tabOverview)}
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="data" className=" space-y-8">
+        <TabsContent value="data" className="mt-4 space-y-8">
           <ExpenseTable
             filteredTransactions={filteredTransactions}
             currency={currency}
@@ -457,7 +765,7 @@ export function MoneyExpensesPage({
             categories={categories}
           />
         </TabsContent>
-        <TabsContent value="overview">
+        <TabsContent value="overview" className="mt-4">
           <ExpenseAnalytics
             transactions={transactions}
             budgets={money?.budgets ?? []}
@@ -508,6 +816,6 @@ export function MoneyExpensesPage({
         transaction={selectedTx}
         onSuccess={fetchData}
       />
-    </div>
+    </MoneyDirectionShell>
   );
 }

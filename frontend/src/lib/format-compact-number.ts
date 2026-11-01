@@ -132,12 +132,14 @@ export function formatOptionalCompactMinorUnits(
   value: MinorUnitValue,
   currency = "RWF",
   emptyLabel = "No records",
+  localeOrOptions?: Intl.LocalesArgument | CompactFormatOptions,
+  options?: CompactFormatOptions,
 ) {
   if (value === null || value === undefined) {
     return emptyLabel;
   }
 
-  return formatCompactMinorUnits(value, currency);
+  return formatCompactMinorUnits(value, currency, localeOrOptions, options);
 }
 
 export function formatFullMinorUnits(value: unknown, currency = "RWF") {
