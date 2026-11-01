@@ -5,13 +5,7 @@ import {
   DashboardBalanceStat,
 } from "@/components/common/dashboard/dashboard-balance-card";
 import { DashboardSummaryMetric } from "@/components/common/dashboard/dashboard-metric-card";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createTranslator } from "@/i18n/translate";
 import type { PersonalOverviewData } from "./personal-overview-data";
 import { addMinorUnits } from "./personal-overview-data";
@@ -42,9 +36,7 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
         value={moneyAvailable ? balance.toString() : 0}
         href="/me/money"
         unavailable={!moneyAvailable}
-        unavailableLabel={t(
-          (m) => m.PersonalOverview.summaryCards.moneyUnavailable,
-        )}
+        unavailableLabel={t((m) => m.PersonalOverview.summaryCards.moneyUnavailable)}
       >
         <DashboardBalanceStat
           href="/me/money/income"
@@ -91,22 +83,12 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
             <DashboardQuickAddTile
               href="/me/money/income"
               label={t((m) => m.PersonalOverview.summaryCards.addIncome)}
-              icon={
-                <ArrowDownLeftIcon
-                  className="text-emerald-500"
-                  aria-hidden="true"
-                />
-              }
+              icon={<ArrowDownLeftIcon className="text-emerald-500" aria-hidden="true" />}
             />
             <DashboardQuickAddTile
               href="/me/money/expenses"
               label={t((m) => m.PersonalOverview.summaryCards.addExpense)}
-              icon={
-                <ArrowUpRightIcon
-                  className="text-destructive"
-                  aria-hidden="true"
-                />
-              }
+              icon={<ArrowUpRightIcon className="text-destructive" aria-hidden="true" />}
             />
           </div>
         </CardContent>

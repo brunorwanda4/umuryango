@@ -4,10 +4,8 @@
   "version": "0.1.0",
   "identifier": "rw.umuryango.app",
   "build": {
-    "beforeDevCommand": "bun run native:dev",
-    "devUrl": "http://localhost:5173",
-    "beforeBuildCommand": "bun run native:build",
-    "frontendDist": "../native/dist"
+    "beforeDevCommand": "bun run dev",
+    "devUrl": "http://localhost:4914"
   },
   "app": {
     "withGlobalTauri": false,
@@ -15,6 +13,7 @@
       {
         "label": "main",
         "title": "Umuryango",
+        "url": "/auth/login",
         "width": 1280,
         "height": 840,
         "minWidth": 375,
@@ -25,7 +24,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost data:; style-src 'self' 'unsafe-inline'; connect-src ipc: http://ipc.localhost",
+      "csp": "default-src 'self' http://localhost:4914; img-src 'self' asset: http://asset.localhost http://localhost:4914 data: blob:; style-src 'self' 'unsafe-inline' http://localhost:4914; script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:4914; connect-src 'self' ipc: http://ipc.localhost http://localhost:4914 http://localhost:4915 ws://localhost:4914;",
       "capabilities": ["default"]
     }
   },
@@ -36,7 +35,9 @@
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
-      "icons/icon.ico"
+      "icons/icon.icns",
+      "icons/icon.ico",
+      "icons/icon.png"
     ],
     "windows": {
       "webviewInstallMode": {

@@ -6,11 +6,7 @@ import type { FormEvent, PointerEvent } from "react";
 import { useRef, useState } from "react";
 import { GoogleIcon } from "@/components/icons/google-icon";
 import { Button } from "@/components/ui/button";
-import {
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-} from "@/components/ui/field";
+import { FieldDescription, FieldError, FieldGroup } from "@/components/ui/field";
 import { FloatingField } from "@/components/ui/floating-field";
 import { Spinner } from "@/components/ui/spinner";
 import apiRequest, { getApiAuthUrl } from "@/service/api";
@@ -42,11 +38,7 @@ function normalizeLoginIdentifier(value: string) {
   return value.trim().replace(identifierBoundaryCharacters, "");
 }
 
-export const LoginForm = ({
-  copy,
-  forgotPasswordHref,
-  postLoginHref,
-}: LoginFormProps) => {
+export const LoginForm = ({ copy, forgotPasswordHref, postLoginHref }: LoginFormProps) => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -54,9 +46,7 @@ export const LoginForm = ({
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const skipPasswordToggleClickRef = useRef(false);
 
-  const passwordToggleLabel = isPasswordVisible
-    ? copy.hidePasswordLabel
-    : copy.showPasswordLabel;
+  const passwordToggleLabel = isPasswordVisible ? copy.hidePasswordLabel : copy.showPasswordLabel;
   const PasswordIcon = isPasswordVisible ? EyeOffIcon : EyeIcon;
   const togglePasswordVisibility = () => {
     const nextIsPasswordVisible = !isPasswordVisible;
@@ -74,9 +64,7 @@ export const LoginForm = ({
       });
     }
   };
-  const handlePasswordTogglePointerDown = (
-    event: PointerEvent<HTMLButtonElement>,
-  ) => {
+  const handlePasswordTogglePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     if (event.pointerType === "mouse") return;
 
     event.preventDefault();
@@ -99,9 +87,7 @@ export const LoginForm = ({
     setIsPending(true);
 
     const formData = new FormData(event.currentTarget);
-    const emailOrMobile = normalizeLoginIdentifier(
-      String(formData.get("emailOrMobile") ?? ""),
-    );
+    const emailOrMobile = normalizeLoginIdentifier(String(formData.get("emailOrMobile") ?? ""));
     const password = String(formData.get("password") ?? "");
 
     const response = await apiRequest("post", "/auth/login", {
@@ -111,9 +97,7 @@ export const LoginForm = ({
 
     if (!response.ok) {
       setError(
-        response.statusCode === 0
-          ? copy.genericError
-          : (response.message ?? copy.genericError),
+        response.statusCode === 0 ? copy.genericError : (response.message ?? copy.genericError),
       );
       setIsPending(false);
       return;
@@ -165,18 +149,24 @@ export const LoginForm = ({
               </Button>
             }
           />
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            aria-pressed={isPasswordVisible}
-            onPointerDown={handlePasswordTogglePointerDown}
-            onClick={handlePasswordToggleClick}
-            className="h-9 w-fit self-end rounded-full px-3 text-muted-foreground hover:text-foreground sm:hidden"
-          >
-            <PasswordIcon data-icon="inline-start" aria-hidden="true" />
-            {passwordToggleLabel}
-          </Button>
+
+          <div className="flex justify-between items-center">
+            <Button href={forgotPasswordHref} variant="link" className="text-sm">
+              {copy.forgotPassword}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              aria-pressed={isPasswordVisible}
+              onPointerDown={handlePasswordTogglePointerDown}
+              onClick={handlePasswordToggleClick}
+              className="h-9 w-fit self-end rounded-full px-3 text-muted-foreground hover:text-foreground sm:hidden"
+            >
+              <PasswordIcon data-icon="inline-start" aria-hidden="true" />
+              {passwordToggleLabel}
+            </Button>
+          </div>
           <FieldError>{error}</FieldError>
         </div>
       </FieldGroup>
@@ -208,10 +198,6 @@ export const LoginForm = ({
             <GoogleIcon data-icon="inline-start" />
             {copy.continueWithGoogle}
           </a>
-        </Button>
-
-        <Button href={forgotPasswordHref} variant="link" className="text-sm">
-          {copy.forgotPassword}
         </Button>
       </div>
 

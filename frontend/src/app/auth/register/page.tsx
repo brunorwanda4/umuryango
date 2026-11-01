@@ -1,6 +1,5 @@
-import { ChevronLeftIcon } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackButton } from "@/components/common/back-button";
 import {
   getLocalizedHref,
   getMessages,
@@ -56,14 +55,11 @@ const RegisterPage = async ({ searchParams }: RegisterPageProps) => {
     <main className="flex min-h-dvh justify-center bg-background px-6 py-10 text-foreground sm:px-8">
       <div className="flex w-full max-w-[34rem] flex-col gap-7">
         <div className="flex flex-col gap-2">
-          <div className="flex flex-row items-center gap-2 ">
-            <Link
+          <div className="flex flex-row items-center gap-2">
+            <BackButton
               href={getLocalizedHref("/auth/login", locale)}
-              className="inline-flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label={register((m) => m.RegisterPage.backAriaLabel)}
-            >
-              <ChevronLeftIcon aria-hidden="true" className="size-5" />
-            </Link>
+              label={register((m) => m.RegisterPage.backAriaLabel)}
+            />
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
               {register((m) => m.RegisterPage.heading)}
             </h1>

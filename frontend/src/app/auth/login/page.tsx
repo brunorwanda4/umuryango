@@ -63,19 +63,19 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
 
   return (
     <main className="grid min-h-dvh bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_minmax(28rem,1fr)]">
-      <section className="relative order-2 flex min-h-[42rem] flex-col overflow-hidden border-border px-6 py-8 sm:px-10 lg:order-1 lg:min-h-dvh lg:border-r lg:px-12">
+      <section className="relative hidden flex-col overflow-hidden border-border px-6 py-8 sm:px-10 lg:order-1 lg:flex lg:min-h-dvh lg:px-12">
         <Link
           href={getLocalizedHref("/", locale)}
-          className="flex size-14 items-center justify-center rounded-2xl bg-card shadow-sm ring-1 ring-border"
+          className=""
           aria-label={shared((m) => m.Shared.homeAriaLabel)}
         >
           <Image
-            src="/brand/umuryango-inverted-icon.png"
+            src="/brand/umuryango-family-icon.png"
             alt=""
             width={56}
             height={56}
             priority
-            className="rounded-2xl"
+            className=" dark:invert"
           />
         </Link>
 

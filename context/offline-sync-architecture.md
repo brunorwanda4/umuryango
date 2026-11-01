@@ -1,5 +1,11 @@
 # Offline-First Native Architecture & Synchronization Specification
 
+> [!NOTE] Architecture Migration Status
+> The Umuryango Tauri desktop application has migrated to use the existing Next.js application (`frontend/src/`) as its single UI.
+> The separate native React UI (`frontend/native/`), client-side token vault, native SQLite caching, and client offline synchronization panels have been intentionally removed.
+> The desktop application operates as a Tauri webview wrapper loading the Next.js application, authenticates using standard Next.js flows and secure HTTP-only cookies, and requires active network connectivity (relying on standard browser/PWA caching when available).
+> The backend sync models and contracts documented below remain in place for backend-authoritative data synchronization needs.
+
 ## 1. Current System Data Flows (Pre-Synchronization Baseline)
 
 ### 1.1 Web Application (`frontend/src/`)

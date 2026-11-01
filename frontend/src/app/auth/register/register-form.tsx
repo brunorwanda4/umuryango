@@ -26,8 +26,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Spinner } from "@/components/ui/spinner";
 import apiRequest, { getApiAuthUrl } from "@/service/api";
 
-const defaultDevelopmentVerificationCode =
-  process.env.NODE_ENV === "development" ? "678901" : "";
+const defaultDevelopmentVerificationCode = process.env.NODE_ENV === "development" ? "678901" : "";
 
 export type RegisterFormCopy = {
   fullNameLabel: string;
@@ -69,11 +68,7 @@ type RegisterFormProps = {
   verifiedHref?: string;
 };
 
-export const RegisterForm = ({
-  copy,
-  loginHref,
-  verifiedHref = "/me",
-}: RegisterFormProps) => {
+export const RegisterForm = ({ copy, loginHref, verifiedHref = "/me" }: RegisterFormProps) => {
   const router = useRouter();
   const [step, setStep] = useState<"register" | "verify">("register");
   const [registeredEmail, setRegisteredEmail] = useState("");
@@ -85,9 +80,7 @@ export const RegisterForm = ({
   const [isResending, setIsResending] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const passwordToggleLabel = isPasswordVisible
-    ? copy.hidePasswordLabel
-    : copy.showPasswordLabel;
+  const passwordToggleLabel = isPasswordVisible ? copy.hidePasswordLabel : copy.showPasswordLabel;
   const PasswordIcon = isPasswordVisible ? EyeOffIcon : EyeIcon;
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
@@ -115,9 +108,7 @@ export const RegisterForm = ({
 
     if (!response.ok) {
       setError(
-        response.statusCode === 0
-          ? copy.networkError
-          : (response.message ?? copy.genericError),
+        response.statusCode === 0 ? copy.networkError : (response.message ?? copy.genericError),
       );
       setIsPending(false);
       return;
@@ -234,9 +225,7 @@ export const RegisterForm = ({
                 </InputOTPGroup>
               </InputOTP>
               <FieldError>{error}</FieldError>
-              <p className="text-xs text-muted-foreground text-center">
-                {copy.spamHint}
-              </p>
+              <p className="text-xs text-muted-foreground text-center">{copy.spamHint}</p>
             </Field>
           </div>
         </FieldGroup>
@@ -353,7 +342,6 @@ export const RegisterForm = ({
             maxLength={20}
             aria-invalid={Boolean(error)}
           />
-          <FieldDescription>{copy.contactHint}</FieldDescription>
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -385,9 +373,7 @@ export const RegisterForm = ({
         </div>
       </FieldGroup>
 
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        {copy.legal}
-      </p>
+      <p className="text-xs leading-relaxed text-muted-foreground">{copy.legal}</p>
 
       <div className="flex flex-col items-center gap-3">
         <Button

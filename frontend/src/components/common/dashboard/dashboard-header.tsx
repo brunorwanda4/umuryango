@@ -16,10 +16,7 @@ export function DashboardHeader({
 }) {
   return (
     <header
-      className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between",
-        className,
-      )}
+      className={cn("flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between", className)}
     >
       <div className="min-w-0 space-y-2">
         <div className="flex flex-wrap items-center gap-3">
@@ -28,15 +25,9 @@ export function DashboardHeader({
           </h1>
           {meta}
         </div>
-        {subtitle ? (
-          <p className="max-w-3xl text-muted-foreground text-sm">{subtitle}</p>
-        ) : null}
+        {subtitle ? <p className="max-w-3xl text-muted-foreground text-sm">{subtitle}</p> : null}
       </div>
-      {actions ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {actions}
-        </div>
-      ) : null}
+      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </header>
   );
 }

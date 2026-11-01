@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::api::contracts::{
     validate_positive_minor_units, CachedFamilyView, NativeDashboardView, OutboxCommandView,
     SafeSessionSummary, SyncCommandType, SyncRecordType, SyncStatusSummary,

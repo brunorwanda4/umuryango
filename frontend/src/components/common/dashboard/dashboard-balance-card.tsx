@@ -1,12 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import type { MinorUnitValue } from "@/lib/format-compact-number";
 import { cn } from "@/lib/utils";
 
@@ -46,11 +41,7 @@ export function DashboardBalanceStat({
     );
   }
 
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/6 p-3">
-      {inner}
-    </div>
-  );
+  return <div className="rounded-xl border border-white/10 bg-white/6 p-3">{inner}</div>;
 }
 
 export function DashboardBalanceCard({
@@ -108,9 +99,7 @@ export function DashboardBalanceCard({
         ) : (
           <div>{balanceContent}</div>
         )}
-        {children ? (
-          <div className="mt-auto grid grid-cols-2 gap-3 pt-5">{children}</div>
-        ) : null}
+        {children ? <div className="mt-auto grid grid-cols-2 gap-3 pt-5">{children}</div> : null}
       </CardContent>
     </Card>
   );

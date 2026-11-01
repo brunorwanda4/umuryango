@@ -55,12 +55,12 @@ Family is the tenant boundary; backend enforces permissions; financial records a
 When status changes, update the table with what changed, what remains, and any verification. Do not mark features complete without implementation, tests/checks, and documentation.
 
 
-## Offline-First Tauri v2 Native Platform (Android & Windows)
+## Tauri v2 Desktop Platform (Next.js Unified UI)
 
-- **Status**: Implemented & verified across Phases 1–4.
-- **Delivered**:
-  - Versioned shared synchronization contracts (`contracts/sync-contracts.v1.json`, `contracts/index.ts`, `frontend/src-tauri/src/api/contracts.rs`).
-  - Prisma schema & migration (`backend/prisma/migrations/20261101000000_add_offline_sync_support/migration.sql`) adding `FamilySyncMutation`, receipt `checksumSha256`/`idempotencyKey`, and cursor indexes `@@index([familyId, updatedAt, id])`.
-  - Backend native auth (`/api/v1/auth/native/*`) and family sync endpoints (`GET /api/v1/families/:familySlug/sync/pull`, `POST /api/v1/families/:familySlug/sync/push`) with live membership/permission revalidation, idempotent command deduplication, conflict detection, tombstones, and audit logs.
-  - Rust Tauri v2 application (`frontend/src-tauri/`) with encrypted Stronghold/AEAD session vault, per-account SQLite database with `ChaCha20-Poly1305` payload encryption, outbox engine, bounded exponential backoff with jitter, offline receipt staging, deep links, notifications, and Android (`rw.umuryango.app`) + Windows configurations.
-  - Separately bundled native React/TypeScript UI (`frontend/native/`) with separated server-authoritative vs local-pending totals, offline mutation forms, staleness banner, and Sync Inspector screen.
+- **Status**: Migrated to unified Next.js App Router UI.
+- **Changes**:
+  - The separate native React UI (`frontend/native/`), client offline SQLite database, client token vault, and offline synchronization screens were intentionally removed.
+  - Desktop development runs the existing Next.js application on port 4914 via `bun run dev` and `tauri dev` (`devUrl: "http://localhost:4914"`).
+  - Web and desktop share identical routes, components, and HTTP-only cookie authentication flows.
+  - Tauri capabilities are reduced to least-privilege desktop features with no broad remote-domain IPC access.
+  - Production desktop packaging is blocked until an authoritative production HTTPS deployment URL is configured (no localhost or fabricated domains). Backend synchronization models and contracts remain in place.

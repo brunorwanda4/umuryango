@@ -59,16 +59,13 @@ Use this file for system design, module boundaries, database, API, jobs, storage
 - Scale with pagination, indexes, efficient reports, safe caching, queues, and avoiding N+1 queries.
 
 
-## Offline-First Tauri v2 Native Architecture (Android & Windows)
+## Tauri v2 Desktop Architecture (Windows & Android)
 
-- **Web Preservation**: `frontend/src/` remains the standard Next.js 15 App Router web application communicating directly with `/api/v1` via HTTP-only cookies (`rf_access_token`, `rf_refresh_token`). No `output: "export"` is used on the web build.
-- **Native UI Layer (`frontend/native/`)**: Separately bundled local React + TypeScript thin presentation layer (`frontend/native/dist/`) loaded by Tauri on Android and Windows. It never accesses tokens, never writes `localStorage` tokens, never executes direct HTTP calls, and invokes narrow typed Rust commands (`frontend/src-tauri/src/commands/mod.rs`).
-- **Rust Core (`frontend/src-tauri/src/`)**:
-  - `auth/`: Manages native sessions (`UNAUTHENTICATED`, `AUTHENTICATED_ONLINE`, `AUTHENTICATED_OFFLINE_UNLOCKED`, `SESSION_EXPIRED`, `MEMBERSHIP_REVOKED`) and stores access/refresh tokens in an encrypted Stronghold-equivalent AEAD vault (`ChaCha20-Poly1305` via `ring::aead` + `HKDF-SHA256`).
-  - `database/`: Per-account SQLite database (`accounts/<sha256(user_id)>/umuryango_v1.sqlite3`) with versioned migrations, strict account + `familyId` isolation, `ChaCha20-Poly1305` AEAD payload encryption with associated data (`account_id | family_id | record_type | local_id`), and `i128` minor-unit financial aggregation.
-  - `sync/`: Outbox-based synchronization engine with `UUID v4` idempotency keys, parent-child command dependency halting, bounded exponential backoff with jitter, transactional cursor-based pull, tombstones, and explicit conflict resolution (`ACCEPT_SERVER`, `DISCARD_LOCAL`, `RETRY_AS_NEW_NOTES`).
-  - `files/`: App-owned encrypted staging for offline receipts/documents (`<= 10 MiB`, `JPEG/PNG/WEBP/PDF`) with `SHA-256` checksum verification.
-- **Backend Synchronization (`backend/src/sync/` & `backend/src/auth/`)**:
-  - Native auth endpoints under `/api/v1/auth/native/{login,refresh,logout,health}` requiring `x-umuryango-client: tauri-native`.
-  - Family-scoped sync endpoints `GET /api/v1/families/:familySlug/sync/pull` and `POST /api/v1/families/:familySlug/sync/push` enforcing live membership/permission revalidation, idempotency deduplication (`FamilySyncMutation`), conflict codes, and audit logs.
-- **Detailed Reference**: See `context/offline-sync-architecture.md` and `contracts/sync-contracts.v1.json`.
+- **Single UI Architecture**: `frontend/src/` is the sole application UI for both regular browsers and the Tauri desktop application. The separate native React UI (`frontend/native/`) has been removed. Both web and desktop load the identical Next.js routes, layouts, and components.
+- **Authentication**: Desktop WebView runs the standard Next.js authentication flow (`/auth/login`, `/auth/register`, `/auth/forgot-password`, etc.) with secure HTTP-only cookies (`umuryango_access_token`, `umuryango_refresh_token`) against the backend API via `frontend/src/service/api.ts`. Client-side tokens are never stored in localStorage, sessionStorage, or a separate native token vault.
+- **Network Dependency**: The desktop application functions as a Tauri wrapper around the Next.js application. It requires active network connectivity to communicate with the server and authenticate users; offline behavior is limited to standard browser caching / PWA service worker capabilities. The prior native offline SQLite caching and Rust outbox synchronization engine are removed from the client UI.
+- **Tauri Integration & Security**:
+  - Development mode starts the Next.js development server on port 4914 (`bun run dev`) and sets Tauri's dev URL to `http://localhost:4914`, opening `/auth/login` directly by default to bypass public web marketing pages on desktop.
+  - In production, Tauri is intended to load the hosted HTTPS Next.js deployment. No localhost is used in production, and `output: "export"` remains disabled to support Next.js server features.
+  - Privileged Rust IPC commands are not exposed to remotely loaded web content. Tauri capabilities are restricted to least-privilege desktop features (window management, opener, notifications, dialogs).
+- **Backend & Contracts**: Backend sync endpoints and shared synchronization contracts (`contracts/sync-contracts.v1.json`) are preserved for future headless or mobile sync capabilities without native UI coupling.

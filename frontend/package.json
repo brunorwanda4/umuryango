@@ -11,10 +11,10 @@
     "lint": "biome check",
     "format": "biome format --write",
     "i18n": "bun ./scripts/i18n.ts",
-    "test": "bun test src native/src/test",
-    "native:test": "bun test native/src/test/native-ui.test.tsx",
-    "native:build": "bun build ./native/index.html --outdir ./native/dist --minify",
-    "native:dev": "bun ./native/index.html --port 5173"
+    "test": "bun test src",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -51,6 +51,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
     "@tailwindcss/postcss": "^4",
+    "@tauri-apps/cli": "^2.12.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
