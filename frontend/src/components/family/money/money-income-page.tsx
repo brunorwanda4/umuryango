@@ -319,9 +319,9 @@ export function MoneyIncomePage({
     const todayKey = formatDateKey(new Date());
     const currentMonthKey = todayKey.slice(0, 7);
 
-    let totalRecorded = 0n;
-    let monthRecorded = 0n;
-    let pendingAmount = 0n;
+    let totalRecorded = BigInt(0);
+    let monthRecorded = BigInt(0);
+    let pendingAmount = BigInt(0);
     let activeRecordCount = 0;
 
     for (const tx of transactions) {
@@ -344,7 +344,9 @@ export function MoneyIncomePage({
     }
 
     const clearedAmount =
-      totalRecorded >= pendingAmount ? totalRecorded - pendingAmount : 0n;
+      totalRecorded >= pendingAmount
+        ? totalRecorded - pendingAmount
+        : BigInt(0);
 
     return {
       totalRecorded: totalRecorded.toString(),
@@ -373,7 +375,7 @@ export function MoneyIncomePage({
       const name = tx.category.name || "Uncategorized";
       const id = tx.categoryId || name;
       const amount = BigInt(normalizeMinorUnits(tx.amountMinorUnits));
-      if (amount <= 0n) continue;
+      if (amount <= BigInt(0)) continue;
 
       const existing = map.get(id);
       if (existing) {
@@ -383,7 +385,7 @@ export function MoneyIncomePage({
           id,
           name,
           total: amount,
-          color: tx.category.color ?? null,
+          color: null,
         });
       }
     }

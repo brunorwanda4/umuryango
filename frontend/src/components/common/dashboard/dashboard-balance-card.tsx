@@ -19,7 +19,7 @@ function isPositiveMinorUnits(value: MinorUnitValue): boolean {
       return false;
     }
     try {
-      return BigInt(trimmed.split(".")[0]) > 0n;
+      return BigInt(trimmed.split(".")[0]) > BigInt(0);
     } catch {
       return false;
     }

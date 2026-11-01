@@ -25,7 +25,7 @@ export function normalizeMinorUnits(
 export function addMinorUnits(
   ...values: (MinorUnitValue | null | undefined)[]
 ): string {
-  let sum = 0n;
+  let sum = BigInt(0);
   for (const v of values) {
     if (v === null || v === undefined) continue;
     try {
@@ -56,9 +56,9 @@ export function safeCalculatePercentage(
     const item = BigInt(itemStr);
     const total = BigInt(totalStr);
 
-    if (total <= 0n || item <= 0n) return 0;
-    // Basis points: (item * 10000) / total
-    const basisPoints = Number((item * 10000n) / total);
+    if (total <= BigInt(0) || item <= BigInt(0)) return 0;
+    // Basis points: (item * BigInt(10000)) / total
+    const basisPoints = Number((item * BigInt(10000)) / total);
     return Math.min(100, Math.max(0, Math.round(basisPoints / 100)));
   } catch {
     return 0;

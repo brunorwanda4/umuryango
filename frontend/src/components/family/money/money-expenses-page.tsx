@@ -256,10 +256,10 @@ export function MoneyExpensesPage({
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
 
-    let totalExpenses = 0n;
-    let monthExpenses = 0n;
-    let todayExpenses = 0n;
-    let pendingApproval = 0n;
+    let totalExpenses = BigInt(0);
+    let monthExpenses = BigInt(0);
+    let todayExpenses = BigInt(0);
+    let pendingApproval = BigInt(0);
 
     for (const transaction of transactions) {
       const amount = BigInt(normalizeMinorUnits(transaction.amountMinorUnits));
@@ -302,12 +302,12 @@ export function MoneyExpensesPage({
   const budgetProgress = useMemo<MoneyHeroProgress | undefined>(() => {
     if (!money?.budgets || money.budgets.length === 0) return undefined;
 
-    let totalBudget = 0n;
+    let totalBudget = BigInt(0);
     for (const b of money.budgets) {
-      totalBudget += BigInt(normalizeMinorUnits(b.amountMinorUnits));
+      totalBudget += BigInt(normalizeMinorUnits(b.limitMinorUnits));
     }
 
-    if (totalBudget <= 0n) return undefined;
+    if (totalBudget <= BigInt(0)) return undefined;
 
     const percent = safeCalculatePercentage(
       summary.monthExpenses,
@@ -403,7 +403,7 @@ export function MoneyExpensesPage({
       const name = tx.category.name || "Uncategorized";
       const id = tx.categoryId || name;
       const amount = BigInt(normalizeMinorUnits(tx.amountMinorUnits));
-      if (amount <= 0n) continue;
+      if (amount <= BigInt(0)) continue;
 
       const existing = map.get(id);
       if (existing) {
@@ -413,7 +413,7 @@ export function MoneyExpensesPage({
           id,
           name,
           total: amount,
-          color: tx.category.color ?? null,
+          color: null,
         });
       }
     }
