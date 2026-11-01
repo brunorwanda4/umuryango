@@ -11,7 +11,7 @@ export function DashboardShell({
   return (
     <div
       className={cn(
-        "mx-auto flex w-full max-w-5xl flex-col gap-4 sm:gap-5",
+        "mx-auto flex w-full max-w-6xl flex-col gap-4 sm:gap-5 pb-8",
         className,
       )}
     >

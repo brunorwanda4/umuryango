@@ -1,8 +1,9 @@
 import type { LucideIcon } from "lucide-react";
 import {
   ActivityIcon,
+  ArrowDownLeftIcon,
+  ArrowUpRightIcon,
   CalendarCheckIcon,
-  ReceiptTextIcon,
   UsersIcon,
 } from "lucide-react";
 import {
@@ -12,6 +13,7 @@ import {
 import { DashboardEmptyState } from "@/components/common/dashboard/dashboard-empty-state";
 import { DashboardSectionCard } from "@/components/common/dashboard/dashboard-section-card";
 import { createTranslator, type Translator } from "@/i18n/translate";
+import { cn } from "@/lib/utils";
 import type { PersonalOverviewData } from "./personal-overview-data";
 
 type Activity = {
@@ -20,6 +22,7 @@ type Activity = {
   description: string;
   time: string;
   icon: LucideIcon;
+  iconClassName?: string;
 };
 
 export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
@@ -30,14 +33,16 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
       title: t((m) => m.PersonalOverview.recentActivityCard.addedIncome),
       description: record.description ?? record.category.name,
       time: record.createdAt,
-      icon: ReceiptTextIcon,
+      icon: ArrowDownLeftIcon,
+      iconClassName: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
     })),
     ...(data.expenses?.records ?? []).map((record) => ({
       id: `expense-${record.id}`,
       title: t((m) => m.PersonalOverview.recentActivityCard.addedExpense),
       description: record.description ?? record.category.name,
       time: record.createdAt,
-      icon: ReceiptTextIcon,
+      icon: ArrowUpRightIcon,
+      iconClassName: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
     })),
     ...data.plans.map((plan) => ({
       id: `plan-${plan.id}`,
@@ -48,6 +53,7 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
       description: plan.title,
       time: plan.completedAt ?? plan.createdAt,
       icon: CalendarCheckIcon,
+      iconClassName: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
     })),
     ...data.families.map((family) => ({
       id: `family-${family.id}`,
@@ -57,6 +63,7 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
       description: family.name,
       time: "",
       icon: UsersIcon,
+      iconClassName: "bg-muted text-muted-foreground",
     })),
   ]
     .sort(
@@ -85,7 +92,16 @@ export function RecentActivityCard({ data }: { data: PersonalOverviewData }) {
           {activities.map((activity) => (
             <DashboardActivityItem
               key={activity.id}
-              icon={<activity.icon className="size-4" aria-hidden="true" />}
+              icon={
+                <div
+                  className={cn(
+                    "flex size-7 items-center justify-center rounded-lg",
+                    activity.iconClassName,
+                  )}
+                >
+                  <activity.icon className="size-3.5" aria-hidden="true" />
+                </div>
+              }
               title={activity.title}
               description={activity.description}
               timestamp={

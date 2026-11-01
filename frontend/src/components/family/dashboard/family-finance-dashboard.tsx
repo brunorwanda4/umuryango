@@ -51,13 +51,7 @@ import {
   createProjectSlug,
 } from "@/components/family/projects/utils";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   type ChartConfig,
   ChartContainer,
@@ -68,6 +62,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
+import { cn } from "@/lib/utils";
 import {
   buildAttentionItems,
   getFamilyQuickActions,
@@ -90,9 +85,14 @@ function getQuickActionMeta(id: FamilyQuickActionId) {
     case "add-income":
       return {
         label: t((m) => m.FamilyDashboard.addIncome),
+        description: "Deposit, dues, or gift",
         icon: (
-          <ArrowDownLeftIcon className="text-emerald-500" aria-hidden="true" />
+          <ArrowDownLeftIcon
+            className="size-4 text-emerald-500"
+            aria-hidden="true"
+          />
         ),
+        iconClassName: "bg-emerald-500/10 text-emerald-500",
         buttonIcon: (
           <ArrowDownLeftIcon data-icon="inline-start" aria-hidden="true" />
         ),
@@ -100,9 +100,14 @@ function getQuickActionMeta(id: FamilyQuickActionId) {
     case "add-expense":
       return {
         label: t((m) => m.FamilyDashboard.addExpense),
+        description: "Bills, supplies, or event",
         icon: (
-          <ArrowUpRightIcon className="text-destructive" aria-hidden="true" />
+          <ArrowUpRightIcon
+            className="size-4 text-rose-500"
+            aria-hidden="true"
+          />
         ),
+        iconClassName: "bg-rose-500/10 text-rose-500",
         buttonIcon: (
           <ArrowUpRightIcon data-icon="inline-start" aria-hidden="true" />
         ),
@@ -110,7 +115,11 @@ function getQuickActionMeta(id: FamilyQuickActionId) {
     case "add-loan":
       return {
         label: t((m) => m.FamilyDashboard.addLoan),
-        icon: <HandCoinsIcon aria-hidden="true" />,
+        description: "Record family loan or debt",
+        icon: (
+          <HandCoinsIcon className="size-4 text-amber-500" aria-hidden="true" />
+        ),
+        iconClassName: "bg-amber-500/10 text-amber-500",
         buttonIcon: (
           <HandCoinsIcon data-icon="inline-start" aria-hidden="true" />
         ),
@@ -118,7 +127,14 @@ function getQuickActionMeta(id: FamilyQuickActionId) {
     case "create-project":
       return {
         label: t((m) => m.FamilyDashboard.createProject),
-        icon: <FolderKanbanIcon aria-hidden="true" />,
+        description: "Wedding, medical, or build",
+        icon: (
+          <FolderKanbanIcon
+            className="size-4 text-blue-500"
+            aria-hidden="true"
+          />
+        ),
+        iconClassName: "bg-blue-500/10 text-blue-500",
         buttonIcon: (
           <FolderKanbanIcon data-icon="inline-start" aria-hidden="true" />
         ),
@@ -126,7 +142,11 @@ function getQuickActionMeta(id: FamilyQuickActionId) {
     case "invite-member":
       return {
         label: t((m) => m.FamilyDashboard.inviteMember),
-        icon: <UserPlusIcon aria-hidden="true" />,
+        description: "Add a new family member",
+        icon: (
+          <UserPlusIcon className="size-4 text-foreground" aria-hidden="true" />
+        ),
+        iconClassName: "bg-primary/10 text-primary",
         buttonIcon: (
           <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
         ),
@@ -134,7 +154,14 @@ function getQuickActionMeta(id: FamilyQuickActionId) {
     case "review-approvals":
       return {
         label: t((m) => m.FamilyDashboard.reviewApprovals),
-        icon: <CheckSquareIcon aria-hidden="true" />,
+        description: "Review pending requests",
+        icon: (
+          <CheckSquareIcon
+            className="size-4 text-amber-500"
+            aria-hidden="true"
+          />
+        ),
+        iconClassName: "bg-amber-500/10 text-amber-500",
         buttonIcon: (
           <CheckSquareIcon data-icon="inline-start" aria-hidden="true" />
         ),
@@ -142,7 +169,14 @@ function getQuickActionMeta(id: FamilyQuickActionId) {
     case "open-reports":
       return {
         label: t((m) => m.FamilyDashboard.openReports),
-        icon: <FileBarChart2Icon aria-hidden="true" />,
+        description: "View financial reports",
+        icon: (
+          <FileBarChart2Icon
+            className="size-4 text-muted-foreground"
+            aria-hidden="true"
+          />
+        ),
+        iconClassName: "bg-muted text-muted-foreground",
         buttonIcon: (
           <FileBarChart2Icon data-icon="inline-start" aria-hidden="true" />
         ),
@@ -166,7 +200,6 @@ export function FamilyFinancialSummary({
   const canApproveExpense = hasCapability(family, "APPROVE_EXPENSE");
   const quickActions = getFamilyQuickActions(family);
   const primaryActions = quickActions.slice(0, 2);
-  const cardClassName = "card card-border gap-0 rounded-[20px] py-5 shadow-sm";
 
   return (
     <section
@@ -186,25 +219,27 @@ export function FamilyFinancialSummary({
           currency={currency}
           label={t((m) => m.FamilyDashboard.incomeThisMonth)}
           value={totals?.incomeMinorUnits ?? 0}
+          variant="income"
         />
         <DashboardBalanceStat
           href={`${moneyHref}/expenses`}
           currency={currency}
           label={t((m) => m.FamilyDashboard.spentThisMonth)}
           value={totals?.expenseMinorUnits ?? 0}
+          variant="expense"
         />
       </DashboardBalanceCard>
 
-      <Card className={cardClassName}>
-        <CardHeader className="px-5 pb-3.5">
-          <CardTitle className="font-fraunces text-xl">
+      <Card className="rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs flex flex-col justify-between min-w-0">
+        <div>
+          <h2 className="text-xs sm:text-sm font-bold tracking-tight text-foreground">
             {t((m) => m.FamilyDashboard.quickAddTitle)}
-          </CardTitle>
-          <CardDescription>
+          </h2>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
             {t((m) => m.FamilyDashboard.quickAddDesc)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 px-5">
+          </p>
+        </div>
+        <div className="grid gap-3 pt-3">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <DashboardSummaryMetric
               href={canApproveExpense ? `${moneyHref}/approvals` : moneyHref}
@@ -212,11 +247,19 @@ export function FamilyFinancialSummary({
               value={
                 moneyAvailable ? String(totals?.pendingApprovalCount ?? 0) : "—"
               }
+              valueClassName={
+                (totals?.pendingApprovalCount ?? 0) > 0
+                  ? "text-amber-600 dark:text-amber-400"
+                  : undefined
+              }
             />
             <DashboardSummaryMetric
               href={moneyHref}
               label={t((m) => m.FamilyDashboard.overdue)}
               value={moneyAvailable ? String(totals?.overdueCount ?? 0) : "—"}
+              valueClassName={
+                (totals?.overdueCount ?? 0) > 0 ? "text-destructive" : undefined
+              }
             />
             <DashboardSummaryMetric
               href={moneyHref}
@@ -239,7 +282,7 @@ export function FamilyFinancialSummary({
           </div>
 
           {primaryActions.length > 0 ? (
-            <div className="grid gap-2.5 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-2">
               {primaryActions.map((action) => {
                 const meta = getQuickActionMeta(action.id);
                 return (
@@ -247,7 +290,9 @@ export function FamilyFinancialSummary({
                     key={action.id}
                     href={action.href}
                     label={meta.label}
+                    description={meta.description}
                     icon={meta.icon}
+                    iconClassName={meta.iconClassName}
                   />
                 );
               })}
@@ -257,7 +302,7 @@ export function FamilyFinancialSummary({
               {t((m) => m.FamilyDashboard.noQuickActionsDesc)}
             </p>
           )}
-        </CardContent>
+        </div>
       </Card>
     </section>
   );
@@ -265,8 +310,9 @@ export function FamilyFinancialSummary({
 
 export function FamilyQuickActionsCard({ family }: { family: FamilyDetail }) {
   const quickActions = getFamilyQuickActions(family);
+  const secondaryActions = quickActions.slice(2);
 
-  if (quickActions.length === 0) {
+  if (secondaryActions.length === 0) {
     return null;
   }
 
@@ -276,7 +322,7 @@ export function FamilyQuickActionsCard({ family }: { family: FamilyDetail }) {
       description={t((m) => m.FamilyDashboard.quickActionsDesc)}
     >
       <DashboardActionGrid className="sm:grid-cols-3 lg:grid-cols-4">
-        {quickActions.map((action) => {
+        {secondaryActions.map((action) => {
           const meta = getQuickActionMeta(action.id);
           return (
             <DashboardActionTile
@@ -371,101 +417,145 @@ export function FamilyMoneyOverviewCard({
         />
       ) : (
         <>
-          <ChartContainer
-            config={chartConfig}
-            className="h-44 w-full aspect-auto"
-            initialDimension={{ height: 176, width: 560 }}
-          >
-            <BarChart
-              data={chartData}
-              margin={{ left: 0, right: 8, top: 8 }}
-              accessibilityLayer
+          <div className="rounded-xl border border-border/70 bg-muted/20 p-3">
+            <ChartContainer
+              config={chartConfig}
+              className="h-36 w-full aspect-auto"
+              initialDimension={{ height: 144, width: 560 }}
             >
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tickMargin={8}
-              />
-              <YAxis hide />
-              <ChartTooltip
-                cursor={false}
-                content={
-                  <ChartTooltipContent
-                    hideLabel
-                    formatter={(value) =>
-                      typeof value === "number"
-                        ? formatFullMinorUnits(value, currency)
-                        : value
-                    }
-                  />
-                }
-              />
-              <Bar dataKey="amount" radius={8} />
-            </BarChart>
-          </ChartContainer>
-          <Separator />
-          <div className="flex flex-col gap-3">
-            <p className="font-medium text-sm">
+              <BarChart
+                data={chartData}
+                margin={{ left: 0, right: 8, top: 8 }}
+                accessibilityLayer
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tickMargin={8}
+                />
+                <YAxis hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      hideLabel
+                      formatter={(value) =>
+                        typeof value === "number"
+                          ? formatFullMinorUnits(value, currency)
+                          : value
+                      }
+                    />
+                  }
+                />
+                <Bar dataKey="amount" radius={8} />
+              </BarChart>
+            </ChartContainer>
+          </div>
+
+          <Separator className="bg-border/60" />
+
+          <div className="flex flex-col gap-2.5">
+            <p className="font-semibold text-xs text-foreground">
               {t((m) => m.FamilyDashboard.recentTransactionsTitle)}
             </p>
             {records.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs">
                 {t((m) => m.FamilyDashboard.noRecentTransactions)}
               </p>
             ) : (
-              records.map((record) => {
-                const statusUpper = (record.status ?? "").toUpperCase();
-                return (
-                  <Link
-                    key={record.id}
-                    href={moneyHref}
-                    className="flex items-center justify-between gap-3 rounded-lg py-1.5 transition-colors hover:bg-muted/50"
-                  >
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="truncate font-medium text-sm">
-                          {record.title}
-                        </p>
-                        {record.status ? (
-                          <Badge variant="outline" className="text-[11px]">
-                            {statusUpper === "APPROVED"
-                              ? t(
-                                  (m) =>
-                                    m.FamilyDashboard.transactionStatus
-                                      .APPROVED,
-                                )
-                              : statusUpper === "PENDING"
-                                ? t(
-                                    (m) =>
-                                      m.FamilyDashboard.transactionStatus
-                                        .PENDING,
-                                  )
-                                : statusUpper === "REJECTED"
+              <div className="space-y-2">
+                {records.map((record) => {
+                  const statusUpper = (record.status ?? "").toUpperCase();
+                  const isIncome = record.type === "INCOME";
+
+                  return (
+                    <Link
+                      key={record.id}
+                      href={moneyHref}
+                      className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={cn(
+                            "size-7 shrink-0 rounded-lg flex items-center justify-center text-xs font-bold",
+                            isIncome
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                          )}
+                        >
+                          {isIncome ? (
+                            <ArrowDownLeftIcon
+                              className="size-3.5"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <ArrowUpRightIcon
+                              className="size-3.5"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <p className="truncate font-semibold text-xs text-foreground">
+                              {record.title}
+                            </p>
+                            {record.status ? (
+                              <Badge
+                                variant={
+                                  statusUpper === "REJECTED"
+                                    ? "destructive"
+                                    : "outline"
+                                }
+                                className="text-[10px] px-1.5 py-0 h-4"
+                              >
+                                {statusUpper === "APPROVED"
                                   ? t(
                                       (m) =>
                                         m.FamilyDashboard.transactionStatus
-                                          .REJECTED,
+                                          .APPROVED,
                                     )
-                                  : formatTitle(record.status)}
-                          </Badge>
-                        ) : null}
+                                  : statusUpper === "PENDING"
+                                    ? t(
+                                        (m) =>
+                                          m.FamilyDashboard.transactionStatus
+                                            .PENDING,
+                                      )
+                                    : statusUpper === "REJECTED"
+                                      ? t(
+                                          (m) =>
+                                            m.FamilyDashboard.transactionStatus
+                                              .REJECTED,
+                                        )
+                                      : formatTitle(record.status)}
+                              </Badge>
+                            ) : null}
+                          </div>
+                          <p className="truncate text-muted-foreground text-[10px]">
+                            {record.category ?? formatTitle(record.type)}
+                            {record.createdBy ? ` · ${record.createdBy}` : ""} ·{" "}
+                            {formatDate(record.date)}
+                          </p>
+                        </div>
                       </div>
-                      <p className="truncate text-muted-foreground text-xs">
-                        {record.category ?? formatTitle(record.type)}
-                        {record.createdBy ? ` · ${record.createdBy}` : ""} ·{" "}
-                        {formatDate(record.date)}
-                      </p>
-                    </div>
-                    <CompactMoney
-                      className="shrink-0 font-medium"
-                      currency={currency}
-                      value={record.amountMinorUnits ?? 0}
-                    />
-                  </Link>
-                );
-              })
+                      <div className="text-right shrink-0">
+                        <CompactMoney
+                          className={cn(
+                            "font-mono text-xs font-bold tabular-nums block",
+                            isIncome
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-rose-600 dark:text-rose-400",
+                          )}
+                          currency={currency}
+                          value={record.amountMinorUnits ?? 0}
+                        />
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             )}
           </div>
         </>
@@ -560,17 +650,28 @@ export function FamilyAttentionCard({
         actionHref ? t((m) => m.FamilyDashboard.openApprovals) : undefined
       }
     >
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.pendingApprovals)}
+          valueClassName={
+            pendingApprovalsCount > 0
+              ? "text-amber-600 dark:text-amber-400"
+              : undefined
+          }
           value={money === null ? "—" : pendingApprovalsCount}
         />
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.overdue)}
+          valueClassName={overdueCount > 0 ? "text-destructive" : undefined}
           value={money === null ? "—" : overdueCount}
         />
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.pendingReview)}
+          valueClassName={
+            verificationCount > 0
+              ? "text-blue-600 dark:text-blue-400"
+              : undefined
+          }
           value={contributions === null ? "—" : verificationCount}
         />
       </div>
@@ -582,18 +683,21 @@ export function FamilyAttentionCard({
           description={t((m) => m.FamilyDashboard.nothingNeedsAttentionDesc)}
         />
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {items.map((item) =>
             item.href ? (
               <Link
                 key={item.id}
                 href={item.href}
-                className="rounded-lg py-1 transition-colors hover:bg-muted/50"
+                className="rounded-xl border border-border/60 bg-muted/20 p-2.5 sm:p-3 transition-colors hover:bg-muted/40 block"
               >
                 <AttentionItemRow item={item} />
               </Link>
             ) : (
-              <div key={item.id} className="py-1">
+              <div
+                key={item.id}
+                className="rounded-xl border border-border/60 bg-muted/20 p-2.5 sm:p-3"
+              >
                 <AttentionItemRow item={item} />
               </div>
             ),
@@ -605,28 +709,35 @@ export function FamilyAttentionCard({
 }
 
 function AttentionItemRow({ item }: { item: FamilyAttentionItem }) {
+  const isDestructive =
+    item.kind === "overdue-record" || item.kind === "rejected-record";
+  const isWarning = item.kind === "pending-approval";
+
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex items-center justify-between gap-3 text-xs">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-1.5">
-          <p className="truncate font-medium text-sm">{item.title}</p>
+          <p className="truncate font-semibold text-foreground">{item.title}</p>
           <Badge
             variant={
-              item.kind === "overdue-record" || item.kind === "rejected-record"
-                ? "destructive"
-                : "outline"
+              isDestructive ? "destructive" : isWarning ? "outline" : "outline"
             }
+            className={cn(
+              "text-[10px] px-1.5 py-0 h-4",
+              isWarning &&
+                "border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10",
+            )}
           >
             {getAttentionBadgeLabel(item.kind)}
           </Badge>
         </div>
-        <p className="truncate text-muted-foreground text-xs">
+        <p className="truncate text-muted-foreground text-[10px] mt-0.5">
           {item.subtitle}
           {item.date ? ` · ${formatDate(item.date)}` : ""}
         </p>
       </div>
       <CompactMoney
-        className="shrink-0 font-medium"
+        className="shrink-0 font-mono font-bold tabular-nums text-foreground"
         currency={item.currency}
         value={item.amountMinorUnits}
       />
@@ -679,7 +790,7 @@ export function FamilyContributionsOverviewCard({
       title={t((m) => m.FamilyDashboard.contributionsTitle)}
       description={t((m) => m.FamilyDashboard.contributionsDesc)}
     >
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.activePlansStat)}
           value={activePlanCount}
@@ -695,6 +806,7 @@ export function FamilyContributionsOverviewCard({
         />
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.amountPaidStat)}
+          valueClassName="text-emerald-600 dark:text-emerald-400"
           value={
             <CompactMoney
               currency={currency}
@@ -720,13 +832,13 @@ export function FamilyContributionsOverviewCard({
           description={t((m) => m.FamilyDashboard.noContributionsDesc)}
         />
       ) : (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2.5 sm:p-3">
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <span className="font-medium">
+              <span className="font-semibold text-foreground">
                 {t((m) => m.FamilyDashboard.memberProgressLabel)}
               </span>
-              <span className="text-muted-foreground tabular-nums">
+              <span className="text-muted-foreground font-mono text-[11px] tabular-nums">
                 {t((m) => m.FamilyDashboard.memberProgressValue, {
                   paid: contributorsPaid,
                   expected: contributorsExpected,
@@ -736,17 +848,18 @@ export function FamilyContributionsOverviewCard({
             </div>
             <Progress
               value={collectionRate}
+              className="h-1.5 w-full"
               aria-label={t((m) => m.FamilyDashboard.collectionProgressAria, {
                 rate: collectionRate,
               })}
             />
-            <div className="flex flex-wrap items-center gap-2 pt-0.5">
-              <Badge variant="outline">
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
                 {t((m) => m.FamilyDashboard.pendingVerificationStat, {
                   count: pendingVerificationCount,
                 })}
               </Badge>
-              <Badge variant="outline">
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
                 {t((m) => m.FamilyDashboard.overdueContributorsStat, {
                   count: overdueContributorCount,
                 })}
@@ -754,18 +867,18 @@ export function FamilyContributionsOverviewCard({
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {plans.length > 0
               ? plans.map((plan) => (
                   <div
                     key={plan.id}
-                    className="flex items-center justify-between gap-3"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-2.5 sm:p-3 text-xs transition-colors hover:bg-muted/40"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-sm">
+                      <p className="truncate font-semibold text-foreground">
                         {plan.name}
                       </p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-muted-foreground text-[10px]">
                         {t((m) => m.FamilyDashboard.planExpectedPaid, {
                           collected: formatMinorUnits(
                             plan.collectedMinorUnits,
@@ -778,23 +891,33 @@ export function FamilyContributionsOverviewCard({
                         })}
                       </p>
                     </div>
-                    <Badge variant="outline">{formatTitle(plan.cadence)}</Badge>
+                    <Badge
+                      variant="outline"
+                      className="shrink-0 text-[10px] font-mono"
+                    >
+                      {formatTitle(plan.cadence)}
+                    </Badge>
                   </div>
                 ))
               : cycles.map((cycle) => (
                   <div
                     key={cycle.id}
-                    className="flex items-center justify-between gap-3"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-2.5 sm:p-3 text-xs transition-colors hover:bg-muted/40"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-medium text-sm">
+                      <p className="truncate font-semibold text-foreground">
                         {cycle.label}
                       </p>
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-muted-foreground text-[10px]">
                         {formatDate(cycle.dueDate)}
                       </p>
                     </div>
-                    <Badge variant="outline">{cycle.percentCollected}%</Badge>
+                    <Badge
+                      variant="outline"
+                      className="shrink-0 text-[10px] font-mono"
+                    >
+                      {cycle.percentCollected}%
+                    </Badge>
                   </div>
                 ))}
           </div>
@@ -847,7 +970,7 @@ export function FamilyActiveProjectsCard({
       actionHref={projectsHref}
       actionLabel={t((m) => m.FamilyDashboard.openProjects)}
     >
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.activeProjectsStat)}
           value={activeProjectCount}
@@ -863,6 +986,7 @@ export function FamilyActiveProjectsCard({
         />
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.contributionsReceivedStat)}
+          valueClassName="text-emerald-600 dark:text-emerald-400"
           value={
             <CompactMoney
               currency={currency}
@@ -888,7 +1012,7 @@ export function FamilyActiveProjectsCard({
           description={t((m) => m.FamilyDashboard.noProjectsDesc)}
         />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {activeProjects.map((project) => {
             const progress = clampPercent(project.percentFunded ?? 0);
             const slug = createProjectSlug(project.name);
@@ -896,33 +1020,16 @@ export function FamilyActiveProjectsCard({
               <Link
                 key={project.id}
                 href={`${projectsHref}/${encodeURIComponent(slug)}`}
-                className="flex flex-col gap-2 rounded-lg py-1 transition-colors hover:bg-muted/50"
+                className="flex flex-col gap-1.5 rounded-xl border border-border/60 bg-muted/20 p-2.5 sm:p-3 text-xs transition-colors hover:bg-muted/40"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-sm">
-                      {project.name}
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      {t((m) => m.FamilyDashboard.projectFundedOfPlanned, {
-                        contributed: formatMinorUnits(
-                          project.contributedMinorUnits,
-                          currency,
-                        ),
-                        planned: formatMinorUnits(
-                          project.targetAmountMinorUnits,
-                          currency,
-                        ),
-                      })}{" "}
-                      ·{" "}
-                      {project.targetDate
-                        ? t((m) => m.FamilyDashboard.projectTargetDate, {
-                            date: formatDate(project.targetDate),
-                          })
-                        : t((m) => m.FamilyDashboard.projectNoTargetDate)}
-                    </p>
-                  </div>
-                  <Badge variant="outline">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate font-semibold text-foreground">
+                    {project.name}
+                  </p>
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 text-[10px] font-mono"
+                  >
                     {project.status
                       ? formatTitle(project.status)
                       : `${progress}%`}
@@ -930,11 +1037,33 @@ export function FamilyActiveProjectsCard({
                 </div>
                 <Progress
                   value={progress}
+                  className="h-1.5 w-full"
                   aria-label={t((m) => m.FamilyDashboard.projectProgressAria, {
                     name: project.name,
                     progress,
                   })}
                 />
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span className="truncate">
+                    {t((m) => m.FamilyDashboard.projectFundedOfPlanned, {
+                      contributed: formatMinorUnits(
+                        project.contributedMinorUnits,
+                        currency,
+                      ),
+                      planned: formatMinorUnits(
+                        project.targetAmountMinorUnits,
+                        currency,
+                      ),
+                    })}
+                  </span>
+                  <span className="shrink-0">
+                    {project.targetDate
+                      ? t((m) => m.FamilyDashboard.projectTargetDate, {
+                          date: formatDate(project.targetDate),
+                        })
+                      : t((m) => m.FamilyDashboard.projectNoTargetDate)}
+                  </span>
+                </div>
               </Link>
             );
           })}
@@ -986,7 +1115,7 @@ export function FamilyLoansOverviewCard({
       actionHref={loansHref}
       actionLabel={t((m) => m.FamilyDashboard.openLoans)}
     >
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.totalBorrowedStat)}
           value={
@@ -998,6 +1127,7 @@ export function FamilyLoansOverviewCard({
         />
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.totalLentStat)}
+          valueClassName="text-emerald-600 dark:text-emerald-400"
           value={
             <CompactMoney
               currency={currency}
@@ -1016,10 +1146,16 @@ export function FamilyLoansOverviewCard({
         />
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.overdue)}
+          valueClassName={
+            summary.overdueCount > 0 ? "text-destructive" : undefined
+          }
           value={
             <div className="flex flex-wrap items-center gap-1.5">
               <span>{summary.overdueCount}</span>
-              <Badge variant="outline" className="text-[11px]">
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1.5 py-0 h-4 font-mono"
+              >
                 {t((m) => m.FamilyDashboard.dueSoonLoansStat, {
                   count: summary.dueSoonCount,
                 })}
@@ -1036,29 +1172,39 @@ export function FamilyLoansOverviewCard({
           description={t((m) => m.FamilyDashboard.noLoansDesc)}
         />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {summary.urgentLoans.map((loan) => {
             const progress = getLoanProgress(loan);
             const counterparty =
               loan.type === "MONEY_BORROWED" ? loan.lender : loan.borrower;
             const overdue = isLoanOverdue(loan);
+
             return (
-              <div key={loan.id} className="flex flex-col gap-2">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-sm">{loan.title}</p>
-                    <p className="text-muted-foreground text-xs">
-                      {loan.dueDate
-                        ? t((m) => m.FamilyDashboard.loanCounterpartyDue, {
-                            name: counterparty,
-                            date: formatDate(loan.dueDate),
-                          })
-                        : t((m) => m.FamilyDashboard.loanCounterpartyNoDue, {
-                            name: counterparty,
-                          })}
+              <div
+                key={loan.id}
+                className="flex flex-col gap-1.5 rounded-xl border border-border/60 bg-muted/20 p-2.5 sm:p-3 text-xs transition-colors hover:bg-muted/40"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span
+                      className={cn(
+                        "size-1.5 shrink-0 rounded-full",
+                        overdue
+                          ? "bg-destructive"
+                          : loan.type === "MONEY_LENT"
+                            ? "bg-emerald-500"
+                            : "bg-amber-500",
+                      )}
+                      aria-hidden="true"
+                    />
+                    <p className="truncate font-semibold text-foreground">
+                      {loan.title}
                     </p>
                   </div>
-                  <Badge variant={overdue ? "destructive" : "outline"}>
+                  <Badge
+                    variant={overdue ? "destructive" : "outline"}
+                    className="shrink-0 text-[10px] px-1.5 py-0 h-4 font-mono"
+                  >
                     {loan.type === "MONEY_BORROWED"
                       ? t((m) => m.FamilyDashboard.borrowedBadge)
                       : t((m) => m.FamilyDashboard.lentBadge)}
@@ -1066,11 +1212,29 @@ export function FamilyLoansOverviewCard({
                 </div>
                 <Progress
                   value={progress}
+                  className="h-1.5 w-full"
                   aria-label={t((m) => m.FamilyDashboard.loanRepaidAria, {
                     title: loan.title,
                     progress,
                   })}
                 />
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span className="truncate">
+                    {loan.dueDate
+                      ? t((m) => m.FamilyDashboard.loanCounterpartyDue, {
+                          name: counterparty,
+                          date: formatDate(loan.dueDate),
+                        })
+                      : t((m) => m.FamilyDashboard.loanCounterpartyNoDue, {
+                          name: counterparty,
+                        })}
+                  </span>
+                  <CompactMoney
+                    className="font-mono font-medium text-foreground shrink-0"
+                    currency={currency}
+                    value={loan.remainingBalanceMinorUnits}
+                  />
+                </div>
               </div>
             );
           })}

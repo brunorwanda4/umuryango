@@ -20,6 +20,7 @@ import type { MoneyOverview } from "@/components/family/money/types";
 import type { ProjectsOverview } from "@/components/family/projects/types";
 import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
+import { cn } from "@/lib/utils";
 import {
   buildFamilyActivityEntries,
   formatRelativeTime,
@@ -33,27 +34,64 @@ import type {
 
 const t = createTranslator("FamilyDashboard");
 
-function getActivityIcon(kind: FamilyActivityEntry["kind"]) {
+function getActivityIconMeta(kind: FamilyActivityEntry["kind"]) {
   switch (kind) {
     case "transaction-income":
-      return <ArrowDownLeftIcon className="size-4" aria-hidden="true" />;
+      return {
+        icon: <ArrowDownLeftIcon className="size-3.5" aria-hidden="true" />,
+        className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      };
     case "transaction-expense":
-      return <ArrowUpRightIcon className="size-4" aria-hidden="true" />;
+      return {
+        icon: <ArrowUpRightIcon className="size-3.5" aria-hidden="true" />,
+        className: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+      };
     case "transaction-approved":
-      return <CheckCircle2Icon className="size-4" aria-hidden="true" />;
+      return {
+        icon: <CheckCircle2Icon className="size-3.5" aria-hidden="true" />,
+        className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      };
     case "transaction-rejected":
-      return <XCircleIcon className="size-4" aria-hidden="true" />;
+      return {
+        icon: (
+          <XCircleIcon
+            className="size-3.5 text-destructive"
+            aria-hidden="true"
+          />
+        ),
+        className: "bg-destructive/10",
+      };
     case "contribution":
-      return <PiggyBankIcon className="size-4" aria-hidden="true" />;
+      return {
+        icon: <PiggyBankIcon className="size-3.5" aria-hidden="true" />,
+        className: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+      };
     case "project":
-      return <FolderKanbanIcon className="size-4" aria-hidden="true" />;
+      return {
+        icon: <FolderKanbanIcon className="size-3.5" aria-hidden="true" />,
+        className: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+      };
     case "member-invited":
-      return <UserPlusIcon className="size-4" aria-hidden="true" />;
+      return {
+        icon: <UserPlusIcon className="size-3.5" aria-hidden="true" />,
+        className: "bg-primary/10 text-primary",
+      };
     case "member-joined":
     case "member-updated":
-      return <UserCheckIcon className="size-4" aria-hidden="true" />;
+      return {
+        icon: <UserCheckIcon className="size-3.5" aria-hidden="true" />,
+        className: "bg-primary/10 text-primary",
+      };
     case "settings":
-      return <SettingsIcon className="size-4" aria-hidden="true" />;
+      return {
+        icon: (
+          <SettingsIcon
+            className="size-3.5 text-muted-foreground"
+            aria-hidden="true"
+          />
+        ),
+        className: "bg-muted",
+      };
   }
 }
 
@@ -107,12 +145,22 @@ export function FamilyActivityFeed({
             const timestamp = Number.isNaN(parsedDate.getTime())
               ? entry.occurredAt
               : formatRelativeTime(parsedDate);
+            const meta = getActivityIconMeta(entry.kind);
 
             return (
               <DashboardActivityItem
                 key={entry.id}
                 href={entry.href}
-                icon={getActivityIcon(entry.kind)}
+                icon={
+                  <div
+                    className={cn(
+                      "flex size-7 items-center justify-center rounded-lg",
+                      meta.className,
+                    )}
+                  >
+                    {meta.icon}
+                  </div>
+                }
                 title={entry.title}
                 description={entry.detail}
                 timestamp={timestamp}

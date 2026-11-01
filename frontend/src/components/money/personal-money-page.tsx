@@ -1,14 +1,21 @@
 "use client";
 
+import {
+  CashflowHeroCard,
+  CategoryBreakdownCard,
+  MoneyOverviewHeader,
+  MoneyOverviewLoadingSkeleton,
+  MoneyOverviewShell,
+  MoneyOverviewTopGrid,
+  MoneyPeriodSelector,
+  TransactionLedgerCard,
+} from "@/components/common/money-overview";
 import { MoneyFormDialog } from "@/components/money/money-form-dialog";
 import { PersonPlanForm } from "@/components/plans/person-plan-form";
-import { Skeleton } from "@/components/ui/skeleton";
+import { createTranslator } from "@/i18n/translate";
 import {
   PersonalMoneyDebtCard,
   PersonalMoneyEmptyWorkspace,
-  PersonalMoneyHeader,
-  PersonalMoneyOverviewCards,
-  PersonalMoneyRecentTransactions,
   PersonalMoneySavingsCard,
   usePersonalMoney,
 } from "./personal-money";
@@ -26,17 +33,25 @@ export {
 } from "./personal-money";
 
 export function PersonalMoneyPage() {
+  const t = createTranslator("PersonalMoney");
   const {
     familyId,
     currency,
     loading,
+    period,
+    setPeriod,
+    periodOptions,
+    periodLabel,
     categories,
-    allTransactions,
-    totalIncome,
-    totalExpenses,
-    balance,
-    totalSavings,
-    totalDebt,
+    sharedTransactions,
+    cashFlowPoints,
+    incomeCategoryBreakdown,
+    expenseCategoryBreakdown,
+    totalIncomeMinorUnits,
+    totalExpensesMinorUnits,
+    balanceMinorUnits,
+    incomeDashboard,
+    expenseDashboard,
     nextSavingsGoal,
     activeDebt,
     moneyFormOpen,
@@ -50,66 +65,109 @@ export function PersonalMoneyPage() {
   } = usePersonalMoney();
 
   return (
-    <div className="flex flex-col gap-4">
+    <MoneyOverviewShell>
       {/* Page Header */}
-      <PersonalMoneyHeader
-        familyId={familyId}
-        categories={categories}
-        onSuccess={loadData}
+      <MoneyOverviewHeader
+        title={t((m) => m.PersonalMoney.pageTitle)}
+        description={t((m) => m.PersonalMoney.pageDescription)}
+        actions={
+          familyId ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <MoneyFormDialog
+                categories={categories}
+                familyId={familyId}
+                onCategoryCreated={loadData}
+                onSuccess={loadData}
+                triggerClassName="rounded-xl font-semibold"
+                triggerSize="default"
+                type="income"
+              />
+              <MoneyFormDialog
+                categories={categories}
+                familyId={familyId}
+                onCategoryCreated={loadData}
+                onSuccess={loadData}
+                triggerClassName="rounded-xl font-semibold"
+                triggerSize="default"
+                type="expense"
+              />
+            </div>
+          ) : null
+        }
       />
+
+      {/* Timeframe Pill Selector */}
+      <div className="w-full sm:w-auto">
+        <MoneyPeriodSelector
+          options={periodOptions}
+          value={period}
+          onChange={(v) => setPeriod(v as typeof period)}
+        />
+      </div>
 
       {/* No Family Alert */}
       {!familyId && !loading ? <PersonalMoneyEmptyWorkspace /> : null}
 
       {/* Main Content */}
       {loading ? (
-        <div className="flex flex-col gap-4">
-          <PersonalMoneyOverviewCards
-            loading={true}
-            currency={currency}
-            totalIncome={0}
-            totalExpenses={0}
-            balance={0}
-            totalSavings={0}
-            totalDebt={0}
-          />
-          <Skeleton className="h-64 rounded-[20px]" />
-        </div>
+        <MoneyOverviewLoadingSkeleton />
       ) : (
-        <div className="flex flex-col gap-4">
-          <PersonalMoneyOverviewCards
+        <>
+          {/* Top Grid: Hero Card + Category Breakdown */}
+          <MoneyOverviewTopGrid>
+            <div className="lg:col-span-8">
+              <CashflowHeroCard
+                label={t((m) => m.PersonalMoney.cards.balance)}
+                badgeLabel={periodLabel}
+                netMinorUnits={balanceMinorUnits}
+                incomeMinorUnits={totalIncomeMinorUnits}
+                expenseMinorUnits={totalExpensesMinorUnits}
+                currency={currency}
+                incomeMeta={
+                  incomeDashboard?.records?.length
+                    ? `${incomeDashboard.records.length} records`
+                    : undefined
+                }
+                expenseMeta={
+                  expenseDashboard?.records?.length
+                    ? `${expenseDashboard.records.length} records`
+                    : undefined
+                }
+                cashFlowPoints={cashFlowPoints}
+              />
+            </div>
+
+            <div className="lg:col-span-4">
+              <CategoryBreakdownCard
+                expenseCategories={expenseCategoryBreakdown}
+                incomeCategories={incomeCategoryBreakdown}
+                currency={currency}
+              />
+            </div>
+          </MoneyOverviewTopGrid>
+
+          {/* Transaction Ledger */}
+          <TransactionLedgerCard
+            transactions={sharedTransactions}
             currency={currency}
-            totalIncome={totalIncome}
-            totalExpenses={totalExpenses}
-            balance={balance}
-            totalSavings={totalSavings}
-            totalDebt={totalDebt}
+            limit={12}
           />
 
-          {/* Recent Transactions Card */}
-          <PersonalMoneyRecentTransactions
-            transactions={allTransactions}
-            currency={currency}
-            limit={8}
-          />
-
-          {/* Bottom 2 Cards Grid */}
+          {/* Supporting Row: Savings Goal Snapshot & Debt Snapshot */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {/* Next Savings Goal */}
             <PersonalMoneySavingsCard
               goal={nextSavingsGoal}
               currency={currency}
               onAddGoal={openGoalDialog}
             />
 
-            {/* Debt Snapshot */}
             <PersonalMoneyDebtCard
               loan={activeDebt}
               currency={currency}
               onAddLoan={openDebtDialog}
             />
           </div>
-        </div>
+        </>
       )}
 
       {/* MoneyFormDialog for adding transactions */}
@@ -134,6 +192,6 @@ export function PersonalMoneyPage() {
         initialType="LONG_TERM_GOAL"
         onSuccess={loadData}
       />
-    </div>
+    </MoneyOverviewShell>
   );
 }

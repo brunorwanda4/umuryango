@@ -1,4 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { SharedMoneyPeriodOption } from "@/components/common/money-overview";
+import {
+  aggregateCategoryBreakdown,
+  buildCashflowBuckets,
+  type PersonalMoneyPeriod,
+  resolvePersonalPeriodRange,
+} from "@/components/common/money-overview/money-overview-utils";
+import type {
+  SharedCategoryItem,
+  SharedTransactionItem,
+} from "@/components/common/money-overview/types";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import type { ExpenseDashboardResponse } from "@/components/money/expense-dashboard/expense-dashboard-data";
 import type { IncomeDashboardResponse } from "@/components/money/income-dashboard/income-dashboard-data";
@@ -20,6 +31,9 @@ export function usePersonalMoney() {
   const [currency, setCurrency] = useState("RWF");
   const [loading, setLoading] = useState(true);
 
+  // Period state
+  const [period, setPeriod] = useState<PersonalMoneyPeriod>("this_month");
+
   // Raw fetched data
   const [categories, setCategories] = useState<MoneyFormCategory[]>([]);
   const [incomeDashboard, setIncomeDashboard] =
@@ -35,6 +49,20 @@ export function usePersonalMoney() {
     "income" | "expense" | "savings" | "debt"
   >("income");
   const [planFormOpen, setPlanFormOpen] = useState(false);
+
+  const periodOptions: SharedMoneyPeriodOption[] = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return [
+      { value: "this_month", label: "This Month" },
+      { value: "last_month", label: "Last Month" },
+      { value: "this_year", label: `Year ${currentYear}` },
+    ];
+  }, []);
+
+  const { label: periodLabel } = useMemo(
+    () => resolvePersonalPeriodRange(period),
+    [period],
+  );
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -54,10 +82,7 @@ export function usePersonalMoney() {
     setFamilyId(family.id);
     setCurrency(family.defaultCurrency);
 
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const from = `${currentYear}-01-01`;
-    const to = `${currentYear}-12-31`;
+    const { from, to } = resolvePersonalPeriodRange(period);
 
     const [categoriesRes, incomeRes, expenseRes, loansRes, plansRes] =
       await Promise.all([
@@ -97,7 +122,7 @@ export function usePersonalMoney() {
     }
 
     setLoading(false);
-  }, []);
+  }, [period]);
 
   useEffect(() => {
     void loadData();
@@ -124,6 +149,7 @@ export function usePersonalMoney() {
               ? "Pending"
               : r.status,
         amount: Number(r.amountMinorUnits) || 0,
+        rawAmountMinorUnits: r.amountMinorUnits,
       });
     }
 
@@ -144,6 +170,7 @@ export function usePersonalMoney() {
               ? "Pending"
               : r.status,
         amount: Number(r.amountMinorUnits) || 0,
+        rawAmountMinorUnits: r.amountMinorUnits,
       });
     }
 
@@ -157,26 +184,123 @@ export function usePersonalMoney() {
     return list;
   }, [incomeDashboard, expenseDashboard]);
 
-  // Financial totals
-  const totalIncome = useMemo(() => {
+  // Financial totals calculated safely with BigInt
+  const totalIncomeMinorUnits = useMemo(() => {
     if (incomeDashboard?.summary?.periodTotalMinorUnits) {
-      return Number(incomeDashboard.summary.periodTotalMinorUnits);
+      return String(incomeDashboard.summary.periodTotalMinorUnits);
     }
-    return allTransactions
-      .filter((t) => t.type === "in")
-      .reduce((sum, t) => sum + t.amount, 0);
-  }, [incomeDashboard, allTransactions]);
+    return (incomeDashboard?.records ?? [])
+      .reduce((sum, r) => sum + BigInt(r.amountMinorUnits || "0"), 0n)
+      .toString();
+  }, [incomeDashboard]);
 
-  const totalExpenses = useMemo(() => {
+  const totalExpensesMinorUnits = useMemo(() => {
     if (expenseDashboard?.summary?.periodTotalMinorUnits) {
-      return Number(expenseDashboard.summary.periodTotalMinorUnits);
+      return String(expenseDashboard.summary.periodTotalMinorUnits);
     }
-    return allTransactions
-      .filter((t) => t.type === "out")
-      .reduce((sum, t) => sum + t.amount, 0);
-  }, [expenseDashboard, allTransactions]);
+    return (expenseDashboard?.records ?? [])
+      .reduce((sum, r) => sum + BigInt(r.amountMinorUnits || "0"), 0n)
+      .toString();
+  }, [expenseDashboard]);
 
-  const balance = totalIncome - totalExpenses;
+  const balanceMinorUnits = useMemo(() => {
+    return (
+      BigInt(totalIncomeMinorUnits || "0") -
+      BigInt(totalExpensesMinorUnits || "0")
+    ).toString();
+  }, [totalIncomeMinorUnits, totalExpensesMinorUnits]);
+
+  // Backward-compatibility number values
+  const totalIncome = Number(totalIncomeMinorUnits) || 0;
+  const totalExpenses = Number(totalExpensesMinorUnits) || 0;
+  const balance = Number(balanceMinorUnits) || 0;
+
+  // Category breakdown
+  const incomeCategoryBreakdown: SharedCategoryItem[] = useMemo(() => {
+    const records = incomeDashboard?.records ?? [];
+    if (records.length > 0) {
+      return aggregateCategoryBreakdown(
+        records.map((r) => ({
+          categoryId: r.categoryId,
+          categoryName: r.category?.name,
+          amountMinorUnits: r.amountMinorUnits,
+          color: r.category?.color,
+        })),
+        totalIncomeMinorUnits,
+      );
+    }
+    const byCat = incomeDashboard?.byCategory ?? [];
+    return aggregateCategoryBreakdown(
+      byCat.map((c) => ({
+        categoryId: c.category,
+        categoryName: c.category,
+        amountMinorUnits: c.amountMinorUnits,
+      })),
+      totalIncomeMinorUnits,
+    );
+  }, [incomeDashboard, totalIncomeMinorUnits]);
+
+  const expenseCategoryBreakdown: SharedCategoryItem[] = useMemo(() => {
+    const records = expenseDashboard?.records ?? [];
+    if (records.length > 0) {
+      return aggregateCategoryBreakdown(
+        records.map((r) => ({
+          categoryId: r.categoryId,
+          categoryName: r.category?.name,
+          amountMinorUnits: r.amountMinorUnits,
+          color: r.category?.color,
+        })),
+        totalExpensesMinorUnits,
+      );
+    }
+    const byCat = expenseDashboard?.byCategory ?? [];
+    return aggregateCategoryBreakdown(
+      byCat.map((c) => ({
+        categoryId: c.category,
+        categoryName: c.category,
+        amountMinorUnits: c.amountMinorUnits,
+      })),
+      totalExpensesMinorUnits,
+    );
+  }, [expenseDashboard, totalExpensesMinorUnits]);
+
+  // Cashflow points
+  const cashFlowPoints = useMemo(() => {
+    return buildCashflowBuckets(
+      (incomeDashboard?.records ?? []).map((r) => ({
+        date: r.date,
+        amountMinorUnits: r.amountMinorUnits,
+      })),
+      (expenseDashboard?.records ?? []).map((r) => ({
+        date: r.date,
+        amountMinorUnits: r.amountMinorUnits,
+      })),
+      period,
+    );
+  }, [incomeDashboard, expenseDashboard, period]);
+
+  // Shared transaction items for Ledger
+  const sharedTransactions: SharedTransactionItem[] = useMemo(() => {
+    return allTransactions.map((tx) => ({
+      id: tx.id,
+      title: tx.title,
+      subtitle: `${tx.category}${tx.source ? ` • ${tx.source}` : ""}`,
+      type: tx.type === "in" ? "income" : "expense",
+      amountMinorUnits: tx.rawAmountMinorUnits ?? String(tx.amount),
+      currency,
+      date: tx.date,
+      rawDate: tx.rawDate,
+      status: tx.status,
+      statusVariant:
+        tx.status === "Received" || tx.status === "Paid"
+          ? "success"
+          : tx.status === "Pending"
+            ? "pending"
+            : "neutral",
+      category: tx.category,
+      paymentMethod: tx.source,
+    }));
+  }, [allTransactions, currency]);
 
   // Savings totals from plans
   const savingsPlans = useMemo(() => {
@@ -240,12 +364,23 @@ export function usePersonalMoney() {
     familyId,
     currency,
     loading,
+    period,
+    setPeriod,
+    periodOptions,
+    periodLabel,
     categories,
     incomeDashboard,
     expenseDashboard,
     loans,
     plans,
     allTransactions,
+    sharedTransactions,
+    cashFlowPoints,
+    incomeCategoryBreakdown,
+    expenseCategoryBreakdown,
+    totalIncomeMinorUnits,
+    totalExpensesMinorUnits,
+    balanceMinorUnits,
     totalIncome,
     totalExpenses,
     balance,

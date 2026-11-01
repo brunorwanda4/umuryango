@@ -5,7 +5,7 @@ import {
   DashboardBalanceStat,
 } from "@/components/common/dashboard/dashboard-balance-card";
 import { DashboardSummaryMetric } from "@/components/common/dashboard/dashboard-metric-card";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { createTranslator } from "@/i18n/translate";
 import type { PersonalOverviewData } from "./personal-overview-data";
 import { addMinorUnits } from "./personal-overview-data";
@@ -24,7 +24,6 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
     (loan) => loan.status === "ACTIVE" || loan.status === "OVERDUE",
   ).length;
   const moneyAvailable = Boolean(data.income && data.expenses);
-  const cardClassName = "card card-border gap-0 rounded-[20px] py-5 shadow-sm";
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr]">
@@ -36,32 +35,37 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
         value={moneyAvailable ? balance.toString() : 0}
         href="/me/money"
         unavailable={!moneyAvailable}
-        unavailableLabel={t((m) => m.PersonalOverview.summaryCards.moneyUnavailable)}
+        unavailableLabel={t(
+          (m) => m.PersonalOverview.summaryCards.moneyUnavailable,
+        )}
       >
         <DashboardBalanceStat
           href="/me/money/income"
           currency={data.currency}
           label={t((m) => m.PersonalOverview.summaryCards.incomeThisMonth)}
           value={income}
+          variant="income"
         />
         <DashboardBalanceStat
           href="/me/money/expenses"
           currency={data.currency}
           label={t((m) => m.PersonalOverview.summaryCards.spentThisMonth)}
           value={expenses}
+          variant="expense"
         />
       </DashboardBalanceCard>
 
-      <Card className={cardClassName}>
-        <CardHeader className="px-5 pb-3.5">
-          <CardTitle className="font-fraunces text-xl">
+      <Card className="rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs flex flex-col justify-between min-w-0">
+        <div>
+          <h2 className="text-xs sm:text-sm font-bold tracking-tight text-foreground">
             {t((m) => m.PersonalOverview.summaryCards.quickAddTitle)}
-          </CardTitle>
-          <CardDescription>
+          </h2>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
             {t((m) => m.PersonalOverview.summaryCards.quickAddDesc)}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 px-5">
+          </p>
+        </div>
+
+        <div className="grid gap-3 pt-3">
           <div className="grid grid-cols-3 gap-2">
             <DashboardSummaryMetric
               href="/me/plans"
@@ -79,19 +83,34 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
               value={data.families.length}
             />
           </div>
-          <div className="grid gap-2.5 sm:grid-cols-2">
+
+          <div className="grid gap-2 sm:grid-cols-2">
             <DashboardQuickAddTile
               href="/me/money/income"
               label={t((m) => m.PersonalOverview.summaryCards.addIncome)}
-              icon={<ArrowDownLeftIcon className="text-emerald-500" aria-hidden="true" />}
+              description="Salary or deposit"
+              icon={
+                <ArrowDownLeftIcon
+                  className="size-4 text-emerald-500"
+                  aria-hidden="true"
+                />
+              }
+              iconClassName="bg-emerald-500/10 text-emerald-500"
             />
             <DashboardQuickAddTile
               href="/me/money/expenses"
               label={t((m) => m.PersonalOverview.summaryCards.addExpense)}
-              icon={<ArrowUpRightIcon className="text-destructive" aria-hidden="true" />}
+              description="Bills or supplies"
+              icon={
+                <ArrowUpRightIcon
+                  className="size-4 text-rose-500"
+                  aria-hidden="true"
+                />
+              }
+              iconClassName="bg-rose-500/10 text-rose-500"
             />
           </div>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );

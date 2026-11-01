@@ -25,7 +25,7 @@ export function PersonalOverviewPage() {
   if (isLoading) return <PersonalOverviewSkeleton />;
   if (error) {
     return (
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
           <AlertTitle>{t((m) => m.PersonalOverview.errorLoad)}</AlertTitle>
@@ -70,42 +70,25 @@ export function PersonalOverviewPage() {
 
 function PersonalOverviewSkeleton() {
   const t = createTranslator("PersonalOverview");
-  const summarySkeletons = [
-    "balance",
-    "income",
-    "expenses",
-    "plans",
-    "loans",
-    "families",
-  ];
-  const sectionSkeletons = [
-    "money",
-    "plans",
-    "loans",
-    "families",
-    "activity",
-    "actions",
-  ];
 
   return (
     <output
-      className="mx-auto flex w-full max-w-7xl flex-col gap-6"
+      className="mx-auto flex w-full max-w-6xl flex-col gap-5"
       aria-label={t((m) => m.PersonalOverview.loadingAria)}
     >
       <div className="flex flex-col gap-2">
-        <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-10 w-full max-w-sm" />
-        <Skeleton className="h-5 w-full max-w-2xl" />
+        <Skeleton className="h-8 w-64 rounded-lg" />
+        <Skeleton className="h-4 w-48 rounded-md" />
       </div>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-6">
-        {summarySkeletons.map((item) => (
-          <Skeleton key={item} className="h-32" />
-        ))}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr]">
+        <Skeleton className="h-64 rounded-3xl" />
+        <Skeleton className="h-64 rounded-2xl" />
       </div>
-      <div className="grid gap-4 xl:grid-cols-2">
-        {sectionSkeletons.map((item) => (
-          <Skeleton key={item} className="h-96" />
-        ))}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Skeleton className="h-80 rounded-2xl" />
+        <Skeleton className="h-80 rounded-2xl" />
+        <Skeleton className="h-80 rounded-2xl" />
+        <Skeleton className="h-80 rounded-2xl" />
       </div>
     </output>
   );

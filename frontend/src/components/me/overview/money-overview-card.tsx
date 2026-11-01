@@ -1,6 +1,10 @@
 "use client";
 
-import { ReceiptTextIcon } from "lucide-react";
+import {
+  ArrowDownLeftIcon,
+  ArrowUpRightIcon,
+  ReceiptTextIcon,
+} from "lucide-react";
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { DashboardEmptyState } from "@/components/common/dashboard/dashboard-empty-state";
@@ -23,6 +27,7 @@ import {
   formatFullMinorUnits,
   toChartNumber,
 } from "@/lib/format-compact-number";
+import { cn } from "@/lib/utils";
 import type { PersonalOverviewData } from "./personal-overview-data";
 
 export function MoneyOverviewCard({
@@ -83,97 +88,135 @@ export function MoneyOverviewCard({
         />
       ) : (
         <>
-          <ChartContainer
-            config={chartConfig}
-            className="h-44 w-full aspect-auto"
-            initialDimension={{ height: 176, width: 560 }}
-          >
-            <BarChart
-              data={chartData}
-              margin={{ left: 0, right: 8, top: 8 }}
-              accessibilityLayer
+          <div className="rounded-xl border border-border/70 bg-muted/20 p-3">
+            <ChartContainer
+              config={chartConfig}
+              className="h-36 w-full aspect-auto"
+              initialDimension={{ height: 144, width: 560 }}
             >
-              <CartesianGrid vertical={false} />
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tickMargin={8}
-              />
-              <YAxis hide />
-              <ChartTooltip
-                cursor={false}
-                content={
-                  <ChartTooltipContent
-                    hideLabel
-                    formatter={(value) =>
-                      typeof value === "number"
-                        ? formatFullMinorUnits(value, data.currency)
-                        : value
-                    }
-                  />
-                }
-              />
-              <Bar dataKey="amount" radius={8} />
-            </BarChart>
-          </ChartContainer>
-          <Separator />
-          <div className="flex flex-col gap-3">
-            <p className="font-medium text-sm">
-              {t((m) => m.PersonalOverview.moneyCard.recentTransactions)}
-            </p>
+              <BarChart
+                data={chartData}
+                margin={{ left: 0, right: 8, top: 8 }}
+                accessibilityLayer
+              >
+                <CartesianGrid vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tickMargin={8}
+                />
+                <YAxis hide />
+                <ChartTooltip
+                  cursor={false}
+                  content={
+                    <ChartTooltipContent
+                      hideLabel
+                      formatter={(value) =>
+                        typeof value === "number"
+                          ? formatFullMinorUnits(value, data.currency)
+                          : value
+                      }
+                    />
+                  }
+                />
+                <Bar dataKey="amount" radius={8} />
+              </BarChart>
+            </ChartContainer>
+          </div>
+
+          <Separator className="bg-border/60" />
+
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <p className="font-semibold text-xs text-foreground">
+                {t((m) => m.PersonalOverview.moneyCard.recentTransactions)}
+              </p>
+            </div>
             {records.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs">
                 {t((m) => m.PersonalOverview.moneyCard.noRecentTransactions)}
               </p>
             ) : (
-              records.map((record) => {
-                const trigger = (
-                  <Button
-                    key={record.id}
-                    type="button"
-                    variant="ghost"
-                    className="h-auto w-full justify-between gap-3 whitespace-normal text-left"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-sm">
-                        {record.description ?? record.category.name}
-                      </p>
-                      <p className="text-muted-foreground text-xs">
-                        {record.category.name} ·{" "}
-                        {new Date(record.date).toLocaleDateString("en", {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </p>
-                    </div>
-                    <CompactMoney
-                      className="font-medium"
-                      currency={record.currency}
-                      value={record.amountMinorUnits}
+              <div className="space-y-2">
+                {records.map((record) => {
+                  const isIncome = record.type === "INCOME";
+                  const trigger = (
+                    <Button
+                      key={record.id}
+                      type="button"
+                      variant="ghost"
+                      className="h-auto w-full justify-between gap-3 p-2.5 rounded-xl border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors whitespace-normal text-left"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={cn(
+                            "size-7 shrink-0 rounded-lg flex items-center justify-center text-xs font-bold",
+                            isIncome
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                          )}
+                        >
+                          {isIncome ? (
+                            <ArrowDownLeftIcon
+                              className="size-3.5"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <ArrowUpRightIcon
+                              className="size-3.5"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate font-semibold text-xs text-foreground">
+                            {record.description ?? record.category.name}
+                          </p>
+                          <p className="text-muted-foreground text-[10px]">
+                            {record.category.name} ·{" "}
+                            {new Date(record.date).toLocaleDateString("en", {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <CompactMoney
+                          className={cn(
+                            "font-mono text-xs font-bold tabular-nums block",
+                            isIncome
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-rose-600 dark:text-rose-400",
+                          )}
+                          currency={record.currency}
+                          value={record.amountMinorUnits}
+                        />
+                      </div>
+                    </Button>
+                  );
+                  return record.type === "INCOME" ? (
+                    <ViewIncomeDialog
+                      key={record.id}
+                      income={mapIncomeRecord(record)}
+                      categories={data.categories}
+                      familyId={record.familyId}
+                      onSuccess={onSuccess}
+                      trigger={trigger}
                     />
-                  </Button>
-                );
-                return record.type === "INCOME" ? (
-                  <ViewIncomeDialog
-                    key={record.id}
-                    income={mapIncomeRecord(record)}
-                    categories={data.categories}
-                    familyId={record.familyId}
-                    onSuccess={onSuccess}
-                    trigger={trigger}
-                  />
-                ) : (
-                  <ViewExpenseDialog
-                    key={record.id}
-                    expense={mapExpenseRecord(record)}
-                    categories={data.categories}
-                    familyId={record.familyId}
-                    onSuccess={onSuccess}
-                    trigger={trigger}
-                  />
-                );
-              })
+                  ) : (
+                    <ViewExpenseDialog
+                      key={record.id}
+                      expense={mapExpenseRecord(record)}
+                      categories={data.categories}
+                      familyId={record.familyId}
+                      onSuccess={onSuccess}
+                      trigger={trigger}
+                    />
+                  );
+                })}
+              </div>
             )}
           </div>
         </>

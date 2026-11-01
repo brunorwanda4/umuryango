@@ -84,17 +84,19 @@ export function FamilyDashboard({
             : t((m) => m.FamilyDashboard.welcomeBackDefault)
         }
         meta={
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{family.name}</Badge>
-            <Badge variant="outline">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge variant="secondary" className="text-[11px] font-medium">
+              {family.name}
+            </Badge>
+            <Badge variant="outline" className="text-[11px] font-medium">
               {AUTHORITY_LABELS[family.authority]}
             </Badge>
-            <Badge variant="outline">
+            <Badge variant="outline" className="text-[11px] font-medium">
               {t((m) => m.FamilyDashboard.membersCount, {
                 count: memberCount,
               })}
             </Badge>
-            <Badge variant="outline">
+            <Badge variant="outline" className="text-[11px] font-medium">
               {t((m) => m.FamilyDashboard.reportingPeriod)}
             </Badge>
           </div>

@@ -17,10 +17,12 @@ export function DashboardSummaryMetric({
 }) {
   const content = (
     <>
-      <p className="text-[11px] leading-tight text-muted-foreground">{label}</p>
+      <p className="truncate text-[10px] sm:text-[11px] text-muted-foreground">
+        {label}
+      </p>
       <p
         className={cn(
-          "mt-1 font-mono text-lg font-semibold tabular-nums",
+          "mt-0.5 font-mono text-base sm:text-lg font-bold tabular-nums text-foreground",
           valueClassName,
         )}
       >
@@ -29,40 +31,53 @@ export function DashboardSummaryMetric({
     </>
   );
 
+  const containerClassName = cn(
+    "min-w-0 rounded-xl border border-border/70 bg-muted/40 p-2.5 text-left transition-colors",
+    href &&
+      "hover:border-border hover:bg-muted/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+    className,
+  );
+
   if (href) {
     return (
-      <Link
-        href={href}
-        className={cn(
-          "rounded-xl border bg-muted/40 p-2.5 transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-          className,
-        )}
-      >
+      <Link href={href} className={containerClassName}>
         {content}
       </Link>
     );
   }
 
-  return (
-    <div className={cn("rounded-xl border bg-muted/40 p-2.5", className)}>
-      {content}
-    </div>
-  );
+  return <div className={containerClassName}>{content}</div>;
 }
 
 export function DashboardStatTile({
   label,
   value,
+  valueClassName,
   className,
 }: {
   label: ReactNode;
   value: ReactNode;
+  valueClassName?: string;
   className?: string;
 }) {
   return (
-    <div className={cn("min-w-0 rounded-xl bg-muted p-3", className)}>
-      <div className="truncate font-semibold text-lg tabular-nums">{value}</div>
-      <p className="text-muted-foreground text-xs">{label}</p>
+    <div
+      className={cn(
+        "min-w-0 rounded-xl border border-border/70 bg-muted/30 p-2.5 sm:p-3 transition-colors",
+        className,
+      )}
+    >
+      <div
+        className={cn(
+          "truncate font-mono text-base sm:text-lg font-bold tabular-nums text-foreground",
+          valueClassName,
+        )}
+      >
+        {value}
+      </div>
+      <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+        {label}
+      </p>
     </div>
   );
 }

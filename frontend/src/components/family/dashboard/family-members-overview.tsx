@@ -32,7 +32,7 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
       actionHref={membersHref}
       actionLabel={t((m) => m.FamilyDashboard.viewMembers)}
     >
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:gap-2.5 sm:grid-cols-4">
         <DashboardStatTile
           label={t((m) => m.FamilyDashboard.totalMembersStat)}
           value={totalMembers}
@@ -53,7 +53,7 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
           description={t((m) => m.FamilyDashboard.noMembersDesc)}
         />
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {visibleMembers.map((member) => {
             const joinedDate = new Date(member.joinedAt);
             const formattedJoined = Number.isNaN(joinedDate.getTime())
@@ -64,21 +64,21 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
               <Link
                 key={member.id}
                 href={membersHref}
-                className="flex items-center gap-3 rounded-xl border p-3 transition-colors hover:bg-muted/40"
+                className="flex items-center gap-2.5 sm:gap-3 rounded-xl border border-border/60 bg-muted/20 p-2.5 sm:p-3 transition-colors hover:bg-muted/40"
               >
-                <Avatar size="sm">
+                <Avatar size="sm" className="size-8">
                   {member.avatarUrl ? (
                     <AvatarImage src={member.avatarUrl} alt={member.fullName} />
                   ) : null}
-                  <AvatarFallback name={member.fullName}>
+                  <AvatarFallback name={member.fullName} className="text-xs">
                     {getInitials(member.fullName)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-sm">
+                  <p className="truncate font-semibold text-xs text-foreground">
                     {member.fullName}
                   </p>
-                  <p className="truncate text-muted-foreground text-xs">
+                  <p className="truncate text-muted-foreground text-[10px]">
                     {getKinshipLabel(member)} ·{" "}
                     {t((m) => m.FamilyDashboard.joinedDate, {
                       date: formattedJoined,
@@ -87,7 +87,7 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
                 </div>
                 <Badge
                   variant={member.authority === "HEAD" ? "default" : "outline"}
-                  className="shrink-0"
+                  className="shrink-0 text-[10px] px-1.5 py-0 h-4"
                 >
                   {AUTHORITY_LABELS[member.authority]}
                 </Badge>
@@ -95,7 +95,7 @@ export function FamilyMembersOverview({ family }: { family: FamilyDetail }) {
             );
           })}
           {hiddenCount > 0 ? (
-            <p className="text-muted-foreground text-xs">
+            <p className="text-muted-foreground text-[11px] pt-1">
               {t((m) => m.FamilyDashboard.moreMembers, { count: hiddenCount })}
             </p>
           ) : null}

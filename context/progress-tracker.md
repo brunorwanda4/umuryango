@@ -23,7 +23,7 @@ Keep this file short. Update it only for meaningful product or engineering progr
 | Communication/Events | In progress | Family Contacts module is implemented with trusted people/organizations, emergency and loan contact flags, search/filter UI, soft delete, audit events, and loan integration. Announcements, emergency alerts, events, RSVP, attendance, and reminders remain. |
 | Reports/Exports | In progress | `GET /api/v1/families/:familyId/reports/overview` implemented — aggregates contribution payments and project budgets server-side with VIEW_REPORTS permission check. Income/expense/savings/debt ledgers return null until those modules are modelled. Export table not yet modelled. |
 | Notifications | Planned | In-app, email, SMS, push. |
-| Dashboard/UI System | Planned | Role dashboards, black-and-white theme, light/dark mode, localization-ready text. |
+| Dashboard/UI System | In progress | Unified mobile-first personal (`/me`) and family (`/family/:slug`) dashboard design system adapted from the reference visual identity. Features carbon balance cards with embedded income/expense sub-cards and dot indicators, quick action cards with dense metrics, rounded section cards, 2x2 metric grids, progress bars, and responsive two-column desktop layouts using semantic tokens. |
 
 ## Milestones
 

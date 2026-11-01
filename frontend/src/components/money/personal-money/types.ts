@@ -8,4 +8,5 @@ export type RealTransaction = {
   rawDate: string;
   status: string;
   amount: number;
+  rawAmountMinorUnits?: string;
 };

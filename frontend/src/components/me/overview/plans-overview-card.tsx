@@ -4,6 +4,7 @@ import { DashboardStatTile } from "@/components/common/dashboard/dashboard-metri
 import { DashboardSectionCard } from "@/components/common/dashboard/dashboard-section-card";
 import type { PersonPlan } from "@/components/plans/types-and-schemas";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { createTranslator, type Translator } from "@/i18n/translate";
 
 export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
@@ -57,7 +58,7 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
       actionHref="/me/plans"
       actionLabel={t((m) => m.PersonalOverview.plansCard.viewAll)}
     >
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
         {stats.map((stat) => (
           <DashboardStatTile
             key={stat.label}
@@ -73,28 +74,41 @@ export function PlansOverviewCard({ plans }: { plans: PersonPlan[] }) {
           description={t((m) => m.PersonalOverview.plansCard.noPlansYetDesc)}
         />
       ) : (
-        <div className="flex flex-col gap-3">
-          <p className="font-medium text-sm">
+        <div className="flex flex-col gap-2">
+          <p className="font-semibold text-xs text-foreground">
             {t((m) => m.PersonalOverview.plansCard.upcoming)}
           </p>
-          {upcoming.map((plan) => (
-            <div
-              key={plan.id}
-              className="flex items-center justify-between gap-3"
-            >
-              <div className="min-w-0">
-                <p className="truncate font-medium text-sm">{plan.title}</p>
-                <p className="text-muted-foreground text-xs">
-                  {formatPlanDate(plan, t)}
-                </p>
+          <div className="space-y-2">
+            {upcoming.map((plan) => (
+              <div
+                key={plan.id}
+                className="flex flex-col gap-1.5 rounded-xl border border-border/60 bg-muted/20 p-2.5 text-xs transition-colors hover:bg-muted/40"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate font-semibold text-foreground">
+                    {plan.title}
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 text-[10px] font-mono"
+                  >
+                    {plan.type === "TASK"
+                      ? t((m) => m.PersonalOverview.plansCard.task)
+                      : `${plan.progress}%`}
+                  </Badge>
+                </div>
+                {plan.type !== "TASK" ? (
+                  <Progress value={plan.progress} className="h-1.5 w-full" />
+                ) : null}
+                <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span>{formatPlanDate(plan, t)}</span>
+                  <span className="capitalize">
+                    {plan.type.toLowerCase().replace(/_/g, " ")}
+                  </span>
+                </div>
               </div>
-              <Badge variant="outline">
-                {plan.type === "TASK"
-                  ? t((m) => m.PersonalOverview.plansCard.task)
-                  : `${plan.progress}%`}
-              </Badge>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </DashboardSectionCard>

@@ -9,7 +9,7 @@ export function DashboardActivityList({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={cn("flex flex-col", className)}>{children}</div>;
+  return <div className={cn("flex flex-col gap-2", className)}>{children}</div>;
 }
 
 export function DashboardActivityItem({
@@ -29,32 +29,33 @@ export function DashboardActivityItem({
 }) {
   const content = (
     <>
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+      <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
         {icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="font-medium text-sm">{title}</p>
+        <p className="text-xs font-semibold text-foreground truncate">
+          {title}
+        </p>
         {description ? (
-          <p className="truncate text-muted-foreground text-xs">
+          <p className="truncate text-[11px] text-muted-foreground">
             {description}
           </p>
         ) : null}
       </div>
-      <p className="shrink-0 text-muted-foreground text-xs">{timestamp}</p>
+      <p className="shrink-0 text-[10px] text-muted-foreground font-mono">
+        {timestamp}
+      </p>
     </>
   );
 
   const rowClassName = cn(
-    "flex items-start gap-3 border-b py-3 first:pt-0 last:border-b-0 last:pb-0",
+    "flex items-center gap-2.5 sm:gap-3 rounded-xl border border-border/50 bg-muted/20 p-2.5 transition-colors hover:bg-muted/40",
     className,
   );
 
   if (href) {
     return (
-      <Link
-        href={href}
-        className={cn(rowClassName, "transition-colors hover:opacity-85")}
-      >
+      <Link href={href} className={rowClassName}>
         {content}
       </Link>
     );

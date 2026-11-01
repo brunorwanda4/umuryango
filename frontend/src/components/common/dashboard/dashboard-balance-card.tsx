@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
-import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import type { MinorUnitValue } from "@/lib/format-compact-number";
 import { cn } from "@/lib/utils";
 
@@ -11,37 +11,87 @@ export function DashboardBalanceStat({
   label,
   value,
   emptyLabel,
+  variant = "default",
+  indicatorColor,
 }: {
   href?: string;
   currency: string;
   label: ReactNode;
   value: MinorUnitValue;
   emptyLabel?: string;
+  variant?: "default" | "income" | "expense";
+  indicatorColor?: "emerald" | "rose" | "amber" | "muted";
 }) {
+  const resolvedIndicator =
+    indicatorColor ??
+    (variant === "income"
+      ? "emerald"
+      : variant === "expense"
+        ? "rose"
+        : undefined);
+
   const inner = (
     <>
-      <small className="block text-[13px] text-white/70">{label}</small>
-      <CompactMoney
-        className="mt-1 block font-mono text-lg font-semibold text-white"
-        currency={currency}
-        emptyLabel={emptyLabel}
-        value={value}
-      />
+      <div className="flex items-center justify-between gap-1.5 text-[11px] text-white/70">
+        <span className="truncate">{label}</span>
+        {resolvedIndicator === "emerald" ? (
+          <span
+            className="size-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"
+            aria-hidden="true"
+          />
+        ) : resolvedIndicator === "rose" ? (
+          <span
+            className="size-1.5 shrink-0 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(251,113,133,0.6)]"
+            aria-hidden="true"
+          />
+        ) : resolvedIndicator === "amber" ? (
+          <span
+            className="size-1.5 shrink-0 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.6)]"
+            aria-hidden="true"
+          />
+        ) : resolvedIndicator === "muted" ? (
+          <span
+            className="size-1.5 shrink-0 rounded-full bg-white/40"
+            aria-hidden="true"
+          />
+        ) : null}
+      </div>
+      <div className="mt-1 flex items-baseline gap-1">
+        <CompactMoney
+          className={cn(
+            "block font-mono text-base font-bold tracking-tight sm:text-lg tabular-nums",
+            variant === "income"
+              ? "text-emerald-400"
+              : variant === "expense"
+                ? "text-rose-400"
+                : "text-white",
+          )}
+          currency={currency}
+          emptyLabel={emptyLabel}
+          value={value}
+        />
+      </div>
     </>
   );
+
+  const statClassName =
+    "flex flex-col justify-between rounded-2xl border border-white/10 bg-black/40 p-3 sm:p-3.5 transition-colors";
 
   if (href) {
     return (
       <Link
         href={href}
-        className="rounded-xl border border-white/10 bg-white/6 p-3 transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className={cn(
+          statClassName,
+          "hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        )}
       >
         {inner}
       </Link>
     );
   }
 
-  return <div className="rounded-xl border border-white/10 bg-white/6 p-3">{inner}</div>;
+  return <div className={statClassName}>{inner}</div>;
 }
 
 export function DashboardBalanceCard({
@@ -68,12 +118,12 @@ export function DashboardBalanceCard({
   const balanceContent = (
     <>
       <CompactMoney
-        className="mt-2 font-mono text-4xl font-semibold tracking-[0.06em] text-white sm:text-5xl"
+        className="font-mono text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
         currency={currency}
         value={unavailable ? 0 : value}
       />
       {unavailable && unavailableLabel ? (
-        <p className="mt-2 text-sm text-white/70">{unavailableLabel}</p>
+        <p className="mt-1.5 text-xs text-white/70">{unavailableLabel}</p>
       ) : null}
     </>
   );
@@ -81,26 +131,39 @@ export function DashboardBalanceCard({
   return (
     <Card
       className={cn(
-        "family-balance-card gap-0 rounded-[22px] border py-[22px] text-white shadow-xl",
+        "family-balance-card gap-0 rounded-3xl border border-white/10 p-5 sm:p-6 text-white shadow-xl min-w-0 flex flex-col justify-between",
         className,
       )}
     >
-      <CardHeader className="flex flex-row items-center justify-between gap-2 px-[22px]">
-        <CardDescription className="font-mono text-[17px] font-semibold uppercase tracking-[0.14em] text-white/90">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-white/80 truncate">
           {label}
-        </CardDescription>
-        {badge}
-      </CardHeader>
-      <CardContent className="mt-7 flex flex-1 flex-col px-[22px]">
+        </span>
+        {badge ?? (
+          <span className="shrink-0 font-mono text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white/90 border border-white/10">
+            {currency}
+          </span>
+        )}
+      </div>
+
+      <div className="my-3">
         {href ? (
-          <Link href={href} className="block">
+          <Link
+            href={href}
+            className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring rounded-lg"
+          >
             {balanceContent}
           </Link>
         ) : (
           <div>{balanceContent}</div>
         )}
-        {children ? <div className="mt-auto grid grid-cols-2 gap-3 pt-5">{children}</div> : null}
-      </CardContent>
+      </div>
+
+      {children ? (
+        <div className="mt-auto grid grid-cols-2 gap-2.5 sm:gap-3">
+          {children}
+        </div>
+      ) : null}
     </Card>
   );
 }
