@@ -41,12 +41,8 @@ export function TransactionLedgerCard({
   actionSlot,
 }: TransactionLedgerCardProps) {
   const t = createTranslator("MoneyOverview");
-  const [filter, setFilter] = useState<
-    "all" | "income" | "expense" | "contribution"
-  >("all");
-  const [selectedTx, setSelectedTx] = useState<SharedTransactionItem | null>(
-    null,
-  );
+  const [filter, setFilter] = useState<"all" | "income" | "expense" | "contribution">("all");
+  const [selectedTx, setSelectedTx] = useState<SharedTransactionItem | null>(null);
   const [receiptOpen, setReceiptOpen] = useState(false);
 
   const filteredItems = useMemo(() => {
@@ -56,9 +52,7 @@ export function TransactionLedgerCard({
     } else if (filter === "expense") {
       list = list.filter((t) => t.type === "expense");
     } else if (filter === "contribution") {
-      list = list.filter(
-        (t) => t.type === "contribution" || t.type === "transfer",
-      );
+      list = list.filter((t) => t.type === "contribution" || t.type === "transfer");
     }
     return limit ? list.slice(0, limit) : list;
   }, [transactions, filter, limit]);
@@ -82,10 +76,7 @@ export function TransactionLedgerCard({
             <h3 className="text-xs sm:text-sm font-bold tracking-tight text-foreground">
               {t((m) => m.MoneyOverview.transactionLedger)}
             </h3>
-            <Badge
-              variant="secondary"
-              className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-            >
+            <Badge variant="secondary" className="text-[10px] font-bold px-2 py-0.5 rounded-full">
               {t((m) => m.MoneyOverview.itemCount, {
                 count: transactions.length,
               })}
@@ -146,8 +137,7 @@ export function TransactionLedgerCard({
             {filteredItems.map((tx) => {
               const isIncome = tx.type === "income";
               const isExpense = tx.type === "expense";
-              const isContribution =
-                tx.type === "contribution" || tx.type === "transfer";
+              const isContribution = tx.type === "contribution" || tx.type === "transfer";
 
               return (
                 <button
@@ -181,9 +171,7 @@ export function TransactionLedgerCard({
                     </div>
 
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground truncate">
-                        {tx.title}
-                      </p>
+                      <p className="text-xs font-semibold text-foreground truncate">{tx.title}</p>
                       <p className="text-[11px] text-muted-foreground truncate">
                         {tx.subtitle ??
                           (tx.category
@@ -220,10 +208,7 @@ export function TransactionLedgerCard({
           <Empty className="py-8">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <ReceiptIcon
-                  className="size-5 text-muted-foreground"
-                  aria-hidden="true"
-                />
+                <ReceiptIcon className="size-5 text-muted-foreground" aria-hidden="true" />
               </EmptyMedia>
               <EmptyTitle className="text-xs">
                 {t((m) => m.MoneyOverview.noTransactions)}

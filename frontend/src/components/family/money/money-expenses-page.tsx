@@ -1,16 +1,8 @@
 "use client";
 
-import {
-  AlertCircleIcon,
-  PieChartIcon,
-  PlusCircleIcon,
-  PlusIcon,
-  RefreshCwIcon,
-} from "lucide-react";
+import { AlertCircleIcon, PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { MoneyActionGrid } from "@/components/common/money-section/money-action-grid";
-import { MoneyCategoryBreakdownCard } from "@/components/common/money-section/money-category-breakdown-card";
 import { MoneyDirectionHeader } from "@/components/common/money-section/money-direction-header";
 import { MoneyDirectionShell } from "@/components/common/money-section/money-direction-shell";
 import { MoneyDirectionalHero } from "@/components/common/money-section/money-directional-hero";
@@ -20,8 +12,6 @@ import {
   safeCalculatePercentage,
 } from "@/components/common/money-section/money-section-utils";
 import type {
-  MoneyActionItem,
-  MoneyCategoryItem,
   MoneyHeroProgress,
   MoneyHeroSubmetric,
   MoneyPendingAttentionItem,
@@ -391,47 +381,6 @@ export function MoneyExpensesPage({
     handleSendApproval,
   ]);
 
-  // Category items with BigInt arithmetic
-  const categoryItems = useMemo<MoneyCategoryItem[]>(() => {
-    const map = new Map<
-      string,
-      { id: string; name: string; total: bigint; color?: string | null }
-    >();
-
-    for (const tx of transactions) {
-      if (tx.status === "REJECTED" || tx.status === "REVERSED") continue;
-      const name = tx.category.name || "Uncategorized";
-      const id = tx.categoryId || name;
-      const amount = BigInt(normalizeMinorUnits(tx.amountMinorUnits));
-      if (amount <= BigInt(0)) continue;
-
-      const existing = map.get(id);
-      if (existing) {
-        existing.total += amount;
-      } else {
-        map.set(id, {
-          id,
-          name,
-          total: amount,
-          color: null,
-        });
-      }
-    }
-
-    return Array.from(map.values())
-      .sort((a, b) => (b.total > a.total ? 1 : b.total < a.total ? -1 : 0))
-      .map((entry) => ({
-        id: entry.id,
-        name: entry.name,
-        amountMinorUnits: entry.total.toString(),
-        color: entry.color,
-        percentage: safeCalculatePercentage(
-          entry.total.toString(),
-          summary.totalExpenses,
-        ),
-      }));
-  }, [transactions, summary.totalExpenses]);
-
   // Filtering Logic
   const filteredTransactions = useMemo(() => {
     const min = minAmount ? Number(minAmount.replace(/,/g, "")) : null;
@@ -584,46 +533,6 @@ export function MoneyExpensesPage({
     ];
   }, [t, summary, pendingTransactions.length, transactions.length]);
 
-  const quickActions = useMemo<MoneyActionItem[]>(() => {
-    const canRecord = family ? hasCapability(family, "RECORD_EXPENSE") : false;
-    return [
-      {
-        id: "add-expense",
-        label: t((m) => m.FamilyExpenses.addExpense),
-        description: "Log household payment or cost",
-        icon: PlusCircleIcon,
-        iconColor: "rose",
-        disabled: !canRecord,
-        onClick: () => {
-          setDuplicateValues(null);
-          setOpenCreate(true);
-        },
-        tooltip: !canRecord
-          ? "You do not have permission to record family expenses."
-          : undefined,
-      },
-      {
-        id: "view-analytics",
-        label: activeTab === "overview" ? "View ledger" : "Budget analytics",
-        description: "Analyze budget & project links",
-        icon: PieChartIcon,
-        iconColor: "purple",
-        onClick: () =>
-          setActiveTab((prev) => (prev === "overview" ? "data" : "overview")),
-      },
-      {
-        id: "refresh-expenses",
-        label: "Refresh",
-        description: "Fetch latest expense records",
-        icon: RefreshCwIcon,
-        iconColor: "zinc",
-        onClick: () => {
-          void fetchData();
-        },
-      },
-    ];
-  }, [family, t, activeTab, fetchData]);
-
   if (loading) return <FamilyMoneySkeleton />;
   if (error || !family) {
     return (
@@ -670,9 +579,15 @@ export function MoneyExpensesPage({
         }
       />
 
-      {/* 2. Top Grid: Directional Hero (7 cols) + Outflow Actions & Pending Attention (5 cols) */}
+      {/* 2. Top Grid: Directional Hero + Optional Pending Attention */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
-        <div className="lg:col-span-7 xl:col-span-7">
+        <div
+          className={
+            pendingTransactions.length > 0
+              ? "lg:col-span-7 xl:col-span-7"
+              : "lg:col-span-12"
+          }
+        >
           <MoneyDirectionalHero
             direction="expense"
             currency={currency}
@@ -683,46 +598,24 @@ export function MoneyExpensesPage({
                 {currency}
               </span>
             }
-            subtitle="Track household bills, groceries, rent, transport, projects, and family operations."
             progress={budgetProgress}
             submetrics={submetrics}
           />
         </div>
 
-        <div className="lg:col-span-5 xl:col-span-5 flex flex-col gap-4">
-          <MoneyActionGrid
-            title="Expense actions"
-            description="Log family expenses, review budget usage, and track approvals."
-            actions={quickActions}
-          />
-
-          {pendingTransactions.length > 0 ? (
+        {pendingTransactions.length > 0 ? (
+          <div className="lg:col-span-5 xl:col-span-5 flex flex-col gap-4">
             <MoneyPendingAttentionCard
               direction="expense"
               title="Pending Approvals"
-              subtitle="Expense requests awaiting leadership review."
               badgeCount={pendingTransactions.length}
               items={pendingAttentionItems}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
 
-      {/* 3. Middle Section: Expense Categories Breakdown Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
-        <div className="lg:col-span-12">
-          <MoneyCategoryBreakdownCard
-            direction="expense"
-            title="Expense Categories & Breakdown"
-            subtitle="Breakdown of food, housing, utilities, transport, and household costs."
-            currency={currency}
-            items={categoryItems}
-            activeCountLabel={`${categoryItems.length} active categories`}
-          />
-        </div>
-      </div>
-
-      {/* 4. Ledger Section with Tabs */}
+      {/* 3. Ledger Section with Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="bg-zinc-900 border border-zinc-800">
           <TabsTrigger value="data">

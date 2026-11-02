@@ -3109,7 +3109,11 @@
     "incomeTab": "Income",
     "noCategories": "No category records found for this period",
     "transactionLedger": "Transaction Ledger",
-    "itemCount": "{count, plural, =0 {0 items} =1 {1 item} other {# items}}",
+    "itemCount": {
+      "zero": "0 items",
+      "one": "{count} item",
+      "other": "{count} items"
+    },
     "filterAll": "All",
     "filterIncome": "Income",
     "filterExpenses": "Expenses",

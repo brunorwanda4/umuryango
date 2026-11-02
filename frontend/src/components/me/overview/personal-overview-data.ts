@@ -27,6 +27,7 @@ export type OverviewFamily = FamilySummary & {
 
 export type PersonalOverviewData = {
   user: CurrentUser | null;
+  personalWorkspaceId: string | null;
   families: OverviewFamily[];
   plans: PersonPlan[];
   loans: PersonalLoan[];
@@ -39,6 +40,7 @@ export type PersonalOverviewData = {
 
 const EMPTY_DATA: PersonalOverviewData = {
   user: null,
+  personalWorkspaceId: null,
   families: [],
   plans: [],
   loans: [],
@@ -168,6 +170,7 @@ export function usePersonalOverviewData() {
 
     setData({
       user: userResponse.data?.user ?? null,
+      personalWorkspaceId: moneyWorkspace?.id ?? null,
       families,
       plans: plansResponse.data?.plans ?? [],
       loans,

@@ -43,49 +43,6 @@ export type MoneyDirectionalHeroProps = {
   className?: string;
 };
 
-export type MoneyActionItem = {
-  id: string;
-  label: ReactNode;
-  description?: ReactNode;
-  icon: LucideIcon;
-  iconColor?: "emerald" | "rose" | "blue" | "purple" | "zinc" | "amber";
-  onClick?: () => void;
-  disabled?: boolean;
-  tooltip?: string;
-};
-
-export type MoneyActionGridProps = {
-  title: ReactNode;
-  description?: ReactNode;
-  actions: MoneyActionItem[];
-  className?: string;
-};
-
-export type MoneyCategoryItem = {
-  id: string;
-  name: string;
-  amountMinorUnits: MinorUnitValue;
-  percentage: number; // 0-100
-  color?: string | null;
-  count?: number;
-  icon?: LucideIcon;
-  subtitle?: string | null;
-};
-
-export type MoneyCategoryBreakdownProps = {
-  direction: MoneyDirection;
-  title: ReactNode;
-  subtitle?: ReactNode;
-  activeCountLabel?: ReactNode;
-  currency: string;
-  items: MoneyCategoryItem[];
-  emptyTitle?: ReactNode;
-  emptyDescription?: ReactNode;
-  onAddCategory?: () => void;
-  addCategoryLabel?: ReactNode;
-  className?: string;
-};
-
 export type MoneyPendingAttentionItem = {
   id: string;
   title: string;

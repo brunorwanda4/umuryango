@@ -148,42 +148,26 @@ export function CreateCategoryForm({
       )}
       <DialogContent className="max-h-[96vh] overflow-y-auto lg:max-h-[calc(100vh-2rem)] lg:max-w-4xl lg:overflow-y-hidden">
         <DialogHeader>
-          <DialogTitle>
-            {t((m) => m.FamilyCategories.createCategoryDialogTitle)}
-          </DialogTitle>
-          <DialogDescription>
+          <DialogTitle>{t((m) => m.FamilyCategories.createCategoryDialogTitle)}</DialogTitle>
+          <DialogDescription className=" hidden md:block">
             {t((m) => m.FamilyCategories.createCategoryDialogDesc)}
           </DialogDescription>
         </DialogHeader>
         <form
           id="category-form"
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-6"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 "
         >
-          {error && (
-            <div className="text-sm text-destructive col-span-full">
-              {error}
-            </div>
-          )}
+          {error && <div className="text-sm text-destructive col-span-full">{error}</div>}
           <CategoryFormFields control={form.control} showStatus={false} />
         </form>
         <DialogFooter className=" flex flex-row gap-4  justify-end">
           <DialogClose asChild>
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => setOpen(false)}
-              className=" w-fit"
-            >
+            <Button variant="ghost" type="button" onClick={() => setOpen(false)} className=" w-fit">
               {t((m) => m.FamilyCategories.cancel)}
             </Button>
           </DialogClose>
-          <Button
-            type="submit"
-            form="category-form"
-            disabled={isPending}
-            className="w-fit"
-          >
+          <Button type="submit" form="category-form" disabled={isPending} className="w-fit">
             {isPending
               ? t((m) => m.FamilyCategories.creating)
               : t((m) => m.FamilyCategories.createCategoryBtn)}

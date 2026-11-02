@@ -56,7 +56,7 @@ export function PersonalOverviewPage() {
           </AlertDescription>
         </Alert>
       ) : null}
-      <PersonalSummaryCards data={data} />
+      <PersonalSummaryCards data={data} onSuccess={reload} />
       <DashboardGrid>
         <MoneyOverviewCard data={data} onSuccess={reload} />
         <PlansOverviewCard plans={data.plans} />

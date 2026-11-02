@@ -44,13 +44,12 @@ export function CategoryBreakdownCard({
   const t = createTranslator("MoneyOverview");
   const [activeTab, setActiveTab] = useState<"expenses" | "income">("expenses");
 
-  const currentList =
-    activeTab === "expenses" ? expenseCategories : incomeCategories;
+  const currentList = activeTab === "expenses" ? expenseCategories : incomeCategories;
 
   return (
     <Card
       className={cn(
-        "rounded-2xl border border-border/90 bg-card p-4 sm:p-5 shadow-sm space-y-3.5 flex flex-col justify-between",
+        "rounded-2xl border border-border/90 bg-card p-4 sm:p-5 shadow-sm space-y-3.5 flex flex-col justify-between h-full",
         className,
       )}
     >
@@ -125,19 +124,14 @@ export function CategoryBreakdownCard({
             {currentList.map((item, index) => {
               const color = item.color || PALETTE[index % PALETTE.length];
               return (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between text-xs py-0.5"
-                >
+                <div key={item.id} className="flex items-center justify-between text-xs py-0.5">
                   <div className="flex items-center gap-2 min-w-0 pr-2">
                     <span
                       className="size-2.5 rounded-xs shrink-0"
                       style={{ backgroundColor: color }}
                       aria-hidden="true"
                     />
-                    <span className="truncate text-foreground font-medium">
-                      {item.name}
-                    </span>
+                    <span className="truncate text-foreground font-medium">{item.name}</span>
                   </div>
                   <div className="text-right shrink-0 font-mono">
                     <span className="font-bold text-foreground">
@@ -155,14 +149,9 @@ export function CategoryBreakdownCard({
           <Empty className="py-6">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <PieChartIcon
-                  className="size-5 text-muted-foreground"
-                  aria-hidden="true"
-                />
+                <PieChartIcon className="size-5 text-muted-foreground" aria-hidden="true" />
               </EmptyMedia>
-              <EmptyTitle className="text-xs">
-                {t((m) => m.MoneyOverview.noCategories)}
-              </EmptyTitle>
+              <EmptyTitle className="text-xs">{t((m) => m.MoneyOverview.noCategories)}</EmptyTitle>
               <EmptyDescription className="text-[11px]">
                 {activeTab === "expenses"
                   ? t((m) => m.MoneyOverview.noTransactionsDesc)

@@ -246,6 +246,8 @@ function MoneyWorkspaceContent({
       ? money.totals.pendingApprovalCount
       : (money?.approvals?.length ?? 0);
 
+  const moneyBaseHref = `/family/${encodeURIComponent(family.slug)}/money`;
+
   return (
     <MoneyOverviewShell>
       {/* Header */}
@@ -319,6 +321,8 @@ function MoneyWorkspaceContent({
                   money?.totals?.expenseMinorUnits ?? "0",
                 )}
                 currency={currency}
+                incomeHref={`${moneyBaseHref}/income`}
+                expenseHref={`${moneyBaseHref}/expenses`}
                 incomeMeta={
                   money?.totals?.contributionsPaidMinorUnits
                     ? `Paid: ${formatCompactMinorUnits(money.totals.contributionsPaidMinorUnits, currency)}`

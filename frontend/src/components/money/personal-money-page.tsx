@@ -78,8 +78,8 @@ export function PersonalMoneyPage() {
                 familyId={familyId}
                 onCategoryCreated={loadData}
                 onSuccess={loadData}
-                triggerClassName="rounded-xl font-semibold"
-                triggerSize="default"
+                triggerClassName="font-semibold sm:h-9 sm:gap-1.5 sm:px-3 sm:text-sm sm:[&_svg:not([class*='size-'])]:size-4"
+                // triggerSize="xs"
                 type="income"
               />
               <MoneyFormDialog
@@ -87,8 +87,8 @@ export function PersonalMoneyPage() {
                 familyId={familyId}
                 onCategoryCreated={loadData}
                 onSuccess={loadData}
-                triggerClassName="rounded-xl font-semibold"
-                triggerSize="default"
+                triggerClassName="font-semibold sm:h-9 sm:gap-1.5 sm:px-3 sm:text-sm sm:[&_svg:not([class*='size-'])]:size-4"
+                // triggerSize="xs"
                 type="expense"
               />
             </div>
@@ -115,7 +115,7 @@ export function PersonalMoneyPage() {
         <>
           {/* Top Grid: Hero Card + Category Breakdown */}
           <MoneyOverviewTopGrid>
-            <div className="lg:col-span-8">
+            <div className="lg:col-span-6">
               <CashflowHeroCard
                 label={t((m) => m.PersonalMoney.cards.balance)}
                 badgeLabel={periodLabel}
@@ -123,6 +123,8 @@ export function PersonalMoneyPage() {
                 incomeMinorUnits={totalIncomeMinorUnits}
                 expenseMinorUnits={totalExpensesMinorUnits}
                 currency={currency}
+                incomeHref="/me/money/income"
+                expenseHref="/me/money/expenses"
                 incomeMeta={
                   incomeDashboard?.records?.length
                     ? `${incomeDashboard.records.length} records`
@@ -137,7 +139,7 @@ export function PersonalMoneyPage() {
               />
             </div>
 
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-6">
               <CategoryBreakdownCard
                 expenseCategories={expenseCategoryBreakdown}
                 incomeCategories={incomeCategoryBreakdown}
@@ -147,11 +149,7 @@ export function PersonalMoneyPage() {
           </MoneyOverviewTopGrid>
 
           {/* Transaction Ledger */}
-          <TransactionLedgerCard
-            transactions={sharedTransactions}
-            currency={currency}
-            limit={12}
-          />
+          <TransactionLedgerCard transactions={sharedTransactions} currency={currency} limit={12} />
 
           {/* Supporting Row: Savings Goal Snapshot & Debt Snapshot */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

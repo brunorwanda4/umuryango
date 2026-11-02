@@ -1,38 +1,18 @@
 "use client";
 
-import {
-  AlertCircleIcon,
-  LayersIcon,
-  PieChartIcon,
-  PlusCircleIcon,
-  RefreshCwIcon,
-} from "lucide-react";
+import { AlertCircleIcon, RefreshCwIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import { MoneyActionGrid } from "@/components/common/money-section/money-action-grid";
-import { MoneyCategoryBreakdownCard } from "@/components/common/money-section/money-category-breakdown-card";
 import { MoneyDirectionalHero } from "@/components/common/money-section/money-directional-hero";
 import { MoneyPendingAttentionCard } from "@/components/common/money-section/money-pending-attention-card";
 import { MoneySectionSkeleton } from "@/components/common/money-section/money-section-skeleton";
-import {
-  addMinorUnits,
-  safeCalculatePercentage,
-} from "@/components/common/money-section/money-section-utils";
+import { addMinorUnits } from "@/components/common/money-section/money-section-utils";
 import type {
-  MoneyActionItem,
-  MoneyCategoryItem,
   MoneyHeroSubmetric,
   MoneyPendingAttentionItem,
 } from "@/components/common/money-section/types";
 import { CreateCategoryForm } from "@/components/family/money/forms/create-category-form";
-import { MoneyFormDialog } from "@/components/money/money-form-dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createTranslator } from "@/i18n/translate";
 import { ExpenseChartsSection } from "./expense-dashboard/expense-charts-section";
@@ -46,7 +26,6 @@ import { ViewExpenseDialog } from "./expense-dashboard/view-expense-dialog";
 
 export function ExpenseDashboard({
   categories,
-  allCategories,
   data,
   error,
   familyId,
@@ -65,8 +44,6 @@ export function ExpenseDashboard({
 }) {
   const t = createTranslator("PersonalMoney.personalExpenses");
   const [activeTab, setActiveTab] = useState("data");
-  const [isRecordExpenseOpen, setIsRecordExpenseOpen] = useState(false);
-  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [viewPendingExpenseId, setViewPendingExpenseId] = useState<
     string | null
   >(null);
@@ -144,20 +121,6 @@ export function ExpenseDashboard({
     ];
   }, [data, approvedRecords.length, pendingRecords.length, pendingTotal]);
 
-  const categoryItems = useMemo<MoneyCategoryItem[]>(() => {
-    if (!dashboard || !data) return [];
-    return dashboard.expenseSourceData.map((source) => ({
-      id: source.name,
-      name: source.name,
-      amountMinorUnits: source.amountMinorUnitsValue,
-      percentage: safeCalculatePercentage(
-        source.amountMinorUnitsValue,
-        data.summary.periodTotalMinorUnits,
-      ),
-      color: source.color,
-    }));
-  }, [dashboard, data]);
-
   const pendingAttentionItems = useMemo<MoneyPendingAttentionItem[]>(() => {
     return pendingRecords.map((record) => ({
       id: record.id,
@@ -172,46 +135,6 @@ export function ExpenseDashboard({
       onView: () => setViewPendingExpenseId(record.id),
     }));
   }, [pendingRecords]);
-
-  const quickActions = useMemo<MoneyActionItem[]>(() => {
-    return [
-      {
-        id: "record-expense",
-        label: "Record expense",
-        description: "Log payment or cost",
-        icon: PlusCircleIcon,
-        iconColor: "rose",
-        onClick: () => setIsRecordExpenseOpen(true),
-      },
-      {
-        id: "add-category",
-        label: "New category",
-        description: "Organize expense types",
-        icon: LayersIcon,
-        iconColor: "blue",
-        onClick: () => setIsAddCategoryOpen(true),
-      },
-      {
-        id: "view-charts",
-        label: activeTab === "charts" ? "View ledger" : "Expense charts",
-        description: "Visual outflow breakdown",
-        icon: PieChartIcon,
-        iconColor: "purple",
-        onClick: () =>
-          setActiveTab((prev) => (prev === "charts" ? "data" : "charts")),
-      },
-      {
-        id: "refresh-data",
-        label: "Refresh",
-        description: "Fetch latest records",
-        icon: RefreshCwIcon,
-        iconColor: "zinc",
-        onClick: () => {
-          void onRetry();
-        },
-      },
-    ];
-  }, [activeTab, onRetry]);
 
   if (isLoading) {
     return <MoneySectionSkeleton />;
@@ -263,9 +186,15 @@ export function ExpenseDashboard({
 
   return (
     <div className="flex flex-col gap-5 sm:gap-6">
-      {/* 1. Top Section: Directional Hero (7 cols) + Quick Actions & Pending Attention (5 cols) */}
+      {/* 1. Top Section: Directional Hero + Optional Pending Attention */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
-        <div className="lg:col-span-7 xl:col-span-7">
+        <div
+          className={
+            pendingRecords.length > 0
+              ? "lg:col-span-7 xl:col-span-7"
+              : "lg:col-span-12"
+          }
+        >
           <MoneyDirectionalHero
             direction="expense"
             currency="RWF"
@@ -276,47 +205,23 @@ export function ExpenseDashboard({
                 {periodLabel ?? "This Month"}
               </span>
             }
-            subtitle="Track household spending, bills, transport, and discretionary outflows."
             submetrics={submetrics}
           />
         </div>
 
-        <div className="lg:col-span-5 xl:col-span-5 flex flex-col gap-4">
-          <MoneyActionGrid
-            title="Expense actions"
-            description="Record payments, manage expense categories, and analyze outflows."
-            actions={quickActions}
-          />
-
-          {pendingRecords.length > 0 ? (
+        {pendingRecords.length > 0 ? (
+          <div className="lg:col-span-5 xl:col-span-5 flex flex-col gap-4">
             <MoneyPendingAttentionCard
               direction="expense"
               title="Pending Expenses"
-              subtitle="Expenses currently awaiting approval or settlement."
               badgeCount={pendingRecords.length}
               items={pendingAttentionItems}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
 
-      {/* 2. Middle Section: Categories Breakdown Card */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
-        <div className="lg:col-span-12">
-          <MoneyCategoryBreakdownCard
-            direction="expense"
-            title="Expense Categories & Breakdown"
-            subtitle="Breakdown of food, housing, utilities, transport, and other costs."
-            currency="RWF"
-            items={categoryItems}
-            activeCountLabel={`${categoryItems.length} active categories`}
-            onAddCategory={() => setIsAddCategoryOpen(true)}
-            addCategoryLabel="New expense category"
-          />
-        </div>
-      </div>
-
-      {/* 3. Transaction Ledger & Charts Tabs */}
+      {/* 2. Transaction Ledger & Charts Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="bg-zinc-900 border border-zinc-800">
           <TabsTrigger value="data">
@@ -344,39 +249,6 @@ export function ExpenseDashboard({
           />
         </TabsContent>
       </Tabs>
-
-      {/* Create Category Dialog */}
-      <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create an expense category</DialogTitle>
-          </DialogHeader>
-          <CreateCategoryForm
-            defaultType="EXPENSE"
-            existingCategories={allCategories ?? categories}
-            familyId={familyId}
-            personal
-            onSuccess={async () => {
-              setIsAddCategoryOpen(false);
-              await onRetry();
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Record Expense Dialog Triggered from Quick Action */}
-      {familyId ? (
-        <MoneyFormDialog
-          categories={allCategories ?? categories}
-          familyId={familyId}
-          open={isRecordExpenseOpen}
-          onOpenChange={setIsRecordExpenseOpen}
-          onCategoryCreated={onRetry}
-          onSuccess={onRetry}
-          trigger={null}
-          type="expense"
-        />
-      ) : null}
 
       {/* Pending Expense View Dialog */}
       {selectedPendingExpense ? (

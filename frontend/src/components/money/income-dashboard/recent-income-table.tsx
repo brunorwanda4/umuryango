@@ -9,10 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePersistentViewMode } from "@/hooks/use-persistent-view-mode";
 import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
-import type {
-  IncomeCategory,
-  RecentIncomeRecord,
-} from "./income-dashboard-data";
+import type { IncomeCategory, RecentIncomeRecord } from "./income-dashboard-data";
 import { RecentIncomeActionsPopover } from "./recent-income-actions-popover";
 import { RecentIncomeFilter } from "./recent-income-filter";
 import { RecentIncomeItems } from "./recent-income-items";
@@ -38,19 +35,17 @@ function getRecentIncomeColumns({
       cell: ({ row }) => {
         return (
           <div className="flex min-w-44 items-center">
-            <span className="font-medium text-muted-foreground">
-              {row.original.source}
-            </span>
+            <span className="font-medium text-muted-foreground">{row.original.source}</span>
           </div>
         );
       },
     },
     {
-      accessorKey: "description",
-      header: t((m) => m.PersonalMoney.personalIncome.table.description),
+      accessorKey: "amountMinorUnits",
+      header: t((m) => m.PersonalMoney.personalIncome.table.amount),
       cell: ({ row }) => (
-        <span className="block min-w-60 text-muted-foreground">
-          {row.original.description}
+        <span className="font-bold text-chart-2">
+          <CompactMoney currency="RWF" value={row.original.amountMinorUnits} />
         </span>
       ),
     },
@@ -69,20 +64,17 @@ function getRecentIncomeColumns({
       ),
     },
     {
-      accessorKey: "amountMinorUnits",
-      header: t((m) => m.PersonalMoney.personalIncome.table.amount),
+      accessorKey: "description",
+      header: t((m) => m.PersonalMoney.personalIncome.table.description),
       cell: ({ row }) => (
-        <span className="font-bold text-chart-2">
-          <CompactMoney currency="RWF" value={row.original.amountMinorUnits} />
-        </span>
+        <span className="block min-w-60 text-muted-foreground">{row.original.description}</span>
       ),
     },
+
     {
       accessorKey: "date",
       header: t((m) => m.PersonalMoney.personalIncome.table.date),
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">{row.original.date}</span>
-      ),
+      cell: ({ row }) => <span className="text-muted-foreground">{row.original.date}</span>,
     },
     {
       accessorKey: "paymentMethod",
@@ -108,9 +100,7 @@ function getRecentIncomeColumns({
     {
       id: "actions",
       header: () => (
-        <div className="text-right">
-          {t((m) => m.PersonalMoney.personalIncome.table.actions)}
-        </div>
+        <div className="text-right">{t((m) => m.PersonalMoney.personalIncome.table.actions)}</div>
       ),
       cell: ({ row }) => (
         <div className="flex justify-end">
@@ -142,9 +132,7 @@ export function RecentIncomeTable({
   const [category, setCategory] = useState("all");
   const [paymentMethod, setPaymentMethod] = useState("all");
   const [viewIncomeId, setViewIncomeId] = useState<string | null>(null);
-  const [viewMode, setViewMode] = usePersistentViewMode(
-    RECENT_INCOME_VIEW_MODE_STORAGE_KEY,
-  );
+  const [viewMode, setViewMode] = usePersistentViewMode(RECENT_INCOME_VIEW_MODE_STORAGE_KEY);
   const filteredIncomeData = useMemo(() => {
     const query = search.trim().toLowerCase();
 

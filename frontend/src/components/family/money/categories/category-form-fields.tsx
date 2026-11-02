@@ -45,10 +45,7 @@ type CategoryFormFieldsProps = {
  *
  * Status and Description span full width via col-span-full.
  */
-export function CategoryFormFields({
-  control,
-  showStatus = true,
-}: CategoryFormFieldsProps) {
+export function CategoryFormFields({ control, showStatus = true }: CategoryFormFieldsProps) {
   const t = createTranslator("FamilyCategories");
 
   return (
@@ -108,7 +105,7 @@ export function CategoryFormFields({
         label={t((m) => m.FamilyCategories.color)}
         fieldType="custom"
         required
-        description="Choose a preset or use a custom color for category lists and future reports."
+        // description="Choose a preset or use a custom color for category lists and future reports."
         render={({ field, id, invalid, disabled }) => {
           const selectedColor = field.value?.toString() ?? "";
           const isPreset = colorOptions.some((o) => o.value === selectedColor);

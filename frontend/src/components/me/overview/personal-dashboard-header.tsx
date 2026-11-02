@@ -24,10 +24,6 @@ export function PersonalDashboardHeader({ firstName }: { firstName?: string }) {
       subtitle={
         <>
           <span>{dateStr}</span>
-          <span className="text-muted-foreground/50" aria-hidden="true">
-            •
-          </span>
-          <span>Kigali, Rwanda</span>
         </>
       }
     />

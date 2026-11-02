@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { BackButton } from "../back-button";
 
 export function MoneyOverviewHeader({
   title,
@@ -20,9 +21,12 @@ export function MoneyOverviewHeader({
       )}
     >
       <div className="min-w-0 space-y-0.5">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
-          {title}
-        </h1>
+        <div className="flex items-center gap-2">
+          <BackButton />
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
+            {title}
+          </h1>
+        </div>
         {description ? (
           <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 hidden md:block">
             {description}
@@ -30,11 +34,7 @@ export function MoneyOverviewHeader({
         ) : null}
       </div>
 
-      {actions ? (
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          {actions}
-        </div>
-      ) : null}
+      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </header>
   );
 }

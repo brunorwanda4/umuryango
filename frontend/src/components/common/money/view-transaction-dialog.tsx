@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  CalendarDaysIcon,
-  EyeIcon,
-  PencilIcon,
-  TagIcon,
-  Trash2Icon,
-} from "lucide-react";
+import { CalendarDaysIcon, EyeIcon, PencilIcon, TagIcon, Trash2Icon } from "lucide-react";
 import type * as React from "react";
 import { useState } from "react";
 import { CompactMoney } from "@/components/common/money/compact-money";
@@ -89,20 +83,11 @@ export function ViewTransactionDialog({
 
   return (
     <>
-      <Dialog
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        searchParamValue={searchParamValue}
-      >
+      <Dialog open={isOpen} onOpenChange={setIsOpen} searchParamValue={searchParamValue}>
         {trigger !== null && (
           <DialogTrigger asChild>
             {trigger ?? (
-              <Button
-                className="justify-start"
-                size="sm"
-                type="button"
-                variant="ghost"
-              >
+              <Button className="justify-start" size="sm" type="button" variant="ghost">
                 <EyeIcon aria-hidden="true" data-icon="inline-start" />
                 {t((m) => m.Common.view)}
               </Button>
@@ -112,24 +97,20 @@ export function ViewTransactionDialog({
         <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-lg">
           <DialogHeader className="px-6 pt-6 pb-5 pr-14">
             <DialogTitle>{detailsTitle}</DialogTitle>
-            <DialogDescription>{detailsDescription}</DialogDescription>
+            <DialogDescription className=" hidden md:block">{detailsDescription}</DialogDescription>
           </DialogHeader>
-          <Separator />
+          <Separator className=" " />
           <div className="flex flex-col gap-6 px-6 py-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-3">
                 {leading}
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className="font-medium leading-5">{title}</span>
-                  <span className="text-muted-foreground text-sm leading-5">
-                    {description}
-                  </span>
+                  <span className="text-muted-foreground text-sm leading-5">{description}</span>
                 </div>
               </div>
               <div className="flex shrink-0 flex-col gap-1 sm:items-end">
-                <span className="text-muted-foreground text-xs font-medium">
-                  {amountLabel}
-                </span>
+                <span className="text-muted-foreground text-xs font-medium">{amountLabel}</span>
                 <span className="font-heading text-2xl font-semibold tabular-nums">
                   <CompactMoney currency={currency} value={amountMinorUnits} />
                 </span>
@@ -139,15 +120,11 @@ export function ViewTransactionDialog({
               <div className="flex items-center gap-3 border-b px-4 py-3.5">
                 <CalendarDaysIcon className="text-muted-foreground size-4 shrink-0" />
                 <dt className="text-muted-foreground text-sm">{dateLabel}</dt>
-                <dd className="ml-auto text-right text-sm font-medium">
-                  {date}
-                </dd>
+                <dd className="ml-auto text-right text-sm font-medium">{date}</dd>
               </div>
               <div className="flex items-center gap-3 border-b px-4 py-3.5">
                 <TagIcon className="text-muted-foreground size-4 shrink-0" />
-                <dt className="text-muted-foreground text-sm">
-                  {t((m) => m.Common.category)}
-                </dt>
+                <dt className="text-muted-foreground text-sm">{t((m) => m.Common.category)}</dt>
                 <dd className="ml-auto">
                   <Badge className={categoryClassName}>{category}</Badge>
                 </dd>
@@ -157,9 +134,7 @@ export function ViewTransactionDialog({
                 <dt className="text-muted-foreground text-sm">
                   {t((m) => m.Common.paymentMethod)}
                 </dt>
-                <dd className="ml-auto text-right text-sm font-medium">
-                  {paymentMethod}
-                </dd>
+                <dd className="ml-auto text-right text-sm font-medium">{paymentMethod}</dd>
               </div>
             </dl>
           </div>
@@ -186,11 +161,7 @@ export function ViewTransactionDialog({
               {updateLabel}
             </Button>
             <DialogClose asChild>
-              <Button
-                className="w-full sm:w-auto"
-                type="button"
-                variant="outline"
-              >
+              <Button className="w-full sm:w-auto" type="button" variant="outline">
                 {t((m) => m.Common.close)}
               </Button>
             </DialogClose>

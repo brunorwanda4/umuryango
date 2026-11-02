@@ -1,16 +1,24 @@
-import { ArrowDownLeftIcon, ArrowUpRightIcon } from "lucide-react";
+import { ArrowDownLeftIcon, ArrowUpRightIcon, PlusIcon } from "lucide-react";
 import { DashboardQuickAddTile } from "@/components/common/dashboard/dashboard-action-grid";
 import {
   DashboardBalanceCard,
   DashboardBalanceStat,
 } from "@/components/common/dashboard/dashboard-balance-card";
 import { DashboardSummaryMetric } from "@/components/common/dashboard/dashboard-metric-card";
+import { MoneyFormDialog } from "@/components/money/money-form-dialog";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { createTranslator } from "@/i18n/translate";
 import type { PersonalOverviewData } from "./personal-overview-data";
 import { addMinorUnits } from "./personal-overview-data";
 
-export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
+export function PersonalSummaryCards({
+  data,
+  onSuccess,
+}: {
+  data: PersonalOverviewData;
+  onSuccess: () => void | Promise<void>;
+}) {
   const t = createTranslator("PersonalOverview.summaryCards");
   const allIncome = data.income?.summary.allTimeTotalMinorUnits;
   const allExpenses = data.expenses?.summary.allTimeTotalMinorUnits;
@@ -35,9 +43,7 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
         value={moneyAvailable ? balance.toString() : 0}
         href="/me/money"
         unavailable={!moneyAvailable}
-        unavailableLabel={t(
-          (m) => m.PersonalOverview.summaryCards.moneyUnavailable,
-        )}
+        unavailableLabel={t((m) => m.PersonalOverview.summaryCards.moneyUnavailable)}
       >
         <DashboardBalanceStat
           href="/me/money/income"
@@ -45,6 +51,28 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
           label={t((m) => m.PersonalOverview.summaryCards.incomeThisMonth)}
           value={income}
           variant="income"
+          action={
+            data.personalWorkspaceId ? (
+              <MoneyFormDialog
+                categories={data.categories}
+                familyId={data.personalWorkspaceId}
+                onCategoryCreated={onSuccess}
+                onSuccess={onSuccess}
+                type="income"
+                trigger={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="default"
+                    aria-label={t((m) => m.PersonalOverview.summaryCards.addIncome)}
+                    className="rounded-full"
+                  >
+                    <PlusIcon aria-hidden="true" />
+                  </Button>
+                }
+              />
+            ) : null
+          }
         />
         <DashboardBalanceStat
           href="/me/money/expenses"
@@ -52,6 +80,28 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
           label={t((m) => m.PersonalOverview.summaryCards.spentThisMonth)}
           value={expenses}
           variant="expense"
+          action={
+            data.personalWorkspaceId ? (
+              <MoneyFormDialog
+                categories={data.categories}
+                familyId={data.personalWorkspaceId}
+                onCategoryCreated={onSuccess}
+                onSuccess={onSuccess}
+                type="expense"
+                trigger={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="default"
+                    aria-label={t((m) => m.PersonalOverview.summaryCards.addExpense)}
+                    className=" rounded-full"
+                  >
+                    <PlusIcon aria-hidden="true" />
+                  </Button>
+                }
+              />
+            ) : null
+          }
         />
       </DashboardBalanceCard>
 
@@ -89,24 +139,14 @@ export function PersonalSummaryCards({ data }: { data: PersonalOverviewData }) {
               href="/me/money/income"
               label={t((m) => m.PersonalOverview.summaryCards.addIncome)}
               description="Salary or deposit"
-              icon={
-                <ArrowDownLeftIcon
-                  className="size-4 text-emerald-500"
-                  aria-hidden="true"
-                />
-              }
+              icon={<ArrowDownLeftIcon className="size-4 text-emerald-500" aria-hidden="true" />}
               iconClassName="bg-emerald-500/10 text-emerald-500"
             />
             <DashboardQuickAddTile
               href="/me/money/expenses"
               label={t((m) => m.PersonalOverview.summaryCards.addExpense)}
               description="Bills or supplies"
-              icon={
-                <ArrowUpRightIcon
-                  className="size-4 text-rose-500"
-                  aria-hidden="true"
-                />
-              }
+              icon={<ArrowUpRightIcon className="size-4 text-rose-500" aria-hidden="true" />}
               iconClassName="bg-rose-500/10 text-rose-500"
             />
           </div>

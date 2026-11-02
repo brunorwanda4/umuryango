@@ -95,6 +95,23 @@ describe("translate and createTranslator", () => {
     assert.strictEqual(t("addExpense"), "Add Expense");
   });
 
+  it("pluralizes the real money overview item count", () => {
+    const t = createTranslator("MoneyOverview");
+
+    assert.strictEqual(
+      t((m) => m.MoneyOverview.itemCount, { count: 0 }),
+      "0 items",
+    );
+    assert.strictEqual(
+      t((m) => m.MoneyOverview.itemCount, { count: 1 }),
+      "1 item",
+    );
+    assert.strictEqual(
+      t((m) => m.MoneyOverview.itemCount, { count: 2 }),
+      "2 items",
+    );
+  });
+
   it("returns an empty string when a selector points to nothing", () => {
     const t = createTranslator(sampleMessages);
     assert.strictEqual(

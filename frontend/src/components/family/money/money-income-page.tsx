@@ -1,27 +1,14 @@
 "use client";
 
-import {
-  AlertCircleIcon,
-  LayersIcon,
-  PlusCircleIcon,
-  PlusIcon,
-  RefreshCwIcon,
-} from "lucide-react";
+import { AlertCircleIcon, PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { MoneyActionGrid } from "@/components/common/money-section/money-action-grid";
-import { MoneyCategoryBreakdownCard } from "@/components/common/money-section/money-category-breakdown-card";
 import { MoneyDirectionHeader } from "@/components/common/money-section/money-direction-header";
 import { MoneyDirectionShell } from "@/components/common/money-section/money-direction-shell";
 import { MoneyDirectionalHero } from "@/components/common/money-section/money-directional-hero";
 import { MoneyPendingAttentionCard } from "@/components/common/money-section/money-pending-attention-card";
-import {
-  normalizeMinorUnits,
-  safeCalculatePercentage,
-} from "@/components/common/money-section/money-section-utils";
+import { normalizeMinorUnits } from "@/components/common/money-section/money-section-utils";
 import type {
-  MoneyActionItem,
-  MoneyCategoryItem,
   MoneyHeroSubmetric,
   MoneyPendingAttentionItem,
 } from "@/components/common/money-section/types";
@@ -363,47 +350,6 @@ export function MoneyIncomePage({
     [transactions],
   );
 
-  // Stream Categories with BigInt safety
-  const streamCategoryItems = useMemo<MoneyCategoryItem[]>(() => {
-    const map = new Map<
-      string,
-      { id: string; name: string; total: bigint; color?: string | null }
-    >();
-
-    for (const tx of transactions) {
-      if (tx.status === "REJECTED" || tx.status === "REVERSED") continue;
-      const name = tx.category.name || "Uncategorized";
-      const id = tx.categoryId || name;
-      const amount = BigInt(normalizeMinorUnits(tx.amountMinorUnits));
-      if (amount <= BigInt(0)) continue;
-
-      const existing = map.get(id);
-      if (existing) {
-        existing.total += amount;
-      } else {
-        map.set(id, {
-          id,
-          name,
-          total: amount,
-          color: null,
-        });
-      }
-    }
-
-    return Array.from(map.values())
-      .sort((a, b) => (b.total > a.total ? 1 : b.total < a.total ? -1 : 0))
-      .map((entry) => ({
-        id: entry.id,
-        name: entry.name,
-        amountMinorUnits: entry.total.toString(),
-        color: entry.color,
-        percentage: safeCalculatePercentage(
-          entry.total.toString(),
-          summary.totalRecorded,
-        ),
-      }));
-  }, [transactions, summary.totalRecorded]);
-
   // Filtering Logic
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
@@ -627,45 +573,6 @@ export function MoneyIncomePage({
     pendingTransactions.length,
   ]);
 
-  const quickActions = useMemo<MoneyActionItem[]>(() => {
-    const canRecord = family ? hasCapability(family, "RECORD_INCOME") : false;
-    return [
-      {
-        id: "add-income",
-        label: t((m) => m.FamilyIncome.addIncome),
-        description: "Log contribution or deposit",
-        icon: PlusCircleIcon,
-        iconColor: "emerald",
-        disabled: !canRecord,
-        onClick: () => openGenericCreate(true),
-        tooltip: !canRecord
-          ? "You do not have permission to record family income."
-          : undefined,
-      },
-      {
-        id: "manage-categories",
-        label: "Categories",
-        description: "View inflow channels",
-        icon: LayersIcon,
-        iconColor: "blue",
-        onClick: () => {
-          const el = document.getElementById("family-income-streams-section");
-          el?.scrollIntoView({ behavior: "smooth" });
-        },
-      },
-      {
-        id: "refresh-records",
-        label: "Refresh",
-        description: "Fetch latest family records",
-        icon: RefreshCwIcon,
-        iconColor: "zinc",
-        onClick: () => {
-          void refreshTransactions();
-        },
-      },
-    ];
-  }, [family, t, openGenericCreate, refreshTransactions]);
-
   if (loading) return <FamilyMoneySkeleton />;
   if (error || !family) {
     return (
@@ -706,9 +613,15 @@ export function MoneyIncomePage({
         }
       />
 
-      {/* 2. Top Grid: Directional Hero (7 cols) + Inflow Actions & Pending Attention (5 cols) */}
+      {/* 2. Top Grid: Directional Hero + Optional Pending Attention */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
-        <div className="lg:col-span-7 xl:col-span-7">
+        <div
+          className={
+            pendingTransactions.length > 0
+              ? "lg:col-span-7 xl:col-span-7"
+              : "lg:col-span-12"
+          }
+        >
           <MoneyDirectionalHero
             direction="income"
             currency={currency}
@@ -719,48 +632,23 @@ export function MoneyIncomePage({
                 {currency}
               </span>
             }
-            subtitle="Track member contributions, rent collections, business returns, and grants."
             submetrics={submetrics}
           />
         </div>
 
-        <div className="lg:col-span-5 xl:col-span-5 flex flex-col gap-4">
-          <MoneyActionGrid
-            title="Inflow actions"
-            description="Record family payments, manage income categories, and track approvals."
-            actions={quickActions}
-          />
-
-          {pendingTransactions.length > 0 ? (
+        {pendingTransactions.length > 0 ? (
+          <div className="lg:col-span-5 xl:col-span-5 flex flex-col gap-4">
             <MoneyPendingAttentionCard
               direction="income"
               title="Pending & Expected Inflows"
-              subtitle="Pledges and transactions awaiting settlement or approval."
               badgeCount={pendingTransactions.length}
               items={pendingAttentionItems}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
 
-      {/* 3. Middle Section: Streams & Sources Breakdown Card */}
-      <div
-        id="family-income-streams-section"
-        className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5"
-      >
-        <div className="lg:col-span-12">
-          <MoneyCategoryBreakdownCard
-            direction="income"
-            title="Income Streams & Sources"
-            subtitle="Breakdown of member contributions, rental collections, projects, and communal pots."
-            currency={currency}
-            items={streamCategoryItems}
-            activeCountLabel={`${streamCategoryItems.length} active streams`}
-          />
-        </div>
-      </div>
-
-      {/* 4. Ledger Section with Tabs */}
+      {/* 3. Ledger Section with Tabs */}
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="bg-zinc-900 border border-zinc-800">
           <TabsTrigger value="all">{tCommon((m) => m.Common.all)}</TabsTrigger>
