@@ -19,11 +19,8 @@ pub struct NativeApiClient {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NativeLoginPayload {
-    pub identifier: String,
+    pub emailOrMobile: String,
     pub password: String,
-    pub deviceId: String,
-    pub deviceName: String,
-    pub platform: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,7 +44,9 @@ pub struct RemoteFamilySummary {
     pub id: String,
     pub name: String,
     pub slug: String,
+    #[serde(alias = "defaultCurrency")]
     pub currency: String,
+    #[serde(alias = "authority")]
     pub role: Option<String>,
 }
 

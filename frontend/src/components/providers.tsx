@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { type ReactNode, useState } from "react";
+import { OfflineSync } from "@/components/offline-sync";
 import { PwaRegistration } from "@/components/pwa-registration";
 import { SessionRefresh } from "@/components/session-refresh";
 import { ThemeShortcut } from "@/components/theme-shortcut";
@@ -35,6 +36,7 @@ export function Providers({ children }: ProvidersProps) {
       >
         <ThemeShortcut />
         <PwaRegistration />
+        <OfflineSync />
         <TooltipProvider>
           <SessionRefresh />
           {children}

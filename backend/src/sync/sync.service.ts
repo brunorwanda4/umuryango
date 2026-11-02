@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import {
   CategoryStatus,
@@ -20,12 +21,14 @@ import {
   FamilyProjectStatus,
   IncomePaymentStatus,
   IncomeRecurrence,
+  NotificationType,
   type Prisma,
   TransactionScope,
   TransactionStatus,
   TransactionType,
 } from '@prisma/client';
 import { can } from '../families/family-access';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import type {
   SyncCommandType,
@@ -134,7 +137,10 @@ type ActiveMembershipContext = {
 
 @Injectable()
 export class SyncService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly notificationsService?: NotificationsService,
+  ) {}
 
   async pull(
     userId: string,
@@ -149,9 +155,7 @@ export class SyncService {
     const limit = query.limit ?? 250;
     const serverNow = new Date();
 
-    const updatedFilter = cursorDate
-      ? { gt: cursorDate }
-      : undefined;
+    const updatedFilter = cursorDate ? { gt: cursorDate } : undefined;
 
     const [
       members,
@@ -540,7 +544,10 @@ export class SyncService {
 
     for (const project of projects) {
       trackWatermark(project.updatedAt, project.id);
-      if (project.archivedAt || project.status === FamilyProjectStatus.CANCELLED) {
+      if (
+        project.archivedAt ||
+        project.status === FamilyProjectStatus.CANCELLED
+      ) {
         tombstones.push({
           recordType: 'PROJECT',
           serverId: project.id,
@@ -578,7 +585,10 @@ export class SyncService {
 
     for (const contact of contacts) {
       trackWatermark(contact.updatedAt, contact.id);
-      if (contact.deletedAt || contact.status === FamilyContactStatus.INACTIVE) {
+      if (
+        contact.deletedAt ||
+        contact.status === FamilyContactStatus.INACTIVE
+      ) {
         tombstones.push({
           recordType: 'CONTACT',
           serverId: contact.id,
@@ -643,6 +653,11 @@ export class SyncService {
     const effectiveCursorDate =
       maxUpdatedAt.getTime() > 0 ? maxUpdatedAt : serverNow;
     const nextCursor = this.formatCursor(effectiveCursorDate, lastEntityId);
+    const authoritativeTotals = await this.getAuthoritativeTotals(
+      family.id,
+      userId,
+      family.defaultCurrency,
+    );
 
     return {
       contractVersion: '1.0.0',
@@ -658,16 +673,13 @@ export class SyncService {
         capabilities: membership.capabilities,
         removedAt: null,
       },
+      authoritativeTotals,
       entities,
       tombstones,
     };
   }
 
-  async push(
-    userId: string,
-    familyIdentifier: string,
-    dto: SyncPushDto,
-  ) {
+  async push(userId: string, familyIdentifier: string, dto: SyncPushDto) {
     const { family, membership } = await this.requireActiveMembership(
       userId,
       familyIdentifier,
@@ -723,12 +735,74 @@ export class SyncService {
       results.push(result);
     }
 
+    const authoritativeTotals = await this.getAuthoritativeTotals(
+      family.id,
+      userId,
+      family.defaultCurrency,
+    );
+
     return {
       contractVersion: '1.0.0',
       familyId: family.id,
       familySlug: family.slug,
       serverTimestamp: serverNow.toISOString(),
+      authoritativeTotals,
       results,
+    };
+  }
+
+  private async getAuthoritativeTotals(
+    familyId: string,
+    userId: string,
+    currency: string,
+  ) {
+    const visibleScope = {
+      OR: [
+        { scope: TransactionScope.FAMILY },
+        { scope: TransactionScope.PERSONAL, createdById: userId },
+      ],
+    } satisfies Prisma.FamilyTransactionWhereInput;
+    const [income, expense, pendingExpense] = await Promise.all([
+      this.prisma.familyTransaction.aggregate({
+        where: {
+          familyId,
+          ...visibleScope,
+          type: TransactionType.INCOME,
+          status: TransactionStatus.APPROVED,
+        },
+        _sum: { amountMinorUnits: true },
+      }),
+      this.prisma.familyTransaction.aggregate({
+        where: {
+          familyId,
+          ...visibleScope,
+          type: TransactionType.EXPENSE,
+          status: TransactionStatus.APPROVED,
+        },
+        _sum: { amountMinorUnits: true },
+      }),
+      this.prisma.familyTransaction.aggregate({
+        where: {
+          familyId,
+          scope: TransactionScope.FAMILY,
+          type: TransactionType.EXPENSE,
+          status: TransactionStatus.PENDING,
+        },
+        _sum: { amountMinorUnits: true },
+      }),
+    ]);
+    const approvedIncome = income._sum.amountMinorUnits ?? 0n;
+    const approvedExpense = expense._sum.amountMinorUnits ?? 0n;
+
+    return {
+      currency,
+      serverApprovedIncomeMinorUnits: approvedIncome.toString(),
+      serverApprovedExpenseMinorUnits: approvedExpense.toString(),
+      serverNetBalanceMinorUnits: (approvedIncome - approvedExpense).toString(),
+      serverPendingApprovalExpenseMinorUnits: (
+        pendingExpense._sum.amountMinorUnits ?? 0n
+      ).toString(),
+      computedAt: new Date().toISOString(),
     };
   }
 
@@ -1050,6 +1124,35 @@ export class SyncService {
           },
         },
       });
+
+      if (scope === TransactionScope.FAMILY && this.notificationsService) {
+        const recipients = await tx.familyMember.findMany({
+          where: {
+            familyId: family.id,
+            removedAt: null,
+            userId: { not: userId },
+          },
+          select: { userId: true },
+        });
+        const directionLabel =
+          type === TransactionType.INCOME ? 'income' : 'expense';
+
+        await Promise.all(
+          recipients.map(({ userId: recipientUserId }) =>
+            this.notificationsService!.createNotification(
+              {
+                userId: recipientUserId,
+                familyId: family.id,
+                type: NotificationType.SYSTEM,
+                title: `New family ${directionLabel}`,
+                description: `A ${directionLabel} transaction was synchronized for the family.`,
+                dedupeKey: `transaction-created:${created.id}:${recipientUserId}`,
+              },
+              tx,
+            ),
+          ),
+        );
+      }
 
       const result: SyncPushCommandResult = {
         idempotencyKey: command.idempotencyKey,

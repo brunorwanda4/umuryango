@@ -6,9 +6,14 @@ import type { FormEvent, PointerEvent } from "react";
 import { useRef, useState } from "react";
 import { GoogleIcon } from "@/components/icons/google-icon";
 import { Button } from "@/components/ui/button";
-import { FieldDescription, FieldError, FieldGroup } from "@/components/ui/field";
+import {
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+} from "@/components/ui/field";
 import { FloatingField } from "@/components/ui/floating-field";
 import { Spinner } from "@/components/ui/spinner";
+import { useConnectivity } from "@/hooks/use-connectivity";
 import apiRequest, { getApiAuthUrl } from "@/service/api";
 
 export type LoginFormCopy = {
@@ -38,15 +43,22 @@ function normalizeLoginIdentifier(value: string) {
   return value.trim().replace(identifierBoundaryCharacters, "");
 }
 
-export const LoginForm = ({ copy, forgotPasswordHref, postLoginHref }: LoginFormProps) => {
+export const LoginForm = ({
+  copy,
+  forgotPasswordHref,
+  postLoginHref,
+}: LoginFormProps) => {
   const router = useRouter();
+  const isOnline = useConnectivity();
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const skipPasswordToggleClickRef = useRef(false);
 
-  const passwordToggleLabel = isPasswordVisible ? copy.hidePasswordLabel : copy.showPasswordLabel;
+  const passwordToggleLabel = isPasswordVisible
+    ? copy.hidePasswordLabel
+    : copy.showPasswordLabel;
   const PasswordIcon = isPasswordVisible ? EyeOffIcon : EyeIcon;
   const togglePasswordVisibility = () => {
     const nextIsPasswordVisible = !isPasswordVisible;
@@ -64,7 +76,9 @@ export const LoginForm = ({ copy, forgotPasswordHref, postLoginHref }: LoginForm
       });
     }
   };
-  const handlePasswordTogglePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+  const handlePasswordTogglePointerDown = (
+    event: PointerEvent<HTMLButtonElement>,
+  ) => {
     if (event.pointerType === "mouse") return;
 
     event.preventDefault();
@@ -87,7 +101,9 @@ export const LoginForm = ({ copy, forgotPasswordHref, postLoginHref }: LoginForm
     setIsPending(true);
 
     const formData = new FormData(event.currentTarget);
-    const emailOrMobile = normalizeLoginIdentifier(String(formData.get("emailOrMobile") ?? ""));
+    const emailOrMobile = normalizeLoginIdentifier(
+      String(formData.get("emailOrMobile") ?? ""),
+    );
     const password = String(formData.get("password") ?? "");
 
     const response = await apiRequest("post", "/auth/login", {
@@ -97,7 +113,9 @@ export const LoginForm = ({ copy, forgotPasswordHref, postLoginHref }: LoginForm
 
     if (!response.ok) {
       setError(
-        response.statusCode === 0 ? copy.genericError : (response.message ?? copy.genericError),
+        response.statusCode === 0
+          ? copy.genericError
+          : (response.message ?? copy.genericError),
       );
       setIsPending(false);
       return;
@@ -151,9 +169,17 @@ export const LoginForm = ({ copy, forgotPasswordHref, postLoginHref }: LoginForm
           />
 
           <div className="flex justify-between items-center">
-            <Button href={forgotPasswordHref} variant="link" className="text-sm">
-              {copy.forgotPassword}
-            </Button>
+            {isOnline ? (
+              <Button
+                href={forgotPasswordHref}
+                variant="link"
+                className="text-sm"
+              >
+                {copy.forgotPassword}
+              </Button>
+            ) : (
+              <span />
+            )}
             <Button
               type="button"
               variant="ghost"
@@ -188,17 +214,19 @@ export const LoginForm = ({ copy, forgotPasswordHref, postLoginHref }: LoginForm
           )}
         </Button>
 
-        <Button
-          asChild
-          variant="outline"
-          size="lg"
-          className="h-11 w-full rounded-full text-sm font-semibold"
-        >
-          <a href={getApiAuthUrl("google")}>
-            <GoogleIcon data-icon="inline-start" />
-            {copy.continueWithGoogle}
-          </a>
-        </Button>
+        {isOnline ? (
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="h-11 w-full rounded-full text-sm font-semibold"
+          >
+            <a href={getApiAuthUrl("google")}>
+              <GoogleIcon data-icon="inline-start" />
+              {copy.continueWithGoogle}
+            </a>
+          </Button>
+        ) : null}
       </div>
 
       <FieldDescription aria-live="polite" className="text-center">

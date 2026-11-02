@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -14,31 +15,16 @@ val tauriProperties = Properties().apply {
 }
 
 android {
-    compileSdk = 35
+    compileSdk = 37
     namespace = "rw.umuryango.app"
-
     defaultConfig {
+        manifestPlaceholders["usesCleartextTraffic"] = "false"
         applicationId = "rw.umuryango.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 37
         versionCode = tauriProperties.getProperty("tauri.android.versionCode", "1").toInt()
-        versionName = tauriProperties.getProperty("tauri.android.versionName", "0.1.0")
-        manifestPlaceholders["usesCleartextTraffic"] = "false"
+        versionName = tauriProperties.getProperty("tauri.android.versionName", "1.0")
     }
-
-    signingConfigs {
-        create("release") {
-            // Release signing reads strictly from external environment variables; never commit keystores
-            val keystorePath = System.getenv("UMURYANGO_ANDROID_KEYSTORE_PATH")
-            if (!keystorePath.isNullOrBlank()) {
-                storeFile = file(keystorePath)
-                storePassword = System.getenv("UMURYANGO_ANDROID_KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("UMURYANGO_ANDROID_KEY_ALIAS")
-                keyPassword = System.getenv("UMURYANGO_ANDROID_KEY_PASSWORD")
-            }
-        }
-    }
-
     buildTypes {
         getByName("debug") {
             manifestPlaceholders["usesCleartextTraffic"] = "true"
@@ -53,23 +39,29 @@ android {
             }
         }
         getByName("release") {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            signingConfig = signingConfigs.findByName("release")
+            optimization {
+               enable = true
+            }
             proguardFiles(
-                *fileTree(".") { include("**/*.pro") }
-                    .plus(getDefaultProguardFile("proguard-android-optimize.txt"))
-                    .toList().toTypedArray()
+                *fileTree(".") {
+                  include("**/*.pro")
+                  exclude("build/**")
+                }.files.toTypedArray()
             )
         }
     }
-
-    kotlinOptions {
-        jvmTarget = "17"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
-
     buildFeatures {
         buildConfig = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_1_8
     }
 }
 
@@ -78,8 +70,14 @@ rust {
 }
 
 dependencies {
-    implementation("androidx.webkit:webkit:1.12.1")
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.activity:activity-ktx:1.9.3")
+    implementation("androidx.webkit:webkit:1.14.0")
+    implementation("androidx.appcompat:appcompat:1.7.1")
+    implementation("androidx.activity:activity-ktx:1.10.1")
     implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.lifecycle:lifecycle-process:2.10.0")
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.4")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.0")
 }
+
+apply(from = file("tauri.build.gradle.kts"))

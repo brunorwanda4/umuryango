@@ -462,7 +462,12 @@ export class AuthController {
         accessToken: loginResult.accessToken,
         refreshToken: loginResult.refreshToken,
         accessTokenExpiresInSeconds: loginResult.accessTokenExpiresInSeconds,
-        refreshTokenExpiresAt: loginResult.refreshTokenExpiresAt.toISOString(),
+        refreshTokenExpiresInSeconds: Math.max(
+          0,
+          Math.floor(
+            (loginResult.refreshTokenExpiresAt.getTime() - Date.now()) / 1000,
+          ),
+        ),
       },
       message: 'Native session established.',
     };
@@ -471,7 +476,8 @@ export class AuthController {
   @Post('native/refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Rotate refresh token and issue a new access token for Rust client',
+    summary:
+      'Rotate refresh token and issue a new access token for Rust client',
   })
   async nativeRefresh(
     @Body() nativeRefreshDto: NativeRefreshDto,
@@ -493,7 +499,12 @@ export class AuthController {
         accessToken: loginResult.accessToken,
         refreshToken: loginResult.refreshToken,
         accessTokenExpiresInSeconds: loginResult.accessTokenExpiresInSeconds,
-        refreshTokenExpiresAt: loginResult.refreshTokenExpiresAt.toISOString(),
+        refreshTokenExpiresInSeconds: Math.max(
+          0,
+          Math.floor(
+            (loginResult.refreshTokenExpiresAt.getTime() - Date.now()) / 1000,
+          ),
+        ),
       },
       message: 'Native session refreshed.',
     };
@@ -525,18 +536,11 @@ export class AuthController {
   async nativeHealth(@Req() request: Request) {
     this.assertNativeClient(request);
 
-    const accessToken = extractAccessTokenFromRequest(request);
-    const user = await this.authService.getCurrentUser(accessToken);
-
     return {
       data: {
         status: 'ok',
         serverTimestamp: new Date().toISOString(),
-        user: {
-          id: user.id,
-          email: user.email,
-          fullName: user.fullName,
-        },
+        contractVersion: '1.0.0',
       },
       message: 'Native session healthy.',
     };

@@ -8,9 +8,11 @@ use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use chrono::{DateTime, Duration, Utc};
 use ring::aead::{Aad, LessSafeKey, Nonce, UnboundKey, CHACHA20_POLY1305, NONCE_LEN};
 use ring::hkdf::{Salt, HKDF_SHA256};
+use ring::pbkdf2::{self, PBKDF2_HMAC_SHA256};
 use ring::rand::{SecureRandom, SystemRandom};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+use std::num::NonZeroU32;
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 use zeroize::Zeroize;
@@ -30,6 +32,10 @@ pub struct PersistedVaultRecord {
     pub active_family_id: Option<String>,
     pub device_id: String,
     pub account_master_key_b64: String,
+    #[serde(default)]
+    pub offline_password_salt_b64: Option<String>,
+    #[serde(default)]
+    pub offline_password_verifier_b64: Option<String>,
 }
 
 impl Drop for PersistedVaultRecord {
@@ -371,6 +377,16 @@ impl SessionManager {
             .as_ref()
             .filter(|v| v.user.id == tokens.user.id)
             .and_then(|v| v.active_family_id.clone());
+        let preserved_password_salt = self
+            .vault
+            .as_ref()
+            .filter(|v| v.user.id == tokens.user.id)
+            .and_then(|v| v.offline_password_salt_b64.clone());
+        let preserved_password_verifier = self
+            .vault
+            .as_ref()
+            .filter(|v| v.user.id == tokens.user.id)
+            .and_then(|v| v.offline_password_verifier_b64.clone());
 
         let record = PersistedVaultRecord {
             user: tokens.user,
@@ -383,6 +399,8 @@ impl SessionManager {
             active_family_id: preserved_id,
             device_id: device_id.unwrap_or_else(|| self.device_id()),
             account_master_key_b64,
+            offline_password_salt_b64: preserved_password_salt,
+            offline_password_verifier_b64: preserved_password_verifier,
         };
 
         self.save_vault_record(&record)?;
@@ -419,6 +437,85 @@ impl SessionManager {
         };
 
         Ok(self.safe_summary())
+    }
+
+    pub fn unlock_offline_session_with_credentials(
+        &mut self,
+        identifier: &str,
+        password: &str,
+    ) -> AppResult<SafeSessionSummary> {
+        let vault = self.vault.as_ref().ok_or_else(|| {
+            AppError::Unauthenticated(
+                "No offline account is saved on this device. Connect and sign in first."
+                    .to_string(),
+            )
+        })?;
+        let normalized_identifier = identifier.trim().to_lowercase();
+        let matches_identity = vault.user.email.to_lowercase() == normalized_identifier
+            || vault
+                .user
+                .phone
+                .as_deref()
+                .is_some_and(|phone| phone.trim() == identifier.trim());
+
+        if !matches_identity {
+            return Err(AppError::Unauthenticated(
+                "This account is not saved for offline use on this device.".to_string(),
+            ));
+        }
+
+        let salt = vault
+            .offline_password_salt_b64
+            .as_deref()
+            .and_then(|value| BASE64.decode(value).ok())
+            .ok_or_else(|| {
+                AppError::Unauthenticated(
+                    "Offline login is not ready. Reconnect and sign in once.".to_string(),
+                )
+            })?;
+        let verifier = vault
+            .offline_password_verifier_b64
+            .as_deref()
+            .and_then(|value| BASE64.decode(value).ok())
+            .ok_or_else(|| {
+                AppError::Unauthenticated(
+                    "Offline login is not ready. Reconnect and sign in once.".to_string(),
+                )
+            })?;
+
+        pbkdf2::verify(
+            PBKDF2_HMAC_SHA256,
+            NonZeroU32::new(120_000).expect("PBKDF2 iteration count is non-zero"),
+            &salt,
+            password.as_bytes(),
+            &verifier,
+        )
+        .map_err(|_| AppError::Unauthenticated("Incorrect password.".to_string()))?;
+
+        self.unlock_offline_session()
+    }
+
+    fn save_offline_password_verifier(&mut self, password: &str) -> AppResult<()> {
+        let mut salt = [0u8; 16];
+        SystemRandom::new()
+            .fill(&mut salt)
+            .map_err(|_| AppError::Encryption("Password verifier RNG failed".to_string()))?;
+        let mut verifier = [0u8; 32];
+        pbkdf2::derive(
+            PBKDF2_HMAC_SHA256,
+            NonZeroU32::new(120_000).expect("PBKDF2 iteration count is non-zero"),
+            &salt,
+            password.as_bytes(),
+            &mut verifier,
+        );
+
+        let record = self.vault.as_mut().ok_or_else(|| {
+            AppError::Unauthenticated("Cannot prepare offline login without a session.".to_string())
+        })?;
+        record.offline_password_salt_b64 = Some(BASE64.encode(salt));
+        record.offline_password_verifier_b64 = Some(BASE64.encode(verifier));
+        let saved = record.clone();
+        self.save_vault_record(&saved)
     }
 
     pub async fn valid_access_token(&mut self, api: &NativeApiClient) -> AppResult<String> {
@@ -468,21 +565,20 @@ impl SessionManager {
         api: &NativeApiClient,
         identifier: &str,
         password: &str,
-        device_name: &str,
-        platform: &str,
+        _device_name: &str,
+        _platform: &str,
     ) -> AppResult<SafeSessionSummary> {
         let device_id = self.device_id();
         let tokens = api
             .login(&NativeLoginPayload {
-                identifier: identifier.trim().to_string(),
+                emailOrMobile: identifier.trim().to_string(),
                 password: password.to_string(),
-                deviceId: device_id.clone(),
-                deviceName: device_name.to_string(),
-                platform: platform.to_string(),
             })
             .await?;
 
-        self.establish_authenticated_session(tokens, Some(device_id))
+        let summary = self.establish_authenticated_session(tokens, Some(device_id))?;
+        self.save_offline_password_verifier(password)?;
+        Ok(summary)
     }
 
     pub async fn sign_out(

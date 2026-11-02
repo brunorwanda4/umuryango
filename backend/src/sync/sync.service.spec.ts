@@ -73,6 +73,9 @@ describe('SyncService', () => {
         findMany: jest.fn().mockResolvedValue([]),
       },
       familyTransaction: {
+        aggregate: jest.fn().mockResolvedValue({
+          _sum: { amountMinorUnits: null },
+        }),
         findUnique: jest.fn(),
         findFirst: jest.fn(),
         findMany: jest.fn().mockResolvedValue([]),
@@ -465,9 +468,7 @@ describe('SyncService', () => {
       });
 
       expect(response.results[0]?.outcome).toBe('CONFLICT');
-      expect(response.results[0]?.conflictCode).toBe(
-        'APPROVAL_STATE_CONFLICT',
-      );
+      expect(response.results[0]?.conflictCode).toBe('APPROVAL_STATE_CONFLICT');
       expect(response.results[0]?.serverRecord?.status).toBe('APPROVED');
     });
 
@@ -573,7 +574,11 @@ describe('SyncService', () => {
           removedAt: laterTime,
           createdAt: baseTime,
           updatedAt: laterTime,
-          user: { fullName: 'Removed Member', avatarUrl: null, email: 'ex@example.com' },
+          user: {
+            fullName: 'Removed Member',
+            avatarUrl: null,
+            email: 'ex@example.com',
+          },
         },
       ]);
       prisma.familyTransactionCategory.findMany.mockResolvedValue([

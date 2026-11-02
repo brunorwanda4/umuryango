@@ -108,7 +108,8 @@ pub struct SignInInput {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateOfflineTransactionInput {
-    pub familySlug: String,
+    pub familyId: String,
+    pub transactionType: Option<String>,
     pub categoryId: String,
     pub categoryName: Option<String>,
     pub amountMinorUnits: String,
@@ -304,10 +305,11 @@ pub async fn sign_in(
 #[tauri::command]
 pub async fn unlock_offline_session(
     state: State<'_, Arc<NativeAppState>>,
+    input: SignInInput,
 ) -> AppResult<SafeSessionSummary> {
     let summary = {
         let mut session = state.session.lock().await;
-        session.unlock_offline_session()?
+        session.unlock_offline_session_with_credentials(&input.identifier, &input.password)?
     };
     let _ = state.ensure_account_db().await?;
     Ok(summary)
@@ -387,6 +389,33 @@ pub async fn create_offline_expense(
     enqueue_transaction_command(app, state, input, "EXPENSE", SyncCommandType::CreateExpense).await
 }
 
+#[tauri::command]
+pub async fn create_offline_personal_transaction(
+    app: AppHandle,
+    state: State<'_, Arc<NativeAppState>>,
+    input: CreateOfflineTransactionInput,
+) -> AppResult<OutboxCommandView> {
+    let direction = input
+        .transactionType
+        .as_deref()
+        .unwrap_or("EXPENSE")
+        .to_uppercase();
+    if direction != "INCOME" && direction != "EXPENSE" {
+        return Err(AppError::Validation(
+            "Personal transaction type must be INCOME or EXPENSE.".to_string(),
+        ));
+    }
+
+    enqueue_transaction_command(
+        app,
+        state,
+        input,
+        &direction,
+        SyncCommandType::CreatePersonalTransaction,
+    )
+    .await
+}
+
 async fn enqueue_transaction_command(
     app: AppHandle,
     state: State<'_, Arc<NativeAppState>>,
@@ -402,7 +431,7 @@ async fn enqueue_transaction_command(
 
     let amount_minor = validate_positive_minor_units(&input.amountMinorUnits)?;
     let db = state.ensure_account_db().await?;
-    let family = db.get_cached_family_by_slug(&input.familySlug).await?;
+    let family = db.get_cached_family_by_id(&input.familyId).await?;
 
     let (user_id, device_id) = {
         let session = state.session.lock().await;
@@ -434,9 +463,10 @@ async fn enqueue_transaction_command(
         "categoryId": input.categoryId,
         "amountMinorUnits": amount_minor,
         "currency": currency,
+        "type": direction,
         "description": input.description.trim(),
         "notes": input.notes,
-        "transactionDate": tx_date,
+        "date": tx_date,
     });
 
     let outbox = db

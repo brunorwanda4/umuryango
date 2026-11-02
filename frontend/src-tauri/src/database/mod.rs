@@ -284,6 +284,39 @@ impl AccountDatabase {
         })
     }
 
+    pub async fn get_cached_family_by_id(&self, family_id: &str) -> AppResult<CachedFamilyView> {
+        let row = sqlx::query(
+            r#"
+            SELECT family_id, slug, name, currency, role, permissions_json, is_active_member, last_synced_at
+            FROM cached_families
+            WHERE account_id = ? AND family_id = ?
+            "#,
+        )
+        .bind(self.account_id())
+        .bind(family_id)
+        .fetch_optional(&self.pool)
+        .await?
+        .ok_or_else(|| {
+            AppError::PermissionDenied(format!(
+                "Family '{family_id}' is not available in this account's local cache."
+            ))
+        })?;
+
+        let permissions_raw: String = row.get("permissions_json");
+        let permissions: Vec<String> = serde_json::from_str(&permissions_raw).unwrap_or_default();
+
+        Ok(CachedFamilyView {
+            familyId: row.get("family_id"),
+            slug: row.get("slug"),
+            name: row.get("name"),
+            currency: row.get("currency"),
+            role: row.get("role"),
+            permissions,
+            isActiveMember: row.get::<i64, _>("is_active_member") != 0,
+            lastSyncedAt: row.get("last_synced_at"),
+        })
+    }
+
     pub async fn get_family_cursor(&self, family_id: &str) -> AppResult<Option<String>> {
         let row: Option<(Option<String>,)> = sqlx::query_as(
             "SELECT last_cursor FROM cached_families WHERE account_id = ? AND family_id = ?",
@@ -665,6 +698,25 @@ impl AccountDatabase {
             .await?;
 
         for res in results {
+            let command_id = if res.commandId.is_empty() {
+                sqlx::query_scalar::<_, String>(
+                    "SELECT command_id FROM sync_outbox WHERE account_id = ? AND family_id = ? AND local_record_id = ? ORDER BY seq DESC LIMIT 1",
+                )
+                .bind(self.account_id())
+                .bind(family_id)
+                .bind(&res.localRecordId)
+                .fetch_optional(&mut *tx)
+                .await?
+                .ok_or_else(|| {
+                    AppError::Database(format!(
+                        "Sync response referenced unknown local record '{}'.",
+                        res.localRecordId
+                    ))
+                })?
+            } else {
+                res.commandId.clone()
+            };
+
             match res.outcome {
                 SyncCommandOutcome::Applied | SyncCommandOutcome::DuplicateIgnored => {
                     sqlx::query(
@@ -681,7 +733,7 @@ impl AccountDatabase {
                     .bind(&now)
                     .bind(self.account_id())
                     .bind(family_id)
-                    .bind(&res.commandId)
+                    .bind(&command_id)
                     .execute(&mut *tx)
                     .await?;
 
@@ -713,7 +765,7 @@ impl AccountDatabase {
                         Some(ref snap) => Some(self.cipher.encrypt_json(
                             family_id,
                             "CONFLICT_SNAPSHOT",
-                            &res.commandId,
+                            &command_id,
                             snap,
                         )?),
                         None => None,
@@ -737,7 +789,7 @@ impl AccountDatabase {
                     .bind(&now)
                     .bind(self.account_id())
                     .bind(family_id)
-                    .bind(&res.commandId)
+                    .bind(&command_id)
                     .execute(&mut *tx)
                     .await?;
 
@@ -778,7 +830,7 @@ impl AccountDatabase {
                     .bind(&now)
                     .bind(self.account_id())
                     .bind(family_id)
-                    .bind(&res.commandId)
+                    .bind(&command_id)
                     .execute(&mut *tx)
                     .await?;
 
@@ -808,7 +860,7 @@ impl AccountDatabase {
                     )
                     .bind(self.account_id())
                     .bind(family_id)
-                    .bind(&res.commandId)
+                    .bind(&command_id)
                     .fetch_optional(&mut *tx)
                     .await?;
 
@@ -833,7 +885,7 @@ impl AccountDatabase {
                     .bind(&now)
                     .bind(self.account_id())
                     .bind(family_id)
-                    .bind(&res.commandId)
+                    .bind(&command_id)
                     .execute(&mut *tx)
                     .await?;
 
@@ -1020,6 +1072,7 @@ impl AccountDatabase {
         let direction = server_rec
             .payload
             .get("direction")
+            .or_else(|| server_rec.payload.get("type"))
             .and_then(|v| v.as_str())
             .map(|s| s.to_string());
         let record_status = server_rec
@@ -1226,13 +1279,16 @@ impl AccountDatabase {
                     .to_string(),
                 direction: payload
                     .get("direction")
+                    .or_else(|| payload.get("type"))
                     .and_then(|v| v.as_str())
                     .unwrap_or("EXPENSE")
                     .to_string(),
                 isActive: payload
                     .get("isActive")
                     .and_then(|v| v.as_bool())
-                    .unwrap_or(true),
+                    .unwrap_or_else(|| {
+                        payload.get("status").and_then(|v| v.as_str()) != Some("INACTIVE")
+                    }),
                 requiresReceiptAboveMinorUnits: payload
                     .get("requiresReceiptAboveMinorUnits")
                     .and_then(|v| v.as_str())
@@ -1307,6 +1363,7 @@ impl AccountDatabase {
                 categoryName: category_name,
                 direction: payload
                     .get("direction")
+                    .or_else(|| payload.get("type"))
                     .and_then(|v| v.as_str())
                     .unwrap_or("EXPENSE")
                     .to_string(),
@@ -1336,6 +1393,7 @@ impl AccountDatabase {
                     .map(|s| s.to_string()),
                 transactionDate: payload
                     .get("transactionDate")
+                    .or_else(|| payload.get("date"))
                     .and_then(|v| v.as_str())
                     .unwrap_or("")
                     .to_string(),

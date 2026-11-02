@@ -35,6 +35,30 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::initialize_native_app,
+            commands::get_session_state,
+            commands::set_api_base_url,
+            commands::sign_in,
+            commands::unlock_offline_session,
+            commands::sign_out,
+            commands::list_cached_families,
+            commands::select_active_family,
+            commands::get_cached_dashboard,
+            commands::create_offline_income,
+            commands::create_offline_expense,
+            commands::create_offline_personal_transaction,
+            commands::update_offline_transaction_notes,
+            commands::create_offline_contribution_payment,
+            commands::create_offline_project,
+            commands::create_offline_contact,
+            commands::stage_offline_receipt,
+            commands::get_sync_status,
+            commands::sync_now,
+            commands::retry_failed_command,
+            commands::resolve_conflict,
+            commands::get_notification_permission,
+            commands::set_notification_permission,
+            commands::send_native_notification,
             commands::handle_deep_link,
             commands::open_external_url,
         ])
@@ -48,8 +72,8 @@ mod tests {
         parse_minor_units, sum_minor_unit_strings, validate_positive_minor_units, NativeAuthUser,
         NativeSessionState, NativeSessionTokensResponse, SyncAuthoritativeTotals,
         SyncCommandOutcome, SyncCommandType, SyncPullMemberSummary, SyncPullResponse,
-        SyncPushCommandResult, SyncRecordEnvelope, SyncRecordType, SyncTombstoneRecord,
-        SYNC_CONTRACTS_VERSION,
+        SyncPushCommandResult, SyncPushResponse, SyncRecordEnvelope, SyncRecordType,
+        SyncTombstoneRecord, SYNC_CONTRACTS_VERSION,
     };
     use crate::api::NativeApiClient;
     use crate::auth::SessionManager;
@@ -614,5 +638,84 @@ mod tests {
         assert!(validate_external_https_url("https://umuryango.rw/docs").is_ok());
         assert!(validate_external_https_url("javascript:alert(1)").is_err());
         assert!(validate_external_https_url("file:///C:/Windows/System32").is_err());
+    }
+
+    #[test]
+    fn test_18_backend_sync_envelopes_deserialize_into_native_contracts() {
+        let pull: SyncPullResponse = serde_json::from_value(serde_json::json!({
+            "contractVersion": "1.0.0",
+            "familyId": "fam-1",
+            "familySlug": "family-one",
+            "serverTimestamp": "2026-11-02T10:00:00Z",
+            "nextCursor": "cursor-1",
+            "hasMore": false,
+            "membership": {
+                "memberId": "member-1",
+                "userId": "user-1",
+                "authority": "HEAD",
+                "capabilities": ["RECORD_INCOME"]
+            },
+            "authoritativeTotals": {
+                "currency": "RWF",
+                "serverApprovedIncomeMinorUnits": "10000",
+                "serverApprovedExpenseMinorUnits": "2500",
+                "serverNetBalanceMinorUnits": "7500",
+                "serverPendingApprovalExpenseMinorUnits": "0",
+                "computedAt": "2026-11-02T10:00:00Z"
+            },
+            "entities": [{
+                "recordType": "TRANSACTION",
+                "serverId": "tx-1",
+                "familyId": "fam-1",
+                "serverVersion": "2026-11-02T10:00:00Z",
+                "createdAt": "2026-11-02T10:00:00Z",
+                "updatedAt": "2026-11-02T10:00:00Z",
+                "deletedAt": null,
+                "createdById": "user-1",
+                "data": { "type": "INCOME", "amountMinorUnits": "10000" }
+            }],
+            "tombstones": []
+        }))
+        .unwrap();
+
+        assert_eq!(pull.membership.role, "HEAD");
+        assert_eq!(pull.records.len(), 1);
+        assert_eq!(pull.records[0].recordType, SyncRecordType::MoneyTransaction);
+        assert_eq!(pull.authoritativeTotals.serverNetBalanceMinorUnits, "7500");
+
+        let push: SyncPushResponse = serde_json::from_value(serde_json::json!({
+            "contractVersion": "1.0.0",
+            "familyId": "fam-1",
+            "familySlug": "family-one",
+            "serverTimestamp": "2026-11-02T10:00:00Z",
+            "authoritativeTotals": {
+                "currency": "RWF",
+                "serverApprovedIncomeMinorUnits": "10000",
+                "serverApprovedExpenseMinorUnits": "2500",
+                "serverNetBalanceMinorUnits": "7500",
+                "serverPendingApprovalExpenseMinorUnits": "0",
+                "computedAt": "2026-11-02T10:00:00Z"
+            },
+            "results": [{
+                "idempotencyKey": "idem-1",
+                "localRecordId": "local-1",
+                "commandType": "CREATE_PERSONAL_TRANSACTION",
+                "outcome": "APPLIED",
+                "serverRecordId": "tx-1",
+                "serverVersion": "2026-11-02T10:00:00Z",
+                "conflictCode": null,
+                "message": "Transaction synchronized and persisted.",
+                "serverRecord": { "id": "tx-1", "amountMinorUnits": "10000" }
+            }]
+        }))
+        .unwrap();
+
+        assert_eq!(push.results.len(), 1);
+        assert!(push.results[0].commandId.is_empty());
+        assert!(push.results[0].serverRecord.is_none());
+        assert_eq!(
+            push.results[0].errorMessage.as_deref(),
+            Some("Transaction synchronized and persisted.")
+        );
     }
 }

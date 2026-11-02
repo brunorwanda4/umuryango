@@ -44,18 +44,29 @@ impl SyncStatus {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum SyncRecordType {
+    #[serde(alias = "FAMILY")]
     FamilyProfile,
+    #[serde(alias = "MEMBER")]
     FamilyMembership,
+    #[serde(alias = "CATEGORY")]
     FinanceCategory,
+    #[serde(alias = "TRANSACTION")]
     MoneyTransaction,
+    #[serde(alias = "RECEIPT")]
     FamilyReceipt,
+    #[serde(alias = "CONTRIBUTION_PLAN")]
     ContributionGroup,
+    #[serde(alias = "CONTRIBUTION_CYCLE")]
     ContributionMember,
+    #[serde(alias = "CONTRIBUTION_PAYMENT")]
     ContributionPayment,
+    #[serde(alias = "PROJECT")]
     FamilyProject,
     ProjectBudgetLine,
     ProjectMilestone,
+    #[serde(alias = "CONTACT")]
     FamilyContact,
+    #[serde(alias = "NOTIFICATION")]
     NotificationItem,
 }
 
@@ -103,6 +114,7 @@ impl SyncRecordType {
 pub enum SyncCommandType {
     CreateIncome,
     CreateExpense,
+    CreatePersonalTransaction,
     UpdateTransactionNotes,
     AttachReceipt,
     CreateContributionPayment,
@@ -118,6 +130,7 @@ impl SyncCommandType {
         match self {
             SyncCommandType::CreateIncome => "CREATE_INCOME",
             SyncCommandType::CreateExpense => "CREATE_EXPENSE",
+            SyncCommandType::CreatePersonalTransaction => "CREATE_PERSONAL_TRANSACTION",
             SyncCommandType::UpdateTransactionNotes => "UPDATE_TRANSACTION_NOTES",
             SyncCommandType::AttachReceipt => "ATTACH_RECEIPT",
             SyncCommandType::CreateContributionPayment => "CREATE_CONTRIBUTION_PAYMENT",
@@ -133,6 +146,7 @@ impl SyncCommandType {
         match value {
             "CREATE_INCOME" => Some(SyncCommandType::CreateIncome),
             "CREATE_EXPENSE" => Some(SyncCommandType::CreateExpense),
+            "CREATE_PERSONAL_TRANSACTION" => Some(SyncCommandType::CreatePersonalTransaction),
             "UPDATE_TRANSACTION_NOTES" => Some(SyncCommandType::UpdateTransactionNotes),
             "ATTACH_RECEIPT" => Some(SyncCommandType::AttachReceipt),
             "CREATE_CONTRIBUTION_PAYMENT" => Some(SyncCommandType::CreateContributionPayment),
@@ -178,7 +192,9 @@ pub struct ApiEnvelope<T> {
 pub struct NativeAuthUser {
     pub id: String,
     pub email: String,
+    #[serde(alias = "fullName")]
     pub name: String,
+    #[serde(alias = "phoneNumber")]
     pub phone: Option<String>,
     pub mfaEnabled: Option<bool>,
 }
@@ -211,11 +227,13 @@ pub struct SyncRecordEnvelope {
     pub recordType: SyncRecordType,
     pub serverId: String,
     pub familyId: String,
+    #[serde(alias = "serverVersion")]
     pub version: String,
     pub createdAt: String,
     pub updatedAt: String,
     pub deletedAt: Option<String>,
     pub createdById: Option<String>,
+    #[serde(alias = "data")]
     pub payload: serde_json::Value,
 }
 
@@ -231,6 +249,7 @@ pub struct SyncTombstoneRecord {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[derive(Default)]
 pub struct SyncAuthoritativeTotals {
     pub currency: String,
     pub serverApprovedIncomeMinorUnits: String,
@@ -245,9 +264,16 @@ pub struct SyncAuthoritativeTotals {
 pub struct SyncPullMemberSummary {
     pub memberId: String,
     pub userId: String,
+    #[serde(alias = "authority")]
     pub role: String,
+    #[serde(alias = "capabilities")]
     pub permissions: Vec<String>,
+    #[serde(default = "default_true")]
     pub isActive: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -260,7 +286,9 @@ pub struct SyncPullResponse {
     pub nextCursor: String,
     pub hasMore: bool,
     pub membership: SyncPullMemberSummary,
+    #[serde(default)]
     pub authoritativeTotals: SyncAuthoritativeTotals,
+    #[serde(alias = "entities")]
     pub records: Vec<SyncRecordEnvelope>,
     pub tombstones: Vec<SyncTombstoneRecord>,
 }
@@ -268,12 +296,16 @@ pub struct SyncPullResponse {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncPushCommandItem {
+    #[serde(skip_serializing)]
     pub commandId: String,
     pub idempotencyKey: String,
+    #[serde(skip_serializing)]
     pub familyId: String,
     pub commandType: SyncCommandType,
     pub localRecordId: String,
+    #[serde(skip_serializing)]
     pub targetServerId: Option<String>,
+    #[serde(rename = "dependsOnLocalId")]
     pub parentCommandId: Option<String>,
     pub baseVersion: Option<String>,
     pub clientCreatedAt: String,
@@ -291,15 +323,30 @@ pub struct SyncPushRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncPushCommandResult {
+    #[serde(default)]
     pub commandId: String,
     pub idempotencyKey: String,
     pub localRecordId: String,
     pub outcome: SyncCommandOutcome,
+    #[serde(default, deserialize_with = "deserialize_optional_sync_record")]
     pub serverRecord: Option<SyncRecordEnvelope>,
     pub conflictCode: Option<String>,
+    #[serde(default, alias = "message")]
     pub errorMessage: Option<String>,
+    #[serde(default)]
     pub serverSnapshot: Option<serde_json::Value>,
+    #[serde(default)]
     pub processedAt: String,
+}
+
+fn deserialize_optional_sync_record<'de, D>(
+    deserializer: D,
+) -> Result<Option<SyncRecordEnvelope>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value = Option::<serde_json::Value>::deserialize(deserializer)?;
+    Ok(value.and_then(|record| serde_json::from_value(record).ok()))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -309,6 +356,7 @@ pub struct SyncPushResponse {
     pub familyId: String,
     pub familySlug: String,
     pub serverTimestamp: String,
+    #[serde(default)]
     pub authoritativeTotals: SyncAuthoritativeTotals,
     pub results: Vec<SyncPushCommandResult>,
 }

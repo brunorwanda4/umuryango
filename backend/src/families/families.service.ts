@@ -55,6 +55,7 @@ export type UserFamily = {
   id: string;
   name: string;
   slug: string;
+  defaultCurrency: string;
   authority: FamilyAuthority;
 };
 
@@ -273,6 +274,7 @@ export class FamiliesService {
       id: membership.family.id,
       name: membership.family.name,
       slug: membership.family.slug,
+      defaultCurrency: membership.family.defaultCurrency,
       authority: membership.authority,
     }));
   }

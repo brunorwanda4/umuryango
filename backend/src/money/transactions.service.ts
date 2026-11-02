@@ -136,6 +136,35 @@ export class TransactionsService {
         },
       });
 
+      if (scope === TransactionScope.FAMILY && this.notificationsService) {
+        const recipients = await tx.familyMember.findMany({
+          where: {
+            familyId,
+            removedAt: null,
+            userId: { not: userId },
+          },
+          select: { userId: true },
+        });
+        const directionLabel =
+          dto.type === TransactionType.INCOME ? 'income' : 'expense';
+
+        await Promise.all(
+          recipients.map(({ userId: recipientUserId }) =>
+            this.notificationsService!.createNotification(
+              {
+                userId: recipientUserId,
+                familyId,
+                type: NotificationType.SYSTEM,
+                title: `New family ${directionLabel}`,
+                description: `A ${directionLabel} transaction was recorded for the family.`,
+                dedupeKey: `transaction-created:${created.id}:${recipientUserId}`,
+              },
+              tx,
+            ),
+          ),
+        );
+      }
+
       return this.serializeTransaction(created);
     });
   }
