@@ -2,6 +2,18 @@
 
 import { AlertCircleIcon, UserPlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  calculateLoanSummary,
+  EMPTY_SHARED_LOAN_FILTERS,
+  filterSharedLoans,
+  LoanFilterBar,
+  LoanHeader,
+  LoanList,
+  LoanPageSkeleton,
+  LoanSegmentedTabs,
+  LoanSummaryVault,
+  type SharedLoanFiltersState,
+} from "@/components/common/loans";
 import type {
   ContactListResponse,
   FamilyContact,
@@ -17,43 +29,19 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
 import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { LoanDetailsSheet } from "./loan-details-sheet";
-import { LoanFilters } from "./loan-filters";
 import { LoanForm } from "./loan-form";
-import { LoanPageHeader } from "./loan-page-header";
-import { LoanSummary } from "./loan-summary";
-import { LoanTabs } from "./loan-tabs";
 import { AddTrustedPersonDialog } from "./person-selector";
+import { mapPersonalLoanToSharedLoan } from "./personal-loans-adapter";
 import { RecordPaymentForm } from "./record-payment-form";
 import {
-  EMPTY_PERSONAL_LOAN_FILTERS,
   isTrustedPerson,
   type LoanCategory,
   normalizePersonalLoans,
   type PersonalLoan,
-  type PersonalLoanFilters,
 } from "./types-and-schemas";
-
-function LoansSkeleton() {
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <Skeleton className="h-10 w-40" />
-        <Skeleton className="h-5 w-full max-w-xl" />
-      </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {["borrowed", "lent", "repaid", "remaining"].map((metric) => (
-          <Skeleton key={metric} className="h-40" />
-        ))}
-      </div>
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-72 w-full" />
-    </div>
-  );
-}
 
 export function LoansPage() {
   const t = createTranslator("PersonalLoans");
@@ -61,8 +49,8 @@ export function LoansPage() {
   const [contacts, setContacts] = useState<FamilyContact[]>([]);
   const [categories, setCategories] = useState<LoanCategory[]>([]);
   const [loans, setLoans] = useState<PersonalLoan[]>([]);
-  const [filters, setFilters] = useState<PersonalLoanFilters>(
-    EMPTY_PERSONAL_LOAN_FILTERS,
+  const [filters, setFilters] = useState<SharedLoanFiltersState>(
+    EMPTY_SHARED_LOAN_FILTERS,
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -121,16 +109,24 @@ export function LoansPage() {
     void load();
   }, [load]);
 
-  const filteredLoans = useMemo(() => {
-    const search = filters.search.trim().toLowerCase();
-    return loans.filter(
-      (loan) =>
-        (!search ||
-          `${loan.title} ${loan.person.name}`.toLowerCase().includes(search)) &&
-        (filters.status === "all" || loan.status === filters.status) &&
-        (filters.personId === "all" || loan.person.id === filters.personId),
-    );
-  }, [filters, loans]);
+  const sharedLoans = useMemo(
+    () =>
+      loans.map((loan) =>
+        mapPersonalLoanToSharedLoan(loan, setPaymentLoan, setDetailsLoan),
+      ),
+    [loans],
+  );
+
+  const filteredSharedLoans = useMemo(
+    () => filterSharedLoans(sharedLoans, filters),
+    [sharedLoans, filters],
+  );
+
+  const summary = useMemo(
+    () => calculateLoanSummary(sharedLoans, family?.defaultCurrency ?? "RWF"),
+    [sharedLoans, family?.defaultCurrency],
+  );
+
   const people = useMemo(
     () =>
       Array.from(
@@ -144,11 +140,17 @@ export function LoansPage() {
     [loans],
   );
 
-  if (loading) return <LoansSkeleton />;
+  const allCount = sharedLoans.length;
+  const lentCount = sharedLoans.filter((l) => l.direction === "LENT").length;
+  const borrowedCount = sharedLoans.filter(
+    (l) => l.direction === "BORROWED",
+  ).length;
+
+  if (loading) return <LoanPageSkeleton />;
 
   if (error || !family) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 max-w-5xl mx-auto w-full">
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
           <AlertTitle>
@@ -158,7 +160,11 @@ export function LoansPage() {
             {error ?? t((m) => m.PersonalLoans.page.workspaceNotFound)}
           </AlertDescription>
         </Alert>
-        <Button variant="outline" onClick={() => void load()}>
+        <Button
+          variant="outline"
+          onClick={() => void load()}
+          className="self-start"
+        >
           {t((m) => m.PersonalLoans.page.tryAgain)}
         </Button>
       </div>
@@ -172,12 +178,22 @@ export function LoansPage() {
     ]);
 
   return (
-    <div className="flex min-w-0 flex-col gap-6">
-      <LoanPageHeader onAdd={() => setOpenLoan(true)} />
-      <LoanSummary currency={family.defaultCurrency} loans={loans} />
+    <div className="flex min-w-0 flex-col gap-5 max-w-5xl mx-auto w-full">
+      <LoanHeader
+        title={t((m) => m.PersonalLoans.title)}
+        subtitle={t((m) => m.PersonalLoans.description)}
+        onAdd={() => setOpenLoan(true)}
+        addLabel={t((m) => m.PersonalLoans.addLoan)}
+      />
+
+      <LoanSummaryVault
+        summary={summary}
+        onSelectTab={(dir) => setFilters((f) => ({ ...f, direction: dir }))}
+        isPersonal
+      />
 
       {contacts.length === 0 ? (
-        <Empty className="min-h-64 rounded-2xl border bg-card">
+        <Empty className="min-h-64 rounded-2xl border border-dashed border-border bg-card p-8">
           <EmptyHeader>
             <EmptyMedia variant="icon">
               <UserPlusIcon aria-hidden="true" />
@@ -190,7 +206,7 @@ export function LoansPage() {
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => setOpenPerson(true)}>
+            <Button onClick={() => setOpenPerson(true)} size="sm">
               <UserPlusIcon aria-hidden="true" data-icon="inline-start" />
               {t((m) => m.PersonalLoans.person.addPerson)}
             </Button>
@@ -198,21 +214,31 @@ export function LoansPage() {
         </Empty>
       ) : (
         <>
-          <LoanFilters
-            filters={filters}
-            people={people}
-            onChange={setFilters}
+          <LoanSegmentedTabs
+            activeTab={filters.direction}
+            onTabChange={(dir) => setFilters((f) => ({ ...f, direction: dir }))}
+            allCount={allCount}
+            lentCount={lentCount}
+            borrowedCount={borrowedCount}
+            isPersonal
           />
-          <LoanTabs
-            loans={filteredLoans}
+
+          <LoanFilterBar
+            filters={filters}
+            onFiltersChange={setFilters}
+            counterparties={people}
+          />
+
+          <LoanList
+            loans={filteredSharedLoans}
             hasLoans={loans.length > 0}
             onAdd={() => setOpenLoan(true)}
-            onPayment={(loan) => setPaymentLoan(loan)}
-            onView={(loan) => setDetailsLoan(loan)}
+            onResetFilters={() => setFilters(EMPTY_SHARED_LOAN_FILTERS)}
           />
         </>
       )}
 
+      {/* Reused Existing Dialogs & Forms */}
       <LoanForm
         categories={categories}
         contacts={contacts}
