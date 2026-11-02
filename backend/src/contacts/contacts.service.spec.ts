@@ -159,7 +159,7 @@ describe('ContactsService', () => {
   });
 
   it('merges an imported phone match and saves the importer display name', async () => {
-    const contact = makeContact();
+    const contact = makeContact({ phoneNumber: '0788000000' });
     prisma.familyMember.findFirst.mockResolvedValue(memberMembership);
     prisma.familyContact.findMany.mockResolvedValue([contact]);
     prisma.familyContactDisplayName.upsert.mockResolvedValue({

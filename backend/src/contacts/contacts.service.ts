@@ -14,8 +14,8 @@ import { can } from '../families/family-access';
 import { PrismaService } from '../prisma/prisma.service';
 import { ContactQueryDto } from './dto/contact-query.dto';
 import { CreateContactDto } from './dto/create-contact.dto';
-import { UpdateContactDto } from './dto/update-contact.dto';
 import { ImportContactsDto } from './dto/import-contacts.dto';
+import { UpdateContactDto } from './dto/update-contact.dto';
 
 type Membership = {
   id: string;
@@ -149,7 +149,7 @@ export class ContactsService {
     const contact = await this.findContact(familyId, id);
     this.assertCanMutate(membership, contact);
 
-    const updated = await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       const saved = await tx.familyContact.update({
         where: { id },
         data: {
@@ -374,7 +374,10 @@ export class ContactsService {
   }
 
   private normalizePhone(value?: string | null) {
-    const digits = value?.replace(/\D/g, '') ?? '';
+    let digits = value?.replace(/\D/g, '') ?? '';
+    if (digits.startsWith('00')) digits = digits.slice(2);
+    if (/^0[27]\d{8}$/.test(digits)) digits = `250${digits.slice(1)}`;
+    if (/^[27]\d{8}$/.test(digits)) digits = `250${digits}`;
     return digits.length >= 7 ? digits : '';
   }
 
