@@ -25,27 +25,14 @@ export function getLinkedBudgetName(
   );
 }
 
-export function getLinkedProjectName(
-  value: string | undefined,
-  linkOptions: ExpenseLinkOptions,
-) {
-  if (!value || value === "none") return "";
-
-  return (
-    linkOptions.projects.find((project) => project.id === value)?.name ?? value
-  );
-}
-
 export function withLinkedContext(
   values: ExpenseFormValues,
   linkOptions: ExpenseLinkOptions,
 ) {
   const budgetName = getLinkedBudgetName(values.budgetId, linkOptions);
-  const projectName = getLinkedProjectName(values.projectId, linkOptions);
   const lines = [values.notes?.trim()].filter(Boolean);
 
   if (budgetName) lines.push(`Linked budget: ${budgetName}`);
-  if (projectName) lines.push(`Linked project: ${projectName}`);
   if (values.status === "DRAFT") {
     lines.push("Requested status: Draft");
   }

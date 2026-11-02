@@ -93,6 +93,13 @@ export class CreateTransactionDto {
   @Transform(({ value }) => trim(value))
   notes?: string;
 
+  @ApiPropertyOptional({ description: 'Family project funded by this expense' })
+  @IsString()
+  @IsOptional()
+  @MaxLength(120)
+  @Transform(({ value }) => trim(value))
+  projectId?: string | null;
+
   @ApiPropertyOptional({
     description: 'Person/organization who sent the money',
   })

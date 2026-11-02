@@ -8,9 +8,13 @@ import {
   FamilyAuditAction,
   FamilyAuthority,
   FamilyCapability,
-  FamilyProjectContributionStatus,
-  FamilyProjectStatus,
   type FamilyProject,
+  FamilyProjectContributionStatus,
+  FamilyProjectContributionStrategy,
+  FamilyProjectStatus,
+  TransactionScope,
+  TransactionStatus,
+  TransactionType,
 } from '@prisma/client';
 import { can } from '../families/family-access';
 import { PrismaService } from '../prisma/prisma.service';
@@ -85,21 +89,56 @@ export class ProjectsService {
     ]);
 
     const projectIds = projects.map((project) => project.id);
-    const contributions = projectIds.length
-      ? await this.prisma.familyProjectContribution.findMany({
-          where: {
-            familyId,
-            projectId: { in: projectIds },
-            reversedAt: null,
-          },
-          include: {
-            project: { select: { name: true } },
-            member: { include: { user: { select: { fullName: true } } } },
-          },
-          orderBy: { paidAt: 'desc' },
-          take: 100,
-        })
-      : [];
+    const currentBalanceExpenseWhere = {
+      familyId,
+      projectId: { in: projectIds },
+      scope: TransactionScope.FAMILY,
+      type: TransactionType.EXPENSE,
+      status: TransactionStatus.APPROVED,
+      reversedAt: null,
+      project: {
+        contributionStrategy: FamilyProjectContributionStrategy.CURRENT_BALANCE,
+      },
+    };
+    const [
+      contributions,
+      currentBalanceExpenseTotals,
+      currentBalanceExpenses,
+      currentBalanceExpenseCount,
+    ] = projectIds.length
+      ? await Promise.all([
+          this.prisma.familyProjectContribution.findMany({
+            where: {
+              familyId,
+              projectId: { in: projectIds },
+              reversedAt: null,
+            },
+            include: {
+              project: { select: { name: true } },
+              member: { include: { user: { select: { fullName: true } } } },
+            },
+            orderBy: { paidAt: 'desc' },
+            take: 100,
+          }),
+          this.prisma.familyTransaction.groupBy({
+            by: ['projectId'],
+            where: currentBalanceExpenseWhere,
+            _sum: { amountMinorUnits: true },
+          }),
+          this.prisma.familyTransaction.findMany({
+            where: currentBalanceExpenseWhere,
+            include: {
+              project: { select: { name: true } },
+              createdBy: { select: { fullName: true } },
+            },
+            orderBy: { date: 'desc' },
+            take: 25,
+          }),
+          this.prisma.familyTransaction.count({
+            where: currentBalanceExpenseWhere,
+          }),
+        ])
+      : [[], [], [], 0];
 
     const verifiedContributions = contributions.filter(
       (contribution) =>
@@ -115,17 +154,31 @@ export class ProjectsService {
       );
       contributors.add(contribution.memberId);
     }
+    const currentBalanceByProject = new Map<string, bigint>();
+    for (const total of currentBalanceExpenseTotals) {
+      if (total.projectId) {
+        currentBalanceByProject.set(
+          total.projectId,
+          total._sum.amountMinorUnits ?? 0n,
+        );
+      }
+    }
+    const progressForProject = (project: FamilyProject) =>
+      project.contributionStrategy ===
+      FamilyProjectContributionStrategy.CURRENT_BALANCE
+        ? (currentBalanceByProject.get(project.id) ?? 0n)
+        : (contributedByProject.get(project.id) ?? 0n);
 
     const planned = projects.reduce(
       (sum, project) => sum + project.targetAmountMinorUnits,
       0n,
     );
-    const contributed = verifiedContributions.reduce(
-      (sum, contribution) => sum + contribution.amountMinorUnits,
+    const contributed = projects.reduce(
+      (sum, project) => sum + progressForProject(project),
       0n,
     );
     const outstanding = projects.reduce((sum, project) => {
-      const projectContributed = contributedByProject.get(project.id) ?? 0n;
+      const projectContributed = progressForProject(project);
       const remaining = project.targetAmountMinorUnits - projectContributed;
       return remaining > 0n ? sum + remaining : sum;
     }, 0n);
@@ -134,7 +187,10 @@ export class ProjectsService {
       currency,
       generatedAt: now.toISOString(),
       sourceRecordCount:
-        projects.length + contributions.length + updates.length,
+        projects.length +
+        contributions.length +
+        currentBalanceExpenseCount +
+        updates.length,
       totals: {
         plannedMinorUnits: planned.toString(),
         contributedMinorUnits: contributed.toString(),
@@ -148,17 +204,32 @@ export class ProjectsService {
         contributorCount: contributors.size,
       },
       projects: projects.map((project) =>
-        this.toProjectRow(project, contributedByProject.get(project.id) ?? 0n),
+        this.toProjectRow(project, progressForProject(project)),
       ),
-      contributions: contributions.slice(0, 25).map((contribution) => ({
-        id: contribution.id,
-        projectId: contribution.projectId,
-        projectName: contribution.project.name,
-        contributorName: contribution.member.user.fullName,
-        amountMinorUnits: contribution.amountMinorUnits.toString(),
-        paidAt: contribution.paidAt.toISOString(),
-        status: contribution.status.toLowerCase(),
-      })),
+      contributions: [
+        ...contributions.slice(0, 25).map((contribution) => ({
+          id: contribution.id,
+          projectId: contribution.projectId,
+          projectName: contribution.project.name,
+          contributorName: contribution.member.user.fullName,
+          amountMinorUnits: contribution.amountMinorUnits.toString(),
+          paidAt: contribution.paidAt.toISOString(),
+          status: contribution.status.toLowerCase(),
+          source: 'member_contribution',
+        })),
+        ...currentBalanceExpenses.map((expense) => ({
+          id: expense.id,
+          projectId: expense.projectId,
+          projectName: expense.project?.name ?? '',
+          contributorName: 'Current family balance',
+          amountMinorUnits: expense.amountMinorUnits.toString(),
+          paidAt: expense.date.toISOString(),
+          status: expense.status.toLowerCase(),
+          source: 'current_balance',
+        })),
+      ]
+        .sort((left, right) => right.paidAt.localeCompare(left.paidAt))
+        .slice(0, 25),
       updates: updates.map((update) => ({
         id: update.id,
         projectId: update.projectId,
@@ -218,9 +289,13 @@ export class ProjectsService {
           status,
           ownerMemberId: dto.ownerMemberId || null,
           contributionStrategy: dto.contributionStrategy,
-          expectedContributionMinorUnits: dto.expectedContributionMinorUnits
-            ? BigInt(dto.expectedContributionMinorUnits)
-            : null,
+          expectedContributionMinorUnits:
+            dto.contributionStrategy ===
+            FamilyProjectContributionStrategy.CURRENT_BALANCE
+              ? null
+              : dto.expectedContributionMinorUnits
+                ? BigInt(dto.expectedContributionMinorUnits)
+                : null,
           participantNotes: dto.participantNotes || null,
           idempotencyKey: idempotencyKey ?? null,
           createdById: userId,

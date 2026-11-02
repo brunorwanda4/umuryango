@@ -52,6 +52,7 @@ export type ProjectContributionRow = {
   amountMinorUnits?: MoneyMinorValue | null;
   paidAt?: string | null;
   status?: string | null;
+  source?: "member_contribution" | "current_balance" | string;
 };
 
 export type ProjectUpdateRow = {

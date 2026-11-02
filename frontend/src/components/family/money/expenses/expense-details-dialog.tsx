@@ -32,7 +32,9 @@ export function ExpenseDetailsDialog({
   if (!transaction) return null;
 
   const budget = getNoteLinkValue(transaction.notes, "Linked budget");
-  const project = getNoteLinkValue(transaction.notes, "Linked project");
+  const project =
+    transaction.project?.name ??
+    getNoteLinkValue(transaction.notes, "Linked project");
   const timeline = [
     {
       label: t((m) => m.FamilyExpenses.dialogs.expenseCreated),

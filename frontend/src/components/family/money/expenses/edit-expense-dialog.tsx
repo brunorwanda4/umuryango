@@ -67,6 +67,7 @@ export function EditExpenseDialog({
       date: new Date(values.date).toISOString(),
       description: values.title,
       paymentMethod: values.paymentMethod,
+      projectId: values.projectId === "none" ? null : values.projectId,
       notes: withLinkedContext(values, linkOptions),
       receivedFrom: values.paidTo,
       receivedBy: values.paidBy,
@@ -97,7 +98,7 @@ export function EditExpenseDialog({
         paidBy: transaction.receivedBy || "",
         paymentMethod: transaction.paymentMethod || "CASH",
         budgetId: "none",
-        projectId: "none",
+        projectId: transaction.projectId ?? "none",
         notes: transaction.notes || "",
         status:
           transaction.status === "REVERSED" ? "REJECTED" : transaction.status,

@@ -455,95 +455,97 @@ export function MoneyFormDialog({
               placeholder="0"
               required
             />
-            <CommonFormField
-              control={form.control}
-              name="categoryId"
-              label={t((m) => m.PersonalMoney.moneyForm.fields.category)}
-              fieldType="custom"
-              disabled={!activeCategories.length && !canCreateCategoryInline}
-              placeholder={t(
-                (m) => m.PersonalMoney.moneyForm.fields.selectCategory,
-              )}
-              required
-              render={({ field, id, invalid, disabled }) => (
-                <>
-                  <Select
-                    value={field.value?.toString() ?? ""}
-                    onValueChange={(value) => {
-                      if (value === CREATE_CATEGORY_VALUE) {
-                        setOpenCreateCategory(true);
-                        field.onChange("");
-                        return;
-                      }
-
-                      field.onChange(value);
-                    }}
-                    disabled={disabled}
-                    name={field.name}
-                  >
-                    <SelectTrigger
-                      id={id}
-                      className="w-full"
-                      aria-invalid={invalid}
-                      onBlur={field.onBlur}
-                      ref={field.ref}
-                    >
-                      <SelectValue
-                        placeholder={t(
-                          (m) =>
-                            m.PersonalMoney.moneyForm.fields.selectCategory,
-                        )}
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {categoryOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-
-                  {canCreateCategoryInline &&
-                  familyId &&
-                  config.transactionType ? (
-                    <CreateCategoryForm
-                      defaultType={config.transactionType}
-                      existingCategories={availableCategories}
-                      familyId={familyId}
-                      personal
-                      open={openCreateCategory}
-                      onOpenChange={setOpenCreateCategory}
-                      onSuccess={async (category) => {
-                        if (
-                          category &&
-                          category.type === config.transactionType
-                        ) {
-                          setCreatedCategory(category);
-                          field.onChange(category.id);
+            <FieldGroup className="grid grid-cols-2 gap-3 lg:contents">
+              <CommonFormField
+                control={form.control}
+                name="categoryId"
+                label={t((m) => m.PersonalMoney.moneyForm.fields.category)}
+                fieldType="custom"
+                disabled={!activeCategories.length && !canCreateCategoryInline}
+                placeholder={t(
+                  (m) => m.PersonalMoney.moneyForm.fields.selectCategory,
+                )}
+                required
+                render={({ field, id, invalid, disabled }) => (
+                  <>
+                    <Select
+                      value={field.value?.toString() ?? ""}
+                      onValueChange={(value) => {
+                        if (value === CREATE_CATEGORY_VALUE) {
+                          setOpenCreateCategory(true);
+                          field.onChange("");
+                          return;
                         }
 
-                        await onCategoryCreated?.();
+                        field.onChange(value);
                       }}
-                      trigger={null}
-                    />
-                  ) : null}
-                </>
-              )}
-            />
-            <CommonFormField
-              control={form.control}
-              name="account"
-              label={t((m) => m.PersonalMoney.moneyForm.fields.account)}
-              fieldType="select"
-              placeholder={t(
-                (m) => m.PersonalMoney.moneyForm.fields.selectAccount,
-              )}
-              required
-              selectOptions={accountOptions}
-            />
+                      disabled={disabled}
+                      name={field.name}
+                    >
+                      <SelectTrigger
+                        id={id}
+                        className="w-full"
+                        aria-invalid={invalid}
+                        onBlur={field.onBlur}
+                        ref={field.ref}
+                      >
+                        <SelectValue
+                          placeholder={t(
+                            (m) =>
+                              m.PersonalMoney.moneyForm.fields.selectCategory,
+                          )}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {categoryOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+
+                    {canCreateCategoryInline &&
+                    familyId &&
+                    config.transactionType ? (
+                      <CreateCategoryForm
+                        defaultType={config.transactionType}
+                        existingCategories={availableCategories}
+                        familyId={familyId}
+                        personal
+                        open={openCreateCategory}
+                        onOpenChange={setOpenCreateCategory}
+                        onSuccess={async (category) => {
+                          if (
+                            category &&
+                            category.type === config.transactionType
+                          ) {
+                            setCreatedCategory(category);
+                            field.onChange(category.id);
+                          }
+
+                          await onCategoryCreated?.();
+                        }}
+                        trigger={null}
+                      />
+                    ) : null}
+                  </>
+                )}
+              />
+              <CommonFormField
+                control={form.control}
+                name="account"
+                label={t((m) => m.PersonalMoney.moneyForm.fields.account)}
+                fieldType="select"
+                placeholder={t(
+                  (m) => m.PersonalMoney.moneyForm.fields.selectAccount,
+                )}
+                required
+                selectOptions={accountOptions}
+              />
+            </FieldGroup>
             <CommonFormField
               control={form.control}
               name="date"

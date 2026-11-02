@@ -27,10 +27,12 @@ const makeProject = ({
   id,
   targetAmountMinorUnits,
   targetDate,
+  contributionStrategy = FamilyProjectContributionStrategy.EQUAL_SHARES,
 }: {
   id: string;
   targetAmountMinorUnits: bigint;
   targetDate: Date;
+  contributionStrategy?: FamilyProjectContributionStrategy;
 }) => ({
   id,
   familyId: 'fam-1',
@@ -46,7 +48,7 @@ const makeProject = ({
   targetDate,
   status: FamilyProjectStatus.ACTIVE,
   ownerMemberId: 'mem-1',
-  contributionStrategy: FamilyProjectContributionStrategy.EQUAL_SHARES,
+  contributionStrategy,
   expectedContributionMinorUnits: null,
   participantNotes: null,
   idempotencyKey: null,
@@ -69,6 +71,11 @@ describe('ProjectsService', () => {
       create: jest.Mock;
     };
     familyProjectContribution: { findMany: jest.Mock };
+    familyTransaction: {
+      groupBy: jest.Mock;
+      findMany: jest.Mock;
+      count: jest.Mock;
+    };
     familyProjectUpdate: { findMany: jest.Mock };
     familyAuditEvent: { create: jest.Mock };
     $transaction: jest.Mock;
@@ -96,6 +103,11 @@ describe('ProjectsService', () => {
         create: jest.fn(),
       },
       familyProjectContribution: { findMany: jest.fn() },
+      familyTransaction: {
+        groupBy: jest.fn(),
+        findMany: jest.fn(),
+        count: jest.fn(),
+      },
       familyProjectUpdate: { findMany: jest.fn() },
       familyAuditEvent: { create: jest.fn() },
       $transaction: jest.fn((callback: TransactionCallback) =>
@@ -169,6 +181,9 @@ describe('ProjectsService', () => {
         member: { user: { fullName: 'Jean Mutesi' } },
       },
     ]);
+    prisma.familyTransaction.groupBy.mockResolvedValue([]);
+    prisma.familyTransaction.findMany.mockResolvedValue([]);
+    prisma.familyTransaction.count.mockResolvedValue(0);
 
     const result = (await service.getOverview('u-1', 'fam-1', 'active')) as {
       currency: string;
@@ -198,6 +213,56 @@ describe('ProjectsService', () => {
     );
     expect(result.contributions).toHaveLength(2);
     expect(result.updates).toHaveLength(1);
+  });
+
+  it('uses approved linked expenses as current-balance project progress', async () => {
+    const project = makeProject({
+      id: 'project-1',
+      targetAmountMinorUnits: 800000n,
+      targetDate: new Date('2027-01-10T00:00:00.000Z'),
+      contributionStrategy: FamilyProjectContributionStrategy.CURRENT_BALANCE,
+    });
+    prisma.familyMember.findFirst.mockResolvedValue(membership);
+    prisma.familyProject.findMany.mockResolvedValue([project]);
+    prisma.familyProjectUpdate.findMany.mockResolvedValue([]);
+    prisma.familyProjectContribution.findMany.mockResolvedValue([]);
+    prisma.familyTransaction.groupBy.mockResolvedValue([
+      { projectId: 'project-1', _sum: { amountMinorUnits: 300000n } },
+    ]);
+    prisma.familyTransaction.findMany.mockResolvedValue([
+      {
+        id: 'expense-1',
+        projectId: 'project-1',
+        amountMinorUnits: 300000n,
+        date: baseDate,
+        status: 'APPROVED',
+        project: { name: 'Build family house' },
+        createdBy: { fullName: 'Claudine Mutesi' },
+      },
+    ]);
+    prisma.familyTransaction.count.mockResolvedValue(1);
+
+    const result = (await service.getOverview('u-1', 'fam-1', 'active')) as {
+      totals: Record<string, unknown>;
+      projects: Array<Record<string, unknown>>;
+      contributions: Array<Record<string, unknown>>;
+    };
+
+    expect(result.totals.contributedMinorUnits).toBe('300000');
+    expect(result.totals.outstandingMinorUnits).toBe('500000');
+    expect(result.projects[0]).toEqual(
+      expect.objectContaining({
+        contributedMinorUnits: '300000',
+        outstandingMinorUnits: '500000',
+      }),
+    );
+    expect(result.contributions[0]).toEqual(
+      expect.objectContaining({
+        id: 'expense-1',
+        source: 'current_balance',
+        amountMinorUnits: '300000',
+      }),
+    );
   });
 
   it('blocks project creation without MANAGE_PROJECTS', async () => {

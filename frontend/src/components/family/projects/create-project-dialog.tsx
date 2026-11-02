@@ -32,7 +32,8 @@ type ContributionStrategy =
   | "equal_shares"
   | "pledges"
   | "monthly"
-  | "as_available";
+  | "as_available"
+  | "current_balance";
 
 type ProjectFormValues = {
   name: string;
@@ -81,6 +82,7 @@ const contributionStrategyValues: ContributionStrategy[] = [
   "pledges",
   "monthly",
   "as_available",
+  "current_balance",
 ];
 
 // ─── Public wrappers ──────────────────────────────────────────────────────────
@@ -289,10 +291,13 @@ function ProjectForm({
         ownerMemberId:
           values.ownerMemberId === "unassigned" ? null : values.ownerMemberId,
         contributionStrategy: values.contributionStrategy,
-        expectedContributionMinorUnits: parseMoneyToMinorUnits(
-          values.expectedContributionAmount,
-          currency,
-        ),
+        expectedContributionMinorUnits:
+          values.contributionStrategy === "current_balance"
+            ? null
+            : parseMoneyToMinorUnits(
+                values.expectedContributionAmount,
+                currency,
+              ),
         participantNotes: values.participantNotes.trim() || null,
         description: values.description.trim() || null,
       }),
@@ -306,6 +311,7 @@ function ProjectForm({
       toastOnError: true,
       toastOnSuccess: true,
     });
+  const contributionStrategy = form.watch("contributionStrategy");
 
   // Pre-fill the form whenever the project record changes (edit mode only)
   useEffect(() => {
@@ -371,6 +377,14 @@ function ProjectForm({
         />
         <CommonFormField
           control={form.control}
+          name="contributionStrategy"
+          label={t((m) => m.FamilyProjects.contributionApproach)}
+          fieldType="select"
+          selectOptions={strategyOptions}
+          required
+        />
+        <CommonFormField
+          control={form.control}
           name="targetAmount"
           label={t((m) => m.FamilyProjects.targetAmountLabel, { currency })}
           placeholder={
@@ -379,21 +393,23 @@ function ProjectForm({
           required
           fieldType="money"
         />
-        <CommonFormField
-          control={form.control}
-          name="expectedContributionAmount"
-          label={t((m) => m.FamilyProjects.expectedContributionLabel, {
-            currency,
-          })}
-          placeholder={
-            getCurrencyFractionDigits(currency) === 0 ? "10000" : "100.00"
-          }
-          description={t((m) => m.FamilyProjects.expectedContributionDesc)}
-          inputProps={{
-            inputMode: "decimal",
-            autoComplete: "off",
-          }}
-        />
+        {contributionStrategy !== "current_balance" ? (
+          <CommonFormField
+            control={form.control}
+            name="expectedContributionAmount"
+            label={t((m) => m.FamilyProjects.expectedContributionLabel, {
+              currency,
+            })}
+            placeholder={
+              getCurrencyFractionDigits(currency) === 0 ? "10000" : "100.00"
+            }
+            description={t((m) => m.FamilyProjects.expectedContributionDesc)}
+            inputProps={{
+              inputMode: "decimal",
+              autoComplete: "off",
+            }}
+          />
+        ) : null}
         <div className="grid min-w-0 grid-cols-1 gap-4 sm:col-span-2 sm:grid-cols-2">
           <CommonFormField
             control={form.control}
@@ -415,14 +431,6 @@ function ProjectForm({
           label={t((m) => m.FamilyProjects.responsibleMember)}
           fieldType="select"
           selectOptions={memberOptions}
-        />
-        <CommonFormField
-          control={form.control}
-          name="contributionStrategy"
-          label={t((m) => m.FamilyProjects.contributionApproach)}
-          fieldType="select"
-          selectOptions={strategyOptions}
-          required
         />
         <CommonFormField
           control={form.control}
@@ -495,6 +503,7 @@ function createProjectSchema(currency: string) {
       "pledges",
       "monthly",
       "as_available",
+      "current_balance",
     ]),
     expectedContributionAmount: z
       .string()
@@ -586,9 +595,13 @@ function isProjectCategory(value: unknown): value is ProjectCategory {
 }
 
 function isContributionStrategy(value: unknown): value is ContributionStrategy {
-  return ["equal_shares", "pledges", "monthly", "as_available"].includes(
-    value as string,
-  );
+  return [
+    "equal_shares",
+    "pledges",
+    "monthly",
+    "as_available",
+    "current_balance",
+  ].includes(value as string);
 }
 
 // ─── Date helpers ─────────────────────────────────────────────────────────────

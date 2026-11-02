@@ -455,6 +455,7 @@ export function MoneyExpensesPage({
       paidTo: transaction.receivedFrom || "",
       paidBy: transaction.receivedBy || "",
       paymentMethod: transaction.paymentMethod || "CASH",
+      projectId: transaction.projectId ?? "none",
       notes: transaction.notes || "",
       status: "PENDING",
     });

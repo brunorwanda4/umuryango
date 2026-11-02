@@ -79,6 +79,7 @@ export function CreateExpenseDialog({
       date: new Date(values.date).toISOString(),
       description: values.title,
       paymentMethod: values.paymentMethod,
+      projectId: values.projectId === "none" ? null : values.projectId,
       notes: withLinkedContext(values, linkOptions),
       receivedFrom: values.paidTo,
       receivedBy: values.paidBy,

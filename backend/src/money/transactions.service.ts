@@ -7,10 +7,12 @@ import {
 } from '@nestjs/common';
 import {
   CategoryStatus,
+  ContributionPaymentStatus,
   FamilyAuditAction,
   FamilyAuthority,
   FamilyCapability,
   FamilyContactStatus,
+  FamilyProjectContributionStrategy,
   IncomePaymentStatus,
   IncomeRecurrence,
   NotificationType,
@@ -62,6 +64,15 @@ export class TransactionsService {
       dto.type,
       scope,
     );
+    const project = dto.projectId
+      ? await this.requireProjectLink(
+          familyId,
+          dto.projectId,
+          dto.type,
+          scope,
+          dto.currency,
+        )
+      : null;
     const receivedFromContact = dto.receivedFromContactId
       ? await this.requireContact(familyId, dto.receivedFromContactId)
       : null;
@@ -106,6 +117,7 @@ export class TransactionsService {
               ? TransactionStatus.APPROVED
               : TransactionStatus.PENDING,
           notes: this.nullableString(dto.notes),
+          projectId: project?.id ?? null,
           receivedFrom:
             this.nullableString(dto.receivedFrom) ??
             receivedFromContact?.fullName,
@@ -272,6 +284,7 @@ export class TransactionsService {
             createdAt: true,
           },
         },
+        project: { select: { id: true, name: true } },
       },
     });
 
@@ -390,6 +403,7 @@ export class TransactionsService {
         category: { select: { name: true } },
         createdBy: { select: { fullName: true } },
         approvedBy: { select: { fullName: true } },
+        project: { select: { id: true, name: true } },
         receivedFromContact: {
           select: { id: true, fullName: true, phoneNumber: true },
         },
@@ -471,6 +485,19 @@ export class TransactionsService {
       );
     }
 
+    if (dto.projectId !== undefined) {
+      const project = dto.projectId
+        ? await this.requireProjectLink(
+            familyId,
+            dto.projectId,
+            transaction.type,
+            transaction.scope,
+            dto.currency ?? transaction.currency,
+          )
+        : null;
+      dto.projectId = project?.id ?? null;
+    }
+
     const data: any = { ...dto };
     if (dto.amountMinorUnits !== undefined) {
       data.amountMinorUnits = BigInt(dto.amountMinorUnits);
@@ -506,24 +533,40 @@ export class TransactionsService {
 
     Object.assign(data, this.buildTrackingData(dto, transaction));
 
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.familyTransaction.update({
-        where: { id },
-        data,
-      });
+    return this.prisma.$transaction(
+      async (tx) => {
+        if (transaction.status === TransactionStatus.APPROVED) {
+          await this.assertCurrentBalanceCanCover(tx, familyId, {
+            id: transaction.id,
+            amountMinorUnits:
+              data.amountMinorUnits ?? transaction.amountMinorUnits,
+            projectId:
+              data.projectId !== undefined
+                ? data.projectId
+                : transaction.projectId,
+            type: transaction.type,
+          });
+        }
 
-      await tx.familyAuditEvent.create({
-        data: {
-          familyId,
-          actorId: userId,
-          action: FamilyAuditAction.TRANSACTION_UPDATED,
-          before: this.auditSnapshot(transaction),
-          after: this.auditSnapshot(updated),
-        },
-      });
+        const updated = await tx.familyTransaction.update({
+          where: { id },
+          data,
+        });
 
-      return this.serializeTransaction(updated);
-    });
+        await tx.familyAuditEvent.create({
+          data: {
+            familyId,
+            actorId: userId,
+            action: FamilyAuditAction.TRANSACTION_UPDATED,
+            before: this.auditSnapshot(transaction),
+            after: this.auditSnapshot(updated),
+          },
+        });
+
+        return this.serializeTransaction(updated);
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 
   async approve(userId: string, familyId: string, id: string) {
@@ -537,56 +580,61 @@ export class TransactionsService {
       throw new BadRequestException('Transaction is not pending approval');
     }
 
-    return this.prisma.$transaction(async (tx) => {
-      const updated = await tx.familyTransaction.update({
-        where: { id },
-        data: {
-          status: TransactionStatus.APPROVED,
-          approvedById: userId,
-          approvedAt: new Date(),
-        },
-      });
+    return this.prisma.$transaction(
+      async (tx) => {
+        await this.assertCurrentBalanceCanCover(tx, familyId, transaction);
 
-      await tx.familyAuditEvent.create({
-        data: {
-          familyId,
-          actorId: userId,
-          action: FamilyAuditAction.TRANSACTION_APPROVED,
-          after: {
-            id: updated.id,
-            status: updated.status,
-            approvedById: updated.approvedById,
-            approvedAt: updated.approvedAt?.toISOString(),
+        const updated = await tx.familyTransaction.update({
+          where: { id },
+          data: {
+            status: TransactionStatus.APPROVED,
+            approvedById: userId,
+            approvedAt: new Date(),
           },
-        },
-      });
-
-      if (
-        this.notificationsService &&
-        transaction.createdById &&
-        transaction.createdById !== userId
-      ) {
-        const family = await tx.family.findUnique({
-          where: { id: familyId },
-          select: { slug: true },
         });
-        const familySlug = encodeURIComponent(family?.slug ?? familyId);
-        await this.notificationsService.createNotification(
-          {
-            userId: transaction.createdById,
-            familyId,
-            type: NotificationType.TRANSACTION_APPROVED,
-            title: 'Transaction Approved',
-            description: `Your ${transaction.type.toLowerCase()} of ${transaction.currency} ${(Number(transaction.amountMinorUnits) / 100).toFixed(0)} was approved.`,
-            href: `/family/${familySlug}/money`,
-            dedupeKey: `tx-approve:${transaction.id}`,
-          },
-          tx,
-        );
-      }
 
-      return this.serializeTransaction(updated);
-    });
+        await tx.familyAuditEvent.create({
+          data: {
+            familyId,
+            actorId: userId,
+            action: FamilyAuditAction.TRANSACTION_APPROVED,
+            after: {
+              id: updated.id,
+              status: updated.status,
+              approvedById: updated.approvedById,
+              approvedAt: updated.approvedAt?.toISOString(),
+            },
+          },
+        });
+
+        if (
+          this.notificationsService &&
+          transaction.createdById &&
+          transaction.createdById !== userId
+        ) {
+          const family = await tx.family.findUnique({
+            where: { id: familyId },
+            select: { slug: true },
+          });
+          const familySlug = encodeURIComponent(family?.slug ?? familyId);
+          await this.notificationsService.createNotification(
+            {
+              userId: transaction.createdById,
+              familyId,
+              type: NotificationType.TRANSACTION_APPROVED,
+              title: 'Transaction Approved',
+              description: `Your ${transaction.type.toLowerCase()} of ${transaction.currency} ${(Number(transaction.amountMinorUnits) / 100).toFixed(0)} was approved.`,
+              href: `/family/${familySlug}/money`,
+              dedupeKey: `tx-approve:${transaction.id}`,
+            },
+            tx,
+          );
+        }
+
+        return this.serializeTransaction(updated);
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+    );
   }
 
   async reject(userId: string, familyId: string, id: string) {
@@ -791,6 +839,112 @@ export class TransactionsService {
     }
 
     return contact;
+  }
+
+  private async requireProjectLink(
+    familyId: string,
+    projectId: string,
+    type: TransactionType,
+    scope: TransactionScope,
+    currency: string,
+  ) {
+    if (type !== TransactionType.EXPENSE || scope !== TransactionScope.FAMILY) {
+      throw new BadRequestException(
+        'Only family expenses can be linked to a family project',
+      );
+    }
+
+    const project = await this.prisma.familyProject.findFirst({
+      where: {
+        id: projectId,
+        familyId,
+        archivedAt: null,
+        status: { not: 'CANCELLED' },
+      },
+      select: { id: true, currency: true },
+    });
+
+    if (!project) {
+      throw new BadRequestException('Select an active project in this family');
+    }
+    if (project.currency !== currency) {
+      throw new BadRequestException(
+        'Project and expense currencies must match',
+      );
+    }
+
+    return project;
+  }
+
+  private async assertCurrentBalanceCanCover(
+    tx: Prisma.TransactionClient,
+    familyId: string,
+    transaction: {
+      id: string;
+      amountMinorUnits: bigint;
+      projectId: string | null;
+      type: TransactionType;
+    },
+  ) {
+    if (
+      transaction.type !== TransactionType.EXPENSE ||
+      !transaction.projectId
+    ) {
+      return;
+    }
+
+    const project = await tx.familyProject.findFirst({
+      where: { id: transaction.projectId, familyId, archivedAt: null },
+      select: { contributionStrategy: true },
+    });
+    if (
+      project?.contributionStrategy !==
+      FamilyProjectContributionStrategy.CURRENT_BALANCE
+    ) {
+      return;
+    }
+
+    const [income, expenses, contributions] = await Promise.all([
+      tx.familyTransaction.aggregate({
+        where: {
+          familyId,
+          scope: TransactionScope.FAMILY,
+          type: TransactionType.INCOME,
+          status: TransactionStatus.APPROVED,
+          reversedAt: null,
+        },
+        _sum: { amountMinorUnits: true },
+      }),
+      tx.familyTransaction.aggregate({
+        where: {
+          familyId,
+          scope: TransactionScope.FAMILY,
+          type: TransactionType.EXPENSE,
+          status: TransactionStatus.APPROVED,
+          reversedAt: null,
+          id: { not: transaction.id },
+        },
+        _sum: { amountMinorUnits: true },
+      }),
+      tx.familyContributionPayment.aggregate({
+        where: {
+          familyId,
+          status: ContributionPaymentStatus.VERIFIED,
+          reversedAt: null,
+        },
+        _sum: { amountMinorUnits: true },
+      }),
+    ]);
+
+    const available =
+      (income._sum.amountMinorUnits ?? 0n) +
+      (contributions._sum.amountMinorUnits ?? 0n) -
+      (expenses._sum.amountMinorUnits ?? 0n);
+    if (transaction.amountMinorUnits > available) {
+      throw new BadRequestException(
+        'Current family balance is not enough for this project payment',
+      );
+    }
   }
 
   private buildTrackingData(
@@ -1002,6 +1156,7 @@ export class TransactionsService {
       periodStart: transaction.periodStart?.toISOString?.() ?? null,
       periodEnd: transaction.periodEnd?.toISOString?.() ?? null,
       propertyName: transaction.propertyName,
+      projectId: transaction.projectId,
       description: transaction.description,
       paymentMethod: transaction.paymentMethod,
       notes: transaction.notes,

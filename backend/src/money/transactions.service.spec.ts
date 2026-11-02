@@ -5,6 +5,7 @@ import {
   FamilyAuditAction,
   FamilyAuthority,
   FamilyCapability,
+  FamilyProjectContributionStrategy,
   IncomePaymentStatus,
   IncomeRecurrence,
   TransactionScope,
@@ -58,6 +59,7 @@ function makeTransaction(overrides: Record<string, unknown> = {}) {
     periodStart: new Date('2026-07-01T00:00:00.000Z'),
     periodEnd: new Date('2026-07-31T00:00:00.000Z'),
     propertyName: 'Kigali house',
+    projectId: null,
     createdAt: baseDate,
     updatedAt: baseDate,
     ...overrides,
@@ -81,6 +83,8 @@ describe('TransactionsService', () => {
         update: jest.fn(),
       },
       familyContact: { findFirst: jest.fn() },
+      familyProject: { findFirst: jest.fn() },
+      familyContributionPayment: { aggregate: jest.fn() },
       familyAuditEvent: { create: jest.fn() },
       $transaction: jest.fn((callback) => callback(prisma)),
     };
@@ -320,6 +324,75 @@ describe('TransactionsService', () => {
         date: '2026-07-08T12:00:00.000Z',
       }),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('persists a family project link on an expense', async () => {
+    const created = makeTransaction({
+      id: 'project-expense-1',
+      type: TransactionType.EXPENSE,
+      incomeRecurrence: IncomeRecurrence.ONE_TIME,
+      paymentStatus: IncomePaymentStatus.NOT_EXPECTED,
+      projectId: 'project-1',
+    });
+    prisma.familyMember.findFirst.mockResolvedValue({
+      ...managerMembership,
+      capabilities: [FamilyCapability.RECORD_EXPENSE],
+    });
+    prisma.familyTransactionCategory.findFirst.mockResolvedValue({
+      id: 'category-school-fees',
+    });
+    prisma.familyProject.findFirst.mockResolvedValue({
+      id: 'project-1',
+      currency: 'RWF',
+    });
+    prisma.familyTransaction.findUnique.mockResolvedValue(null);
+    prisma.familyTransaction.create.mockResolvedValue(created);
+    prisma.familyAuditEvent.create.mockResolvedValue({ id: 'audit-project-1' });
+
+    await service.create('user-1', 'family-1', {
+      categoryId: 'category-school-fees',
+      amountMinorUnits: '300000',
+      currency: 'RWF',
+      type: TransactionType.EXPENSE,
+      date: '2026-11-02T00:00:00.000Z',
+      projectId: 'project-1',
+    });
+
+    expect(prisma.familyTransaction.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ projectId: 'project-1' }),
+      }),
+    );
+  });
+
+  it('rejects a current-balance project expense that exceeds available money', async () => {
+    const transaction = makeTransaction({
+      id: 'project-expense-1',
+      type: TransactionType.EXPENSE,
+      amountMinorUnits: 900000n,
+      projectId: 'project-1',
+    });
+    prisma.familyMember.findFirst.mockResolvedValue({
+      ...managerMembership,
+      capabilities: [FamilyCapability.APPROVE_EXPENSE],
+    });
+    prisma.familyTransaction.findFirst.mockResolvedValue(transaction);
+    prisma.familyProject.findFirst.mockResolvedValue({
+      contributionStrategy: FamilyProjectContributionStrategy.CURRENT_BALANCE,
+    });
+    prisma.familyTransaction.aggregate
+      .mockResolvedValueOnce({ _sum: { amountMinorUnits: 800000n } })
+      .mockResolvedValueOnce({ _sum: { amountMinorUnits: 0n } });
+    prisma.familyContributionPayment.aggregate.mockResolvedValue({
+      _sum: { amountMinorUnits: 0n },
+    });
+
+    await expect(
+      service.approve('user-1', 'family-1', 'project-expense-1'),
+    ).rejects.toThrow(
+      'Current family balance is not enough for this project payment',
+    );
+    expect(prisma.familyTransaction.update).not.toHaveBeenCalled();
   });
 
   it('builds a dashboard from only the authenticated user transactions', async () => {

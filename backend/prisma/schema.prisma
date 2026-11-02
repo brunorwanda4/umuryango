@@ -314,6 +314,7 @@ enum FamilyProjectContributionStrategy {
   PLEDGES
   MONTHLY
   AS_AVAILABLE
+  CURRENT_BALANCE
 }
 
 enum FamilyProjectContributionStatus {
@@ -739,6 +740,7 @@ model FamilyProject {
   participants                   FamilyProjectParticipant[]
   contributions                  FamilyProjectContribution[]
   updates                        FamilyProjectUpdate[]
+  transactions                   FamilyTransaction[]
 
   @@unique([familyId, idempotencyKey])
   @@index([familyId, status])
@@ -914,6 +916,7 @@ model FamilyTransaction {
   periodStart              DateTime?
   periodEnd                DateTime?
   propertyName             String?
+  projectId                String?
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
   family                   Family                    @relation(fields: [familyId], references: [id], onDelete: Cascade)
@@ -921,6 +924,7 @@ model FamilyTransaction {
   createdBy                User                      @relation("TransactionsCreated", fields: [createdById], references: [id], onDelete: Cascade)
   approvedBy               User?                     @relation("TransactionsApproved", fields: [approvedById], references: [id], onDelete: SetNull)
   receivedFromContact      FamilyContact?            @relation("TransactionReceivedFromContact", fields: [receivedFromContactId], references: [id], onDelete: SetNull)
+  project                  FamilyProject?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
   receipts                 FamilyReceipt[]
 
   @@unique([familyId, idempotencyKey])
@@ -930,6 +934,7 @@ model FamilyTransaction {
   @@index([familyId, paymentStatus])
   @@index([familyId, status])
   @@index([familyId, receivedFromContactId])
+  @@index([familyId, projectId, status])
   @@index([categoryId])
   @@index([familyId, updatedAt, id])
 }

@@ -48,6 +48,8 @@ export type ExpenseTransaction = {
   notes: string | null;
   receivedFrom: string | null;
   receivedBy: string | null;
+  projectId: string | null;
+  project?: { id: string; name: string } | null;
   createdById: string;
   approvedById: string | null;
   approvedAt: string | null;
