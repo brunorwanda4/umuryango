@@ -1,8 +1,18 @@
 "use client";
 
-import { AlertCircleIcon, ListChecksIcon, PlusIcon } from "lucide-react";
+import { AlertCircleIcon, PlusIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { PageTitle } from "@/components/common/pages/page-title";
+import {
+  calculatePlanSummary,
+  filterSharedPlans,
+  PlanList,
+  PlanPageSkeleton,
+  PlanSegmentedFilters,
+  PlanSummaryHero,
+  type SharedPlanFilterTab,
+} from "@/components/common/plans";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -15,60 +25,31 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Empty,
-  EmptyContent,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import { Skeleton } from "@/components/ui/skeleton";
 import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { PersonPlanDetailsSheet } from "./person-plan-details-sheet";
 import { PersonPlanForm } from "./person-plan-form";
-import { PersonPlansFilters } from "./person-plans-filters";
-import { PersonPlansHeader } from "./person-plans-header";
-import { PersonPlansSummary } from "./person-plans-summary";
-import { PersonPlansTabs } from "./person-plans-tabs";
-import {
-  EMPTY_PLAN_FILTERS,
-  isOverdue,
-  type PersonalPlansResponse,
-  type PersonPlan,
-  type PersonPlanStatus,
-  type PlanFilters,
-  type PlanPerson,
+import { adaptPersonPlanToSharedItem } from "./person-plans-adapter";
+import type {
+  PersonalPlansResponse,
+  PersonPlan,
+  PersonPlanStatus,
+  PlanPerson,
 } from "./types-and-schemas";
-
-function PlansSkeleton() {
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-3">
-        <Skeleton className="size-12 rounded-full" />
-        <Skeleton className="h-14 w-72 max-w-full" />
-      </div>
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        {["today", "week", "progress", "complete"].map((item) => (
-          <Skeleton key={item} className="h-32" />
-        ))}
-      </div>
-      <Skeleton className="h-10 w-full" />
-      <Skeleton className="h-64 w-full" />
-    </div>
-  );
-}
 
 export function PersonPlansPage() {
   const t = createTranslator("PersonalPlans");
+  const tShared = createTranslator("SharedPlans");
+
   const [person, setPerson] = useState<PlanPerson | null>(null);
   const [plans, setPlans] = useState<PersonPlan[]>([]);
-  const [filters, setFilters] = useState<PlanFilters>(EMPTY_PLAN_FILTERS);
+  const [activeTab, setActiveTab] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
-  const [createType, setCreateType] = useState<PersonPlan["type"]>("TASK");
+  const [createType, setCreateType] =
+    useState<PersonPlan["type"]>("LONG_TERM_GOAL");
   const [editPlan, setEditPlan] = useState<PersonPlan | null>(null);
   const [detailsPlan, setDetailsPlan] = useState<PersonPlan | null>(null);
   const [deletePlan, setDeletePlan] = useState<PersonPlan | null>(null);
@@ -98,64 +79,50 @@ export function PersonPlansPage() {
     void load();
   }, [load]);
 
-  const filteredPlans = useMemo(() => {
-    const search = filters.search.trim().toLowerCase();
-    return plans.filter((plan) => {
-      const planDate = plan.type === "TASK" ? plan.dueDate : plan.targetDate;
-      return (
-        (!search || plan.title.toLowerCase().includes(search)) &&
-        (filters.type === "all" || plan.type === filters.type) &&
-        (filters.status === "all" ||
-          (filters.status === "OVERDUE"
-            ? isOverdue(plan)
-            : plan.status === filters.status)) &&
-        (filters.priority === "all" || plan.priority === filters.priority) &&
-        (!filters.date || planDate?.slice(0, 10) === filters.date)
-      );
-    });
-  }, [filters, plans]);
-
-  const openCreate = (type: PersonPlan["type"] = "TASK") => {
+  const openCreate = (type: PersonPlan["type"] = "LONG_TERM_GOAL") => {
     setCreateType(type);
     setEditPlan(null);
     setFormOpen(true);
   };
 
-  const updateStatus = async (plan: PersonPlan, status: PersonPlanStatus) => {
-    setPlans((current) =>
-      current.map((item) =>
-        item.id === plan.id
-          ? {
-              ...item,
-              status,
-              completedAt:
-                status === "COMPLETED" ? new Date().toISOString() : null,
-            }
-          : item,
-      ),
-    );
-    const response = await apiRequest(
-      "patch",
-      `/personal-plans/${encodeURIComponent(plan.id)}`,
-      { status },
-    );
-    if (!response.ok) {
-      toast.error(
-        t((m) => m.PersonalPlans.toasts.updateFailed),
-        {
-          description: response.message,
-        },
+  const updateStatus = useCallback(
+    async (plan: PersonPlan, status: PersonPlanStatus) => {
+      setPlans((current) =>
+        current.map((item) =>
+          item.id === plan.id
+            ? {
+                ...item,
+                status,
+                completedAt:
+                  status === "COMPLETED" ? new Date().toISOString() : null,
+              }
+            : item,
+        ),
+      );
+      const response = await apiRequest(
+        "patch",
+        `/personal-plans/${encodeURIComponent(plan.id)}`,
+        { status },
+      );
+      if (!response.ok) {
+        toast.error(
+          t((m) => m.PersonalPlans.toasts.updateFailed),
+          {
+            description: response.message,
+          },
+        );
+        void load(detailsPlan?.id);
+        return;
+      }
+      toast.success(
+        status === "COMPLETED"
+          ? t((m) => m.PersonalPlans.toasts.planCompleted)
+          : t((m) => m.PersonalPlans.toasts.planIncomplete),
       );
       void load(detailsPlan?.id);
-      return;
-    }
-    toast.success(
-      status === "COMPLETED"
-        ? t((m) => m.PersonalPlans.toasts.planCompleted)
-        : t((m) => m.PersonalPlans.toasts.planIncomplete),
-    );
-    void load(detailsPlan?.id);
-  };
+    },
+    [detailsPlan?.id, load, t],
+  );
 
   const confirmDelete = async () => {
     if (!deletePlan) return;
@@ -180,10 +147,64 @@ export function PersonPlansPage() {
     void load();
   };
 
-  if (loading) return <PlansSkeleton />;
+  const sharedItems = useMemo(() => {
+    return plans.map((plan) =>
+      adaptPersonPlanToSharedItem(plan, {
+        onEdit: (p) => {
+          setEditPlan(p);
+          setFormOpen(true);
+        },
+        onDelete: setDeletePlan,
+        onStatus: updateStatus,
+        onView: setDetailsPlan,
+      }),
+    );
+  }, [plans, updateStatus]);
+
+  const summary = useMemo(() => {
+    return calculatePlanSummary(sharedItems, "RWF");
+  }, [sharedItems]);
+
+  const tabs: SharedPlanFilterTab[] = useMemo(() => {
+    const savingsCount = sharedItems.filter((i) => i.isFinancial).length;
+    const tasksCount = sharedItems.filter((i) => i.taskCheckable).length;
+    const completedCount = sharedItems.filter((i) => i.isCompleted).length;
+
+    return [
+      {
+        id: "all",
+        label: tShared((m) => m.SharedPlans.allPlansTab),
+        count: sharedItems.length,
+      },
+      {
+        id: "savings",
+        label: tShared((m) => m.SharedPlans.savingsTab),
+        count: savingsCount,
+      },
+      {
+        id: "tasks",
+        label: tShared((m) => m.SharedPlans.tasksTab),
+        count: tasksCount,
+      },
+      {
+        id: "completed",
+        label: tShared((m) => m.SharedPlans.completedTab),
+        count: completedCount,
+      },
+    ];
+  }, [sharedItems, tShared]);
+
+  const filteredItems = useMemo(() => {
+    return filterSharedPlans(sharedItems, activeTab, searchQuery);
+  }, [sharedItems, activeTab, searchQuery]);
+
+  if (loading) {
+    return <PlanPageSkeleton />;
+  }
+
   if (error || !person) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 max-w-5xl mx-auto w-full">
         <Alert variant="destructive">
           <AlertCircleIcon aria-hidden="true" />
           <AlertTitle>{t((m) => m.PersonalPlans.loadErrorTitle)}</AlertTitle>
@@ -205,50 +226,49 @@ export function PersonPlansPage() {
     );
   }
 
-  const firstName = person.fullName.split(" ")[0] || person.fullName;
   return (
-    <div className="flex min-w-0 flex-col gap-6">
-      <PersonPlansHeader person={person} onAdd={() => openCreate()} />
-      <PersonPlansSummary plans={plans} />
-      {plans.length === 0 ? (
-        <Empty className="min-h-80 border bg-card">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ListChecksIcon aria-hidden="true" />
-            </EmptyMedia>
-            <EmptyTitle>
-              {t((m) => m.PersonalPlans.noPlansTitle, { name: firstName })}
-            </EmptyTitle>
-            <EmptyDescription>
-              {t((m) => m.PersonalPlans.noPlansDesc, { name: firstName })}
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button onClick={() => openCreate()}>
-              <PlusIcon aria-hidden="true" data-icon="inline-start" />
-              {t((m) => m.PersonalPlans.addFirstPlan)}
-            </Button>
-          </EmptyContent>
-        </Empty>
-      ) : (
-        <>
-          <PersonPlansFilters filters={filters} onChange={setFilters} />
-          <PersonPlansTabs
-            plans={filteredPlans}
-            person={person}
-            onAdd={openCreate}
-            itemActions={{
-              onDelete: setDeletePlan,
-              onEdit: (plan) => {
-                setEditPlan(plan);
-                setFormOpen(true);
-              },
-              onStatus: updateStatus,
-              onView: setDetailsPlan,
-            }}
-          />
-        </>
-      )}
+    <div className="flex flex-col gap-5 max-w-5xl mx-auto w-full min-w-0">
+      {/* Page Title with Add Goal Primary Action */}
+      <PageTitle
+        title={tShared((m) => m.SharedPlans.title)}
+        description={tShared((m) => m.SharedPlans.subtitle)}
+        actions={
+          <Button
+            size="sm"
+            onClick={() => openCreate("LONG_TERM_GOAL")}
+            className="gap-1.5"
+          >
+            <PlusIcon className="size-4" />
+            <span>{tShared((m) => m.SharedPlans.newGoal)}</span>
+          </Button>
+        }
+      />
+
+      {/* Summary Hero Card */}
+      <PlanSummaryHero summary={summary} isPersonal={true} />
+
+      {/* Segmented Filter Tabs & Search */}
+      <PlanSegmentedFilters
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
+
+      {/* Plans List */}
+      <PlanList
+        items={filteredItems}
+        hasPlans={sharedItems.length > 0}
+        onAdd={() => openCreate("LONG_TERM_GOAL")}
+        onResetFilters={() => {
+          setActiveTab("all");
+          setSearchQuery("");
+        }}
+        isPersonal={true}
+      />
+
+      {/* Existing Create/Edit Dialog */}
       <PersonPlanForm
         key={`${editPlan?.id ?? "new"}-${createType}`}
         editPlan={editPlan}
@@ -257,6 +277,8 @@ export function PersonPlansPage() {
         onOpenChange={setFormOpen}
         onSuccess={() => void load(detailsPlan?.id)}
       />
+
+      {/* Existing Plan Details Sheet */}
       <PersonPlanDetailsSheet
         plan={detailsPlan}
         onOpenChange={(open) => {
@@ -264,6 +286,8 @@ export function PersonPlansPage() {
         }}
         onUpdated={(planId) => void load(planId)}
       />
+
+      {/* Existing Delete Confirmation Alert Dialog */}
       <AlertDialog
         open={Boolean(deletePlan)}
         onOpenChange={(open) => {

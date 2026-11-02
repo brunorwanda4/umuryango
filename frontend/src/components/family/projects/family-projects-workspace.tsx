@@ -2,8 +2,16 @@
 
 import { AlertCircleIcon, DownloadIcon, FolderKanbanIcon } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageTitle } from "@/components/common/pages/page-title";
+import {
+  filterSharedPlans,
+  PlanList,
+  PlanPageSkeleton,
+  PlanSegmentedFilters,
+  PlanSummaryHero,
+  type SharedPlanFilterTab,
+} from "@/components/common/plans";
 import type { FamilyDetail } from "@/components/family/dashboard/types";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -14,28 +22,28 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createTranslator } from "@/i18n/translate";
 import { AUTHORITY_LABELS, hasCapability } from "@/lib/family-access";
 import apiRequest from "@/service/api";
 import { CreateProjectDialog } from "./create-project-dialog";
-import { FamilyProjectsSkeleton } from "./family-projects-skeleton";
+import {
+  adaptFamilyProjectsSummary,
+  adaptFamilyProjectToSharedItem,
+} from "./family-projects-adapter";
 import { ProjectContributionTable } from "./project-contribution-table";
-import { ProjectFilters } from "./project-filters";
-import { ProjectList } from "./project-list";
-import { ProjectMetricCards } from "./project-metric-cards";
 import { ProjectOperationsGrid } from "./project-operations-grid";
 import type {
   FetchState,
   ProjectStatusFilter,
   ProjectsOverview,
 } from "./types";
-import { normalizeProjectsOverview, statusLabels } from "./utils";
+import { normalizeProjectsOverview } from "./utils";
 
 const t = createTranslator("FamilyProjects");
 const tCommon = createTranslator("Common");
 const tDashboard = createTranslator("FamilyDashboard");
+const tShared = createTranslator("SharedPlans");
 
 export type FamilyProjectsWorkspaceInitialData = {
   family: FamilyDetail | null;
@@ -116,7 +124,7 @@ export function FamilyProjectsWorkspace({
   }, [load, initialData, isFirstMount, status]);
 
   if (state.status === "loading") {
-    return <FamilyProjectsSkeleton />;
+    return <PlanPageSkeleton />;
   }
 
   if (state.status === "error") {
@@ -170,19 +178,55 @@ function ProjectsWorkspaceContent({
   status: ProjectStatusFilter;
 }) {
   const currency = projects?.currency ?? family.defaultCurrency;
-  const _hasSourceRecords = Boolean(
-    projects && (projects.sourceRecordCount ?? 0) > 0,
-  );
   const canManageProjects = hasCapability(family, "MANAGE_PROJECTS");
   const canExportReports = hasCapability(family, "EXPORT_REPORTS");
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const summary = useMemo(() => {
+    return adaptFamilyProjectsSummary(projects, currency);
+  }, [projects, currency]);
+
+  const sharedItems = useMemo(() => {
+    const rawProjects = projects?.projects || [];
+    return rawProjects.map((p) =>
+      adaptFamilyProjectToSharedItem(p, familyName, currency),
+    );
+  }, [projects?.projects, familyName, currency]);
+
+  const statusTabs: SharedPlanFilterTab[] = useMemo(() => {
+    return [
+      {
+        id: "active",
+        label: tShared((m) => m.SharedPlans.activeTab),
+      },
+      {
+        id: "planned",
+        label: tShared((m) => m.SharedPlans.plannedTab),
+      },
+      {
+        id: "completed",
+        label: tShared((m) => m.SharedPlans.completedTab),
+      },
+      {
+        id: "all",
+        label: tShared((m) => m.SharedPlans.allProjectsTab),
+      },
+    ];
+  }, []);
+
+  const filteredItems = useMemo(() => {
+    return filterSharedPlans(sharedItems, "all", searchQuery);
+  }, [sharedItems, searchQuery]);
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 max-w-5xl mx-auto w-full min-w-0">
       <PageTitle
         title={t((m) => m.FamilyProjects.title)}
+        description={tShared((m) => m.SharedPlans.familySubtitle)}
         badge={AUTHORITY_LABELS[family.authority]}
         actions={
-          <div className="flex flex-wrap gap-2 lg:justify-end">
+          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
             {canManageProjects ? (
               <CreateProjectDialog
                 currency={currency}
@@ -200,12 +244,9 @@ function ProjectsWorkspaceContent({
         }
       />
 
-      <Separator />
-      <ProjectFilters
-        onStatusChange={onStatusChange}
-        status={status}
-        statusLabel={statusLabels[status]}
-      />
+      {/* Hero Summary Card */}
+      <PlanSummaryHero summary={summary} isPersonal={false} />
+
       {projectsMessage ? (
         <Alert>
           <AlertCircleIcon aria-hidden="true" />
@@ -219,9 +260,10 @@ function ProjectsWorkspaceContent({
           </AlertDescription>
         </Alert>
       ) : null}
-      <ProjectMetricCards currency={currency} projects={projects} />
+
+      {/* Workspace Tabs */}
       <Tabs defaultValue="projects" className="gap-4">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto no-scrollbar">
           <TabsList className="min-w-max">
             <TabsTrigger value="projects">
               {t((m) => m.FamilyProjects.projectsTab)}
@@ -234,16 +276,33 @@ function ProjectsWorkspaceContent({
             </TabsTrigger>
           </TabsList>
         </div>
-        <TabsContent value="projects">
-          <ProjectList
-            currency={currency}
-            familyName={familyName}
-            projects={projects}
+
+        <TabsContent value="projects" className="space-y-4">
+          <PlanSegmentedFilters
+            tabs={statusTabs}
+            activeTab={status}
+            onTabChange={(newStatus) =>
+              onStatusChange(newStatus as ProjectStatusFilter)
+            }
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+          />
+
+          <PlanList
+            items={filteredItems}
+            hasPlans={sharedItems.length > 0}
+            onResetFilters={() => {
+              onStatusChange("active");
+              setSearchQuery("");
+            }}
+            isPersonal={false}
           />
         </TabsContent>
+
         <TabsContent value="contributions">
           <ProjectContributionTable currency={currency} projects={projects} />
         </TabsContent>
+
         <TabsContent value="operations">
           <ProjectOperationsGrid family={family} projects={projects} />
         </TabsContent>

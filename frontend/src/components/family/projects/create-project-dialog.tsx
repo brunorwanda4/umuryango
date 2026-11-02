@@ -172,14 +172,14 @@ function ProjectFormDialogContent({
   const isEdit = mode === "edit";
 
   return (
-    <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl md:max-w-2xl">
+    <DialogContent className="max-h-[calc(100dvh-1rem)] max-w-[calc(100%-1rem)] gap-4 overflow-y-auto p-4 sm:max-h-[calc(100dvh-2rem)] sm:max-w-xl sm:gap-6 sm:p-6 md:max-w-2xl">
       <DialogHeader>
         <DialogTitle>
           {isEdit
             ? t((m) => m.FamilyProjects.editProject)
             : t((m) => m.FamilyProjects.createProjectTitle)}
         </DialogTitle>
-        <DialogDescription>
+        <DialogDescription className=" hidden md:block">
           {isEdit
             ? t((m) => m.FamilyProjects.editProjectDesc)
             : t((m) => m.FamilyProjects.createProjectDesc)}
@@ -336,7 +336,7 @@ function ProjectForm({
 
   return (
     <form
-      className="flex flex-col gap-6"
+      className="flex min-w-0 flex-col gap-4 sm:gap-6"
       onSubmit={form.handleSubmit(onSubmit)}
     >
       {error ? (
@@ -353,7 +353,7 @@ function ProjectForm({
         </Alert>
       ) : null}
 
-      <FieldGroup className=" grid grid-cols-2">
+      <FieldGroup className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
         <CommonFormField
           control={form.control}
           name="name"
@@ -394,7 +394,7 @@ function ProjectForm({
             autoComplete: "off",
           }}
         />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 col-span-2">
+        <div className="grid min-w-0 grid-cols-1 gap-4 sm:col-span-2 sm:grid-cols-2">
           <CommonFormField
             control={form.control}
             name="startDate"
@@ -431,7 +431,7 @@ function ProjectForm({
           fieldType="textarea"
           placeholder={t((m) => m.FamilyProjects.participantNotesPlaceholder)}
           textareaProps={{ rows: 3 }}
-          fieldClassName="col-span-2"
+          fieldClassName="sm:col-span-2"
         />
         <CommonFormField
           control={form.control}
@@ -440,17 +440,17 @@ function ProjectForm({
           fieldType="textarea"
           placeholder={t((m) => m.FamilyProjects.descriptionPlaceholder)}
           textareaProps={{ rows: 4 }}
-          fieldClassName="col-span-2"
+          fieldClassName="sm:col-span-2"
         />
       </FieldGroup>
 
-      <DialogFooter>
+      <DialogFooter className="sticky bottom-0 -mx-4 -mb-4 border-t bg-popover/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:mb-0 sm:border-0 sm:bg-transparent sm:p-0">
         <DialogClose asChild>
-          <Button type="button" variant="outline">
+          <Button type="button" variant="outline" className="w-full sm:w-auto">
             {tCommon((m) => m.Common.cancel)}
           </Button>
         </DialogClose>
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
           {isPending ? (
             <>
               <Spinner data-icon="inline-start" />
@@ -503,7 +503,9 @@ function createProjectSchema(currency: string) {
       .default("")
       .refine(
         (value) => !value || parseMoneyToMinorUnits(value, currency) !== null,
-        { message: `Enter a valid ${currency} contribution amount.` },
+        {
+          message: `Enter a valid ${currency} contribution amount.`,
+        },
       ),
     participantNotes: z.string().trim().max(1000).optional().default(""),
     description: z.string().trim().max(1000).optional().default(""),
