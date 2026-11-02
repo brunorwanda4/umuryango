@@ -42,11 +42,7 @@
     "privacyLink": "Read the privacy policy.",
     "trustTitle": "Built for trust",
     "trustDescription": "Family records should stay accurate, permission-aware, and easy to explain.",
-    "trustItems": [
-      "Free access",
-      "Private family workspace",
-      "Auditable records"
-    ],
+    "trustItems": ["Free access", "Private family workspace", "Auditable records"],
     "highlights": [
       {
         "id": "money",
@@ -788,7 +784,7 @@
       "dismiss": "Dismiss install app prompt"
     },
     "footer": {
-      "moneyManagement": " — Money Management",
+      "moneyManagement": " Money Management",
       "developedBy": "Developed by "
     },
     "navigation": {

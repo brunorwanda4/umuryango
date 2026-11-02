@@ -420,7 +420,7 @@ export function MoneyFormDialog({
           <DialogTitle>
             {isUpdate ? config.updateTitle : config.title}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className=" hidden md:block">
             {isUpdate ? config.updateDescription : config.description}
           </DialogDescription>
         </DialogHeader>
