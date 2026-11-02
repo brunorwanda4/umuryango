@@ -5,11 +5,11 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { createTranslator } from "@/i18n/translate";
-import apiRequest from "@/service/api";
+import { importContactsInBatches } from "./contact-import";
 import {
+  detectContactFileFormat,
   type ImportedContact,
-  parseGoogleCsv,
-  parseVcard,
+  parseContactFile,
 } from "./contact-utils";
 
 const t = createTranslator("FamilyContacts");
@@ -22,9 +22,11 @@ function formatFileSize(bytes: number) {
 function ContactFilePreview({
   file,
   contacts,
+  format,
 }: {
   file: File;
   contacts: ImportedContact[];
+  format: "csv" | "vcard";
 }) {
   const withPhone = contacts.filter((contact) => contact.phoneNumber).length;
   const withEmail = contacts.filter((contact) => contact.email).length;
@@ -36,7 +38,7 @@ function ContactFilePreview({
       </p>
       <p className="mt-1 text-muted-foreground">
         {formatFileSize(file.size)} ·{" "}
-        {file.name.toLowerCase().endsWith(".vcf") ? "vCard" : "CSV"}
+        {format === "vcard" ? "vCard" : "Google CSV"}
       </p>
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         {[
@@ -55,7 +57,7 @@ function ContactFilePreview({
       </div>
       {contacts.length > 1000 ? (
         <p className="mt-2 text-muted-foreground text-xs">
-          {t((m) => m.FamilyContacts.limitHint)}
+          {t((m) => m.FamilyContacts.largeImportHint)}
         </p>
       ) : null}
     </div>
@@ -73,20 +75,24 @@ export function ContactImportPanel({
   const [selectedImport, setSelectedImport] = useState<{
     file: File;
     contacts: ImportedContact[];
+    format: "csv" | "vcard";
   } | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelected = async (file: File) => {
     try {
-      const contacts = file.name.toLowerCase().endsWith(".vcf")
-        ? parseVcard(await file.text())
-        : parseGoogleCsv(await file.text());
+      const text = await file.text();
+      const contacts = parseContactFile(file.name, text);
       if (!contacts.length) {
         setSelectedImport(null);
         toast.error(t((m) => m.FamilyContacts.importEmpty));
         return;
       }
-      setSelectedImport({ file, contacts });
+      setSelectedImport({
+        file,
+        contacts,
+        format: detectContactFileFormat(file.name, text),
+      });
     } catch {
       setSelectedImport(null);
       toast.error(t((m) => m.FamilyContacts.importFileError));
@@ -97,20 +103,26 @@ export function ContactImportPanel({
     if (!selectedImport) return;
     setImporting(true);
     try {
-      const response = await apiRequest<
-        { contacts: ImportedContact[] },
-        { created: number; merged: number }
-      >("post", `/families/${encodeURIComponent(familyId)}/contacts/import`, {
-        contacts: selectedImport.contacts.slice(0, 1000),
-      });
-      if (!response.ok || !response.data) {
-        toast.error(response.message ?? t((m) => m.FamilyContacts.importError));
+      const result = await importContactsInBatches(
+        familyId,
+        selectedImport.contacts,
+      );
+      if (!result.ok) {
+        toast.error(
+          result.processed > 0
+            ? t((m) => m.FamilyContacts.importPartial, {
+                processed: result.processed,
+                total: selectedImport.contacts.length,
+              })
+            : (result.message ?? t((m) => m.FamilyContacts.importError)),
+        );
+        if (result.processed > 0) onImported?.();
         return;
       }
       toast.success(
         t((m) => m.FamilyContacts.importSuccess, {
-          created: response.data.created,
-          merged: response.data.merged,
+          created: result.created,
+          merged: result.merged,
         }),
       );
       setSelectedImport(null);
@@ -143,6 +155,7 @@ export function ContactImportPanel({
           <ContactFilePreview
             file={selectedImport.file}
             contacts={selectedImport.contacts}
+            format={selectedImport.format}
           />
           <div className="flex flex-col gap-2 sm:flex-row">
             <Button type="button" disabled={importing} onClick={handleImport}>

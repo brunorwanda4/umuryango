@@ -64,6 +64,7 @@ describe('ContactsService', () => {
         findFirst: jest.fn(),
         update: jest.fn(),
       },
+      familyContactDisplayName: { upsert: jest.fn() },
       familyAuditEvent: { create: jest.fn() },
       $transaction: jest.fn((callback) => callback(prisma)),
     };
@@ -152,6 +153,49 @@ describe('ContactsService', () => {
       expect.objectContaining({
         data: expect.objectContaining({
           action: FamilyAuditAction.CONTACT_DELETED,
+        }),
+      }),
+    );
+  });
+
+  it('merges an imported phone match and saves the importer display name', async () => {
+    const contact = makeContact();
+    prisma.familyMember.findFirst.mockResolvedValue(memberMembership);
+    prisma.familyContact.findMany.mockResolvedValue([contact]);
+    prisma.familyContactDisplayName.upsert.mockResolvedValue({
+      id: 'display-name-1',
+    });
+    prisma.familyAuditEvent.create.mockResolvedValue({ id: 'audit-3' });
+
+    const result = await service.importMany('user-1', 'family-1', {
+      contacts: [
+        {
+          fullName: 'Grace from Google',
+          phoneNumber: '+250 788 000 000',
+        },
+      ],
+    });
+
+    expect(result).toEqual({ created: 0, merged: 1 });
+    expect(prisma.familyContact.create).not.toHaveBeenCalled();
+    expect(prisma.familyContactDisplayName.upsert).toHaveBeenCalledWith({
+      where: {
+        contactId_userId: { contactId: 'contact-1', userId: 'user-1' },
+      },
+      create: {
+        contactId: 'contact-1',
+        userId: 'user-1',
+        fullName: 'Grace from Google',
+      },
+      update: { fullName: 'Grace from Google' },
+    });
+    expect(prisma.familyAuditEvent.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          familyId: 'family-1',
+          actorId: 'user-1',
+          action: FamilyAuditAction.CONTACT_IMPORTED,
+          after: { created: 0, merged: 1, total: 1 },
         }),
       }),
     );

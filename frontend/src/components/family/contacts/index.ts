@@ -15,10 +15,12 @@ export {
   type ContactPageHeaderProps,
 } from "./contact-page-header";
 export {
+  detectContactFileFormat,
   filterContacts,
   getDefaultValues,
   type ImportedContact,
   normalizePhoneForWhatsApp,
+  parseContactFile,
   parseGoogleCsv,
   parseVcard,
 } from "./contact-utils";

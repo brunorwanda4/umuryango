@@ -1107,7 +1107,7 @@
     "importTitle": "Import contacts",
     "importDescription": "Upload a Google Contacts CSV or vCard (.vcf) export.",
     "dropzoneText": "Click to upload or drag and drop",
-    "dropzoneHint": "Supported formats: .csv, .vcf (Max 1000 contacts)",
+    "dropzoneHint": "Supported formats: Google CSV and vCard (.vcf)",
     "dialogCreateTitle": "Add contact",
     "dialogEditTitle": "Edit contact",
     "addManually": "Add manually",
@@ -1143,6 +1143,7 @@
     "saveSuccess": "Contact saved.",
     "saveError": "Failed to save contact.",
     "importSuccess": "{created} added, {merged} matched existing contacts.",
+    "importPartial": "{processed} of {total} contacts were processed before the import stopped. You can retry the same file safely.",
     "importEmpty": "No contacts were found in that file.",
     "importError": "Contacts could not be imported.",
     "importFileError": "The contact file could not be read.",
@@ -1153,7 +1154,7 @@
     "chooseContactFile": "Choose contact file",
     "withPhone": "With phone",
     "withEmail": "With email",
-    "limitHint": "Only the first 1,000 contacts will be imported.",
+    "largeImportHint": "Large files are imported in safe batches. Keep this window open until the import finishes.",
     "badgeEmergency": "Emergency",
     "badgeLoan": "Loan",
     "call": "Call",
@@ -3660,19 +3661,31 @@
     "netAsset": "Net Asset",
     "netDebt": "Net Debt",
     "settled": "Settled",
-    "activeContracts": "{count, plural, =1 {1 active contract} other {# active contracts}}",
+    "activeContracts": {
+      "one": "{count} active contract",
+      "other": "{count} active contracts"
+    },
     "overdueCount": "{count} overdue",
     "youLent": "You Lent",
     "familyLent": "Family Lent",
     "owedToYou": "Owed to You",
     "owedToFamily": "Owed to Family",
-    "peopleOweYou": "{count, plural, =1 {1 person owes you} other {# people owe you}}",
-    "peopleOweFamily": "{count, plural, =1 {1 open loan} other {# open loans}}",
+    "peopleOweYou": {
+      "one": "{count} person owes you",
+      "other": "{count} people owe you"
+    },
+    "peopleOweFamily": {
+      "one": "{count} open loan",
+      "other": "{count} open loans"
+    },
     "youBorrowed": "You Borrowed",
     "familyBorrowed": "Family Borrowed",
     "youOwe": "You Owe",
     "familyOwes": "Family Owes",
-    "pendingReturn": "{count, plural, =1 {1 pending return} other {# pending returns}}",
+    "pendingReturn": {
+      "one": "{count} pending return",
+      "other": "{count} pending returns"
+    },
     "percentOwed": "{percent}% Owed to You",
     "percentDebt": "{percent}% Debt",
     "tabAll": "All ({count})",

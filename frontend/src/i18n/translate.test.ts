@@ -112,6 +112,31 @@ describe("translate and createTranslator", () => {
     );
   });
 
+  it("pluralizes shared loan counts", () => {
+    const t = createTranslator("SharedLoans");
+
+    assert.strictEqual(
+      t((m) => m.SharedLoans.activeContracts, { count: 0 }),
+      "0 active contracts",
+    );
+    assert.strictEqual(
+      t((m) => m.SharedLoans.activeContracts, { count: 1 }),
+      "1 active contract",
+    );
+    assert.strictEqual(
+      t((m) => m.SharedLoans.peopleOweYou, { count: 2 }),
+      "2 people owe you",
+    );
+    assert.strictEqual(
+      t((m) => m.SharedLoans.peopleOweFamily, { count: 1 }),
+      "1 open loan",
+    );
+    assert.strictEqual(
+      t((m) => m.SharedLoans.pendingReturn, { count: 2 }),
+      "2 pending returns",
+    );
+  });
+
   it("returns an empty string when a selector points to nothing", () => {
     const t = createTranslator(sampleMessages);
     assert.strictEqual(

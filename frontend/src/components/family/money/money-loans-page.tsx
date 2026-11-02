@@ -8,13 +8,13 @@ import {
   EMPTY_SHARED_LOAN_FILTERS,
   filterSharedLoans,
   LoanFilterBar,
-  LoanHeader,
   LoanList,
   LoanPageSkeleton,
   LoanSegmentedTabs,
   LoanSummaryVault,
   type SharedLoanFiltersState,
 } from "@/components/common/loans";
+import { PageTitle } from "@/components/common/pages/page-title";
 import type {
   ContactListResponse,
   FamilyContact,
@@ -290,12 +290,21 @@ export function MoneyLoansPage({
 
   return (
     <div className="flex min-w-0 flex-col gap-5 max-w-5xl mx-auto w-full">
-      <LoanHeader
+      <PageTitle
         title={t((m) => m.FamilyLoans.pageTitle)}
-        subtitle={t((m) => m.FamilyLoans.pageDescription)}
+        description={t((m) => m.FamilyLoans.pageDescription)}
         badge={canManageLoans ? "Manager access" : "View access"}
-        onAdd={canManageLoans ? () => setOpenCreate(true) : undefined}
-        addLabel={t((m) => m.FamilyLoans.recordLoan)}
+        actions={
+          canManageLoans ? (
+            <Button
+              className="mt-4 w-full sm:w-auto lg:mt-0"
+              onClick={() => setOpenCreate(true)}
+            >
+              <PlusIcon aria-hidden="true" data-icon="inline-start" />
+              {t((m) => m.FamilyLoans.recordLoan)}
+            </Button>
+          ) : undefined
+        }
       />
 
       {loanMessage ? (

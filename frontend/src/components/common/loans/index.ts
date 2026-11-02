@@ -2,7 +2,6 @@ export * from "./loan-calculations";
 export * from "./loan-card-item";
 export * from "./loan-empty-state";
 export * from "./loan-filter-bar";
-export * from "./loan-header";
 export * from "./loan-list";
 export * from "./loan-page-skeleton";
 export * from "./loan-segmented-tabs";

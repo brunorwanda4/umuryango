@@ -30,47 +30,37 @@ export function LoanSummaryVault({
     : t((m) => m.SharedLoans.familyOwes);
 
   return (
-    <Card className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm min-w-0 transition-colors">
-      {/* Top Header: Net Position Indicator */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5 border-b border-border">
+    <Card className="relative min-w-0 overflow-hidden rounded-3xl border border-zinc-800/90 bg-gradient-to-br from-[#111116] via-[#0d0d11] to-[#070709] p-5 text-white shadow-xl sm:p-6">
+      <div
+        className={cn(
+          "pointer-events-none absolute -right-24 -top-24 size-72 rounded-full opacity-20 blur-3xl",
+          isNetNegative ? "bg-rose-500" : "bg-emerald-500",
+        )}
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
             {t((m) => m.SharedLoans.netCreditExposure)}
           </span>
-          <div className="flex flex-wrap items-baseline gap-1.5 mt-0.5">
-            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground font-mono">
-              {isNetPositive ? "+" : ""}
-              <CompactMoney
-                currency={summary.currency}
-                value={summary.netBalanceMinorUnits.toString()}
-              />
-            </span>
-            <span
-              className={cn(
-                "text-xs font-semibold",
-                isNetPositive && "text-emerald-600 dark:text-emerald-400",
-                isNetNegative && "text-rose-600 dark:text-rose-400",
-                !isNetPositive && !isNetNegative && "text-muted-foreground",
-              )}
-            >
-              {isNetPositive
-                ? `(${t((m) => m.SharedLoans.netAsset)})`
-                : isNetNegative
-                  ? `(${t((m) => m.SharedLoans.netDebt)})`
-                  : `(${t((m) => m.SharedLoans.settled)})`}
-            </span>
-          </div>
         </div>
 
         <div className="flex items-center gap-1.5 text-right">
           {summary.overdueCount > 0 ? (
-            <Badge variant="destructive" className="text-[10px] font-medium">
+            <Badge
+              variant="outline"
+              className="border-rose-500/30 bg-rose-500/10 text-[10px] font-medium text-rose-300"
+            >
               {t((m) => m.SharedLoans.overdueCount, {
                 count: summary.overdueCount,
               })}
             </Badge>
           ) : null}
-          <Badge variant="secondary" className="text-[10px] font-medium">
+          <Badge
+            variant="outline"
+            className="border-zinc-700/50 bg-zinc-800/80 text-[10px] font-medium text-zinc-300"
+          >
             {t((m) => m.SharedLoans.activeContracts, {
               count: summary.activeCount,
             })}
@@ -78,31 +68,80 @@ export function LoanSummaryVault({
         </div>
       </div>
 
-      {/* Split Vault Columns: Lent vs Borrowed */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3.5">
-        {/* Lent Box */}
+      <div className="relative z-10 my-3 sm:my-4">
+        <div className="flex flex-wrap items-baseline gap-2">
+          <span className="font-mono text-3xl font-extrabold tracking-tight text-white tabular-nums sm:text-4xl">
+            {isNetPositive ? "+" : ""}
+            <CompactMoney
+              currency={summary.currency}
+              value={summary.netBalanceMinorUnits.toString()}
+            />
+          </span>
+          <span
+            className={cn(
+              "text-xs font-semibold",
+              isNetPositive && "text-emerald-400",
+              isNetNegative && "text-rose-400",
+              !isNetPositive && !isNetNegative && "text-zinc-400",
+            )}
+          >
+            {isNetPositive
+              ? t((m) => m.SharedLoans.netAsset)
+              : isNetNegative
+                ? t((m) => m.SharedLoans.netDebt)
+                : t((m) => m.SharedLoans.settled)}
+          </span>
+        </div>
+      </div>
+
+      {totalExposure > BigInt(0) ? (
+        <div className="relative z-10 mb-3 mt-1">
+          <div className="flex h-2 w-full overflow-hidden rounded-full border border-zinc-700/40 bg-zinc-800/90 p-0.5">
+            <div
+              className="h-full rounded-r-full bg-rose-400 transition-all duration-500"
+              style={{ width: `${summary.borrowedRatioPercent}%` }}
+            />
+          </div>
+          <div className="mt-1 flex justify-between font-mono text-[10px]">
+            <span className="text-emerald-400">
+              {t((m) => m.SharedLoans.percentOwed, {
+                percent: summary.lentRatioPercent,
+              })}
+            </span>
+            <span className="text-rose-400">
+              {t((m) => m.SharedLoans.percentDebt, {
+                percent: summary.borrowedRatioPercent,
+              })}
+            </span>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="relative z-10 mt-auto grid grid-cols-2 gap-2.5 border-t border-zinc-800/80 pt-3 sm:gap-3">
         <button
           type="button"
           onClick={() => onSelectTab?.("LENT")}
           className={cn(
-            "p-3.5 rounded-xl border border-border bg-muted/30 text-left transition",
-            "hover:bg-muted/50 hover:border-emerald-500/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+            "flex min-w-0 flex-col justify-between rounded-2xl border border-zinc-800/80 bg-black/50 p-3 text-left transition sm:p-3.5",
+            "hover:border-emerald-500/30 hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
         >
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="size-1.5 rounded-full bg-emerald-500" />
-              <span>{lentLabel}</span>
+          <div className="mb-1 flex w-full items-center justify-between gap-1 text-[11px] text-zinc-400">
+            <span className="truncate">{lentLabel}</span>
+            <span className="flex shrink-0 items-center gap-1.5">
+              <ArrowUpRightIcon
+                aria-hidden="true"
+                className="size-3.5 text-emerald-400"
+              />
             </span>
-            <ArrowUpRightIcon className="size-3.5 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <div className="text-base sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+          <div className="font-mono text-sm font-bold text-emerald-400 tabular-nums sm:text-base">
             <CompactMoney
               currency={summary.currency}
               value={summary.totalLentRemainingMinorUnits.toString()}
             />
           </div>
-          <span className="text-[11px] text-muted-foreground mt-0.5 block">
+          <span className="mt-0.5 block truncate text-[10px] text-zinc-500">
             {isPersonal
               ? t((m) => m.SharedLoans.peopleOweYou, {
                   count: summary.lentCount,
@@ -113,63 +152,36 @@ export function LoanSummaryVault({
           </span>
         </button>
 
-        {/* Borrowed Box */}
         <button
           type="button"
           onClick={() => onSelectTab?.("BORROWED")}
           className={cn(
-            "p-3.5 rounded-xl border border-border bg-muted/30 text-left transition",
-            "hover:bg-muted/50 hover:border-rose-500/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+            "flex min-w-0 flex-col justify-between rounded-2xl border border-zinc-800/80 bg-black/50 p-3 text-left transition sm:p-3.5",
+            "hover:border-rose-500/30 hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
         >
-          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-            <span className="flex items-center gap-1.5 font-medium">
-              <span className="size-1.5 rounded-full bg-rose-500" />
-              <span>{borrowedLabel}</span>
+          <div className="mb-1 flex w-full items-center justify-between gap-1 text-[11px] text-zinc-400">
+            <span className="truncate">{borrowedLabel}</span>
+            <span className="flex shrink-0 items-center gap-1.5">
+              <ArrowDownLeftIcon
+                aria-hidden="true"
+                className="size-3.5 text-rose-400"
+              />
             </span>
-            <ArrowDownLeftIcon className="size-3.5 text-rose-600 dark:text-rose-400" />
           </div>
-          <div className="text-base sm:text-lg font-bold text-rose-600 dark:text-rose-400 font-mono">
+          <div className="font-mono text-sm font-bold text-rose-400 tabular-nums sm:text-base">
             <CompactMoney
               currency={summary.currency}
               value={summary.totalBorrowedRemainingMinorUnits.toString()}
             />
           </div>
-          <span className="text-[11px] text-muted-foreground mt-0.5 block">
+          <span className="mt-0.5 block truncate text-[10px] text-zinc-500">
             {t((m) => m.SharedLoans.pendingReturn, {
               count: summary.borrowedCount,
             })}
           </span>
         </button>
       </div>
-
-      {/* Ratio Bar */}
-      {totalExposure > BigInt(0) ? (
-        <div className="mt-3.5">
-          <div className="w-full bg-muted h-1.5 rounded-full overflow-hidden flex">
-            <div
-              className="bg-emerald-500 h-full transition-all duration-300"
-              style={{ width: `${summary.lentRatioPercent}%` }}
-            />
-            <div
-              className="bg-rose-500 h-full transition-all duration-300"
-              style={{ width: `${summary.borrowedRatioPercent}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-[10px] text-muted-foreground font-mono mt-1">
-            <span className="text-emerald-600 dark:text-emerald-400">
-              {t((m) => m.SharedLoans.percentOwed, {
-                percent: summary.lentRatioPercent,
-              })}
-            </span>
-            <span className="text-rose-600 dark:text-rose-400">
-              {t((m) => m.SharedLoans.percentDebt, {
-                percent: summary.borrowedRatioPercent,
-              })}
-            </span>
-          </div>
-        </div>
-      ) : null}
     </Card>
   );
 }

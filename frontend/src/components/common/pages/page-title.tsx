@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { BackButton } from "@/components/common/back-button";
 import { Badge } from "@/components/ui/badge";
 
 interface PageTitleProps {
@@ -22,9 +23,10 @@ export function PageTitle({
     <section className=" flex flex-col lg:flex-row lg:justify-between">
       <div>
         <div className="flex flex-wrap items-center gap-2.5 lg:items-center ">
-          {icon && <div className="flex-shrink-0">{icon}</div>}
+          <BackButton className="-ml-2 md:hidden" />
+          {icon && <div className="hidden flex-shrink-0 md:block">{icon}</div>}
           {iconImage && (
-            <div className="flex-shrink-0">
+            <div className="hidden flex-shrink-0 md:block">
               <Image
                 width={24}
                 height={24}

@@ -18,13 +18,10 @@ import apiRequest from "@/service/api";
 import { FamilyMoneySkeleton } from "../money/family-money-skeleton";
 import { ContactDetailsDialog } from "./contact-details-dialog";
 import { ContactFormDialog } from "./contact-form-dialog";
+import { importContactsInBatches } from "./contact-import";
 import { ContactList } from "./contact-list";
 import { ContactPageHeader } from "./contact-page-header";
-import {
-  type ImportedContact,
-  parseGoogleCsv,
-  parseVcard,
-} from "./contact-utils";
+import { parseContactFile } from "./contact-utils";
 import { EmergencyContactsCard } from "./emergency-contacts-card";
 import {
   type ContactFiltersState,
@@ -192,29 +189,30 @@ export function FamilyContactsPage({
     setImporting(true);
     try {
       const text = await file.text();
-      const imported = file.name.toLowerCase().endsWith(".vcf")
-        ? parseVcard(text)
-        : parseGoogleCsv(text);
+      const imported = parseContactFile(file.name, text);
       if (!imported.length) {
         toast.error(t((m) => m.FamilyContacts.importEmpty));
         return;
       }
 
-      const response = await apiRequest<
-        { contacts: ImportedContact[] },
-        { created: number; merged: number }
-      >("post", `/families/${encodeURIComponent(family.id)}/contacts/import`, {
-        contacts: imported.slice(0, 1000),
-      });
-      if (!response.ok || !response.data) {
-        toast.error(response.message ?? t((m) => m.FamilyContacts.importError));
+      const result = await importContactsInBatches(family.id, imported);
+      if (!result.ok) {
+        toast.error(
+          result.processed > 0
+            ? t((m) => m.FamilyContacts.importPartial, {
+                processed: result.processed,
+                total: imported.length,
+              })
+            : (result.message ?? t((m) => m.FamilyContacts.importError)),
+        );
+        if (result.processed > 0) await fetchData();
         return;
       }
 
       toast.success(
         t((m) => m.FamilyContacts.importSuccess, {
-          created: response.data.created,
-          merged: response.data.merged,
+          created: result.created,
+          merged: result.merged,
         }),
       );
       await fetchData();

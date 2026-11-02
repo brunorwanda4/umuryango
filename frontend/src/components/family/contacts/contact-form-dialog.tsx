@@ -120,7 +120,7 @@ export function ContactFormDialog({
               ? t((m) => m.FamilyContacts.dialogCreateTitle)
               : t((m) => m.FamilyContacts.dialogEditTitle)}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className=" hidden md:block">
             {mode === "create"
               ? t((m) => m.FamilyContacts.dialogCreateDesc)
               : t((m) => m.FamilyContacts.dialogEditDesc)}
