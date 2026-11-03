@@ -1,16 +1,31 @@
-import type { ColumnDef } from "@tanstack/react-table";
-import { CheckIcon, FileClockIcon, Loader2Icon, XIcon } from "lucide-react";
+import { CheckIcon, FileClockIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CompactMoney } from "@/components/common/money/compact-money";
-import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemFooter,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import { Spinner } from "@/components/ui/spinner";
 import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { StatusBadge, TableEmptyState } from "./money-ui-helpers";
-import type { MoneyApprovalRow, MoneyOverview } from "./types";
-import { formatTitle } from "./utils";
+import type { MoneyOverview } from "./types";
+import { formatDate, formatTitle } from "./utils";
 
 export function MoneyApprovalTable({
   currency,
@@ -50,85 +65,101 @@ export function MoneyApprovalTable({
     }
   };
 
-  const columns: ColumnDef<MoneyApprovalRow>[] = [
-    {
-      accessorKey: "title",
-      header: t((m) => m.FamilyMoney.recordColumn),
-      cell: ({ row }) => <span className="font-medium">{row.original.title}</span>,
-    },
-    {
-      accessorKey: "type",
-      header: t((m) => m.FamilyMoney.typeColumn),
-      cell: ({ row }) => formatTitle(row.original.type),
-    },
-    {
-      accessorKey: "submittedBy",
-      header: t((m) => m.FamilyMoney.submittedBy),
-      cell: ({ row }) => row.original.submittedBy ?? t((m) => m.FamilyMoney.unknownUser),
-    },
-    {
-      accessorKey: "status",
-      header: t((m) => m.FamilyMoney.filterStatus),
-      cell: ({ row }) => <StatusBadge value={row.original.status ?? "pending"} />,
-    },
-    {
-      accessorKey: "amountMinorUnits",
-      header: () => <div className="text-right">{t((m) => m.FamilyMoney.amountColumn)}</div>,
-      cell: ({ row }) => (
-        <div className="text-right font-mono">
-          <CompactMoney
-            currency={currency}
-            emptyLabel="No records"
-            value={row.original.amountMinorUnits}
-          />
-        </div>
-      ),
-    },
-    {
-      id: "actions",
-      header: () => <div className="text-right">{tCommon((m) => m.Common.actions)}</div>,
-      cell: ({ row }) => (
-        <div className="flex justify-end gap-2">
-          <Button
-            size="icon-sm"
-            variant="outline"
-            title={t((m) => m.FamilyApprovals.approve, undefined)}
-            disabled={processingId === row.original.id}
-            onClick={() => handleAction(row.original.id, "approve")}
-          >
-            {processingId === row.original.id ? (
-              <Loader2Icon className="animate-spin" />
-            ) : (
-              <CheckIcon className="text-green-600" />
-            )}
-          </Button>
-          <Button
-            size="icon-sm"
-            variant="outline"
-            title={t((m) => m.FamilyApprovals.reject, undefined)}
-            disabled={processingId === row.original.id}
-            onClick={() => handleAction(row.original.id, "reject")}
-          >
-            {processingId === row.original.id ? (
-              <Loader2Icon className="animate-spin" />
-            ) : (
-              <XIcon className="text-destructive" />
-            )}
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t((m) => m.FamilyMoney.approvalQueueTitle)}</CardTitle>
-        <CardDescription>{t((m) => m.FamilyMoney.approvalQueueDesc)}</CardDescription>
+        <CardDescription>
+          {t((m) => m.FamilyMoney.approvalQueueDesc)}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {approvals.length ? (
-          <CommonDataTable columns={columns} data={approvals} />
+          <ItemGroup>
+            {approvals.map((approval) => {
+              const approveLabel = t(
+                (m) => m.FamilyApprovals.approve,
+                undefined,
+              );
+              const rejectLabel = t((m) => m.FamilyApprovals.reject, undefined);
+              const isProcessing = processingId === approval.id;
+
+              return (
+                <Item key={approval.id} variant="outline" size="sm">
+                  <ItemMedia
+                    variant="icon"
+                    className="size-9 rounded-xl bg-muted text-muted-foreground"
+                  >
+                    <FileClockIcon aria-hidden="true" />
+                  </ItemMedia>
+
+                  <ItemContent className="min-w-0">
+                    <ItemTitle className="w-full min-w-0 flex-wrap">
+                      <span className="min-w-0 flex-1 truncate">
+                        {approval.title}
+                      </span>
+                      <StatusBadge value={approval.status ?? "pending"} />
+                    </ItemTitle>
+                    <ItemDescription className="line-clamp-none text-xs">
+                      <span className="block truncate">
+                        {formatTitle(approval.type)}
+                      </span>
+                      <span className="block truncate">
+                        {t((m) => m.FamilyMoney.submittedBy)}:{" "}
+                        {approval.submittedBy ??
+                          t((m) => m.FamilyMoney.unknownUser)}
+                        {approval.submittedAt
+                          ? ` · ${formatDate(approval.submittedAt)}`
+                          : null}
+                      </span>
+                    </ItemDescription>
+                  </ItemContent>
+
+                  <ItemFooter className="border-border/60 border-t pt-2.5">
+                    <CompactMoney
+                      className="font-mono font-semibold tabular-nums"
+                      currency={currency}
+                      emptyLabel="No records"
+                      value={approval.amountMinorUnits}
+                    />
+                    <ItemActions>
+                      <Button
+                        size="icon-sm"
+                        variant="outline"
+                        aria-label={approveLabel}
+                        title={approveLabel}
+                        disabled={isProcessing}
+                        onClick={() => handleAction(approval.id, "approve")}
+                      >
+                        {isProcessing ? (
+                          <Spinner />
+                        ) : (
+                          <CheckIcon data-icon="inline-start" />
+                        )}
+                      </Button>
+                      <Button
+                        size="icon-sm"
+                        variant="outline"
+                        aria-label={rejectLabel}
+                        title={rejectLabel}
+                        disabled={isProcessing}
+                        onClick={() => handleAction(approval.id, "reject")}
+                      >
+                        {isProcessing ? (
+                          <Spinner />
+                        ) : (
+                          <XIcon
+                            data-icon="inline-start"
+                            className="text-destructive"
+                          />
+                        )}
+                      </Button>
+                    </ItemActions>
+                  </ItemFooter>
+                </Item>
+              );
+            })}
+          </ItemGroup>
         ) : (
           <TableEmptyState
             icon={FileClockIcon}
