@@ -42,7 +42,11 @@
     "privacyLink": "Read the privacy policy.",
     "trustTitle": "Built for trust",
     "trustDescription": "Family records should stay accurate, permission-aware, and easy to explain.",
-    "trustItems": ["Free access", "Private family workspace", "Auditable records"],
+    "trustItems": [
+      "Free access",
+      "Private family workspace",
+      "Auditable records"
+    ],
     "highlights": [
       {
         "id": "money",
@@ -787,6 +791,15 @@
       "pull": "Pull to refresh",
       "release": "Release to refresh",
       "refreshing": "Refreshing..."
+    },
+    "updates": {
+      "title": "Update available",
+      "description": "Umuryango {version} is ready to install.",
+      "windowsAction": "Install and restart",
+      "androidAction": "Download APK",
+      "later": "Later",
+      "starting": "Starting update...",
+      "installError": "The update could not be started. Check your connection and try again."
     },
     "footer": {
       "moneyManagement": " Money Management",

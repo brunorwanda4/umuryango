@@ -238,6 +238,44 @@ The configured default desktop build can also be run with:
 bun run tauri:build
 ```
 
+### Publishing native updates
+
+The hosted Next.js interface updates whenever Vercel is deployed. Native Rust,
+Tauri configuration, permissions, icons, and Android wrapper changes require a
+new native release.
+
+Windows updates are signed and published through GitHub Releases. Android is
+not distributed through Google Play, so the app checks the same GitHub release
+and asks the user to download and approve installation of the newer APK.
+
+One-time setup:
+
+1. Back up `frontend/.tauri-private/umuryango.key` somewhere secure. It is
+   intentionally ignored by Git and must never be committed or shared.
+2. In the GitHub repository settings, create an Actions secret named
+   `TAURI_SIGNING_PRIVATE_KEY` containing the complete private-key file.
+3. Keep the matching public key in `frontend/src-tauri/tauri.conf.json`.
+
+To publish an update:
+
+1. Increase the semantic version in `frontend/src-tauri/tauri.conf.json` and
+   `frontend/src-tauri/Cargo.toml`.
+2. Build the signed universal Android APK locally with
+   `bun run tauri android build --apk`.
+3. Commit and push the release changes.
+4. Run the **Native release** workflow from the GitHub Actions page. It creates
+   a draft release containing the signed Windows installer and `latest.json`.
+5. Upload `app-universal-release.apk` to that same draft release.
+6. Publish the draft only after both Windows and Android assets are present.
+
+The first updater-enabled version must still be installed manually. After that,
+Windows can install signed updates from inside the app. Android opens the APK
+download and the operating system asks the user to approve the installation;
+Android does not permit a privately distributed app to update silently.
+
+Do not lose or replace the updater private key. Existing Windows installations
+will reject future packages signed with a different key.
+
 ## Project structure
 
 ```text

@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "updater",
+  "description": "Allows the hosted Umuryango UI to install signed desktop updates.",
+  "windows": ["main"],
+  "remote": {
+    "urls": ["https://umuryango-app.vercel.app"]
+  },
+  "platforms": ["windows"],
+  "permissions": ["updater:default"]
+}

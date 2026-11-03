@@ -20,6 +20,7 @@ use crate::platform::{
 };
 use crate::sync::conflict::{resolve_outbox_conflict, ConflictResolutionStrategy};
 use crate::sync::SyncEngine;
+use crate::updates::{AndroidUpdateMetadata, NativeUpdateContext};
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -28,6 +29,19 @@ use std::sync::Arc;
 use tauri::{AppHandle, Emitter, State};
 use tokio::sync::Mutex;
 use uuid::Uuid;
+
+#[tauri::command]
+pub fn get_native_update_context(app: AppHandle) -> NativeUpdateContext {
+    NativeUpdateContext {
+        platform: std::env::consts::OS.to_string(),
+        current_version: app.package_info().version.to_string(),
+    }
+}
+
+#[tauri::command]
+pub async fn check_android_update(app: AppHandle) -> AppResult<Option<AndroidUpdateMetadata>> {
+    crate::updates::check_android_update(&app.package_info().version.to_string()).await
+}
 
 pub struct NativeAppState {
     pub storage_dir: PathBuf,

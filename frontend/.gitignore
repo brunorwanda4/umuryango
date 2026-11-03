@@ -20,6 +20,9 @@
 # production
 /build
 
+# Tauri updater signing key
+/.tauri-private/
+
 # misc
 .DS_Store
 *.pem
