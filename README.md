@@ -185,6 +185,59 @@ Run each command from the listed application directory.
 | Frontend | `bun run lint` | Run Biome checks |
 | Frontend | `bun run i18n` | Run the translation maintenance CLI |
 
+## Building the native applications
+
+Run native builds from the frontend directory:
+
+```powershell
+cd frontend
+```
+
+### Android APK
+
+Build a release APK for sharing:
+
+```powershell
+bun run tauri android build --apk
+```
+
+The universal APK is written to:
+
+```text
+frontend/src-tauri/gen/android/app/build/outputs/apk/universal/release/app-universal-release.apk
+```
+
+To build only for modern ARM64 Android phones:
+
+```powershell
+bun run tauri android build --apk --target aarch64
+```
+
+Android builds require the Android SDK and NDK. Release signing reads the local
+`frontend/src-tauri/gen/android/keystore.properties` file when it exists. Never
+commit that file, the keystore, or their passwords.
+
+### Windows installers
+
+Build both the Windows MSI and NSIS executable installers:
+
+```powershell
+bun run tauri build --bundles msi,nsis
+```
+
+The installers are written under:
+
+```text
+frontend/src-tauri/target/release/bundle/msi/
+frontend/src-tauri/target/release/bundle/nsis/
+```
+
+The configured default desktop build can also be run with:
+
+```powershell
+bun run tauri:build
+```
+
 ## Project structure
 
 ```text

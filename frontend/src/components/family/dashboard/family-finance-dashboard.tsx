@@ -18,17 +18,13 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   DashboardActionGrid,
   DashboardActionTile,
-  DashboardQuickAddTile,
 } from "@/components/common/dashboard/dashboard-action-grid";
 import {
   DashboardBalanceCard,
   DashboardBalanceStat,
 } from "@/components/common/dashboard/dashboard-balance-card";
 import { DashboardEmptyState } from "@/components/common/dashboard/dashboard-empty-state";
-import {
-  DashboardStatTile,
-  DashboardSummaryMetric,
-} from "@/components/common/dashboard/dashboard-metric-card";
+import { DashboardStatTile } from "@/components/common/dashboard/dashboard-metric-card";
 import { DashboardSectionCard } from "@/components/common/dashboard/dashboard-section-card";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import {
@@ -51,7 +47,6 @@ import {
   createProjectSlug,
 } from "@/components/family/projects/utils";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import {
   type ChartConfig,
   ChartContainer,
@@ -197,16 +192,14 @@ export function FamilyFinancialSummary({
   const moneyAvailable = normalizedMoney !== null;
   const encodedSlug = encodeURIComponent(family.slug);
   const moneyHref = `/family/${encodedSlug}/money`;
-  const canApproveExpense = hasCapability(family, "APPROVE_EXPENSE");
-  const quickActions = getFamilyQuickActions(family);
-  const primaryActions = quickActions.slice(0, 2);
 
   return (
     <section
       aria-label={t((m) => m.FamilyDashboard.overviewAriaLabel)}
-      className="grid grid-cols-1 gap-4 md:grid-cols-[1.2fr_1fr] md:items-start"
+      className="w-full"
     >
       <DashboardBalanceCard
+        className="w-full"
         label={t((m) => m.FamilyDashboard.totalBalance, { currency })}
         currency={currency}
         value={totals?.cashBalanceMinorUnits ?? 0}
@@ -229,90 +222,14 @@ export function FamilyFinancialSummary({
           variant="expense"
         />
       </DashboardBalanceCard>
-
-      <Card className="rounded-2xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs flex flex-col justify-between min-w-0">
-        <div>
-          <h2 className="text-xs sm:text-sm font-bold tracking-tight text-foreground">
-            {t((m) => m.FamilyDashboard.quickAddTitle)}
-          </h2>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">
-            {t((m) => m.FamilyDashboard.quickAddDesc)}
-          </p>
-        </div>
-        <div className="grid gap-3 pt-3">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <DashboardSummaryMetric
-              href={canApproveExpense ? `${moneyHref}/approvals` : moneyHref}
-              label={t((m) => m.FamilyDashboard.pendingApprovals)}
-              value={
-                moneyAvailable ? String(totals?.pendingApprovalCount ?? 0) : "—"
-              }
-              valueClassName={
-                (totals?.pendingApprovalCount ?? 0) > 0
-                  ? "text-amber-600 dark:text-amber-400"
-                  : undefined
-              }
-            />
-            <DashboardSummaryMetric
-              href={moneyHref}
-              label={t((m) => m.FamilyDashboard.overdue)}
-              value={moneyAvailable ? String(totals?.overdueCount ?? 0) : "—"}
-              valueClassName={
-                (totals?.overdueCount ?? 0) > 0 ? "text-destructive" : undefined
-              }
-            />
-            <DashboardSummaryMetric
-              href={moneyHref}
-              label={t((m) => m.FamilyDashboard.moneyRecords)}
-              value={
-                moneyAvailable
-                  ? String(
-                      normalizedMoney.sourceRecordCount ??
-                        normalizedMoney.records?.length ??
-                        0,
-                    )
-                  : "—"
-              }
-            />
-            <DashboardSummaryMetric
-              href={`/family/${encodedSlug}/members`}
-              label={t((m) => m.FamilyDashboard.familyMembers)}
-              value={String(family.memberCount || family.members.length)}
-            />
-          </div>
-
-          {primaryActions.length > 0 ? (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {primaryActions.map((action) => {
-                const meta = getQuickActionMeta(action.id);
-                return (
-                  <DashboardQuickAddTile
-                    key={action.id}
-                    href={action.href}
-                    label={meta.label}
-                    description={meta.description}
-                    icon={meta.icon}
-                    iconClassName={meta.iconClassName}
-                  />
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-muted-foreground text-xs">
-              {t((m) => m.FamilyDashboard.noQuickActionsDesc)}
-            </p>
-          )}
-        </div>
-      </Card>
     </section>
   );
 }
 
 export function FamilyQuickActionsCard({ family }: { family: FamilyDetail }) {
   const quickActions = getFamilyQuickActions(family);
-  const secondaryActions = quickActions.slice(2);
 
-  if (secondaryActions.length === 0) {
+  if (quickActions.length === 0) {
     return null;
   }
 
@@ -322,7 +239,7 @@ export function FamilyQuickActionsCard({ family }: { family: FamilyDetail }) {
       description={t((m) => m.FamilyDashboard.quickActionsDesc)}
     >
       <DashboardActionGrid className="sm:grid-cols-3 lg:grid-cols-4">
-        {secondaryActions.map((action) => {
+        {quickActions.map((action) => {
           const meta = getQuickActionMeta(action.id);
           return (
             <DashboardActionTile
