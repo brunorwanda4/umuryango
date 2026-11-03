@@ -5,13 +5,7 @@ import { toast } from "sonner";
 import { CompactMoney } from "@/components/common/money/compact-money";
 import { CommonDataTable } from "@/components/common/table/common-data-table";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createTranslator } from "@/i18n/translate";
 import apiRequest from "@/service/api";
 import { StatusBadge, TableEmptyState } from "./money-ui-helpers";
@@ -60,9 +54,7 @@ export function MoneyApprovalTable({
     {
       accessorKey: "title",
       header: t((m) => m.FamilyMoney.recordColumn),
-      cell: ({ row }) => (
-        <span className="font-medium">{row.original.title}</span>
-      ),
+      cell: ({ row }) => <span className="font-medium">{row.original.title}</span>,
     },
     {
       accessorKey: "type",
@@ -72,21 +64,16 @@ export function MoneyApprovalTable({
     {
       accessorKey: "submittedBy",
       header: t((m) => m.FamilyMoney.submittedBy),
-      cell: ({ row }) =>
-        row.original.submittedBy ?? t((m) => m.FamilyMoney.unknownUser),
+      cell: ({ row }) => row.original.submittedBy ?? t((m) => m.FamilyMoney.unknownUser),
     },
     {
       accessorKey: "status",
       header: t((m) => m.FamilyMoney.filterStatus),
-      cell: ({ row }) => (
-        <StatusBadge value={row.original.status ?? "pending"} />
-      ),
+      cell: ({ row }) => <StatusBadge value={row.original.status ?? "pending"} />,
     },
     {
       accessorKey: "amountMinorUnits",
-      header: () => (
-        <div className="text-right">{t((m) => m.FamilyMoney.amountColumn)}</div>
-      ),
+      header: () => <div className="text-right">{t((m) => m.FamilyMoney.amountColumn)}</div>,
       cell: ({ row }) => (
         <div className="text-right font-mono">
           <CompactMoney
@@ -99,9 +86,7 @@ export function MoneyApprovalTable({
     },
     {
       id: "actions",
-      header: () => (
-        <div className="text-right">{tCommon((m) => m.Common.actions)}</div>
-      ),
+      header: () => <div className="text-right">{tCommon((m) => m.Common.actions)}</div>,
       cell: ({ row }) => (
         <div className="flex justify-end gap-2">
           <Button
@@ -139,9 +124,7 @@ export function MoneyApprovalTable({
     <Card>
       <CardHeader>
         <CardTitle>{t((m) => m.FamilyMoney.approvalQueueTitle)}</CardTitle>
-        <CardDescription>
-          {t((m) => m.FamilyMoney.approvalQueueDesc)}
-        </CardDescription>
+        <CardDescription>{t((m) => m.FamilyMoney.approvalQueueDesc)}</CardDescription>
       </CardHeader>
       <CardContent>
         {approvals.length ? (
