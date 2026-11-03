@@ -45,8 +45,8 @@ export function MoneyApprovalTable({
     setProcessingId(id);
     try {
       const response = await apiRequest(
-        "patch",
-        `/families/${encodeURIComponent(familyId)}/money/transactions/${id}/${action}`,
+        "post",
+        `/families/${encodeURIComponent(familyId)}/money/transactions/${encodeURIComponent(id)}/${action}`,
       );
       if (response.ok) {
         toast.success(
