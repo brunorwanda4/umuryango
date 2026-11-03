@@ -51,6 +51,15 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { createTranslator } from "@/i18n/translate";
@@ -314,43 +323,41 @@ export function FamilyMoneyOverviewCard({
                 {t((m) => m.FamilyDashboard.noRecentTransactions)}
               </p>
             ) : (
-              <div className="space-y-2">
+              <ItemGroup className="gap-2">
                 {records.map((record) => {
                   const statusUpper = (record.status ?? "").toUpperCase();
                   const isIncome = record.type === "INCOME";
 
                   return (
-                    <Link
+                    <Item
                       key={record.id}
-                      href={moneyHref}
-                      className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-border/60 bg-muted/20 hover:bg-muted/40 transition-colors"
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="flex-nowrap bg-muted/20 hover:bg-muted/40"
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div
+                      <Link href={moneyHref}>
+                        <ItemMedia
+                          variant="icon"
                           className={cn(
-                            "size-7 shrink-0 rounded-lg flex items-center justify-center text-xs font-bold",
+                            "size-8 rounded-lg",
                             isIncome
                               ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                               : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
                           )}
                         >
                           {isIncome ? (
-                            <ArrowDownLeftIcon
-                              className="size-3.5"
-                              aria-hidden="true"
-                            />
+                            <ArrowDownLeftIcon aria-hidden="true" />
                           ) : (
-                            <ArrowUpRightIcon
-                              className="size-3.5"
-                              aria-hidden="true"
-                            />
+                            <ArrowUpRightIcon aria-hidden="true" />
                           )}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <p className="truncate font-semibold text-xs text-foreground">
+                        </ItemMedia>
+
+                        <ItemContent className="min-w-0">
+                          <ItemTitle className="w-full min-w-0 line-clamp-none">
+                            <span className="truncate text-xs">
                               {record.title}
-                            </p>
+                            </span>
                             {record.status ? (
                               <Badge
                                 variant={
@@ -358,7 +365,7 @@ export function FamilyMoneyOverviewCard({
                                     ? "destructive"
                                     : "outline"
                                 }
-                                className="text-[10px] px-1.5 py-0 h-4"
+                                className="h-4 shrink-0 px-1.5 py-0 text-[10px]"
                               >
                                 {statusUpper === "APPROVED"
                                   ? t(
@@ -381,30 +388,39 @@ export function FamilyMoneyOverviewCard({
                                       : formatTitle(record.status)}
                               </Badge>
                             ) : null}
-                          </div>
-                          <p className="truncate text-muted-foreground text-[10px]">
-                            {record.category ?? formatTitle(record.type)}
-                            {record.createdBy ? ` · ${record.createdBy}` : ""} ·{" "}
-                            {formatDate(record.date)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <CompactMoney
-                          className={cn(
-                            "font-mono text-xs font-bold tabular-nums block",
-                            isIncome
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-rose-600 dark:text-rose-400",
-                          )}
-                          currency={currency}
-                          value={record.amountMinorUnits ?? 0}
-                        />
-                      </div>
-                    </Link>
+                          </ItemTitle>
+                          <ItemDescription className="line-clamp-none text-[11px]">
+                            <span className="block truncate">
+                              {record.category ?? formatTitle(record.type)}
+                            </span>
+                            <span className="block truncate">
+                              {record.createdBy
+                                ? `${t((m) => m.FamilyDashboard.submittedBy, { name: record.createdBy })} · `
+                                : ""}
+                              {t((m) => m.FamilyDashboard.recordedOnLabel, {
+                                date: formatDate(record.date),
+                              })}
+                            </span>
+                          </ItemDescription>
+                        </ItemContent>
+
+                        <ItemActions className="ml-auto shrink-0">
+                          <CompactMoney
+                            className={cn(
+                              "block font-mono text-xs font-bold tabular-nums",
+                              isIncome
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-rose-600 dark:text-rose-400",
+                            )}
+                            currency={currency}
+                            value={record.amountMinorUnits ?? 0}
+                          />
+                        </ItemActions>
+                      </Link>
+                    </Item>
                   );
                 })}
-              </div>
+              </ItemGroup>
             )}
           </div>
         </>
