@@ -2,12 +2,22 @@ import { ArrowRightIcon, PlusIcon, UsersIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppSidebarShell } from "@/components/app-shell/app-sidebar";
-import { getKinshipLabel, joinedDateFormatter } from "@/components/family/dashboard/dashboard-data";
-import type { FamilyDetail, FamilyMemberSummary } from "@/components/family/dashboard/types";
+import { PageTitle } from "@/components/common/pages/page-title";
+import { getKinshipLabel } from "@/components/family/dashboard/dashboard-data";
+import type {
+  FamilyDetail,
+  FamilyMemberSummary,
+} from "@/components/family/dashboard/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Empty,
   EmptyDescription,
@@ -15,23 +25,20 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
 import { createTranslator } from "@/i18n/translate";
-import { AUTHORITY_LABELS, type FamilyAuthority } from "@/lib/family-access";
+import { AUTHORITY_LABELS } from "@/lib/family-access";
 import enMessages from "@/messages/en.json";
 import { serverApiRequest } from "@/service/server-api";
-import { PageTitle } from "@/components/common/pages/page-title";
+import {
+  formatFamilyJoinedDate,
+  normalizeFamilyDetail,
+  normalizeUserFamilies,
+  type UserFamily,
+} from "./family-page-utils";
 
 export const metadata: Metadata = {
   title: enMessages.FamilyPage.metadataTitle,
   description: enMessages.FamilyPage.metadataDescription,
-};
-
-type UserFamily = {
-  id: string;
-  name: string;
-  slug: string;
-  authority: FamilyAuthority;
 };
 
 type FamilyListItem =
@@ -53,12 +60,22 @@ async function getFamilyListItems(): Promise<{
   if (!familiesResponse.ok || !familiesResponse.data) {
     return {
       items: [],
-      error: familiesResponse.message ?? t((m) => m.FamilyPage.loadFamiliesError),
+      error:
+        familiesResponse.message ?? t((m) => m.FamilyPage.loadFamiliesError),
+    };
+  }
+
+  const families = normalizeUserFamilies(familiesResponse.data);
+
+  if (!families) {
+    return {
+      items: [],
+      error: t((m) => m.FamilyPage.loadFamiliesError),
     };
   }
 
   const items = await Promise.all(
-    familiesResponse.data.map(async (family) => {
+    families.map(async (family) => {
       const detailResponse = await serverApiRequest<undefined, FamilyDetail>(
         "get",
         `/families/${encodeURIComponent(family.slug)}`,
@@ -67,12 +84,13 @@ async function getFamilyListItems(): Promise<{
       );
 
       if (detailResponse.ok && detailResponse.data) {
-        return { family: detailResponse.data };
+        return { family: normalizeFamilyDetail(detailResponse.data) };
       }
 
       return {
         family,
-        error: detailResponse.message ?? t((m) => m.FamilyPage.loadMembersError),
+        error:
+          detailResponse.message ?? t((m) => m.FamilyPage.loadMembersError),
       };
     }),
   );
@@ -140,7 +158,9 @@ function NoFamilies() {
           <UsersIcon aria-hidden="true" />
         </EmptyMedia>
         <EmptyTitle>{t((m) => m.FamilyPage.emptyTitle)}</EmptyTitle>
-        <EmptyDescription>{t((m) => m.FamilyPage.emptyDescription)}</EmptyDescription>
+        <EmptyDescription>
+          {t((m) => m.FamilyPage.emptyDescription)}
+        </EmptyDescription>
       </EmptyHeader>
       <Button asChild>
         <Link href="/family/new">{t((m) => m.FamilyPage.createFamily)}</Link>
@@ -154,7 +174,7 @@ function FamilyCard({ item }: { item: FamilyListItem }) {
   const { family } = item;
   const detail = "members" in family ? family : null;
   const memberCount = detail?.memberCount ?? 0;
-  const members = detail?.members ?? [];
+  const members = Array.isArray(detail?.members) ? detail.members : [];
 
   return (
     <Card>
@@ -208,19 +228,23 @@ function FamilyCard({ item }: { item: FamilyListItem }) {
 
 function MemberRow({ member }: { member: FamilyMemberSummary }) {
   const t = createTranslator("FamilyPage");
+  const joinedDate = formatFamilyJoinedDate(member.joinedAt);
+
   return (
     <div className="flex items-center gap-3 border-border/60 border-b py-3 last:border-b-0">
       <Avatar size="sm">
-        {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt={member.fullName} /> : null}
+        {member.avatarUrl ? (
+          <AvatarImage src={member.avatarUrl} alt={member.fullName} />
+        ) : null}
         <AvatarFallback name={member.fullName} />
       </Avatar>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-sm">{member.fullName}</p>
         <p className="text-muted-foreground text-xs">
-          {getKinshipLabel(member)} -{" "}
-          {t((m) => m.FamilyPage.joinedDate, {
-            date: joinedDateFormatter.format(new Date(member.joinedAt)),
-          })}
+          {getKinshipLabel(member)}
+          {joinedDate
+            ? ` - ${t((m) => m.FamilyPage.joinedDate, { date: joinedDate })}`
+            : null}
         </p>
       </div>
       <Badge variant={member.authority === "HEAD" ? "default" : "outline"}>

@@ -125,6 +125,10 @@ export default function RootLayout({
       )}
     >
       <body className="flex min-h-full flex-col">
+        <div
+          aria-hidden="true"
+          className="fixed inset-x-0 top-0 z-50 h-[env(safe-area-inset-top,0px)] bg-background"
+        />
         <Providers>{children}</Providers>
         <Toaster position="bottom-right" />
       </body>

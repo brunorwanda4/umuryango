@@ -16,25 +16,29 @@ export function MoneyOverviewHeader({
   return (
     <header
       className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between",
+        "sticky top-[env(safe-area-inset-top,0px)] z-30 flex flex-col gap-3 border-border/60 border-b bg-background/95 py-3 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between md:static md:border-0 md:bg-transparent md:py-0 md:backdrop-blur-none",
         className,
       )}
     >
       <div className="min-w-0 space-y-0.5">
         <div className="flex items-center gap-2">
           <BackButton />
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
+          <h1 className="font-extrabold text-foreground text-xl tracking-tight sm:text-2xl md:text-3xl">
             {title}
           </h1>
         </div>
         {description ? (
-          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 hidden md:block">
+          <p className="hidden line-clamp-2 text-muted-foreground text-xs sm:text-sm md:block">
             {description}
           </p>
         ) : null}
       </div>
 
-      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {actions}
+        </div>
+      ) : null}
     </header>
   );
 }

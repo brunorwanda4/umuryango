@@ -154,7 +154,7 @@ function AppSidebarContent({
           />
         </SidebarContent>
         <SidebarSeparator />
-        <SidebarFooter>
+        <SidebarFooter className="pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] md:pb-2">
           <SidebarMenu>
             <SidebarMenuItem>
               <WorkspaceSwitcher
