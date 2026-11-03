@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createTranslator } from "@/i18n/translate";
+import { APP_HOME_PATH } from "@/lib/routes";
 
 const AppFooter = () => {
   const t = createTranslator("AppShell.footer");
@@ -7,7 +8,10 @@ const AppFooter = () => {
 
   return (
     <footer className="mt-12 -mx-4 px-4 flex flex-row items-center justify-between gap-4 border-t border-border py-4 text-xs text-muted-foreground">
-      <Link href="/" className="hover:text-foreground transition-colors">
+      <Link
+        href={APP_HOME_PATH}
+        className="hover:text-foreground transition-colors"
+      >
         <span className="font-medium text-foreground">
           {tShared((m) => m.Shared.brand)}
         </span>

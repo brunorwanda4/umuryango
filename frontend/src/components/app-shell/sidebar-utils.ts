@@ -129,6 +129,11 @@ export const personalNavigation: NavigationGroup[] = [
         href: "/me/contacts",
         icon: sidebarIcon("contacts", ContactRoundIcon),
       },
+      {
+        title: tItems((m) => m.AppShell.navigation.items.notifications),
+        href: "/me/notifications",
+        icon: sidebarIcon("announcement", BellIcon),
+      },
     ],
   },
   {

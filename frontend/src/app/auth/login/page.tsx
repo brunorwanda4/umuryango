@@ -19,6 +19,7 @@ import {
   resolveLocaleFromSearchParams,
 } from "@/i18n/config";
 import { createTranslator } from "@/i18n/translate";
+import { APP_HOME_PATH } from "@/lib/routes";
 import enMessages from "@/messages/en.json";
 import { LoginForm } from "./login-form";
 
@@ -65,7 +66,7 @@ const LoginPage = async ({ searchParams }: LoginPageProps) => {
     <main className="grid min-h-dvh bg-background text-foreground lg:grid-cols-[minmax(0,1fr)_minmax(28rem,1fr)]">
       <section className="relative hidden flex-col overflow-hidden border-border px-6 py-8 sm:px-10 lg:order-1 lg:flex lg:min-h-dvh lg:px-12">
         <Link
-          href={getLocalizedHref("/", locale)}
+          href={getLocalizedHref(APP_HOME_PATH, locale)}
           className=""
           aria-label={shared((m) => m.Shared.homeAriaLabel)}
         >

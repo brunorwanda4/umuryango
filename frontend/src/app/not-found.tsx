@@ -4,6 +4,7 @@ import { PublicSiteShell } from "@/components/public-site-shell";
 import { Button } from "@/components/ui/button";
 import { defaultLocale, getLocalizedHref, getMessages } from "@/i18n/config";
 import { createTranslator } from "@/i18n/translate";
+import { APP_HOME_PATH } from "@/lib/routes";
 import enMessages from "@/messages/en.json";
 
 export const metadata: Metadata = {
@@ -16,7 +17,11 @@ export default function NotFound() {
   const t = createTranslator(messages, "NotFoundPage");
 
   return (
-    <PublicSiteShell locale={defaultLocale} messages={messages}>
+    <PublicSiteShell
+      homeHref={APP_HOME_PATH}
+      locale={defaultLocale}
+      messages={messages}
+    >
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-5 py-20 text-center sm:px-6">
         <div className="flex size-16 items-center justify-center rounded-2xl bg-muted">
           <CompassIcon
@@ -39,7 +44,7 @@ export default function NotFound() {
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <Button
-            href={getLocalizedHref("/", defaultLocale)}
+            href={getLocalizedHref(APP_HOME_PATH, defaultLocale)}
             size="lg"
             className="h-12 w-full rounded-full sm:w-fit"
           >

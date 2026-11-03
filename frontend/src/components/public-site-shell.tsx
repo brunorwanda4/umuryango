@@ -7,6 +7,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AppAwareHomeLink } from "@/components/common/app-aware-home-link";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { type AppLocale, getLocalizedHref, type Messages } from "@/i18n/config";
@@ -21,12 +22,14 @@ const navigationLinks = [
 
 type PublicSiteShellProps = {
   children: ReactNode;
+  homeHref?: string;
   locale: AppLocale;
   messages: Messages;
 };
 
 export function PublicSiteShell({
   children,
+  homeHref,
   locale,
   messages,
 }: PublicSiteShellProps) {
@@ -36,16 +39,23 @@ export function PublicSiteShell({
     <div className="flex min-h-dvh flex-col bg-background pt-[env(safe-area-inset-top,0px)] text-foreground">
       <header className="border-border border-b">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-4 pr-20 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:pr-24 lg:px-8">
-          <Link
-            href={getLocalizedHref("/", locale)}
-            className="flex w-fit items-center gap-3"
-            aria-label={t((m) => m.Shared.homeAriaLabel)}
-          >
-            <span
-              aria-hidden="true"
-              className="block h-9 w-40 bg-foreground [mask-image:url('/brand/umuryango-horizontal-wordmark.png')] [mask-position:left_center] [mask-repeat:no-repeat] [mask-size:contain] [-webkit-mask-image:url('/brand/umuryango-horizontal-wordmark.png')] [-webkit-mask-position:left_center] [-webkit-mask-repeat:no-repeat] [-webkit-mask-size:contain]"
-            />
-          </Link>
+          {homeHref ? (
+            <Link
+              href={getLocalizedHref(homeHref, locale)}
+              className="flex w-fit items-center gap-3"
+              aria-label={t((m) => m.Shared.homeAriaLabel)}
+            >
+              <BrandWordmark />
+            </Link>
+          ) : (
+            <AppAwareHomeLink
+              locale={locale}
+              className="flex w-fit items-center gap-3"
+              aria-label={t((m) => m.Shared.homeAriaLabel)}
+            >
+              <BrandWordmark />
+            </AppAwareHomeLink>
+          )}
 
           <nav
             aria-label={t((m) => m.Shared.navigationAriaLabel)}
@@ -107,5 +117,14 @@ export function PublicSiteShell({
         </div>
       </footer>
     </div>
+  );
+}
+
+function BrandWordmark() {
+  return (
+    <span
+      aria-hidden="true"
+      className="block h-9 w-40 bg-foreground [mask-image:url('/brand/umuryango-horizontal-wordmark.png')] [mask-position:left_center] [mask-repeat:no-repeat] [mask-size:contain] [-webkit-mask-image:url('/brand/umuryango-horizontal-wordmark.png')] [-webkit-mask-position:left_center] [-webkit-mask-repeat:no-repeat] [-webkit-mask-size:contain]"
+    />
   );
 }

@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { defaultLocale, getLocalizedHref, getMessages } from "@/i18n/config";
 import { createTranslator } from "@/i18n/translate";
+import { APP_HOME_PATH } from "@/lib/routes";
 
 export default function ErrorPage({
   error,
@@ -133,7 +134,7 @@ export default function ErrorPage({
           size="lg"
           className="h-12 w-full rounded-full sm:w-fit"
         >
-          <Link href={getLocalizedHref("/", defaultLocale)}>
+          <Link href={getLocalizedHref(APP_HOME_PATH, defaultLocale)}>
             {t((m) => m.ErrorPage.backHome)}
           </Link>
         </Button>
