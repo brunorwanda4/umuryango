@@ -2,24 +2,12 @@ import { ArrowRightIcon, PlusIcon, UsersIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AppSidebarShell } from "@/components/app-shell/app-sidebar";
-import {
-  getKinshipLabel,
-  joinedDateFormatter,
-} from "@/components/family/dashboard/dashboard-data";
-import type {
-  FamilyDetail,
-  FamilyMemberSummary,
-} from "@/components/family/dashboard/types";
+import { getKinshipLabel, joinedDateFormatter } from "@/components/family/dashboard/dashboard-data";
+import type { FamilyDetail, FamilyMemberSummary } from "@/components/family/dashboard/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Empty,
   EmptyDescription,
@@ -32,6 +20,7 @@ import { createTranslator } from "@/i18n/translate";
 import { AUTHORITY_LABELS, type FamilyAuthority } from "@/lib/family-access";
 import enMessages from "@/messages/en.json";
 import { serverApiRequest } from "@/service/server-api";
+import { PageTitle } from "@/components/common/pages/page-title";
 
 export const metadata: Metadata = {
   title: enMessages.FamilyPage.metadataTitle,
@@ -64,8 +53,7 @@ async function getFamilyListItems(): Promise<{
   if (!familiesResponse.ok || !familiesResponse.data) {
     return {
       items: [],
-      error:
-        familiesResponse.message ?? t((m) => m.FamilyPage.loadFamiliesError),
+      error: familiesResponse.message ?? t((m) => m.FamilyPage.loadFamiliesError),
     };
   }
 
@@ -84,8 +72,7 @@ async function getFamilyListItems(): Promise<{
 
       return {
         family,
-        error:
-          detailResponse.message ?? t((m) => m.FamilyPage.loadMembersError),
+        error: detailResponse.message ?? t((m) => m.FamilyPage.loadMembersError),
       };
     }),
   );
@@ -100,29 +87,18 @@ export default async function FamilyPage() {
   return (
     <AppSidebarShell mode="personal">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex flex-col gap-2">
-            <Badge variant="outline" className="w-fit">
-              {t((m) => m.FamilyPage.badge)}
-            </Badge>
-            <div className="flex flex-col gap-1">
-              <h1 className="font-semibold text-2xl tracking-tight sm:text-3xl">
-                {t((m) => m.FamilyPage.heading)}
-              </h1>
-              <p className="max-w-2xl text-muted-foreground text-sm leading-relaxed">
-                {t((m) => m.FamilyPage.description)}
-              </p>
-            </div>
-          </div>
-          <Button asChild>
-            <Link href="/family/new">
-              <PlusIcon data-icon="inline-start" aria-hidden="true" />
-              {t((m) => m.FamilyPage.createFamily)}
-            </Link>
-          </Button>
-        </header>
-
-        <Separator />
+        <PageTitle
+          title={t((m) => m.FamilyPage.heading)}
+          description={t((m) => m.FamilyPage.description)}
+          actions={
+            <Button asChild>
+              <Link href="/family/new">
+                <PlusIcon data-icon="inline-start" aria-hidden="true" />
+                {t((m) => m.FamilyPage.createFamily)}
+              </Link>
+            </Button>
+          }
+        />
 
         {error ? <FamilyError message={error} /> : null}
 
@@ -164,9 +140,7 @@ function NoFamilies() {
           <UsersIcon aria-hidden="true" />
         </EmptyMedia>
         <EmptyTitle>{t((m) => m.FamilyPage.emptyTitle)}</EmptyTitle>
-        <EmptyDescription>
-          {t((m) => m.FamilyPage.emptyDescription)}
-        </EmptyDescription>
+        <EmptyDescription>{t((m) => m.FamilyPage.emptyDescription)}</EmptyDescription>
       </EmptyHeader>
       <Button asChild>
         <Link href="/family/new">{t((m) => m.FamilyPage.createFamily)}</Link>
@@ -237,9 +211,7 @@ function MemberRow({ member }: { member: FamilyMemberSummary }) {
   return (
     <div className="flex items-center gap-3 border-border/60 border-b py-3 last:border-b-0">
       <Avatar size="sm">
-        {member.avatarUrl ? (
-          <AvatarImage src={member.avatarUrl} alt={member.fullName} />
-        ) : null}
+        {member.avatarUrl ? <AvatarImage src={member.avatarUrl} alt={member.fullName} /> : null}
         <AvatarFallback name={member.fullName} />
       </Avatar>
       <div className="min-w-0 flex-1">
