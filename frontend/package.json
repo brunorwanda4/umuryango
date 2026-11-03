@@ -5,9 +5,9 @@
   "private": true,
   "license": "AGPL-3.0-only",
   "scripts": {
-    "dev": "bun next dev -p 4914",
-    "build": "bun next build",
-    "start": "bun next start",
+    "dev": "node init && bun next dev -p 4914",
+    "build": "node init && bun next build",
+    "start": "node init && bun next start",
     "lint": "biome check",
     "format": "biome format --write",
     "i18n": "bun ./scripts/i18n.ts",
