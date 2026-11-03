@@ -33,7 +33,7 @@ export function PublicSiteShell({
   const t = createTranslator(messages, "Shared");
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background text-foreground">
+    <div className="flex min-h-dvh flex-col bg-background pt-[env(safe-area-inset-top,0px)] text-foreground">
       <header className="border-border border-b">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-5 py-4 pr-20 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:pr-24 lg:px-8">
           <Link

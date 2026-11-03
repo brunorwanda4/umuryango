@@ -17,10 +17,10 @@ const LayoutAuth = ({ children }: { children: ReactNode }) => {
   const auth = createTranslator(messages, "AuthLayout");
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background text-foreground">
+    <div className="flex min-h-dvh flex-col bg-background pt-[env(safe-area-inset-top,0px)] text-foreground">
       <div className="flex-1">
         {children}{" "}
-        <div className="fixed right-4 top-4 sm:right-6 sm:top-6">
+        <div className="fixed right-4 top-[calc(env(safe-area-inset-top,0px)+1rem)] sm:right-6 sm:top-[calc(env(safe-area-inset-top,0px)+1.5rem)]">
           <ThemeToggle />
         </div>
       </div>
