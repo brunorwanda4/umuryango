@@ -21,6 +21,7 @@ import AppFooter from "./app-footer";
 import AppNavbar from "./app-navbar";
 import { MobileBottomNavigation } from "./mobile-bottom-navigation";
 import { MobileInstallPrompt } from "./mobile-install-prompt";
+import { PullToRefresh } from "./pull-to-refresh";
 import { SidebarNavigationGroups } from "./sidebar-navigation";
 import { SidebarResizeHandle } from "./sidebar-resize-handle";
 import {
@@ -81,6 +82,7 @@ function AppSidebarContent({
   const { setOpenMobile, open } = useSidebar();
   const { user } = useCurrentUser();
   const currentHash = useCurrentHash();
+  const routeKey = `${pathname}${currentHash}`;
   const familyName = formatFamilyName(familySlug);
   const navigation =
     mode === "family" && encodedFamilySlug
@@ -104,6 +106,11 @@ function AppSidebarContent({
     : mode === "family"
       ? familyName
       : "Personal workspace";
+
+  useEffect(() => {
+    if (!routeKey) return;
+    setOpenMobile(false);
+  }, [routeKey, setOpenMobile]);
 
   useEffect(() => {
     const syncSidebarView = () => {
@@ -172,6 +179,7 @@ function AppSidebarContent({
         <SidebarResizeHandle open={open} />
       </Sidebar>
       <SidebarInset className="flex flex-col pt-[env(safe-area-inset-top,0px)] md:pt-14">
+        <PullToRefresh />
         <AppNavbar sidebarTitle={sidebarTitle} />
         <main className="flex-1 min-w-0 max-w-full p-4 pb-[calc(8rem+env(safe-area-inset-bottom,0px))] sm:p-6 sm:pb-[calc(9rem+env(safe-area-inset-bottom,0px))] md:pb-6 md:px-16">
           <div className="min-h-screen">{children}</div>
