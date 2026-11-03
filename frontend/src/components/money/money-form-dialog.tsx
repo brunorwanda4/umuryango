@@ -33,6 +33,7 @@ import { createTranslator } from "@/i18n/translate";
 import { cn } from "@/lib/utils";
 
 type MoneyFormType = "income" | "expense" | "savings" | "debt";
+type MoneyFormScope = "family" | "personal";
 
 const CREATE_CATEGORY_VALUE = "__create_money_category__";
 
@@ -54,6 +55,7 @@ export type MoneyFormValues = {
 
 interface MoneyFormDialogProps {
   categories?: MoneyFormCategory[];
+  currency?: string;
   defaultValues?: Partial<MoneyFormValues>;
   familyId?: string;
   incomeId?: string;
@@ -65,6 +67,7 @@ interface MoneyFormDialogProps {
   trigger?: React.ReactElement | null;
   triggerClassName?: string;
   triggerSize?: React.ComponentProps<typeof Button>["size"];
+  scope?: MoneyFormScope;
   type: MoneyFormType;
 }
 
@@ -154,8 +157,27 @@ function defaultFormValues(
   };
 }
 
+export function getMoneyTransactionEndpoint({
+  familyId,
+  incomeId,
+  isUpdate,
+  scope,
+}: {
+  familyId?: string;
+  incomeId?: string;
+  isUpdate: boolean;
+  scope: MoneyFormScope;
+}) {
+  const base = `/families/${encodeURIComponent(familyId ?? "")}/money/transactions`;
+
+  return isUpdate
+    ? `${base}/${encodeURIComponent(incomeId ?? "")}`
+    : `${base}${scope === "personal" ? "/mine" : ""}`;
+}
+
 export function MoneyFormDialog({
   categories = [],
+  currency = "RWF",
   defaultValues,
   familyId,
   incomeId,
@@ -167,6 +189,7 @@ export function MoneyFormDialog({
   trigger,
   triggerClassName,
   triggerSize = "sm",
+  scope = "personal",
   type,
 }: MoneyFormDialogProps) {
   const t = createTranslator("PersonalMoney.moneyForm");
@@ -328,9 +351,12 @@ export function MoneyFormDialog({
         ]
       : []),
   ];
-  const endpoint = isUpdate
-    ? `/families/${encodeURIComponent(familyId ?? "")}/money/transactions/${encodeURIComponent(incomeId ?? "")}`
-    : `/families/${encodeURIComponent(familyId ?? "")}/money/transactions/mine`;
+  const endpoint = getMoneyTransactionEndpoint({
+    familyId,
+    incomeId,
+    isUpdate,
+    scope,
+  });
 
   const { form, onSubmit, isPending, error, resetMessages } = useZodFormSubmit<
     MoneyFormValues,
@@ -349,7 +375,7 @@ export function MoneyFormDialog({
       return {
         amountMinorUnits: Math.trunc(values.amountMinorUnits).toString(),
         categoryId: values.categoryId,
-        currency: "RWF",
+        currency,
         date: values.date,
         description: values.title,
         notes: values.notes || undefined,
@@ -451,7 +477,7 @@ export function MoneyFormDialog({
               name="amountMinorUnits"
               label={t((m) => m.PersonalMoney.moneyForm.fields.amount)}
               fieldType="money"
-              currency="RWF"
+              currency={currency}
               placeholder="0"
               required
             />
@@ -514,7 +540,7 @@ export function MoneyFormDialog({
                         defaultType={config.transactionType}
                         existingCategories={availableCategories}
                         familyId={familyId}
-                        personal
+                        personal={scope === "personal"}
                         open={openCreateCategory}
                         onOpenChange={setOpenCreateCategory}
                         onSuccess={async (category) => {

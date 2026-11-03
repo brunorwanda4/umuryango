@@ -7,10 +7,12 @@ import {
   FolderKanbanIcon,
   HandCoinsIcon,
   PiggyBankIcon,
+  PlusIcon,
   ReceiptTextIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   DashboardBalanceCard,
@@ -39,7 +41,10 @@ import {
   clampPercent,
   createProjectSlug,
 } from "@/components/family/projects/utils";
+import type { MoneyFormCategory } from "@/components/money/money-form-dialog";
+import { MoneyFormDialog } from "@/components/money/money-form-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   type ChartConfig,
   ChartContainer,
@@ -51,6 +56,7 @@ import { Separator } from "@/components/ui/separator";
 import { createTranslator } from "@/i18n/translate";
 import { hasCapability } from "@/lib/family-access";
 import { cn } from "@/lib/utils";
+import apiRequest from "@/service/api";
 import {
   buildAttentionItems,
   summarizeFamilyLoans,
@@ -73,12 +79,32 @@ export function FamilyFinancialSummary({
   family: FamilyDetail;
   money: MoneyOverview | null;
 }) {
+  const router = useRouter();
   const normalizedMoney = normalizeMoneyOverview(money ?? undefined);
   const currency = normalizedMoney?.currency ?? family.defaultCurrency;
   const totals = normalizedMoney?.totals;
   const moneyAvailable = normalizedMoney !== null;
   const encodedSlug = encodeURIComponent(family.slug);
   const moneyHref = `/family/${encodedSlug}/money`;
+  const canRecordIncome = hasCapability(family, "RECORD_INCOME");
+  const canRecordExpense = hasCapability(family, "RECORD_EXPENSE");
+  const [categories, setCategories] = useState<MoneyFormCategory[]>([]);
+
+  const loadCategories = useCallback(async () => {
+    if (!canRecordIncome && !canRecordExpense) return;
+
+    const response = await apiRequest<undefined, MoneyFormCategory[]>(
+      "get",
+      `/families/${encodeURIComponent(family.id)}/money/categories`,
+    );
+    if (response.ok && response.data) setCategories(response.data);
+  }, [canRecordExpense, canRecordIncome, family.id]);
+
+  useEffect(() => {
+    void loadCategories();
+  }, [loadCategories]);
+
+  const refreshDashboard = () => router.refresh();
 
   return (
     <section
@@ -100,6 +126,30 @@ export function FamilyFinancialSummary({
           label={t((m) => m.FamilyDashboard.incomeThisMonth)}
           value={totals?.incomeMinorUnits ?? 0}
           variant="income"
+          action={
+            canRecordIncome ? (
+              <MoneyFormDialog
+                categories={categories}
+                currency={currency}
+                familyId={family.id}
+                onCategoryCreated={loadCategories}
+                onSuccess={refreshDashboard}
+                scope="family"
+                type="income"
+                trigger={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label={t((m) => m.FamilyDashboard.addIncome)}
+                    className="rounded-full"
+                  >
+                    <PlusIcon data-icon="inline-start" aria-hidden="true" />
+                  </Button>
+                }
+              />
+            ) : null
+          }
         />
         <DashboardBalanceStat
           href={`${moneyHref}/expenses`}
@@ -107,6 +157,30 @@ export function FamilyFinancialSummary({
           label={t((m) => m.FamilyDashboard.spentThisMonth)}
           value={totals?.expenseMinorUnits ?? 0}
           variant="expense"
+          action={
+            canRecordExpense ? (
+              <MoneyFormDialog
+                categories={categories}
+                currency={currency}
+                familyId={family.id}
+                onCategoryCreated={loadCategories}
+                onSuccess={refreshDashboard}
+                scope="family"
+                type="expense"
+                trigger={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label={t((m) => m.FamilyDashboard.addExpense)}
+                    className="rounded-full"
+                  >
+                    <PlusIcon data-icon="inline-start" aria-hidden="true" />
+                  </Button>
+                }
+              />
+            ) : null
+          }
         />
       </DashboardBalanceCard>
     </section>
