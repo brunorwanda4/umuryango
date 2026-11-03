@@ -394,6 +394,13 @@ test("loadFamilyDashboardData isolates family tenant calls, never calls /mine, a
       if (path === "/families/mutesi-family/audit?limit=10") {
         return [
           {
+            id: "audit-unsupported",
+            action: "TRANSACTION_CREATED",
+            actorId: "user-admin-second",
+            targetMemberId: null,
+            createdAt: "2026-07-13T10:00:00.000Z",
+          },
+          {
             id: "audit-1",
             action: "FAMILY_SETTINGS_UPDATED",
             actorId: "user-admin-second",
@@ -444,4 +451,8 @@ test("loadFamilyDashboardData isolates family tenant calls, never calls /mine, a
   });
   assert.equal(activity.length <= 5, true);
   assert.equal(activity[0]?.id, "audit-audit-1");
+  assert.equal(
+    activity.some((entry) => entry.id === "audit-audit-unsupported"),
+    false,
+  );
 });

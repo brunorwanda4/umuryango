@@ -626,7 +626,7 @@ function formatAuditActivityTitle(
   event: FamilyAuditEvent,
   membersByUserId: Map<string, FamilyMemberSummary>,
   membersById: Map<string, FamilyMemberSummary>,
-): { title: string; kind: FamilyActivityEntry["kind"] } {
+): { title: string; kind: FamilyActivityEntry["kind"] } | null {
   const actor =
     membersByUserId.get(event.actorId)?.fullName ??
     t((m) => m.FamilyDashboard.systemActor);
@@ -672,6 +672,8 @@ function formatAuditActivityTitle(
         title: t((m) => m.FamilyDashboard.auditSettingsUpdated, { actor }),
         kind: "settings",
       };
+    default:
+      return null;
   }
 }
 
@@ -705,6 +707,8 @@ export function buildFamilyActivityEntries({
         membersByUserId,
         membersById,
       );
+      if (!formatted) continue;
+
       entries.push({
         id: `audit-${event.id}`,
         kind: formatted.kind,
