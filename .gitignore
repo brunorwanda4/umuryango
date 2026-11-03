@@ -46,6 +46,11 @@ next-env.d.ts
 frontend/src-tauri/target/
 frontend/src-tauri/gen/schemas/
 frontend/native/dist/
+releases/
+*.apk
+*.exe
+*.msi
+*.sig
 *.keystore
 *.jks
 *.sqlite3
