@@ -4,21 +4,14 @@ import {
   ArrowDownLeftIcon,
   ArrowUpRightIcon,
   CalendarCheckIcon,
-  CheckSquareIcon,
-  FileBarChart2Icon,
   FolderKanbanIcon,
   HandCoinsIcon,
   PiggyBankIcon,
   ReceiptTextIcon,
-  UserPlusIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import {
-  DashboardActionGrid,
-  DashboardActionTile,
-} from "@/components/common/dashboard/dashboard-action-grid";
 import {
   DashboardBalanceCard,
   DashboardBalanceStat,
@@ -60,7 +53,6 @@ import { hasCapability } from "@/lib/family-access";
 import { cn } from "@/lib/utils";
 import {
   buildAttentionItems,
-  getFamilyQuickActions,
   summarizeFamilyLoans,
   toBigIntMinorUnits,
 } from "./dashboard-data";
@@ -69,115 +61,10 @@ import type {
   FamilyAttentionItem,
   FamilyDetail,
   FamilyMemberSummary,
-  FamilyQuickActionId,
   RejectedTransactionRow,
 } from "./types";
 
 const t = createTranslator("FamilyDashboard");
-
-function getQuickActionMeta(id: FamilyQuickActionId) {
-  switch (id) {
-    case "add-income":
-      return {
-        label: t((m) => m.FamilyDashboard.addIncome),
-        description: "Deposit, dues, or gift",
-        icon: (
-          <ArrowDownLeftIcon
-            className="size-4 text-emerald-500"
-            aria-hidden="true"
-          />
-        ),
-        iconClassName: "bg-emerald-500/10 text-emerald-500",
-        buttonIcon: (
-          <ArrowDownLeftIcon data-icon="inline-start" aria-hidden="true" />
-        ),
-      };
-    case "add-expense":
-      return {
-        label: t((m) => m.FamilyDashboard.addExpense),
-        description: "Bills, supplies, or event",
-        icon: (
-          <ArrowUpRightIcon
-            className="size-4 text-rose-500"
-            aria-hidden="true"
-          />
-        ),
-        iconClassName: "bg-rose-500/10 text-rose-500",
-        buttonIcon: (
-          <ArrowUpRightIcon data-icon="inline-start" aria-hidden="true" />
-        ),
-      };
-    case "add-loan":
-      return {
-        label: t((m) => m.FamilyDashboard.addLoan),
-        description: "Record family loan or debt",
-        icon: (
-          <HandCoinsIcon className="size-4 text-amber-500" aria-hidden="true" />
-        ),
-        iconClassName: "bg-amber-500/10 text-amber-500",
-        buttonIcon: (
-          <HandCoinsIcon data-icon="inline-start" aria-hidden="true" />
-        ),
-      };
-    case "create-project":
-      return {
-        label: t((m) => m.FamilyDashboard.createProject),
-        description: "Wedding, medical, or build",
-        icon: (
-          <FolderKanbanIcon
-            className="size-4 text-blue-500"
-            aria-hidden="true"
-          />
-        ),
-        iconClassName: "bg-blue-500/10 text-blue-500",
-        buttonIcon: (
-          <FolderKanbanIcon data-icon="inline-start" aria-hidden="true" />
-        ),
-      };
-    case "invite-member":
-      return {
-        label: t((m) => m.FamilyDashboard.inviteMember),
-        description: "Add a new family member",
-        icon: (
-          <UserPlusIcon className="size-4 text-foreground" aria-hidden="true" />
-        ),
-        iconClassName: "bg-primary/10 text-primary",
-        buttonIcon: (
-          <UserPlusIcon data-icon="inline-start" aria-hidden="true" />
-        ),
-      };
-    case "review-approvals":
-      return {
-        label: t((m) => m.FamilyDashboard.reviewApprovals),
-        description: "Review pending requests",
-        icon: (
-          <CheckSquareIcon
-            className="size-4 text-amber-500"
-            aria-hidden="true"
-          />
-        ),
-        iconClassName: "bg-amber-500/10 text-amber-500",
-        buttonIcon: (
-          <CheckSquareIcon data-icon="inline-start" aria-hidden="true" />
-        ),
-      };
-    case "open-reports":
-      return {
-        label: t((m) => m.FamilyDashboard.openReports),
-        description: "View financial reports",
-        icon: (
-          <FileBarChart2Icon
-            className="size-4 text-muted-foreground"
-            aria-hidden="true"
-          />
-        ),
-        iconClassName: "bg-muted text-muted-foreground",
-        buttonIcon: (
-          <FileBarChart2Icon data-icon="inline-start" aria-hidden="true" />
-        ),
-      };
-  }
-}
 
 export function FamilyFinancialSummary({
   family,
@@ -223,35 +110,6 @@ export function FamilyFinancialSummary({
         />
       </DashboardBalanceCard>
     </section>
-  );
-}
-
-export function FamilyQuickActionsCard({ family }: { family: FamilyDetail }) {
-  const quickActions = getFamilyQuickActions(family);
-
-  if (quickActions.length === 0) {
-    return null;
-  }
-
-  return (
-    <DashboardSectionCard
-      title={t((m) => m.FamilyDashboard.quickActionsTitle)}
-      description={t((m) => m.FamilyDashboard.quickActionsDesc)}
-    >
-      <DashboardActionGrid className="sm:grid-cols-3 lg:grid-cols-4">
-        {quickActions.map((action) => {
-          const meta = getQuickActionMeta(action.id);
-          return (
-            <DashboardActionTile
-              key={action.id}
-              href={action.href}
-              icon={meta.buttonIcon}
-              label={meta.label}
-            />
-          );
-        })}
-      </DashboardActionGrid>
-    </DashboardSectionCard>
   );
 }
 

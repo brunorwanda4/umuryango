@@ -21,7 +21,6 @@ import {
   FamilyFinancialSummary,
   FamilyLoansOverviewCard,
   FamilyMoneyOverviewCard,
-  FamilyQuickActionsCard,
 } from "./family-finance-dashboard";
 import { FamilyMembersOverview } from "./family-members-overview";
 import type {
@@ -113,8 +112,6 @@ export function FamilyDashboard({
       ) : null}
 
       <FamilyFinancialSummary family={family} money={money} />
-
-      <FamilyQuickActionsCard family={family} />
 
       <DashboardGrid>
         <FamilyMoneyOverviewCard family={family} money={money} />
