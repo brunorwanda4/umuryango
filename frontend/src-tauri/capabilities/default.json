@@ -3,6 +3,9 @@
   "identifier": "default",
   "description": "Least-privilege capabilities for the Umuryango desktop application wrapping the Next.js frontend.",
   "windows": ["main"],
+  "remote": {
+    "urls": ["https://umuryango-app.vercel.app"]
+  },
   "permissions": [
     "core:default",
     "notification:default",

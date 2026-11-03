@@ -101,7 +101,7 @@ export function MobileBottomNavigation({
   return (
     <nav
       aria-label={t((m) => m.AppShell.sidebar.primaryMobileNavigation)}
-      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-2 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] backdrop-blur supports-[backdrop-filter]:bg-background/80 md:hidden"
     >
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
         {items.map((item) => {

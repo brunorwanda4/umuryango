@@ -71,7 +71,7 @@ export function MobileInstallPrompt() {
   const t = createTranslator("AppShell.installPrompt");
 
   return (
-    <div className="fixed inset-x-3 z-40 md:hidden bottom-[calc(4.75rem+env(safe-area-inset-bottom))]">
+    <div className="fixed inset-x-3 z-40 md:hidden bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))]">
       <div className="mx-auto flex max-w-md items-center gap-2 rounded-md border bg-background/95 p-2 shadow-lg backdrop-blur">
         <button
           type="button"
